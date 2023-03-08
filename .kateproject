@@ -1,0 +1,9 @@
+{
+    "name": "LibICE_postV3",
+    "files": [ { "directory": "./", "filters": ["*.py"], "recursive": 10 } ],
+    "python": {
+        "extraPath": [],
+        "environs": {"key": "value"},
+        "version": "3.6.9"
+    }
+}
