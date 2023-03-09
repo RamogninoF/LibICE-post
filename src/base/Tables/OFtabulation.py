@@ -40,9 +40,7 @@ class OFtabulation(Utilities):
             Order in which the variables are red convert the scalarLists in tables.
                 
         noWrite:        bool
-            Label controlling if the file is allowed to write the files. For safety,
-            in case 'noWrite' is set to False, a warning is displayed, an a backup
-            copy of the tabulation is generated if it already exists.
+            Label controlling if the class is allowed to write the files
         
         tables:             dict
             {
@@ -75,13 +73,86 @@ class OFtabulation(Utilities):
                 "Fatal":False,
                 "extrapolate":True
             }
+        
+    path = None
+    entryNames = {}
+    tableProperties = {}
+    varOrder = []
+    tables = {}
+    tableFileNames = {}
+    noWrite =True
+    
+    #########################################################################
+    #Class methods:
+    @classmethod
+    def fromFile(cls, tablePath, varOrder, tableFileNames, entryNames={}, noWrite=noWrite, noRead=[], **argv):
+        """
+        tablePath:      str
+            The path where the tabulation is stored
+        varOrder:       list<str>
+            Order of the variables used to access the tabulation
+        tableFileNames: list<str>
+            Names of files in 'tablePath/const' where the tables are stored
+        entryNames:     dict    ({})
+            {
+                entri_ii:     str
+                    Name to give at the generic entry 'entry_ii' found in the dictionary
+                    tableProperties.
+            }
+            Used to (optionally) change the names of the variables stored in the table.
+        noWrite:        bool (True)
+            Handle to prevent write access of this class to the tabulation
+        noRead:         list<str>   ([])
+            Tables that are not to be red from files
+        
+        [keyword arguments]
+        Fatal:          bool (False)
+            If set to 'True', raises a ValueError in case the input data is outside
+            of tabulation range. Otherwise a warning is displayed.
+        
+        extrapolate:    bool (True)
+            If set to 'True' the value is extrapolated in case accessing the table
+            outside of ranges. Otherwise, the value is set to the 'nan'.
+        
+        Construct a table from files stored in 'tablePath'.
+        """
+        #Argument checking:
+        try:
+            cls.checkType(tablePath, str, "tablePath")
+            cls.checkInstanceTemplate(varOrder, [""], "varOrder")
+            cls.checkInstanceTemplate(tableFileNames, {"":""}, "tableFileNames")
+            cls.checkInstanceTemplate(entryNames, {"":""}, "entryNames",allowEmptyContainer=True)
+            cls.checkType(noWrite, bool, "noWrite")
+            cls.checkInstanceTemplate(noRead, [""], "noRead",allowEmptyContainer=True)
+            
+            argv = cls.updateKeywordArguments(argv, cls.defaultOpts)
+            
+        except BaseException as err:
+            cls.fatalErrorInArgumentChecking(cls.empty(), OFtabulation.fromFile, err)
+        
+        try:
+            #Create the table:
+            tab = cls(tablePath, noWrite, **argv)
+            tab.readTableProperties(entryNames)
+            tab.setOrder(varOrder)
+            
+            for table in tableFileNames:
+                if not(table in noRead):
+                    tab.readTable(tableFileNames[table], table)
+                else:
+                    tab[table] = None
+            
+        except BaseException as err:
+            cls.fatalErrorIn(cls.empty(), OFtabulation.fromFile, "Failed loading the tabulation", err)
+            
+        return tab
     
     #########################################################################
     #Constructor:
-    def __init__(self, tablePath, noWrite=True, **argv):
+    def __init__(self, tablePath=path, noWrite=noWrite, **argv):
         """
-        tablePath:      str
-            Path where the tabulation is stored
+        tablePath:      str  (None)
+            Path where to read/write the tabulation
         noWrite:        bool (True)
             Label controlling if the class is allowed to write the files. For safety,
             in case 'noWrite' is set to False, a warning is displayed, an a backup
@@ -96,11 +167,13 @@ class OFtabulation(Utilities):
             If set to 'True' the value is extrapolated in case accessing the table
             outside of ranges. Otherwise, the value is set to the 'nan'.
         
-        Create the tabulation, loading the data located at 'tablePath' path.
+        Create a tabulation in OpenFOAM format, associated to path 'tablePath'.
         """
         #Argument checking:
         try:
-            Utilities.checkType(tablePath, str, entryName="tablePath")
+            if not(tablePath is None):
+                Utilities.checkType(tablePath, str, entryName="tablePath")
+            
             Utilities.checkType(noWrite, bool, entryName="noWrite")
             
             #Options:
@@ -112,7 +185,6 @@ class OFtabulation(Utilities):
         #Initialize arguments:
         self.clear()
         self.path = tablePath
-        self.opts = argv
         self.noWrite = noWrite
         
     #########################################################################
@@ -172,13 +244,16 @@ class OFtabulation(Utilities):
         newTable.tableFileNames = self.tableFileNames
         
         for table in self.tables:
-            newTable.tables[table] = self.tables[table].__getitem__(slices)
+            if not (self.tables[table] is None):
+                newTable.tables[table] = self.tables[table].__getitem__(slices)
+            else:
+                newTable.tables[table] = None
         
         return newTable
     
     #########################################################################
     #Read tableProperties file:
-    def readTableProperties(self, entryNames, **argv):
+    def readTableProperties(self, entryNames={}, **argv):
         """
         entryNames:     dict    [{}]
             {
@@ -196,10 +271,11 @@ class OFtabulation(Utilities):
             Utilities.checkType(entryNames, dict, entryName="entryNames")
             
             #Read keyword arguments:
-            self.entryNames = entryNames.update(argv)
+            entryNames.update(argv)
+            self.entryNames.update(entryNames)
             
             #Check again:
-            Utilities.checkInstanceTemplate(entryNames, {0:""}, entryName="entryNames")
+            Utilities.checkInstanceTemplate(entryNames, {0:""}, entryName="entryNames", allowEmptyContainer=True)
             
         except BaseException as err:
             self.fatalErrorInArgumentChecking(self.readTableProperties, err)
@@ -213,22 +289,19 @@ class OFtabulation(Utilities):
         #Read tableProperties into dict:
         tabProps = FoamStringParser(open(self.path + "/tableProperties", "r").read()).getData()
         
-        try:
-            #Store:
-            self.tableProperties = {}
-            for prop in entryNames:
-                if prop in tabProps:
-                    self.tableProperties[entryNames[prop]] = tabProps[prop]
-                else:
-                    raise IOError("Entry '{}' not found in file '{}'.".format(prop,self.path + "/tableProperties"))
-            
-        except BaseException as err:
-            self.fatalErrorIn(self.__init__, "Failed reading table properties", err)
+        #Store:
+        self.tableProperties = {}
+        
+        for prop in tabProps:
+            if prop in self.entryNames:
+                self.tableProperties[self.entryNames[prop]] = tabProps[prop]
+            else:
+                self.tableProperties[prop] = tabProps[prop]
         
         return self
     
     #########################################################################
-    def setOrder(self,varOrder):
+    def setOrder(self,varOrder=None):
         """
         varOrder:     list<str>
             Looping order (from outern-most to inner-most) in which the variables
@@ -236,7 +309,10 @@ class OFtabulation(Utilities):
         """
         #Argument checking:
         try:
-            Utilities.checkInstanceTemplate(varOrder, [""], entryName="varOrder")
+            if not (varOrder is None):
+                Utilities.checkInstanceTemplate(varOrder, [""], entryName="varOrder")
+            else:
+                varOrder = self.__class__.varOrder
         
             if not(self.tableProperties):
                 raise IOError("Must read tableProperties before setting 'varOrder'.")
@@ -250,7 +326,7 @@ class OFtabulation(Utilities):
         except BaseException as err:
             self.fatalErrorInArgumentChecking(self.setOrder, err)
         
-        self.varOrder = varOrder
+        self.varOrder = varOrder[:]
         
         return self
     
@@ -293,9 +369,9 @@ class OFtabulation(Utilities):
         
         try:
             #Table path:
-                tabPath = self.path + "/constant/" + fileName
-                if not(Utilities.os.path.exists(tabPath)):
-                    raise IOError("Cannot read tabulation. File '{}' not found.".format(tabPath))
+            tabPath = self.path + "/constant/" + fileName
+            if not(Utilities.os.path.exists(tabPath)):
+                raise IOError("Cannot read tabulation. File '{}' not found.".format(tabPath))
             
             #Read table:
             tab = readOFscalarList(tabPath)
@@ -305,12 +381,13 @@ class OFtabulation(Utilities):
             
             if not(len(tab) == self.size()):
                 raise IOError("Size of table stored in '{}' is not consistent with the data in tableProperties file.".format(tabPath))
-        
+            
+            self.tables[tableName] = Table(tab, ranges, order,**argv)
+            self.tableFileNames[tableName] = fileName
+            
         except BaseException as err:
             self.fatalErrorIn(self.readTable,"Failed reading table data for table '{}' from file '{}'.".format(tableName, tabPath), err)
         
-        self.tables[tableName] = Table(tab, ranges, order,**argv)
-        self.tableFileNames[tableName] = fileName
         
         #Reorder table properties in ascending order (as tables are stored in order)
         for field in self.varOrder:
@@ -319,7 +396,9 @@ class OFtabulation(Utilities):
         return self
         
     #########################################################################
+    #Access:
     
+    ############################
     #Get ranges:
     def ranges(self):
         """
@@ -332,6 +411,7 @@ class OFtabulation(Utilities):
         
         return Utilities.cp.deepcopy(self.tableProperties)
     
+    ############################
     #Get dimension:
     def ndim(self):
         """
@@ -340,6 +420,7 @@ class OFtabulation(Utilities):
         
         return len(self.tableProperties)
     
+    ############################
     #Get list of dimensions:
     def shape(self):
         """
@@ -352,6 +433,7 @@ class OFtabulation(Utilities):
         
         return tuple(dims)
     
+    ############################
     #Get dimensions:
     def size(self):
         """
@@ -374,6 +456,9 @@ class OFtabulation(Utilities):
             path/tableProperties
         """
         try:
+            if (self.path is None):
+                raise ValueError("The table directory was not initialized.")
+            
             #Folders:
             if not(Utilities.os.path.exists(self.path)):
                 raise IOError("Folder not found '{}', cannot read the tabulation.".format(self.path))
@@ -434,8 +519,12 @@ class OFtabulation(Utilities):
         self.tableProperties[fieldName] = sorted(self.tableProperties[fieldName])
         
         for table in self.tables:
-            self.tables[table].mergeTable(fieldName, secondTable.tables[table])
-        
+            if self.tables[table] is None:
+                self.tables[table] = secondTable.tables[table]
+            
+            elif not(self.tables[table] is None) and not(secondTable.tables[table] is None):
+                self.tables[table].mergeTable(fieldName, secondTable.tables[table])
+            
         return self
     
     #########################################################################    
@@ -479,33 +568,39 @@ class OFtabulation(Utilities):
         
         #Tables:
         for table in self.tables:
-            tabulation = ParsedParameterFile(tableFolder + "/constant/" + self.tableFileNames[table], listDictWithHeader=True, dontRead=True, createZipped=False)
-            
-            tabulation.content = list(self.tables[table].data().flatten())
-            
-            header = \
-                {
-                    "version":2.0,
-                    "format":"ascii",
-                    "class":"scalarList",
-                    "location":"constant",
-                    "object":self.tableFileNames[table]
-                }
-            
-            tabulation.header = header
-            
-            tabulation.writeFile()
+            if not(self.tables[table] is None):
+                tabulation = ParsedParameterFile(tableFolder + "/constant/" + self.tableFileNames[table], listDictWithHeader=True, dontRead=True, createZipped=False)
+                
+                tabulation.content = list(self.tables[table].data().flatten())
+                
+                header = \
+                    {
+                        "version":2.0,
+                        "format":"ascii",
+                        "class":"scalarList",
+                        "location":"constant",
+                        "object":self.tableFileNames[table]
+                    }
+                
+                tabulation.header = header
+                
+                tabulation.writeFile()
         
     #########################################################################    
     #Clear the table:
     def clear(self):
+        """
+        Reset the tabulation arguments to default values.
+        """
         #Initialize arguments:
-        self.path = None
-        self.opts = self.defaultOpts
-        self.noWrite = True
+        self.path = self.__class__.path
+        self.opts = self.__class__.defaultOpts
+        self.noWrite = self.__class__.noWrite
         
-        self.entryNames = {}
-        self.tableProperties = {}
-        self.varOrder = []
-        self.tables = {}
-        self.tableFileNames = {}
+        self.entryNames = self.__class__.entryNames
+        self.tableProperties = self.__class__.tableProperties
+        self.varOrder = self.__class__.varOrder
+        self.tables = self.__class__.tables
+        self.tableFileNames = self.__class__.tableFileNames
+        
+        return self

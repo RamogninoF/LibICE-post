@@ -1,0 +1,98 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2.0.0                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      thermophysicalProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+
+thermoType
+{
+    type            hePsiThermo;
+    mixture         reactingMixture;
+    transport       sutherland;
+    thermo          janaf;
+    energy          sensibleEnthalpy;
+    equationOfState perfectGas;
+    specie          specie;
+
+    defaultCoeffs    on;
+    
+}
+
+
+CHEMKINFile     "$FOAM_CASE/../NC12Faravelli/POLIMI_NC12_96_NOx.CKI";
+CHEMKINThermoFile "$FOAM_CASE/../NC12Faravelli/POLIMI_TOT_NOX_1412.fixed.ckt";
+
+inertSpecie     N2;
+
+liquidComponents ( NC12H26 );
+
+liquids
+{
+
+NC12H26
+{
+    defaultCoeffs off;
+    liquidSpecie IDEA;
+}
+
+}
+
+//flameletSootModel off;
+
+flameletSootModel flameletMoss;
+
+flameletMossCoeffs
+{
+    Ra
+    {
+        A 20.0;
+        Ta -15098.0;
+    }
+    Rb
+    {
+        A 4.46e-3;
+        Ta 7650.0;
+    }
+    Rt
+    {
+        A 1.51e5;
+        Ta 48817.0;
+    }
+    Rz
+    {
+        A 21.3;
+        Ta -2063.0;
+    }
+
+
+    Calpha Calpha [-2 3 -1 -0.5 0 0 0] 6e6;
+
+    Talpha Talpha [0 0 0 1 0 0 0] 46.1e3;
+    Cbeta Cbeta [0 3 -1 -0.5 0 0 0] 2.25e15;
+    Cgamma Cgamma [0 3 -1 -0.5 0 0 0] 6.3e-14;
+    Tgamma Tgamma [0 0 0 1 0 0 0] 12.6e3; 
+    Cdelta Cdelta [1 0 0 0 0 0 0] 144;
+    cGamma  cGamma [0 0 0 0 0 0 0] 1.27e3;
+    Gamma Gamma [0 0 0 0 0 0 0] 0.1;
+    rhos rhos [1 -3 0 0 0 0 0] 1800;
+    precursor C2H2;
+
+    
+}
+
+
+
+
+// ************************************************************************* //

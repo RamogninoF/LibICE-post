@@ -31,28 +31,36 @@ def checkType(entry, Type, entryName=None, **argv):
     
     intAsFloat:     bool (True)
         Treat int as floats for type-checking
+    checkForNone:   bool (False)
+        If False, no type checking is performed on Type==NoneType
     
     Check if instance 'entry' is of type of 'Type'.
     """
     inputs = \
         {
-            "intAsFloat":True
+            "intAsFloat":True,
+            "checkForNone":False
         }
     
     inputs.update(argv)
-    intAsFloat = inputs["intAsFloat"]
     
     if not(entryName is None):
         if not(isinstance(entryName, str)):
             raise TypeError("Wrong type for entry '{}': '{}' expected but '{}' was found.".format("entryName", str.__name__, entryName.__class__.__name__))
     
-    if not(isinstance(intAsFloat, bool)):
-        raise TypeError("Wrong type for entry '{}': '{}' expected but '{}' was found.".format("intAsFloat", bool.__name__, intAsFloat.__class__.__name__))
+    if not(isinstance(inputs["intAsFloat"], bool)):
+        raise TypeError("Wrong type for entry '{}': '{}' expected but '{}' was found.".format("intAsFloat", bool.__name__, inputs["intAsFloat"].__class__.__name__))
+    
+    if not(isinstance(inputs["checkForNone"], bool)):
+        raise TypeError("Wrong type for entry '{}': '{}' expected but '{}' was found.".format("checkForNone", bool.__name__, inputs["checkForNone"].__class__.__name__))
     
     if not(isinstance(Type, type)):
         raise TypeError("Wrong type for entry '{}': '{}' expected but '{}' was found.".format("Type", type.__name__, Type.__class__.__name__))
     
-    if (isinstance(entry, int) and (Type == float) and intAsFloat):
+    if (Type == None.__class__) and not(inputs["checkForNone"]):
+        return
+    
+    if (isinstance(entry, int) and (Type == float) and inputs["intAsFloat"]):
         return
     
     if not(isinstance(entry, Type)):
@@ -76,30 +84,30 @@ def checkTypes(entry, TypeList, entryName=None, **argv):
     
     intAsFloat:     bool (True)
         Treat int as floats for type-checking
+    checkForNone:   bool (False)
+        If False, no type checking is performed on Type==NoneType
     
     Check if instance 'entry' is of any of the types in 'TypeList'.
     """
-    
     inputs = \
         {
-            "intAsFloat":True
+            "intAsFloat":True,
+            "checkForNone":False
         }
     
-    inputs.update(argv)
-    intAsFloat = inputs["intAsFloat"]
+    checkType(entryName, str, entryName="entryName")
     
-    #Argument checking:
-    if not(entryName is None):
-        checkType(entryName, str, entryName="entryName")
-    checkType(intAsFloat, bool, entryName="intAsFloat")
-    checkInstanceTemplate(TypeList, [type], entryName="TypeList")
+    inputs.update(argv)
+    argv = inputs
+    checkType(inputs["intAsFloat"], bool, entryName="intAsFloat")
+    checkType(inputs["checkForNone"], bool, entryName="checkForNone")
     
     isOk = False
     for Type in TypeList:
         try:
-            checkType(entry, Type, intAsFloat=intAsFloat)
+            checkType(entry, Type, **argv)
             isOk = True
-        except:
+        except BaseException as e:
             pass
     if not(isOk):
         listNames = ""
@@ -125,6 +133,12 @@ def checkInstanceTemplate(entry, templateEntry, entryName=None, **argv):
     Keyword arguments:
     intAsFloat:     bool (True)
         Treat int as floats for type-checking
+    checkForNone:   bool (False)
+        If True, check for NoneType in case an entry is None,
+        otherwise it means no check is needed
+    allowEmptyContainer:   bool (False)
+        If applying recursive type-checking, allow an entry to be an
+        empty container even if the template has elements in it.
     
     Check if instance 'entry' is of same type of 'templateEntry',
     checking recursively if the instance is a container.
@@ -132,18 +146,22 @@ def checkInstanceTemplate(entry, templateEntry, entryName=None, **argv):
     #Argument checking:
     inputs = \
         {
-            "entryName":"",
-            "intAsFloat":True
+            "intAsFloat":True,
+            "checkForNone":False,
+            "allowEmptyContainer":False
         }
     
-    inputs.update(argv)
-    intAsFloat = inputs["intAsFloat"]
     
     checkType(entryName, str, entryName="entryName")
-    checkType(intAsFloat, bool, entryName="intAsFloat")
+    
+    inputs.update(argv)
+    argv = inputs
+    checkType(inputs["intAsFloat"], bool, entryName="intAsFloat")
+    checkType(inputs["checkForNone"], bool, entryName="checkForNone")
+    checkType(inputs["allowEmptyContainer"], bool, entryName="allowEmptyContainer")
     
     #Check entry type:
-    checkType(entry, templateEntry.__class__, entryName=entryName, intAsFloat=intAsFloat)
+    checkType(entry, templateEntry.__class__, entryName=entryName, **argv)
     
     #Check for container:
     try:
@@ -161,7 +179,10 @@ def checkInstanceTemplate(entry, templateEntry, entryName=None, **argv):
         return
     
     if len(entry) == 0:
-        raise ValueError("'templateEntry' is a container, but entry '{}' is empty. Cannot apply recursive type-checking on empty container.".format(entryName))
+        if not(inputs["allowEmptyContainer"]):
+            raise ValueError("Empty container not allowed for entry '{}'.".format(entryName))
+        else:
+            return
     
     ii = 0
     for it in entry:
@@ -176,12 +197,12 @@ def checkInstanceTemplate(entry, templateEntry, entryName=None, **argv):
                 key = sorted(list(templateEntry.keys()))[0]
             
             temp = templateEntry[key]
-            checkInstanceTemplate(It, temp, entryName=(entryName + "[\"{}\"]".format(it)), intAsFloat=intAsFloat)
+            checkInstanceTemplate(It, temp, entryName=(entryName + "[\"{}\"]".format(it)), **argv)
         #3) Others:
         else:
             It = it
             temp = templateEntry[0]
-            checkInstanceTemplate(It, temp, entryName=(entryName + "[{}]".format(ii)), intAsFloat=intAsFloat)
+            checkInstanceTemplate(It, temp, entryName=(entryName + "[{}]".format(ii)), **argv)
         
         ii += 1
         

@@ -1,0 +1,44 @@
+rm -rf flameletRegion[1-9]*
+cp -r flameletRegion0 flameletRegion1
+cp -r flameletRegion0 flameletRegion2
+cp -r flameletRegion0 flameletRegion3
+cp -r flameletRegion0 flameletRegion4
+cp -r flameletRegion0 flameletRegion5
+cp -r flameletRegion0 flameletRegion6
+cp -r flameletRegion0 flameletRegion7
+cp -r flameletRegion0 flameletRegion8
+cp -r flameletRegion0 flameletRegion9
+
+cp -r flameletRegion0 flameletRegion10
+cp -r flameletRegion0 flameletRegion11
+cp -r flameletRegion0 flameletRegion12
+cp -r flameletRegion0 flameletRegion13
+cp -r flameletRegion0 flameletRegion14
+cp -r flameletRegion0 flameletRegion15
+cp -r flameletRegion0 flameletRegion16
+cp -r flameletRegion0 flameletRegion17
+cp -r flameletRegion0 flameletRegion18
+cp -r flameletRegion0 flameletRegion19
+
+cp -r flameletRegion0 flameletRegion20
+cp -r flameletRegion0 flameletRegion21
+cp -r flameletRegion0 flameletRegion22
+cp -r flameletRegion0 flameletRegion23
+cp -r flameletRegion0 flameletRegion24
+cp -r flameletRegion0 flameletRegion25
+cp -r flameletRegion0 flameletRegion26
+cp -r flameletRegion0 flameletRegion27
+cp -r flameletRegion0 flameletRegion28
+cp -r flameletRegion0 flameletRegion29
+
+cp -r flameletRegion0 flameletRegion30
+cp -r flameletRegion0 flameletRegion31
+cp -r flameletRegion0 flameletRegion32
+cp -r flameletRegion0 flameletRegion33
+cp -r flameletRegion0 flameletRegion34
+cp -r flameletRegion0 flameletRegion35
+cp -r flameletRegion0 flameletRegion36
+cp -r flameletRegion0 flameletRegion37
+cp -r flameletRegion0 flameletRegion38
+cp -r flameletRegion0 flameletRegion39
+

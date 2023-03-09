@@ -1,0 +1,10 @@
+rm cMin cMax cDot
+rm virtual*
+rm segregated*
+rm tableSh
+rm tauDly
+rm ITau
+rm NOx*
+rm pvTime
+rm output*
+

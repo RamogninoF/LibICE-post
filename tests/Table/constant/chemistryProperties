@@ -1,0 +1,172 @@
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  1.0                                   |
+|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+FoamFile
+{
+version  			2.0;
+format   			ascii;
+class 				dictionary;
+object 				chemistryProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+constantProperty pressure;
+
+p               60e6;
+
+T               850;
+
+
+progressVariableType multiSpecies;
+
+multiSpeciesCoeffs
+{
+whatToTabulate h298;
+speciesNames (H2O CO2);
+coefficients (1  1 );
+
+}
+
+chemistryType
+{
+    chemistrySolver   ode;
+    chemistryThermo   psi;
+
+    //To activate TDAC just set TDAC option to on
+    //in this case a chemkin mecanism should be used
+    //and two subDictionnaries should be provided:
+    // mechanismReduction and tabulation
+    TDAC	      on;
+}
+
+dtChemScale 1; 
+
+chemistry           on;
+
+initialChemicalTimeStep 1e-10;
+
+odeCoeffs
+{
+
+//    solver          SIBS;
+//    absTol          1e-12;
+//    relTol         1e-3;
+
+//    solver          SIBS;
+//    absTol          1e-6;
+//    relTol          1e-2;
+
+
+    solver          seulex;
+    absTol          1e-12;
+    relTol          1e-1;
+
+
+/*
+    solver          SIBS;
+    eps             1e-06;
+*/
+}
+
+mechanismReduction
+{
+    active	off; //by default off
+    //tolerance depends on the reduction method, see details for each method
+    tolerance	1e-3; 
+    //available methods: DRG, DAC, DRGEP, PFA, EFA
+    reductionMethod	DRG;
+
+    //search initiating set (SIS) of species, needed for most methods
+    initialSet
+    {
+	    CO;
+        H2O;
+        CO2;
+    }
+    //for DAC, option to automatically change the SIS
+    // switch from HO2 to H2O and CO to CO2, + disable fuel 
+    automaticSIS	off;
+    //when automaticSIS, the method needs to know the fuel
+    fuelSpecies
+    {
+	    NC7H16 1.0;
+    }
+}
+
+tabulation
+{
+    active    off;
+
+    //tolerance used for retrieve and grow
+    tolerance    1E-4;
+
+    //ISAT is the only method currently available
+    tabulationMethod	ISAT;
+
+    //scale factors used in the definition of the ellipsoid of accuracy
+    //scaleFactor for T and p divide the variation of composition to compare with the tolerance, 
+    //if the maximum variation of T compared to the stored point is 1K and 
+    //the tolerance is 10^-5, then you should set the scaleFactor to 10^5
+    scaleFactor
+    {
+        NC12H26 1;
+        CO2 1;
+        O2 1;
+        H2O 1;
+        CO 1;
+        otherSpecies 1.e15;
+
+//	    N2	10;
+//        otherSpecies 1;	    
+        Temperature    1E5;
+        Pressure    1E15;
+    }
+    
+    //maximum number of leafs stored in the binary tree
+    maxNLeafs  5000;
+
+    //maximum life time of the leafs (in time steps)
+    //used in unsteady simulations to force renewal of
+    //the stored chemPoints and keep the tree small  
+    chPMaxLifeTime 3;
+
+    //maximum number of growth allowed on a chemPoint
+    //to avoid distorded chemPoints
+    maxGrowth  5;
+
+    //number of time steps between analysis of the tree
+    //to remove old chemPoints or try to balance it
+    checkEntireTreeInterval  1;
+
+    //parameters used to decide whether to balance or not
+        //if the tree's depth is larger than maxDepthFactor*log2(nLeafs)
+        //then balance the tree 
+        maxDepthFactor   2;
+        
+        //try to balance the tree only if the size of the tree is greater
+        minBalanceThreshold 30;
+    
+    //activate the use of a MRU (most recently used) list
+    MRURetrieve false;
+
+    //maximum size of the MRU list
+    maxMRUSize 0;
+
+    //allow to grow points
+    growPoints  false;
+
+    //when mechanism reduction is used, new dimensions might be added
+    //maxNumNewDim set the maximum number of new dimensions added during a growth
+    maxNumNewDim 10;
+
+    //Switch to analyze the impact of temperature or pressure on failed retrieve
+    printProportion false;
+
+}
+
+
+// ************************************************************************* //

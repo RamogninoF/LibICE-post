@@ -2,5 +2,8 @@ import sys
 # setting path
 sys.path.append('../')
 
-from src.base.Tables.Table import Table
+from src.thermophysicalModels.laminarFlameSpeed.tabulatedLFS.tabulatedLFS import tabulatedLFS
 
+tab = tabulatedLFS.fromFile("./Table")
+
+print(tab.tables["Su"].__dict__)

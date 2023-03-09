@@ -3,7 +3,7 @@
 #####################################################################
 
 from src.base.Tables.OFtabulation import OFtabulation
-from src.thermopysicalModels.laminarFlameSpeed.laminarFlameSpeedModel import laminarFlameSpeedModel
+from src.thermophysicalModels.laminarFlameSpeed.laminarFlameSpeedModel import laminarFlameSpeedModel
 
 from pylab import exp
 
@@ -21,6 +21,14 @@ class tabulatedLFS(OFtabulation,laminarFlameSpeedModel):
         path:               str
             Path where the tabulation is stored
         
+        entryNames:     dict    [{}]
+            {
+                entri_ii:     str
+                    Name to give at the generic entry 'entry_ii' found in the dictionay
+                    tableProperties.
+            }
+            Used to (optionally) change the names of the variables stored in the table.
+        
         tableProperties:    dict
             {
                 var_ii:   list<float>
@@ -30,12 +38,21 @@ class tabulatedLFS(OFtabulation,laminarFlameSpeedModel):
         
         varOrder:           list<str>
             Order in which the variables are red convert the scalarLists in tables.
+                
+        noWrite:        bool
+            Label controlling if the class is allowed to write the files
         
         tables:             dict
             {
                 'tab_ii':   table
             }
             Contains the tabulations.
+        
+        tableFileNames:     dict
+            {
+                'tab_ii':   str
+            }
+            Contains the names of files for the tabulations.
         
         opts:       dict
         {
@@ -53,69 +70,124 @@ class tabulatedLFS(OFtabulation,laminarFlameSpeedModel):
     #Name:
     typeName = "tabulatedLFS"
     
-    #########################################################################
-    #Constructor:
-    def __init__(self, tablePath, noWrite=True, **argv):
-        """
-        Constructors:
-            tabulatedLFS(tablePath, noWrite, **argv):
-                tablePath:      str
-                    Path where the tabulation is stored
-                noWrite:        bool (True)
-                    Label controlling if the class is allowed to write the files. For safety,
-                    in case 'noWrite' is set to False, a warning is displayed, an a backup
-                    copy of the tabulation is generated if it already exists.
-                    
-                [keyword arguments]
-                Fatal:          bool (False)
-                    If set to 'True', raises a ValueError in case the input data is outside
-                    of tabulation range. Otherwise a warning is displayed.
-                
-                extrapolate:    bool (True)
-                    If set to 'True' the value is extrapolated in case accessing the table
-                    outside of ranges. Otherwise, the value is set to the 'nan'.
-                
-                Create the tabulation, loading the data located at 'tablePath' path.
-            """
-        argv["loadLaminarFlameTickness"] = tabulatedLFS.lookupOrDefault(argv, "loadLaminarFlameTickness", True)
-        
-        OFtabulation.__init__(self, tablePath, noWrite, **argv)
-        
-        variables = \
+    #Static data:
+    entryNames = \
         {
             "pValues":"p",
             "tValues":"T",
-            "eqvrValues":"phi"
+            "eqvrValues":"phi",
+            "EGRValues":"EGR"
         }
     
-        order = ["p", "T", "phi"]
+    tableProperties: \
+            {
+                "p": [],
+                "T": [],
+                "phi": [],
+                "EGR": []
+            }
     
-        #Check if table contains EGR:
-        if "eqvrValues" in self.tableProperties:
-            variables["EGRValues"] = "EGR"
-            order.append("EGR")
+    varOrder = ["p", "T", "phi", "EGR"]
+    
+    tables = \
+        {
+            "Su":None,
+            "deltaL":None
+        }
+    
+    tableFileNames = \
+        {
+            "Su":"laminarFlameSpeedTable",
+            "deltaL":"deltaLTable"
+        }
+    
+    #########################################################################
+    #Class methods:
+    @classmethod
+    def fromFile(cls, tablePath, isLaminarFlameThickness=True, noWrite=OFtabulation.noWrite, **argv):
+        """
+        tablePath:                  str
+            The path where the tabulation is stored
+        isLaminarFlameThickness:    bool (True)
+            Is the laminar flame thickness to be loaded? (in case it was not tabulated)
+        noWrite:        bool (True)
+            Handle to prevent write access of this class to the tabulation
         
-        self.readTableProperties(variables)
+        [keyword arguments]
+        Fatal:          bool (False)
+            If set to 'True', raises a ValueError in case the input data is outside
+            of tabulation range. Otherwise a warning is displayed.
         
-        OFtabulation.setOrder(self, order)
-        OFtabulation.readTable(self, "laminarFlameSpeedTable", "Su")
+        extrapolate:    bool (True)
+            If set to 'True' the value is extrapolated in case accessing the table
+            outside of ranges. Otherwise, the value is set to the 'nan'.
         
-        if argv["loadLaminarFlameTickness"]:
-            OFtabulation.readTable(self, "deltaLTable", "deltaL")
+        Construct a table from files stored in 'tablePath'.
+        """
+        #Argument checking:
+        try:
+            cls.checkType(tablePath, str, "tablePath")
+            cls.checkType(noWrite, bool, "noWrite")
+            cls.checkType(isLaminarFlameThickness, bool, "isLaminarFlameThickness")
+            
+            argv = cls.updateKeywordArguments(argv, cls.defaultOpts)
+        except BaseException as err:
+            cls.fatalErrorInArgumentChecking(cls.empty(), tabulatedLFS.fromFile, err)
+        
+        try:
+            entryNames = cls.entryNames
+            tableFileNames = cls.tableFileNames
+            varOrder = cls.varOrder
+            
+            tabProp = tabulatedLFS(tablePath).readTableProperties().tableProperties
+            if not("EGRValues" in tabProp):
+                del varOrder[-1]
+                del entryNames["EGRValues"]
+            
+            if isLaminarFlameThickness:
+                noRead = []
+            else:
+                noRead = ["deltaL"]
+            
+            #Create the table:
+            tab = super(cls, cls).fromFile(tablePath, varOrder, tableFileNames, entryNames, noWrite, noRead, **argv)
+            #tab = OFtabulation.fromFile(cls, tablePath, varOrder, tableFileNames, entryNames, noWrite, noRead, **argv)
+            
+        except BaseException as err:
+            cls.fatalErrorIn(cls.empty(), tabulatedLFS.fromFile, "Failed loading the tabulation", err)
+        
+        return tab
+    
+    #########################################################################
+    #Constructor:
+    def __init__(self, tablePath=OFtabulation.path, noWrite=OFtabulation.noWrite, **argv):
+        """
+        tablePath:      str  (None)
+            Path where the tabulation is stored
+        noWrite:        bool (True)
+            Label controlling if the class is allowed to write the files. For safety,
+            in case 'noWrite' is set to False, a warning is displayed, an a backup
+            copy of the tabulation is generated if it already exists.
+            
+        [keyword arguments]
+        Fatal:          bool (False)
+            If set to 'True', raises a ValueError in case the input data is outside
+            of tabulation range. Otherwise a warning is displayed.
+        
+        extrapolate:    bool (True)
+            If set to 'True' the value is extrapolated in case accessing the table
+            outside of ranges. Otherwise, the value is set to the 'nan'.
+        
+        Create a class to handle a laminar flame speed tabulation.
+        """
+        try:
+            OFtabulation.__init__(self, tablePath, noWrite, **argv)
+        except BaseException as err:
+            self.fatalErrorInArgumentChecking(self.__init__, err)
     
     #########################################################################
     #Disabling function
     def setCoeffs(self, *args, **argv):
-        import inspect
-        raise AttributeError("'{}' object has no attribute '{}'".format(self.__class__.__name__, inspect.stack()[0][3]))
-    
-    #Disabling function
-    def setOrder(self, *args, **argv):
-        import inspect
-        raise AttributeError("'{}' object has no attribute '{}'".format(self.__class__.__name__, inspect.stack()[0][3]))
-    
-    #Disabling function
-    def readTable(self, *args, **argv):
         import inspect
         raise AttributeError("'{}' object has no attribute '{}'".format(self.__class__.__name__, inspect.stack()[0][3]))
     
@@ -202,7 +274,7 @@ class tabulatedLFS(OFtabulation,laminarFlameSpeedModel):
         
         argv = tabulatedLFS.dictFromTemplate(argv, self.opts)
         
-        if not "deltaL" in self.tables:
+        if self.tables["deltaL"] is None:
             raise ValueError("Trying to axcess to laminar flame tickness tabulation while it was not loaded.")
         
         #Compute flame thickness:

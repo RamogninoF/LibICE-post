@@ -1,0 +1,99 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2.0.0                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      fvSolution;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+solvers
+{
+    "(p|rho)"
+    {
+        solver          PCG;
+        preconditioner  DIC;
+        tolerance       1e-09;
+        relTol          0.;
+    }
+
+    "(p|rho)Final"
+    {
+        $p;
+        tolerance       1e-09;
+        relTol          0;
+    }
+
+    "(k|epsilon)"
+    {
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-08;
+        relTol          0.;
+    }
+
+    "(k|epsilon)Final"
+    {
+        $k;
+        tolerance       1e-08;
+        relTol          0;
+    }
+
+    "(U|h|hu|enthalpy)"
+    {
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-08;
+        relTol          0.;
+    }
+
+    "(U|h|hu|enthalpy)Final"
+    {
+        $U;
+        tolerance       1e-8;//1e-08;
+        relTol          0;
+    }
+
+    "(Yi|YNOPollutant)"
+    {
+        $hFinal;
+    }
+
+
+
+     "(TRIF|YiRIF|flameletSoot)"
+     {
+         solver          PBiCG;
+         preconditioner  DILU;
+         tolerance       1e-12;
+         relTol          0.0;
+     }
+ 
+     "(TRIFset|YiRIFset)"
+     {
+         solver          PBiCG;
+         preconditioner  DILU;
+         tolerance       1e-12;
+         relTol          0.0;
+     }
+
+}
+
+PIMPLE
+{
+    momentumPredictor off;
+    nOuterCorrectors 1;
+    nCorrectors     1;
+    nNonOrthogonalCorrectors 15;
+}
+
+
+// ************************************************************************* //

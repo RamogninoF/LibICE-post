@@ -50,12 +50,15 @@ class laminarFlameSpeedModel(Utilities):
         Used to compute laminar flame speed in derived class. Here in the base class
         it is used only for argument checking.
         """
+        try:
+            Utilities.checkType(p, float, entryName="p")
+            Utilities.checkType(T, float, entryName="T")
+            Utilities.checkType(phi, float, entryName="phi")
+            if not(EGR is None):
+                Utilities.checkType(EGR, float, entryName="EGR")
+        except BaseException as err:
+            self.fatalErrorInArgumentChecking(self.Su, err)
         
-        Utilities.checkType(p, float, entryName="p")
-        Utilities.checkType(T, float, entryName="T")
-        Utilities.checkType(phi, float, entryName="phi")
-        if not(EGR is None):
-            Utilities.checkType(EGR, float, entryName="EGR")
         return None
     
     ##############################
@@ -84,7 +87,10 @@ class laminarFlameSpeedModel(Utilities):
             Dictionary containing the parameters of the model (in laminarFlameSpeed.coeffs) 
             that need to be changed/set. Keyword arguments are also accepted.
         """
-        self.coeffs = Utilities.dictFromTemplate(argv, self.coeffs)
+        try: 
+            self.coeffs = Utilities.updateKeywordArguments(argv, self.coeffs)
+        except BaseException as err:
+            self.fatalErrorInArgumentChecking(self.setCoeffs, err)
         
         return self
         
