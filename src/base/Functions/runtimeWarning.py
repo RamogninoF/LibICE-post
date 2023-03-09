@@ -13,6 +13,38 @@ Functions for warnings and error messages.
 import traceback
 import inspect
 
+from src import GLOBALS
+
+GLOBALS.ERROR_RECURSION = 0
+GLOBALS.CUSTOM_ERROR_MESSAGE = True
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+    
+def enf(msg, style):
+    styles = \
+        {
+            "header":bcolors.HEADER,
+            "blue":bcolors.OKBLUE,
+            "green":bcolors.OKGREEN,
+            "cyan":bcolors.OKCYAN,
+            "warning":bcolors.WARNING,
+            "fail":bcolors.FAIL,
+            "bold":bcolors.BOLD,
+            "underline":bcolors.UNDERLINE
+        }
+    
+    return styles[style] + msg + bcolors.ENDC
+    
+
 #############################################################################
 #                               MAIN FUNCTIONS                              #
 #############################################################################
@@ -21,7 +53,7 @@ def printStack(e=None):
     Print the current call-stack. If an error was raised,
     print the traceback with the error message.
     """
-    formatForWhere = " At line: {:n}    in '{:s}' calling '{:s}'"
+    formatForWhere = " " + enf("At line","bold") + ": {:n}    " + enf("in","bold") + " '{:s}' " + enf("calling","bold") + " '{:s}'"
     #print("printStack()")
     
     if not(e is None):
@@ -72,23 +104,40 @@ def fatalErrorIn(self, func, msg, err=None):
     
     argList = func.__code__.co_varnames
     argList = argList[:func.__code__.co_argcount]
-    msg += " - " + str(err)
+    if not(err is None):
+        msg += " - " + str(err)
     
-    args = ""
-    for arg in argList:
-        args += arg + ","
-    args = args[:-1]
-    
-    print("Fatal error in {}: {}\n\nhelp({}):\n{}".format(funcName + "()", msg , funcName + "(" + args + ")", func.__doc__))
-    
-    print("Printing stack calls:")
-    printStack()
-    if not (err is None):
-        print("")
-        print("With detailed error:")
-        printStack(err)
-    
-    exit()
+    if not(GLOBALS.CUSTOM_ERROR_MESSAGE):
+        raise RuntimeError(msg)
+    else:
+        if GLOBALS.ERROR_RECURSION > 0:
+            print("")
+            print(enf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~", "green"))
+            
+        args = ""
+        for arg in argList:
+            args += arg + ","
+        args = args[:-1]
+        
+        print\
+        (\
+            "--> " + enf(enf("Fatal error in {}".format(funcName + "()"),"fail"),"bold") + \
+            ": {}\n\n".format(msg) + \
+            enf(enf("help","bold"),"underline") + \
+            "({}".format(funcName) + \
+            "{}):".format("(" + args + ")") + \
+            enf("{}".format(func.__doc__),"cyan")\
+        )
+        
+        print(enf("Printing stack calls:","bold"))
+        printStack()
+        if not (err is None):
+            print("")
+            print(enf("Detailed error stack:","bold"))
+            printStack(err)
+        
+        GLOBALS.ERROR_RECURSION += 1
+        exit(err)
 
 #############################################################################
 def fatalErrorInArgumentChecking(self, func, err=None):

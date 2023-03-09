@@ -13,6 +13,9 @@ Functions for type checking.
 import copy as cp
 import inspect
 
+from src import GLOBALS
+GLOBALS.DEBUG = True
+
 #############################################################################
 #                               MAIN FUNCTIONS                              #
 #############################################################################
@@ -36,6 +39,9 @@ def checkType(entry, Type, entryName=None, **argv):
     
     Check if instance 'entry' is of type of 'Type'.
     """
+    if not(GLOBALS.DEBUG):
+        return
+    
     inputs = \
         {
             "intAsFloat":True,
@@ -89,6 +95,9 @@ def checkTypes(entry, TypeList, entryName=None, **argv):
     
     Check if instance 'entry' is of any of the types in 'TypeList'.
     """
+    if not(GLOBALS.DEBUG):
+        return
+    
     inputs = \
         {
             "intAsFloat":True,
@@ -143,6 +152,9 @@ def checkInstanceTemplate(entry, templateEntry, entryName=None, **argv):
     Check if instance 'entry' is of same type of 'templateEntry',
     checking recursively if the instance is a container.
     """
+    if not(GLOBALS.DEBUG):
+        return
+    
     #Argument checking:
     inputs = \
         {

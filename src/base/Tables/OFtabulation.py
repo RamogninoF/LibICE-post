@@ -73,7 +73,7 @@ class OFtabulation(Utilities):
                 "Fatal":False,
                 "extrapolate":True
             }
-        
+    
     path = None
     entryNames = {}
     tableProperties = {}
