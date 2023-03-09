@@ -3,9 +3,7 @@
 #####################################################################
 
 from src.base.Tables.OFtabulation import OFtabulation
-from src.thermophysicalModels.laminarFlameSpeed.laminarFlameSpeedModel import laminarFlameSpeedModel
-
-from pylab import exp
+from src.thermophysicalModels.laminarFlameSpeedModels.laminarFlameSpeedModel import laminarFlameSpeedModel
 
 #############################################################################
 #                               MAIN CLASSES                                #

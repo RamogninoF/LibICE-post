@@ -14,6 +14,7 @@ Functions used to handle OpenFOAM files
 from src.base.Functions.typeChecking import checkType
     
 # Import functions to read OF files:
+import PyFoam
 from PyFoam.RunDictionary.ParsedParameterFile import ParsedFileHeader,ParsedParameterFile
 from PyFoam.Basics.DataStructures import BinaryList
 
