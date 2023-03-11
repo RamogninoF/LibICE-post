@@ -149,7 +149,6 @@ class tabulatedLFS(OFtabulation,laminarFlameSpeedModel):
             
             #Create the table:
             tab = super(cls, cls).fromFile(tablePath, varOrder, tableFileNames, entryNames, noWrite, noRead, **argv)
-            #tab = OFtabulation.fromFile(cls, tablePath, varOrder, tableFileNames, entryNames, noWrite, noRead, **argv)
             
         except BaseException as err:
             cls.fatalErrorIn(cls.empty(), tabulatedLFS.fromFile, "Failed loading the tabulation", err)
@@ -199,6 +198,7 @@ class tabulatedLFS(OFtabulation,laminarFlameSpeedModel):
         
         return tabulatedLFS.cp.deepcopy(self.tables["Su"])
     
+    ################################
     #Get deltaLTable:
     def deltaLTable(self):
         """
@@ -231,18 +231,23 @@ class tabulatedLFS(OFtabulation,laminarFlameSpeedModel):
         
         Used to compute laminar flame speed from tabulation.
         """
-        
         #Check arguments:
-        laminarFlameSpeedModel.Su(self,p,T,phi,EGR)
+        try:
+            laminarFlameSpeedModel.Su(self,p,T,phi,EGR)
+            argv = tabulatedLFS.updateKeywordArguments(argv, self.opts)
+        except BaseException as err:
+            self.fatalErrorInArgumentChecking(self.Su, err)
         
-        argv = tabulatedLFS.dictFromTemplate(argv, self.opts)
-        
-        #Compute flame speed:
-        if (EGR is None) or ("EGR" not in self.varOrder):
-            return self.tables["Su"](p,T,phi, Fatal=argv["Fatal"], extrapolate=argv["extrapolate"])[0]
-        else:
-            return self.tables["Su"](p,T,phi, EGR, Fatal=argv["Fatal"], extrapolate=argv["extrapolate"])[0]
+        try:
+            #Compute flame speed:
+            if (EGR is None) or ("EGR" not in self.varOrder):
+                return self.tables["Su"](p,T,phi, Fatal=argv["Fatal"], extrapolate=argv["extrapolate"])[0]
+            else:
+                return self.tables["Su"](p,T,phi, EGR, Fatal=argv["Fatal"], extrapolate=argv["extrapolate"])[0]
+        except:
+            self.fatalErrorIn(self.Su,"Failed computing laminar flame speed", err)
     
+    ################################
     #Cumpute laminar flame tickness:
     def deltaL(self,p,T,phi,EGR=None, **argv):
         """
@@ -266,18 +271,22 @@ class tabulatedLFS(OFtabulation,laminarFlameSpeedModel):
         
         Used to compute laminar flame tickness from tabulation.
         """
-        
         #Check arguments:
-        laminarFlameSpeedModel.Su(self,p,T,phi,EGR)
+        try:
+            laminarFlameSpeedModel.deltaL(self,p,T,phi,EGR)
+            argv = tabulatedLFS.updateKeywordArguments(argv, self.opts)
+            
+            if self.tables["deltaL"] is None:
+                raise ValueError("Tabulation of laminar flame speed was not loaded.")
+        except BaseException as err:
+            self.fatalErrorInArgumentChecking(self.deltaL, err)
         
-        argv = tabulatedLFS.dictFromTemplate(argv, self.opts)
-        
-        if self.tables["deltaL"] is None:
-            raise ValueError("Trying to axcess to laminar flame tickness tabulation while it was not loaded.")
-        
-        #Compute flame thickness:
-        if (EGR is None) or ("EGR" not in self.varOrder):
-            return self.tables["deltaL"](p,T,phi, Fatal=argv["Fatal"], extrapolate=argv["extrapolate"])[0]
-        else:
-            return self.tables["deltaL"](p,T,phi, EGR, Fatal=argv["Fatal"], extrapolate=argv["extrapolate"])[0]
+        try:
+            #Compute flame speed:
+            if (EGR is None) or ("EGR" not in self.varOrder):
+                return self.tables["deltaL"](p,T,phi, Fatal=argv["Fatal"], extrapolate=argv["extrapolate"])[0]
+            else:
+                return self.tables["deltaL"](p,T,phi, EGR, Fatal=argv["Fatal"], extrapolate=argv["extrapolate"])[0]
+        except:
+            self.fatalErrorIn(self.Su,"Failed computing laminar flame thickness", err)
     
