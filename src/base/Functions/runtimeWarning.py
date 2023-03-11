@@ -61,9 +61,9 @@ def printStack(e=None):
     else:
         Where = traceback.extract_stack()[:-2]
     
-    ii = 1
+    ii = 0
     for stackLine in Where:
-        print (">"*ii + formatForWhere.format(stackLine[1], stackLine[0], stackLine[-1]))
+        print (enf(enf(str(ii) + ")","warning"),"bold") + formatForWhere.format(stackLine[1], stackLine[0], stackLine[-1]))
         ii += 1
 
 #############################################################################

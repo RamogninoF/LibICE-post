@@ -79,7 +79,7 @@ class Atom(Utilities):
             atomSpecie + atomSpecie = chemSpecie
             atomSpecie + chemSpecie = chemSpecie
         """
-        from src.thermophysicalModels.specie.specie.Molecule import Molecule
+        from .Molecule import Molecule
         
         #Argument checking:
         try:
@@ -87,25 +87,29 @@ class Atom(Utilities):
         except BaseException as err:
             self.fatalErrorInArgumentChecking(self.__add__, err)
         
-        if isinstance(otherSpecie, self.__class__):
-            atomicSpecie = [self.copy()]
-            numberOfAtoms = [1]
+        try:
+            if isinstance(otherSpecie, self.__class__):
+                atomicSpecie = [self.copy()]
+                numberOfAtoms = [1]
+                    
+                if (self == otherSpecie):
+                    numberOfAtoms[0] += 1
+                    
+                elif (self.name == otherSpecie.name):
+                    raise TypeError("Cannot add two atomic specie with same name but different properties.")
                 
-            if (self == otherSpecie):
-                numberOfAtoms[0] += 1
+                else:
+                    atomicSpecie.append(otherSpecie)
+                    numberOfAtoms.append(1)
                 
-            elif (self.name == otherSpecie.name):
-                raise TypeError("Cannot add two atomic specie with same name but different properties.")
+                #Create specie from atoms and initialize name from brute formula
+                returnSpecie = Molecule("", atomicSpecie, numberOfAtoms)
+                returnSpecie.name = returnSpecie.bruteFormula()
             
             else:
-                atomicSpecie.append(otherSpecie)
-                numberOfAtoms.append(1)
+                returnSpecie = otherSpecie + self
             
-            #Create specie from atoms and initialize name from brute formula
-            returnSpecie = Molecule("", atomicSpecie, numberOfAtoms)
-            returnSpecie.name = returnSpecie.bruteFormula()
-        
-        else:
-            returnSpecie = otherSpecie + self
+        except BaseException as err:
+            self.fatalErrorIn(self.__add__, "Failed addition '{} + {}'".format(self.__class__.__name__, otherSpecie.__class__.__name__), err)
         
         return returnSpecie

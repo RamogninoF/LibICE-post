@@ -37,10 +37,13 @@ class Thermo(Utilities):
         Raising a 'NotImplementedError' if attempting to construct an object of
         this class. Used only as base class (overwritten from derived classes).
         """
-        if (self.__class__ == Thermo):
-            raise NotImplementedError("Trying to construct base (virtual) class.")
-        
-        self.__class__.checkType(specie, Molecule, entryName="specie")
+        try:
+            if (self.__class__ == Thermo):
+                raise NotImplementedError("Trying to construct base (virtual) class.")
+            
+            self.__class__.checkType(specie, Molecule, entryName="specie")
+        except BaseException as err:
+            self.fatalErrorInArgumentChecking(self.__init__,err)
         
         self.specie = specie.copy()
     

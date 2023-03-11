@@ -4,8 +4,8 @@
 
 from src.base.Utilities import Utilities
 
-from src.thermophysicalModels.specie.specie.Atom import Atom
-from src.thermophysicalModels.specie.specie.Molecule import Molecule
+from .Atom import Atom
+from .Molecule import Molecule
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -367,6 +367,9 @@ class Mixture(Utilities):
 #############################################################################
 #Iterator:
 class MixtureIter:
+    """
+    Iterator for Mixture class.
+    """
     def __init__(self, composition):
         self.composition = composition
         self.specieList = [s.name for s in composition.specie]

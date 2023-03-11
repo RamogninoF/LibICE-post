@@ -4,7 +4,7 @@
 
 from src.base.Utilities import Utilities
 
-from src.thermophysicalModels.specie.specie.Atom import Atom
+from .Atom import Atom
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -113,21 +113,28 @@ class Molecule(Utilities):
         
         if isinstance(otherSpecie, Atom):
             otherSpecie = Molecule(otherSpecie.name, [otherSpecie], [1])
+        
+        try:
+            #Add atoms of second specie
+            for atom in otherSpecie:
+                #Check if already present
+                if atom["atom"].name in self:
+                    #Check if with different properties:
+                    if not(atom["atom"] in self):
+                        raise ValueError("Atomic specie named '{}' already present in molecule with different properties, cannot add atomic specie to molecule.".format(atom["atom"].name))
+                    #Add number of atoms of second specie
+                    indexSelf = self.index(atom["atom"])
+                    self.numberOfAtoms[indexSelf] += atom["numberOfAtoms"]
+                else:
+                    #Add new atomic specie
+                    self.atoms.append(atom["atom"].copy())
+                    self.numberOfAtoms.append(atom["numberOfAtoms"])
             
-        #Add atoms of second specie
-        for atom in otherSpecie:
-            #Check if already present
-            if atom["atom"].name in self:
-                #Add number of atoms of second specie
-                indexSelf = self.index(atom["atom"])
-                self.numberOfAtoms[indexSelf] += atom["numberOfAtoms"]
-            else:
-                #Add new atomic specie
-                self.atoms.append(atom["atom"].copy())
-                self.numberOfAtoms.append(atom["numberOfAtoms"])
-            
-        #Set name from brute formula
-        self.name = self.bruteFormula()
+            #Set name from brute formula
+            self.name = self.bruteFormula()
+        
+        except BaseException as err:
+            self.fatalErrorIn(self.__iadd__, "Failed addition '{} += {}'".format(self.__class__.__name__, otherSpecie.__class__.__name__), err)
         
         return self
     
@@ -139,8 +146,11 @@ class Molecule(Utilities):
             Molecule + Molecule = Molecule
             Molecule + Atom = Molecule
         """
-        newSpecie = self.copy()
-        newSpecie += otherSpecie
+        try:
+            newSpecie = self.copy()
+            newSpecie += otherSpecie
+        except BaseException as err:
+            self.fatalErrorIn(self.__add__, "Failed addition '{} + {}'".format(self.__class__.__name__, otherSpecie.__class__.__name__), err)
         return newSpecie
     
     ##############################
@@ -335,6 +345,9 @@ class Molecule(Utilities):
 #############################################################################
 #Iterator:
 class MoleculeIter:
+    """
+    Iterator for Molecule class.
+    """
     def __init__(self, molecule):
         self.molecule = molecule
         self.atoms = [a.name for a in molecule.atoms]

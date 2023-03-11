@@ -4,17 +4,17 @@
 
 from src.base.Utilities import Utilities
 
-from src.thermophysicalModels.specie.specie.Atom import Atom
-from src.thermophysicalModels.specie.specie.Molecule import Molecule
-from src.thermophysicalModels.specie.reaction.Reaction import Reaction
+from ..specie.Atom import Atom
+from ..specie.Molecule import Molecule
 
-from src.thermophysicalModels.specie.thermo.Thermo import Thermo
+from .Reaction import Reaction
+from .Thermo.Thermo import Thermo
 
 #############################################################################
 #                               MAIN CLASSES                                #
 #############################################################################
 #Table with thermodynamic properties:
-class thermoTable(Utilities):
+class ThermoTable(Utilities):
     """
     Class handling a thermodynamic table (data of atomic specie, chemical specie
     and reactions).
@@ -119,10 +119,10 @@ class thermoTable(Utilities):
         hLine = lambda a: (("-"*(len(a)-1)) + "\n")
         
         #Atomic specie:
-        template = "| {:10}| {:10}|\n"
+        template = "| {:20}| {:20}|\n"
         
         string += "ATOMS:\n"
-        title = template1.format("", "m [g/mol]")
+        title = template.format("", "m [g/mol]")
         
         string += hLine(title)
         string += title
@@ -135,7 +135,7 @@ class thermoTable(Utilities):
         string += "\n"
         
         #Chem specie:
-        template = "| {:10}| {:20}| {:10}|\n"
+        template = "| {:20}| {:30}| {:20}|\n"
         
         string += "CHEMICAL SPECIE:\n"
         title = template.format("", "Brute formula", "m [g/mol]")
@@ -151,7 +151,7 @@ class thermoTable(Utilities):
         string += "\n"
         
         #Reactions:
-        template = "| {:20}| {:20}|\n"
+        template = "| {:40}| {:40}|\n"
         
         string += "REACTIONS:\n"
         title = template.format("Reactants", "Products")
@@ -171,17 +171,15 @@ class thermoTable(Utilities):
         #Thermos:
         template = "| {:20}| {:20}|\n"
         
-        string += "REACTIONS:\n"
-        title = template.format("Reactants", "Products")
+        string += "Thermo:\n"
+        title = template.format("Specie", "Type")
         
         string += hLine(title)
         string += title
         string += hLine(title)
         
-        for reaction in self.reactions:
-            formula = reaction.formula()
-            reactants, products = tuple(formula.split("=>"))
-            string += template.format(reactants, products)
+        for thermo in self.thermos:
+            string += template.format(thermo.specie(), thermo.typeName)
         
         string +=hLine(title)
         string += "\n"
@@ -195,16 +193,16 @@ class thermoTable(Utilities):
     def __iadd__(self, other):
         """
         Possible additions:
-            thermoTable + Atom
-            thermoTable + Molecule
-            thermoTable + Reaction
-            thermoTable + Thermo
-            thermoTable + Reaction
-            thermoTable + thermoTable
+            ThermoTable + Atom
+            ThermoTable + Molecule
+            ThermoTable + Reaction
+            ThermoTable + Thermo
+            ThermoTable + Reaction
+            ThermoTable + ThermoTable
         """
         #Argument checking:
         try:
-            self.checkTypes(other, [Atom, Molecule, Reaction, Thermo, thermoTable])
+            self.checkTypes(other, [Atom, Molecule, Reaction, Thermo, ThermoTable])
         except BaseException as err:
             self.fatalErrorInArgumentChecking(__iadd__, err)
         
@@ -221,11 +219,11 @@ class thermoTable(Utilities):
             self.addReaction(other)
             
         #Thermo
-        elif isinstance(other Thermo):
+        elif isinstance(other, Thermo):
             self.addThermo(other)
             
         #ThermoTable
-        elif isinstance(other, thermoTable):
+        elif isinstance(other, ThermoTable):
             #Atoms:
             for a in other.atoms:
                 self.addAtom(a)
@@ -249,20 +247,20 @@ class thermoTable(Utilities):
     def __add__(self, other):
         """
         Possible additions:
-            thermoTable + Atom
-            thermoTable + Molecule
-            thermoTable + Reaction
-            thermoTable + Thermo
-            thermoTable + Reaction
-            thermoTable + thermoTable
+            ThermoTable + Atom
+            ThermoTable + Molecule
+            ThermoTable + Reaction
+            ThermoTable + Thermo
+            ThermoTable + Reaction
+            ThermoTable + ThermoTable
         """
         #Argument checking:
         try:
-            self.checkTypes(other, [Atom, Molecule, Reaction, Thermo, thermoTable])
+            self.checkTypes(other, [Atom, Molecule, Reaction, Thermo, ThermoTable])
         except BaseException as err:
             self.fatalErrorInArgumentChecking(__add__, err)
         
-        newTab = thermoTable(verbose=False)
+        newTab = ThermoTable(verbose=False)
         newTab += other
         
         return newTab
@@ -413,7 +411,7 @@ class thermoTable(Utilities):
 def mergeTables(tables):
     #Argument checking:
     try:
-        thermoTable.checkInstanceTemplate([thermoTable.empty()])
+        ThermoTable.checkInstanceTemplate([ThermoTable.empty()])
     except BaseException as err:
         Utilities.fatalErrorInArgumentChecking(None, mergeTables, err)
     return sum(tables)
