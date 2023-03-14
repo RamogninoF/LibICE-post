@@ -30,8 +30,8 @@ class Molecule(Utilities):
     """
     
     name = ""
-    atoms = [Atom.empty()]
-    numberOfAtoms = [float("nan")]
+    atoms = []
+    numberOfAtoms = []
     
     #########################################################################
     #Constructor:
@@ -68,7 +68,7 @@ class Molecule(Utilities):
             else:
                 index = self.index(atom)
                 self.numberOfAtoms[index] += numberOfAtoms[ii]
-        
+    
     #########################################################################
     #Operators:
     
@@ -86,7 +86,7 @@ class Molecule(Utilities):
             else:
                 return True
         else:
-            warning("Trying to compare elements of type '{}' and '{}'.".format(otherSpecie.__class__.__name__, self.__class__.__name__))
+            self.__class__.runtimeWarning("Trying to compare elements of type '{}' and '{}'.".format(otherSpecie.__class__.__name__, self.__class__.__name__))
             return False
     
     ##############################
@@ -339,7 +339,24 @@ class Molecule(Utilities):
             atomList.append(atom.copy())
         
         return atomList
-
+    
+    ###############################
+    def atomicCompositionMatrix(self):
+        """
+        Return a 1xN numpy.ndarray with the atomic composition 
+        matrix of the molecule, where N is the number of atoms 
+        in the molecule. Each element of the matrix is the number 
+        of atoms of the atomic specie in the mixture, sorted 
+        according to their order in 'atoms' array.
+        """
+        return self.__class__.np.array([a["numberOfAtoms"] for a in self])
+    
+    def setName(self, value):
+        """
+        Set the name of the specie.
+        """
+        self.name = str(value)
+        return self
 #############################################################################
 #                               FRIEND CLASSES                              #
 #############################################################################

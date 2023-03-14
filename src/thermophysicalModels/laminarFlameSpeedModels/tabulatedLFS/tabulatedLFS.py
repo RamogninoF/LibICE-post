@@ -5,11 +5,13 @@
 from src.base.Tables.OFtabulation import OFtabulation
 from src.thermophysicalModels.laminarFlameSpeedModels.laminarFlameSpeedModel import laminarFlameSpeedModel
 
+from abc import ABCMeta, abstractmethod
+
 #############################################################################
 #                               MAIN CLASSES                                #
 #############################################################################
 #Laminar flame speed computation with Gulder correlation:
-class tabulatedLFS(OFtabulation,laminarFlameSpeedModel):
+class tabulatedLFS(OFtabulation,laminarFlameSpeedModel, metaclass=ABCMeta):
     """
     Class for computation of unstained laminar flame speed from tabulation
     
@@ -147,11 +149,11 @@ class tabulatedLFS(OFtabulation,laminarFlameSpeedModel):
             else:
                 noRead = ["deltaL"]
             
-            #Create the table:
-            tab = super(cls, cls).fromFile(tablePath, varOrder, tableFileNames, entryNames, noWrite, noRead, **argv)
-            
         except BaseException as err:
             cls.fatalErrorIn(cls.empty(), tabulatedLFS.fromFile, "Failed loading the tabulation", err)
+        
+        #Create the table:
+        tab = super(cls, cls).fromFile(tablePath, varOrder, tableFileNames, entryNames, noWrite, noRead, **argv)
         
         return tab
     
@@ -177,10 +179,7 @@ class tabulatedLFS(OFtabulation,laminarFlameSpeedModel):
         
         Create a class to handle a laminar flame speed tabulation.
         """
-        try:
-            OFtabulation.__init__(self, tablePath, noWrite, **argv)
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.__init__, err)
+        OFtabulation.__init__(self, tablePath, noWrite, **argv)
     
     #########################################################################
     #Disabling function
@@ -195,8 +194,7 @@ class tabulatedLFS(OFtabulation,laminarFlameSpeedModel):
         """
         Returns a copy of the tabulation of laminar flame speed
         """
-        
-        return tabulatedLFS.cp.deepcopy(self.tables["Su"])
+        return self.tables["Su"].copy()
     
     ################################
     #Get deltaLTable:
@@ -204,8 +202,7 @@ class tabulatedLFS(OFtabulation,laminarFlameSpeedModel):
         """
         Returns a copy of the tabulation of laminar flame tickness
         """
-        
-        return tabulatedLFS.cp.deepcopy(self.tables["deltaL"])
+        return self.tables["deltaL"].copy()
     
     #########################################################################
     #Cumpute laminar flame speed:
@@ -232,8 +229,8 @@ class tabulatedLFS(OFtabulation,laminarFlameSpeedModel):
         Used to compute laminar flame speed from tabulation.
         """
         #Check arguments:
+        laminarFlameSpeedModel.Su(self,p,T,phi,EGR)
         try:
-            laminarFlameSpeedModel.Su(self,p,T,phi,EGR)
             argv = tabulatedLFS.updateKeywordArguments(argv, self.opts)
         except BaseException as err:
             self.fatalErrorInArgumentChecking(self.Su, err)
@@ -272,8 +269,8 @@ class tabulatedLFS(OFtabulation,laminarFlameSpeedModel):
         Used to compute laminar flame tickness from tabulation.
         """
         #Check arguments:
+        laminarFlameSpeedModel.deltaL(self,p,T,phi,EGR)
         try:
-            laminarFlameSpeedModel.deltaL(self,p,T,phi,EGR)
             argv = tabulatedLFS.updateKeywordArguments(argv, self.opts)
             
             if self.tables["deltaL"] is None:

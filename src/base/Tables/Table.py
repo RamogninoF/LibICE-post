@@ -235,7 +235,7 @@ class Table(Utilities):
             if len(self.ranges()[f]) > 1:
                 entries.append(args[ii])
             else:
-                warning("Field '{}' with only one data-point, cannot interpolate along that dimension. Entry for that field will be ignored.".format(f))
+                self.__class__.runtimeWarning("Field '{}' with only one data-point, cannot interpolate along that dimension. Entry for that field will be ignored.".format(f))
         
         returnValue = None
         if len(argv):

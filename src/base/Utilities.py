@@ -23,6 +23,7 @@ class Utilities(object):
     checkTypes = checkTypes
     checkInstanceTemplate = checkInstanceTemplate
     updateKeywordArguments = updateKeywordArguments
+    checkContainer = checkContainer
     
     #Dictionaries
     lookupOrDefault = lookupOrDefault
@@ -45,11 +46,11 @@ class Utilities(object):
         """
         return cp.deepcopy(self)
     
-    #Numpy:
+    #Useful packages:
     np = np
     cp = cp
     os = os
-
+    
     ##########################################################################################
     #Return empty instance of the class:
     @classmethod
@@ -57,6 +58,7 @@ class Utilities(object):
         """
         Return an empty instance of class.
         """
-        return cls.__new__(cls)
+        out = cls.__new__(cls)
+        return out
     
     

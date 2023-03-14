@@ -7,7 +7,7 @@ from src.base.Utilities import Utilities
 from ..specie.Atom import Atom
 from ..specie.Molecule import Molecule
 
-from .Reaction import Reaction
+from .Reaction.Reaction import Reaction
 from .Thermo.Thermo import Thermo
 
 #############################################################################
@@ -21,36 +21,36 @@ class ThermoTable(Utilities):
     
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
-    Arguments:
-        atoms:          dict<str:Atom>
+    Attributes:
+        atoms:          list<Atom>
             Atomic specie
             
-        molecules:      dict<str:Molecule>
+        molecules:      list<Molecule>
             Chemical specie
         
-        reactions:      dict<str:Reaction>  #TODO
+        reactions:      list<Reaction>
             Reactions
         
-        thermo:         dict<str:Thermo>
+        thermo:         list<Thermo>
             Thermodynamic properties of chemical specie
     """
     
-    atoms = {}
-    molecules = {}
-    reactions = {}
-    thermos = {}
+    atoms = []
+    molecules = []
+    reactions = []
+    thermos = []
     
     #########################################################################
     #Constructor:
-    def __init__(self, molecules=None, reactions=None, thermos=None, **argv):
+    def __init__(self, **argv):
         """
+        [keyword arguments]
         molecules:  list<Molecule>
             List of chemical specie
         reactions:  list<Reaction>
             List of reactions
         thermos:    list<Thermo>
             List of thermodynamic properties to add to the table
-        [keyword arguments]
         verbose:    bool (True)
             Show info when constructing the table
             
@@ -73,38 +73,72 @@ class ThermoTable(Utilities):
         print("CONSTRUCTING THERMODYNAMIC TABLE")
         
         #Argument checking:
+        defArgv = \
+            {
+                "molecules":[],
+                "reactions":[],
+                "thermos":[],
+                "verbose":True
+            }
+        
         try:
-            if not(molecules is None):
-                self.__class__.checkInstanceTemplate(molecules, [Molecule.empty()], entryName="molecules")
-            if not(reactions is None):
-                self.__class__.checkInstanceTemplate(reactions, [Reaction.empty()], entryName="reactions")
-            if not(thermos is None):
-                self.__class__.checkInstanceTemplate(thermos, [Thermo.empty()], entryName="thermos")
+            opts = self.__class__.updateKeywordArguments(argv, defArgv, allowEmptyContainer=True)
             
-            opts = self.__class__.updateKeywordArguments(argv, {"verbose":True})
+            molecules = opts["molecules"]
+            reactions = opts["reactions"]
+            thermos = opts["thermos"]
+            
+            self.__class__.checkContainer\
+                (
+                    molecules,
+                    list,
+                    Molecule,
+                    entryName="molecules",
+                    allowEmptyContainer=True
+                )
+            self.__class__.checkContainer\
+                (
+                    reactions,
+                    list,
+                    Reaction,
+                    entryName="reactions",
+                    allowEmptyContainer=True
+                )
+            self.__class__.checkContainer\
+                (
+                    thermos,
+                    list,
+                    Thermo,
+                    entryName="thermos", 
+                    allowEmptyContainer=True
+                )
+            
         except BaseException as err:
-            self.fatalErrorInArgumentChecking(__init__, err)
+            self.fatalErrorInArgumentChecking(self.__init__, err)
         
         #Initialize lists
-        self.atoms = {}
-        self.molecules = {}
-        self.reactions = {}
-        self.thermos = {}
+        self.atoms = self.__class__.atoms
+        self.molecules = self.__class__.molecules
+        self.reactions = self.__class__.reactions
+        self.thermos = self.__class__.thermos
         
-        #Add molecules:
-        if not(molecules is None):
-            for molecule in molecules:
-                self.addMolecule(molecule)
-                
-        #Add reactions:
-        if not(reactions is None):
-            for reaction in reactions:
-                self.addReaction(reaction)
-        
-        #Add thermo pros:
-        if not(thermos is None):
-            for thermo in thermos:
-                self.addThermo(thermos)
+        try:
+            #Add molecules:
+            if not(molecules is None):
+                for molecule in molecules:
+                    self.addMolecule(molecule)
+                    
+            #Add reactions:
+            if not(reactions is None):
+                for reaction in reactions:
+                    self.addReaction(reaction)
+            
+            #Add thermo pros:
+            if not(thermos is None):
+                for thermo in thermos:
+                    self.addThermo(thermo)
+        except BaseException as err:
+            self.fatalErrorIn(self.__init__, "Failed constructing the thermodynamic table", err)
         
         if opts["verbose"]:
             print(self)
@@ -113,9 +147,7 @@ class ThermoTable(Utilities):
     #Operators:
     #Print:
     def __str__(self):
-        string = "~~~~~~~~~~~~~~~~~~ THERMOTABLE ~~~~~~~~~~~~~~~~~~\n"
-        string += "\n"
-        
+        string = ""
         hLine = lambda a: (("-"*(len(a)-1)) + "\n")
         
         #Atomic specie:
@@ -161,7 +193,7 @@ class ThermoTable(Utilities):
         string += hLine(title)
         
         for reaction in self.reactions:
-            formula = reaction.formula()
+            formula = str(reaction)
             reactants, products = tuple(formula.split("=>"))
             string += template.format(reactants, products)
         
@@ -179,12 +211,19 @@ class ThermoTable(Utilities):
         string += hLine(title)
         
         for thermo in self.thermos:
-            string += template.format(thermo.specie(), thermo.typeName)
+            string += template.format(thermo.specie.name, thermo.typeName)
         
         string +=hLine(title)
         string += "\n"
         
-        string += "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
+        #Add decorations
+        name = "THERMOTABLE"
+        width = max([len(l) for l in string.split("\n")])
+        
+        topDecor =" [" + name + "] "
+        topDecor = "~"*((width - len(topDecor))//2) + topDecor + "~"*((width - len(topDecor))//2)
+        bottomDecor = "~"*len(topDecor)
+        string = topDecor + "\n" + string + bottomDecor + "\n"
         
         return string
     
@@ -202,43 +241,46 @@ class ThermoTable(Utilities):
         """
         #Argument checking:
         try:
-            self.checkTypes(other, [Atom, Molecule, Reaction, Thermo, ThermoTable])
+            self.__class__.checkTypes(other, [Atom, Molecule, Reaction, Thermo, ThermoTable], "other")
         except BaseException as err:
-            self.fatalErrorInArgumentChecking(__iadd__, err)
+            self.fatalErrorInArgumentChecking(self.__iadd__, err)
         
-        #Atom
-        if isinstance(other, Atom):
-            self.addAtom(other)
-            
-        #Molecule
-        elif isinstance(other, Molecule):
-            self.addMolecule(other)
-            
-        #Reaction
-        elif isinstance(other, Reaction):
-            self.addReaction(other)
-            
-        #Thermo
-        elif isinstance(other, Thermo):
-            self.addThermo(other)
-            
-        #ThermoTable
-        elif isinstance(other, ThermoTable):
-            #Atoms:
-            for a in other.atoms:
-                self.addAtom(a)
-            
-            #Molecule:
-            for m in other.molecules:
-                self.addMolecule(m)
-            
-            #Reactions:
-            for r in other.reactions:
-                self.addReaction(r)
-            
-            #Thermos:
-            for t in other.thermos:
-                self.addThermo(t)
+        try:
+            #Atom
+            if isinstance(other, Atom):
+                self.addAtom(other)
+                
+            #Molecule
+            elif isinstance(other, Molecule):
+                self.addMolecule(other)
+                
+            #Reaction
+            elif isinstance(other, Reaction):
+                self.addReaction(other)
+                
+            #Thermo
+            elif isinstance(other, Thermo):
+                self.addThermo(other)
+                
+            #ThermoTable
+            elif isinstance(other, ThermoTable):
+                #Atoms:
+                for a in other.atoms:
+                    self.addAtom(a)
+                
+                #Molecule:
+                for m in other.molecules:
+                    self.addMolecule(m)
+                
+                #Reactions:
+                for r in other.reactions:
+                    self.addReaction(r)
+                
+                #Thermos:
+                for t in other.thermos:
+                    self.addThermo(t)
+        except BaseException as err:
+            self.fatalErrorIn(self.__iadd__, "Failed addition '{} += {}'".format(self.__class__.__name__, other.__class__.__name__), err)
         
         return self
     
@@ -256,12 +298,15 @@ class ThermoTable(Utilities):
         """
         #Argument checking:
         try:
-            self.checkTypes(other, [Atom, Molecule, Reaction, Thermo, ThermoTable])
+            self.__class__.checkTypes(other, [Atom, Molecule, Reaction, Thermo, ThermoTable], "other")
         except BaseException as err:
-            self.fatalErrorInArgumentChecking(__add__, err)
+            self.fatalErrorInArgumentChecking(self.__add__, err)
         
-        newTab = ThermoTable(verbose=False)
-        newTab += other
+        try:
+            newTab = ThermoTable(verbose=False)
+            newTab += other
+        except BaseException as err:
+            self.fatalErrorIn(self.__add__, "Failed addition '{} + {}'".format(self.__class__.__name__, other.__class__.__name__), err)
         
         return newTab
     
@@ -272,24 +317,24 @@ class ThermoTable(Utilities):
         """
         #Argument checking:
         try:
-            self.checkTypes(entry, [Atom, Molecule, Reaction, Thermo], entryName="entry")
+            self.__class__.checkTypes(entry, [Atom, Molecule, Reaction, Thermo], "entry")
         except BaseException as err:
-            self.fatalErrorInArgumentChecking(__contains__, err)
+            self.fatalErrorInArgumentChecking(self.__contains__, err)
             
-            if isinstance(entry, Atom):
-                groupClass = "atoms"
-                
-            elif isinstance(entry, Molecule):
-                groupClass = "molecules"
+        if isinstance(entry, Atom):
+            groupClass = "atoms"
             
-            elif isinstance(entry, Reaction):
-                groupClass = "reactions"
-            
-            elif isinstance(entry, Thermo):
-                groupClass = "thermos"
-            
-            group = self.__dict__[groupClass]
-            return (entry in map(group.__getitem__, list(group.keys())))
+        elif isinstance(entry, Molecule):
+            groupClass = "molecules"
+        
+        elif isinstance(entry, Reaction):
+            groupClass = "reactions"
+        
+        elif isinstance(entry, Thermo):
+            groupClass = "thermos"
+        
+        group = self.__dict__[groupClass]
+        return (entry in group)
     
     #########################################################################
     #Add atomic specie to the table:
@@ -301,20 +346,20 @@ class ThermoTable(Utilities):
         """
         #Argument checking:
         try:
-            self.__class__.checkTypes(atom, Atom, "atom")
+            self.__class__.checkType(atom, Atom, "atom")
         except BaseException as err:
             self.fatalErrorInArgumentChecking(addAtom, err)
         
         try:
             if not(atom in self):
                 #Check if present with different properties:
-                if atom.name in self.atoms:
+                if atom.name in [a.name for a in self.atoms]:
                     raise ValueError("Error when adding atomic specie '{}' to the table: specie already present in the table but with different properties.".format(atom.name))
                 
                 else:
-                    self.atoms[atom.name] = atom.copy()
+                    self.atoms.append(atom.copy())
         except BaseException as err:
-            self.fatalErrorIn(__contains__, "Failed adding atom to table", err)
+            self.fatalErrorIn(self.addAtom, "Failed adding atom to table", err)
         
         return self
     
@@ -330,27 +375,28 @@ class ThermoTable(Utilities):
         """
         #Argument checking:
         try:
-            self.__class__.checkTypes(molecule, Molecule, "molecule")
+            self.__class__.checkType(molecule, Molecule, "molecule")
         except BaseException as err:
-            self.fatalErrorInArgumentChecking(addMolecule, err)
+            self.fatalErrorInArgumentChecking(self.addMolecule, err)
         
         try:
             if not(molecule in self):
                 #Check if present with different properties:
-                if molecule.name in self.molecules:
+                if molecule.name in [m.name for m in self.molecules]:
                     raise ValueError("Error when adding chemical specie '{}' to the table: specie already present in the table but with different properties.".format(molecule.name))
                 
                 else:
-                    self.molecules[molecule.name] = molecule.copy()
+                    self.molecules.append(molecule.copy())
                     
                     #Add atomic specie:
-                    for atom in molecule.atoms:
-                        self.addAtom(atom)
+                    for atom in molecule:
+                        self.addAtom(atom["atom"])
                         
                     #Add default reaction:
-                    self.addDefaultReaction(molecule)
+                    defaultReaction = Reaction([molecule],[molecule])
+                    self.addReaction(defaultReaction)
         except BaseException as err:
-            self.fatalErrorIn(__contains__, "Failed adding molecule to table", err)
+            self.fatalErrorIn(self.addMolecule, "Failed adding molecule to table", err)
         
         return self
     
@@ -366,23 +412,23 @@ class ThermoTable(Utilities):
         """
         #Argument checking:
         try:
-            self.__class__.checkTypes(thermo, Thermo, "thermo")
+            self.__class__.checkType(thermo, Thermo, "thermo")
         except BaseException as err:
-            self.fatalErrorInArgumentChecking(addThermo, err)
+            self.fatalErrorInArgumentChecking(self.addThermo, err)
         
         try:
             if not(thermo in self):
-                #Check if present with different properties:
-                if thermo.specie.name in self.thermos:
-                    raise ValueError("Error when adding thermodynamic properties of chemical specie '{}' to the table: already present in the table but with different properties.".format(thermo.specie.name))
+                #Check if there was a thermo already associated to this specie:
+                if thermo.specie in [t.specie for t in self.thermos]:
+                    raise ValueError("A Thermo was already associated to specie '{}' in the thermodynamic table".format(thermo.specie.name))
                 
-                else:
-                    self.thermos[thermo.specie.name] = thermos.copy()
-                    
-                    #Add chem specie:
-                    self.addMolecule(thermo.specie)
+                #Add thermo
+                self.thermos.append(thermo.copy())
+                
+                #Add chem specie:
+                self.addMolecule(thermo.specie)
         except BaseException as err:
-            self.fatalErrorIn(__contains__, "Failed adding thermophysical data to table", err)
+            self.fatalErrorIn(self.addThermo, "Failed adding thermophysical data to table", err)
         
         return self
     
@@ -398,12 +444,80 @@ class ThermoTable(Utilities):
         """
         #Argument checking:
         try:
-            self.__class__.checkTypes(reaction, Reaction, "thermo")
+            self.__class__.checkType(reaction, Reaction, "reaction")
         except BaseException as err:
-            self.fatalErrorInArgumentChecking(addReaction, err)
+            self.fatalErrorInArgumentChecking(self.addReaction, err)
         
-        raise NotImplementedError("Reactions not implemented.")
+        try:
+            if not(reaction in self):
+                #Add molecules in reactants and products:
+                for r in reaction.reactants:
+                    self.addMolecule(r["specie"])
+                for p in reaction.products:
+                    self.addMolecule(p["specie"])
+                
+                self.reactions.append(reaction)
+                
+        except BaseException as err:
+            self.fatalErrorIn(self.addReaction, "Failed adding reaction to table", err)
+        
+        return self
     
+    #################################
+    def thermoFromSpecie(self, specie):
+        """
+            specie:     Molecule
+        Get the thermodynamic data associated to a specific specie.
+        """
+        #Type checking:
+        try:
+            self.__class__.checkType(specie, Molecule, "specie")
+        except BaseException as err:
+            self.__class__.fatalErrorInArgumentChecking(self.thermoFromSpecie, err)
+        
+        try:
+            if not(specie in [t.specie for t in self.thermos]):
+                raise ValueError("No Thermo found associated to specie '{}'".format(specie.name))
+            index = [t.specie for t in self.thermos].index(specie)
+            return self.thermos[index].copy()
+        except BaseException as err:
+            self.__class__.fatalErrorIn(self.thermoFromSpecie, "Failed retrieving Thermo for specie {}", err)
+    
+    #################################
+    def reactionsFromReactants(self, molecules):
+        """
+            molecules: list<Molecules>
+                List of molecules that can be in reactants
+            
+            Retrieve all reactions stored in the table that have
+            at least one specie in 'molecules' among reactants.
+            The reactions are sorted in order from the reaction
+            with the most number of specie present to the least.
+        """
+        try:
+            self.__class__.checkContainer(molecules, list, Molecule, "molecules")
+        except BaseException as err:
+            self.__class__.fatalErrorInArgumentChecking(self.reactionsFromReactants, err)
+        
+        outList = []
+        for specie in molecules:
+            #Check if specie in table
+            self.index(specie)
+            
+            #Get reactions containing the specie
+            reacts = [r for r in self.reactions if specie in r.reactants]
+            
+            #Merge with outList:
+            for r in reacts:
+                if not r in outList:
+                    outList.append(r.copy())
+            
+        #Sort:
+        numOfSpec = [len([s for s in r.reactants if s["specie"] in molecules]) for r in outList]
+        _, index = sorted(numOfSpec)
+        
+        return outList[index]
+        
 #############################################################################
 #                             FRIEND FUNCTIONS                              #
 #############################################################################

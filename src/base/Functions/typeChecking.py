@@ -12,6 +12,7 @@ Functions for type checking.
 
 import copy as cp
 import inspect
+from .runtimeWarning import fatalErrorInArgumentChecking
 
 from src import GLOBALS
 GLOBALS.DEBUG = True
@@ -50,19 +51,23 @@ def checkType(entry, Type, entryName=None, **argv):
     
     inputs.update(argv)
     
-    if not(entryName is None):
-        if not(isinstance(entryName, str)):
-            raise TypeError("Wrong type for entry '{}': '{}' expected but '{}' was found.".format("entryName", str.__name__, entryName.__class__.__name__))
-    
-    if not(isinstance(inputs["intAsFloat"], bool)):
-        raise TypeError("Wrong type for entry '{}': '{}' expected but '{}' was found.".format("intAsFloat", bool.__name__, inputs["intAsFloat"].__class__.__name__))
-    
-    if not(isinstance(inputs["checkForNone"], bool)):
-        raise TypeError("Wrong type for entry '{}': '{}' expected but '{}' was found.".format("checkForNone", bool.__name__, inputs["checkForNone"].__class__.__name__))
-    
-    if not(isinstance(Type, type)):
-        raise TypeError("Wrong type for entry '{}': '{}' expected but '{}' was found.".format("Type", type.__name__, Type.__class__.__name__))
-    
+    #Argument checking:
+    try:
+        if not(entryName is None):
+            if not(isinstance(entryName, str)):
+                raise TypeError("Wrong type for entry '{}': '{}' expected but '{}' was found.".format("entryName", str.__name__, entryName.__class__.__name__))
+        
+        if not(isinstance(inputs["intAsFloat"], bool)):
+            raise TypeError("Wrong type for entry '{}': '{}' expected but '{}' was found.".format("intAsFloat", bool.__name__, inputs["intAsFloat"].__class__.__name__))
+        
+        if not(isinstance(inputs["checkForNone"], bool)):
+            raise TypeError("Wrong type for entry '{}': '{}' expected but '{}' was found.".format("checkForNone", bool.__name__, inputs["checkForNone"].__class__.__name__))
+        
+        if not(isinstance(Type, type)):
+            raise TypeError("Wrong type for entry '{}': '{}' expected but '{}' was found.".format("Type", type.__name__, Type.__class__.__name__))
+    except BaseException as err:
+        fatalErrorInArgumentChecking(None, checkType, err)
+        
     if (Type == None.__class__) and not(inputs["checkForNone"]):
         return
     
@@ -104,12 +109,15 @@ def checkTypes(entry, TypeList, entryName=None, **argv):
             "checkForNone":False
         }
     
-    checkType(entryName, str, entryName="entryName")
-    
-    inputs.update(argv)
-    argv = inputs
-    checkType(inputs["intAsFloat"], bool, entryName="intAsFloat")
-    checkType(inputs["checkForNone"], bool, entryName="checkForNone")
+    try:
+        checkType(entryName, str, entryName="entryName")
+        
+        inputs.update(argv)
+        argv = inputs
+        checkType(inputs["intAsFloat"], bool, entryName="intAsFloat")
+        checkType(inputs["checkForNone"], bool, entryName="checkForNone")
+    except BaseException as err:
+        fatalErrorInArgumentChecking(None, checkTypes, err)
     
     isOk = False
     for Type in TypeList:
@@ -143,7 +151,7 @@ def checkInstanceTemplate(entry, templateEntry, entryName=None, **argv):
     intAsFloat:     bool (True)
         Treat int as floats for type-checking
     checkForNone:   bool (False)
-        If True, check for NoneType in case an entry is None,
+        If True, check for NoneType in case a template entry is None,
         otherwise it means no check is needed
     allowEmptyContainer:   bool (False)
         If applying recursive type-checking, allow an entry to be an
@@ -163,14 +171,16 @@ def checkInstanceTemplate(entry, templateEntry, entryName=None, **argv):
             "allowEmptyContainer":False
         }
     
-    
-    checkType(entryName, str, entryName="entryName")
-    
-    inputs.update(argv)
-    argv = inputs
-    checkType(inputs["intAsFloat"], bool, entryName="intAsFloat")
-    checkType(inputs["checkForNone"], bool, entryName="checkForNone")
-    checkType(inputs["allowEmptyContainer"], bool, entryName="allowEmptyContainer")
+    try:
+        checkType(entryName, str, entryName="entryName")
+        
+        inputs.update(argv)
+        argv = inputs
+        checkType(inputs["intAsFloat"], bool, entryName="intAsFloat")
+        checkType(inputs["checkForNone"], bool, entryName="checkForNone")
+        checkType(inputs["allowEmptyContainer"], bool, entryName="allowEmptyContainer")
+    except BaseException as err:
+        fatalErrorInArgumentChecking(None, checkInstanceTemplate, err)
     
     #Check entry type:
     checkType(entry, templateEntry.__class__, entryName=entryName, **argv)
@@ -220,25 +230,105 @@ def checkInstanceTemplate(entry, templateEntry, entryName=None, **argv):
         
 #############################################################################
 #Check type of an instance:
-def updateKeywordArguments(argv, defaultArgv):
+def updateKeywordArguments(Argv, defaultArgv, **argv):
     """
-    argv:           dict
+    Argv:           dict
         Keyword arguments
     defaultArgv:    dict
-        Default keyword arguments
+        Default keyword argumentspeError)
+        
+    Keyword arguments:
+    intAsFloat:     bool (True)
+        Treat int as floats for type-checking
+    checkForNone:   bool (False)
+        If True, check for NoneType in case a template entry is None,
+        otherwise it means no check is needed
+    allowEmptyContainer:   bool (False)
+        If applying recursive type-checking, allow an entry to be an
+        empty container even if the template has elements in it.
         
     Check keyword arguments.
     """
-    checkType(argv, dict, "argv")
-    checkType(defaultArgv, dict, "defaultArgv")
+    try:
+        checkType(Argv, dict, "Argv")
+        checkType(defaultArgv, dict, "defaultArgv")
+    except BaseException as err:
+        fatalErrorInArgumentChecking(None, updateKeywordArguments, err)
     
-    for entry in argv:
+    for entry in Argv:
         if not entry in defaultArgv:
             raise ValueError("Unknown keyword argument '{}'".format(entry))
         
-        checkInstanceTemplate(argv[entry], defaultArgv[entry], entry)
+        checkInstanceTemplate(Argv[entry], defaultArgv[entry], entry, **argv)
     
     out = cp.deepcopy(defaultArgv)
-    out.update(argv)
+    out.update(Argv)
     
     return out
+
+#############################################################################
+#Check type of an instance:
+def checkContainer(entry, container, itemType, entryName=None, **argv):
+    """
+    entry:          Instance
+        Instance to be checked
+    container:      Type
+        Container type
+    itemType:       Type
+        Type of the elements of the container
+    entryName:      str  (None)
+        Name of the entry to be checked (used as info when raising TypeError)
+        
+    Keyword arguments:
+    intAsFloat:     bool (True)
+        Treat int as floats for type-checking
+    allowEmptyContainer:   bool (False)
+        Allow the entry to be an empty container.
+    
+    Check if instance 'entry' is a container of type 'container<itemType>'.
+    """
+    if not(GLOBALS.DEBUG):
+        return
+    
+    #Argument checking:
+    inputs = \
+        {
+            "intAsFloat":True,
+            "allowEmptyContainer":False
+        }
+    
+    try:
+        checkType(entryName, str, entryName="entryName")
+        checkType(itemType, type, "itemType")
+        checkType(container, type, "container")
+        
+        if not "__iter__" in dir(container):
+            raise TypeError("Entry 'container' must be a type that admits iteration for its instaces.")
+        
+        inputs.update(argv)
+        argv = inputs
+        checkType(inputs["intAsFloat"], bool, entryName="intAsFloat")
+        checkType(inputs["allowEmptyContainer"], bool, entryName="allowEmptyContainer")
+    except BaseException as err:
+        fatalErrorInArgumentChecking(None, checkInstanceTemplate, err)
+    
+    #Check container type:
+    checkType(entry, container, entryName=entryName, **argv)
+    
+    #Check if empty:
+    if not(inputs["allowEmptyContainer"]) and (len(entry) == 0):
+        raise ValueError("Empty container not allowed for entry '{}'.".format(entryName))
+    
+    #1) string
+    if issubclass(container,str):
+        return
+    
+    for it in entry:
+        #2) dict:
+        if issubclass(container,dict):
+            It = entry[it]
+            checkType(It, itemType, entryName=(entryName + "[\"{}\"]".format(it)), **argv)
+        #3) Others:
+        else:
+            It = it
+            checkType(It, itemType, entryName=(entryName + "[\"{}\"]".format(it)), **argv)

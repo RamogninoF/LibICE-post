@@ -44,8 +44,10 @@ class janaf7(Thermo):
     #Name:
     typeName = "janaf7"
     
-    cpLow = [float("nan")]*7
-    cpHigh = [float("nan")]*7
+    numCoeffs = 7
+    
+    cpLow = [float("nan")]*numCoeffs
+    cpHigh = [float("nan")]*numCoeffs
     Tth = float("nan")
     Tlow = float("nan")
     Thigh = float("nan")
@@ -73,16 +75,15 @@ class janaf7(Thermo):
             coefficients for computation of cp
         """
         #Argument checking:
+        super(self.__class__, self).__init__(specie)
         try:
-            Thermo.__init__(self, specie)
-            
             self.__class__.checkInstanceTemplate(cpLow, [1.0], entryName="cpLow")
             self.__class__.checkInstanceTemplate(cpHigh, [1.0], entryName="cpHigh")
             self.__class__.checkType(Tth, float, entryName="Tth")
             self.__class__.checkType(Tlow, float, entryName="Tlow")
             self.__class__.checkType(Thigh, float, entryName="Thigh")
             
-            if not(len(cpLow) == 7) or not(len(cpHigh) == 7):
+            if not(len(cpLow) == self.numCoeffs) or not(len(cpHigh) == self.numCoeffs):
                 raise ValueError("Required lists of 7 coefficients for 'cpLow' and 'cpHigh'.")
         except BaseException as err:
             self.fatalErrorInArgumentChecking(self.__init__, err)
@@ -148,6 +149,7 @@ class janaf7(Thermo):
     
     ################################
     def cp(self,T):
+        self.__class__.cp.__doc__ = \
         """
         Returns the constant pressure heat capacity at temperature T of the 
         chemical specie. If the temperature is not within Tlow and Thigh, a
@@ -156,23 +158,21 @@ class janaf7(Thermo):
                 | sum_{i=0,n} ( a_{i,low} * T^i )     if T < Tth
         cp(T) = |
                 | sum_{i=0,n} ( a_{i,high} * T^i )    if T >= Tth
-        
         """
+        self.__class__.cp.__doc__ += "\n\twith n = {}".format(self.numCoeffs-2)
+        
         #Argument checking
-        try:
-            self.__class__.checkType(T, float, "T")
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.cp, err)
+        super(self.__class__,self).cp(T)
         
         if (T < self.Tlow) or (T > self.Thigh):
-            warning("Temperature outside of range ["+ "{:.3f}".format(self.Tlow) + ","+ "{:.3f}".format(self.Thigh) + "] for computation of cp for specie " + self.specie.name + "(T = "+ "{:.3f}".format(T) + " [K])")
+            self.__class__.runtimeWarning("Temperature outside of range ["+ "{:.3f}".format(self.Tlow) + ","+ "{:.3f}".format(self.Thigh) + "] for specie " + self.specie.name + "(T = "+ "{:.3f}".format(T) + " [K])")
         
         cp = 0.0
         if(T > self.Tth):
-            for nn in range(5):
+            for nn in range(self.numCoeffs-2):
                 cp += self.cpHigh[nn] * (T **nn)
         else:
-            for nn in range(5):
+            for nn in range(self.numCoeffs-2):
                 cp += self.cpLow[nn] * (T **nn)
         
         return cp*self.specie.Rgas()
@@ -187,10 +187,8 @@ class janaf7(Thermo):
         
         cv(T) = cp(T) - R
         """
-        try:
-            self.__class__.checkType(T, float, "T")
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.cv, err)
+        #Argument checking
+        super(self.__class__,self).cv(T)
         
         return (self.cp(T) - self.specie.Rgas())
     
@@ -204,10 +202,8 @@ class janaf7(Thermo):
         
         gammma(T) = cp(T)/cv(T)
         """
-        try:
-            self.__class__.checkType(T, float, "T")
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.gamma, err)
+        #Argument checking
+        super(self.__class__,self).gamma(T)
         
         return (self.cp(T) / self.cv(T))
         

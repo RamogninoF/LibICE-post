@@ -29,9 +29,9 @@ class Mixture(Utilities):
             Mass fractions of specie in the mixture
     """
     
-    specie = [Molecule.empty()]
-    X = [float("nan")]
-    Y = [float("nan")]
+    specie = []
+    X = []
+    Y = []
     
     #########################################################################
     #Constructor:
@@ -236,6 +236,9 @@ class Mixture(Utilities):
     ###############################
     #Compute Molar fractions:
     def updateMolFracts(self):
+        """
+        Update mole fractions of the specie from mass fractions.
+        """
         aux = 0.0
         for speci in self:
             aux += speci["Y"] / speci["specie"].MM()
@@ -246,6 +249,9 @@ class Mixture(Utilities):
     ###############################
     #Compute Mass fractions:
     def updateMassFracts(self):
+        """
+        Update mass fractions of the specie from mole fractions.
+        """
         aux = 0.0
         for speci in self:
             aux += speci["X"] * speci["specie"].MM()
@@ -326,40 +332,54 @@ class Mixture(Utilities):
         except BaseException as err:
             self.fatalErrorInArgumentChecking(self.dilute, err)
         
+        #Cast molecule to mixture
         if isinstance(dilutingMix, Molecule):
             dilutingMix = Mixture([dilutingMix], [1.0])
         
-        for speci in dilutingMix:
-            #Check if it was already present:
-            if not(speci["specie"] in self):
-                #Add the new specie
-                self.specie.append(speci["specie"].copy())
-                if (fracType == "mass"):
-                    self.Y.append(speci["Y"] * dilutionFract)
-                elif (fracType == "mole"):
-                    self.X.append(speci["X"] * dilutionFract)
-            else:
-                #Dilute the already present specie
-                index = self.index(speci["specie"])
-                if (fracType == "mass"):
-                    self.Y[index] = (self.Y[index] * (1.0 - dilutionFract)) + (speci["Y"] * dilutionFract)
-                elif (fracType == "mole"):
-                    self.X[index] = (self.X[index] * (1.0 - dilutionFract)) + (speci["X"] * dilutionFract)
+        #If diluting with empty mixture, skip
+        if len(dilutingMix) < 1:
+            return self
         
-        #Update mass/mole fractions of other specie:
-        for speci in self:
-            if not(speci["specie"] in dilutingMix):
-                index = self.index(speci["specie"])
-                if (fracType == "mass"):
-                    self.Y[index] *= (1.0 - dilutionFract)
-                elif (fracType == "mole"):
-                    self.X[index] *= (1.0 - dilutionFract)
+        #If the mixture is empty:
+        if len(self) == 0:
+            self.X = dilutingMix.X[:]
+            self.Y = dilutingMix.Y[:]
+            self.specie = [s.copy() for s in dilutingMix.specie]
         
-        if (fracType == "mass"):
-            self.updateMolFracts()
-        elif (fracType == "mole"):
-            self.updateMassFracts()
-    
+        #Dilute
+        try:
+            for speci in dilutingMix:
+                #Check if it was already present:
+                if not(speci["specie"] in self):
+                    #Add the new specie
+                    self.specie.append(speci["specie"].copy())
+                    if (fracType == "mass"):
+                        self.Y.append(speci["Y"] * dilutionFract)
+                    elif (fracType == "mole"):
+                        self.X.append(speci["X"] * dilutionFract)
+                else:
+                    #Dilute the already present specie
+                    index = self.index(speci["specie"])
+                    if (fracType == "mass"):
+                        self.Y[index] = (self.Y[index] * (1.0 - dilutionFract)) + (speci["Y"] * dilutionFract)
+                    elif (fracType == "mole"):
+                        self.X[index] = (self.X[index] * (1.0 - dilutionFract)) + (speci["X"] * dilutionFract)
+            
+            #Update mass/mole fractions of other specie:
+            for speci in self:
+                if not(speci["specie"] in dilutingMix):
+                    index = self.index(speci["specie"])
+                    if (fracType == "mass"):
+                        self.Y[index] *= (1.0 - dilutionFract)
+                    elif (fracType == "mole"):
+                        self.X[index] *= (1.0 - dilutionFract)
+            
+            if (fracType == "mass"):
+                self.updateMolFracts()
+            elif (fracType == "mole"):
+                self.updateMassFracts()
+        except BaseException as err:
+            self.fatalErrorIn(self.dilute, "Failed diluting the mixture", err)
         return self
 
 #############################################################################
@@ -373,14 +393,13 @@ class MixtureIter:
     def __init__(self, composition):
         self.composition = composition
         self.specieList = [s.name for s in composition.specie]
-        
         self.current_index = 0
     
     def __iter__(self):
         return self
     
     def __next__(self):
-        if self.current_index < len(self.specieList):
+        if self.current_index < len(self.specieList) and not(len(self.specieList) == 0):
             out = self.composition[self.specieList[self.current_index]]
             self.current_index += 1
             return out

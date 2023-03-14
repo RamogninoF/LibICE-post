@@ -28,14 +28,13 @@ class laminarFlameSpeedModel(Utilities):
     #Constructor:
     def __init__(self):
         """
-        Raising a 'NotImplementedError' if attempting to construct an object of
-        this class. Used only as base class (overwritten from derived classes).
+        Base (virtual) class: does not support instantiation.
         """
-        
-        raise NotImplementedError
+        pass
         
     #########################################################################
     #Cumpute laminar flame speed:
+    @abstractmethod
     def Su(self,p,T,phi,EGR=None):
         """
         p:      float
@@ -63,6 +62,7 @@ class laminarFlameSpeedModel(Utilities):
     
     ##############################
     #Cumpute laminar flame thickness:
+    @abstractmethod
     def deltaL(self,p,T,phi,EGR=None):
         """
         p:      float
@@ -77,7 +77,16 @@ class laminarFlameSpeedModel(Utilities):
         Used to compute laminar flame thickness in derived class. Here in the base class
         it is used only for argument checking.
         """
-        return Su(p,T,phi,EGR)
+        try:
+            Utilities.checkType(p, float, entryName="p")
+            Utilities.checkType(T, float, entryName="T")
+            Utilities.checkType(phi, float, entryName="phi")
+            if not(EGR is None):
+                Utilities.checkType(EGR, float, entryName="EGR")
+        except BaseException as err:
+            self.fatalErrorInArgumentChecking(self.deltaL, err)
+        
+        return None
 
     ##############################
     #Change coefficients (or some of them):

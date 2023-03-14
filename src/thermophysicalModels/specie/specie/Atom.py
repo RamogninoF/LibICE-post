@@ -60,7 +60,7 @@ class Atom(Utilities):
                     return False
             return True
         else:
-            warning("Trying to compare elements of type '{}' and '{}'.".format(otherSpecie.__class__.__name__, self.__class__.__name__))
+            self.__class__.runtimeWarning("Trying to compare elements of type '{}' and '{}'.".format(otherSpecie.__class__.__name__, self.__class__.__name__))
             return False
     
     ##############################
@@ -76,8 +76,8 @@ class Atom(Utilities):
     def __add__(self, otherSpecie):
         """
         Possible additions:
-            atomSpecie + atomSpecie = chemSpecie
-            atomSpecie + chemSpecie = chemSpecie
+            Atom + Atom = Molecule
+            atomSpecie + Molecule = Molecule
         """
         from .Molecule import Molecule
         
@@ -113,3 +113,36 @@ class Atom(Utilities):
             self.fatalErrorIn(self.__add__, "Failed addition '{} + {}'".format(self.__class__.__name__, otherSpecie.__class__.__name__), err)
         
         return returnSpecie
+    
+    ##############################
+    #Multiplication:
+    def __mul__(self, num):
+        """
+        Possible additions:
+            Atom * float/int = Molecule
+        """
+        from .Molecule import Molecule
+        
+        #Argument checking:
+        try:
+            Utilities.checkType(num, float, entryName="num")
+        except BaseException as err:
+            self.fatalErrorInArgumentChecking(self.__mul__, err)
+        
+        try:
+            returnSpecie = Molecule("",[self.copy()], [num])
+            returnSpecie.name = returnSpecie.bruteFormula()
+            
+        except BaseException as err:
+            self.fatalErrorIn(self.__mul__, "Failed multiplication '{}*{}'".format(self.__class__.__name__, num.__class__.__name__), err)
+        
+        return returnSpecie
+    
+    ##############################
+    #Multiplication:
+    def __rmul__(self, num):
+        """
+        Possible additions:
+            Atom * float/int = Molecule
+        """
+        return self*num

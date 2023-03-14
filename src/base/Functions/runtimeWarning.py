@@ -84,14 +84,14 @@ def runtimeWarning(Msg):
     """
     Print a runtime warning message (Msg) and the call-stack.
     """
-    baseRuntimeWarning("WARNING: ", Msg)
+    baseRuntimeWarning(enf(enf("Runtime Warning: ", "warning"), "bold"), Msg)
 
 #############################################################################
 def runtimeError(Msg):
     """
     Print a runtime error message (Msg) and the call-stack.
     """
-    baseRuntimeWarning("ERROR: ", Msg)
+    baseRuntimeWarning(enf(enf("Runtime Error: ", "warning"), "bold"), Msg)
 
 #############################################################################
 def fatalErrorIn(self, func, msg, err=None):
