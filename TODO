@@ -1,0 +1,11 @@
+To do list:
+    Cambiare le classi di tipo Table per avere le proprietà come properties, in modo che quando vengono aggiornate si ha aggiornamento degli interpolanti
+    
+    Riscrivere gli poeratori __add__ delle classi Molecule e Atom in modo da aggiungere gli atomi nell'ordine in cui sono stati aggiunti
+    Sfruttare anche l'operatore __radd__ per avere le operazioni solo in una delle due classi, e non una doppia implementazione (?)
+    
+    Implementare il __mul__ e __rmul__ per la classe Molecule
+    
+    Rimuovere implementazione del metodo __iadd__ , viene automaticamente implementato dagli operatori assegnazione e __add__
+    
+    

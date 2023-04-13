@@ -13,10 +13,21 @@ Functions for warnings and error messages.
 import traceback
 import inspect
 
+import colorama
+colorama.init(autoreset=False)
+
 from src import GLOBALS
 
 GLOBALS.ERROR_RECURSION = 0
 GLOBALS.CUSTOM_ERROR_MESSAGE = True
+GLOBALS.VERBOSITY_LEVEL=1
+"""
+Verbosity levels:
+    0:  Do not display any runtime message
+    1:  Display runtime warnings
+    2:  Base debug verbosity (TODO)
+    2:  Advanced debug verbosity (TODO)
+"""
 
 class bcolors:
     HEADER = '\033[95m'
@@ -67,37 +78,40 @@ def printStack(e=None):
         ii += 1
 
 #############################################################################
-def baseRuntimeWarning(WarningMSG, Msg):
+def baseRuntimeWarning(WarningMSG, Msg, verbosityLevel=1):
     Where = traceback.extract_stack()
     
-    tabbedMSG = ""
-    for cc in Msg:
-        tabbedMSG += cc
-        if cc == "\n":
-            tabbedMSG += " "*len(WarningMSG)
-    print (WarningMSG + tabbedMSG)
-    printStack()
-    print ("")
+    if (verbosityLevel <= GLOBALS.VERBOSITY_LEVEL):
+        tabbedMSG = ""
+        for cc in Msg:
+            tabbedMSG += cc
+            if cc == "\n":
+                tabbedMSG += " "*len(WarningMSG)
+        print (WarningMSG + tabbedMSG)
+        printStack()
+        print ("")
     
 #############################################################################
-def runtimeWarning(Msg):
+def runtimeWarning(Msg, verbosityLevel=1):
     """
     Print a runtime warning message (Msg) and the call-stack.
     """
-    baseRuntimeWarning(enf(enf("Runtime Warning: ", "warning"), "bold"), Msg)
+    baseRuntimeWarning(enf(enf("Runtime Warning: ", "warning"), "bold"), Msg, verbosityLevel=1)
 
 #############################################################################
-def runtimeError(Msg):
+def runtimeError(Msg, verbosityLevel=1):
     """
     Print a runtime error message (Msg) and the call-stack.
     """
-    baseRuntimeWarning(enf(enf("Runtime Error: ", "warning"), "bold"), Msg)
+    baseRuntimeWarning(enf(enf("Runtime Error: ", "warning"), "bold"), Msg, verbosityLevel=1)
 
 #############################################################################
 def fatalErrorIn(self, func, msg, err=None):
     """
     Raise a RuntimeError.
     """
+    MSG = msg
+    
     funcName = func.__name__
     if not(self is None):
         funcName = self.__class__.__name__ + "." + funcName
@@ -112,7 +126,7 @@ def fatalErrorIn(self, func, msg, err=None):
     else:
         if GLOBALS.ERROR_RECURSION > 0:
             print("")
-            print(enf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~", "green"))
+            print(enf(enf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~", "warning"), "bold"))
             
         args = ""
         for arg in argList:
@@ -137,7 +151,7 @@ def fatalErrorIn(self, func, msg, err=None):
             printStack(err)
         
         GLOBALS.ERROR_RECURSION += 1
-        exit(err)
+        exit(RuntimeError(MSG))
 
 #############################################################################
 def fatalErrorInArgumentChecking(self, func, err=None):
@@ -146,3 +160,30 @@ def fatalErrorInArgumentChecking(self, func, err=None):
     """
     msg = "Argument checking failed"
     fatalErrorIn(self, func, msg, err)
+
+#############################################################################
+def fatalError(msg, err=None):
+    """
+    Raise a RuntimeError.
+    """
+    MSG = msg
+    
+    if not(err is None):
+        msg += " - " + str(err)
+    
+    if GLOBALS.ERROR_RECURSION > 0:
+        print("")
+        print(enf(enf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~", "warning"), "bold"))
+    
+    print("")
+    print(enf("--> " + enf("FATAL ERROR","fail"),"bold") + ": {}\n".format(msg))
+    
+    print(enf("Printing stack calls:","bold"))
+    printStack()
+    if not (err is None):
+        print("")
+        print(enf("Detailed error stack:","bold"))
+        printStack(err)
+    
+    GLOBALS.ERROR_RECURSION += 1
+    exit(RuntimeError(MSG))

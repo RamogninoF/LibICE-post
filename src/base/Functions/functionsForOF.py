@@ -41,15 +41,24 @@ def readOFscalarList(fileName):
     header = ParsedFileHeader(fileName).header
     if not(header["class"] == "scalarList"):
         raise IOError("File '{}' does not store a scalarList, instead '{}' was found.".format(fileName, header["class"]))
-    
+    binary = False
+    if header["format"] == "binary":
+        binary = True
+        
     #Load table:
-    tab = ParsedParameterFile(fileName,listDictWithHeader=True).content
-    
+    File = ParsedParameterFile(fileName, listDictWithHeader=True, binaryMode=True)
+    tab = File.content
     #Load data:
     if isinstance(tab, BinaryList):
         numel = tab.length
         
         import struct
-        return list(struct.unpack("d" * numel, tab.data))
+        with open(fileName, "rb") as f:
+            while True:
+                ch = f.read(1)
+                if ch == b'(':
+                    break
+            data = f.read(8*tab.length)
+        return list(struct.unpack("d" * numel, data))
     else:
         return tab

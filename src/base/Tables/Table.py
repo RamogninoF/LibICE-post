@@ -553,7 +553,7 @@ class Table(Utilities):
                 if len(isoSurf) == 0:
                     raise ValueError("dict entry 'isoSurf' is empty, cannot generate the iso-surface plot.")
                 
-                Utilities.checkInstanceTemplate(isoSurf, {"A":[1.0]}, entryName="isoSurf")
+                Utilities.checkInstanceTemplate(isoSurf, [{"A":1.0}], entryName="isoSurf")
             
             f = ""
             for F in self.fields():
@@ -589,10 +589,12 @@ class Table(Utilities):
                 otherVar = None
                 for var in self.fields():
                     if not ((var == xVar) or (var == yVar)):
-                        if not (otherVar is None):
-                            raise ValueError("Cannot plot iso-surfaces of table with more then 3 variables stored. Must give the data to plot through 'isoSurf' argument, as a list of dicts determining the iso values of the remaining variables:\n\n[\{var_ii:value1.1, var_jj:value2.1,...\}, {var_ii:value1.2, var_jj:value2.2,...\}, ...]")
+                        #if not (otherVar is None):
+                            #raise ValueError("Cannot plot iso-surfaces of table with more then 3 variables stored. Must give the data to plot through 'isoSurf' argument, as a list of dicts determining the iso values of the remaining variables:\n\n[\{var_ii:value1.1, var_jj:value2.1,...\}, {var_ii:value1.2, var_jj:value2.2,...\}, ...]")
+                        if (otherVar is None):
+                            otherVar = [var]
                         else:
-                            otherVar = var
+                            otherVar.append(var)
                 
                 if otherVar is None:
                     Z = self.cp.deepcopy(X)
@@ -618,7 +620,28 @@ class Table(Utilities):
                     isoSurf = []
                     
                 else:
-                    isoSurf = [{otherVar:value} for value in self.ranges()[otherVar]]
+                    isoSurf = []
+                    varIDs = [0]*len(otherVar)
+                    while(True):
+                        #Append surface
+                        isoSurf.append({})
+                        for ii, var in enumerate(otherVar):
+                            isoSurf[-1][var] = self.ranges()[var][varIDs[ii]]
+                        
+                        #Increase counter
+                        for ii,var in enumerate(otherVar):
+                            jj = len(varIDs)-ii-1
+                            
+                            if ii == 0:
+                                varIDs[jj] += 1
+                            
+                            varIDs[jj], rem = (varIDs[jj]%len(self.ranges()[otherVar[jj]])), (varIDs[jj]//len(self.ranges()[otherVar[jj]]))
+                            if jj > 0:
+                                varIDs[jj-1] += rem
+                        
+                        #Check if looped the counter
+                        if all([ID == 0 for ID in varIDs]):
+                            break
                 
             for isoDict in isoSurf:
                 if not isinstance(isoDict, dict):

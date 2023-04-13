@@ -3,6 +3,7 @@
 #####################################################################
 
 from src.base.Utilities import Utilities
+from abc import ABCMeta, abstractmethod
 
 #############################################################################
 #                               MAIN CLASSES                                #

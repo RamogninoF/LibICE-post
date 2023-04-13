@@ -140,7 +140,7 @@ class tabulatedLFS(OFtabulation,laminarFlameSpeedModel, metaclass=ABCMeta):
             varOrder = cls.varOrder
             
             tabProp = tabulatedLFS(tablePath).readTableProperties().tableProperties
-            if not("EGRValues" in tabProp):
+            if not("EGR" in tabProp):
                 del varOrder[-1]
                 del entryNames["EGRValues"]
             

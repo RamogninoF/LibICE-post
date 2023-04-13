@@ -140,7 +140,7 @@ class OFtabulation(Utilities):
                 if not(table in noRead):
                     tab.readTable(tableFileNames[table], table)
                 else:
-                    tab[table] = None
+                    tab.tables[table] = None
             
         except BaseException as err:
             cls.fatalErrorIn(cls.empty(), OFtabulation.fromFile, "Failed loading the tabulation", err)
