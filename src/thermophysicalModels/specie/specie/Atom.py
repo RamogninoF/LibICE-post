@@ -3,6 +3,10 @@
 #####################################################################
 
 from src.base.Utilities import Utilities
+from src.base.Functions.runtimeWarning import runtimeWarning
+
+from chempy.util import periodic
+from src.Database import database
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -146,3 +150,28 @@ class Atom(Utilities):
             Atom * float/int = Molecule
         """
         return self*num
+    
+    ##############################
+    #Representation:
+    def __repr__(self):
+        R = \
+            {
+                "name": self.name,
+                "mass": self.mass,
+            }
+        
+        return R.__repr__()
+
+#############################################################################
+#                                   DATA                                    #
+#############################################################################
+database["PeriodicTable"] = {}
+
+#Periodic table of atoms
+for ii, atom in enumerate(periodic.symbols):
+    database["PeriodicTable"][atom] = \
+        Atom\
+            (
+                atom,
+                periodic.relative_atomic_masses[ii]
+            )

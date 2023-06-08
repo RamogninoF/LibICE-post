@@ -3,9 +3,14 @@
 #####################################################################
 
 from src.base.Utilities import Utilities
+from src.base.Functions.runtimeWarning import runtimeWarning
 
 from .Atom import Atom
 from .Molecule import Molecule
+
+import json
+from src import Database
+from src.Database import database
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -120,6 +125,19 @@ class Mixture(Utilities):
         StrToPrint += "\n"
         
         return StrToPrint
+    
+    ##############################
+    #Representation:
+    def __repr__(self):
+        R = \
+            {
+                "specie": self.specie,
+                "X": self.X,
+                "Y": self.Y,
+                "MM": self.MM()
+            }
+        
+        return R.__repr__()
     
     ###############################
     #Access:
@@ -456,3 +474,24 @@ def mixtureBlend(mixtures, composition, fracType ="mass"):
         Yblen += Y[ii+1]
     
     return mixBlend
+
+#############################################################################
+#                                   DATA                                    #
+#############################################################################
+database["Mixtures"] = {}
+
+fileName = Database.location + "Mixtures.json"
+try:
+    with open(fileName) as f:
+        data = json.load(f)
+        for mix in data:
+            database["Mixtures"][mix] = \
+                Mixture\
+                    (
+                        [database["Molecules"][mol] for mol in data[mix]["specie"]],
+                        data[mix]["composition"],
+                        data[mix]["fracType"] if "fracType" in data[mix] else "mole"
+                    )
+        
+except BaseException as err:
+    runtimeWarning(f"Failed to load the mixtures database '{fileName}':\n{err}.")

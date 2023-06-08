@@ -1,0 +1,8 @@
+{
+    "dryAir":
+    {
+        "specie": ["N2", "O2"],
+        "composition": [0.79, 0.21],
+        "fracType": "mole"
+    }
+}
