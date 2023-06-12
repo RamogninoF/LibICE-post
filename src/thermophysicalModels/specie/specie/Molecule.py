@@ -1,4 +1,13 @@
 #####################################################################
+#                                 DOC                               #
+#####################################################################
+
+"""
+@author: F. Ramognino       <federico.ramognino@polimi.it>
+Last update:        12/06/2023
+"""
+
+#####################################################################
 #                               IMPORT                              #
 #####################################################################
 
@@ -8,8 +17,8 @@ from src.base.Functions.runtimeWarning import runtimeWarning
 from .Atom import Atom
 
 import json
-from src import Database
-from src.Database import database
+import Database
+from Database import database
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -404,29 +413,34 @@ class MoleculeIter:
 #############################################################################
 #                                   DATA                                    #
 #############################################################################
-database["Molecules"] = {}
+database["chemistry"]["specie"]["Molecules"] = {}
+database["chemistry"]["specie"]["Fuels"] = []
 
-for atom in database["PeriodicTable"]:
-    database["Molecules"][atom] = \
-        Molecule\
-            (
-                atom,
-                [database["PeriodicTable"][atom]],
-                [1.0]
-            )
-
-fileName = Database.location + "Molecules.json"
 try:
+    fileName = Database.location + "Molecules.json"
     with open(fileName) as f:
         data = json.load(f)
         for mol in data:
-            database["Molecules"][mol] = \
+            database["chemistry"]["specie"]["Molecules"][mol] = \
                 Molecule\
                     (
                         data[mol]["name"],
-                        [database["PeriodicTable"][atom] for atom in data[mol]["specie"]],
+                        [database["chemistry"]["specie"]["PeriodicTable"][atom] for atom in data[mol]["specie"]],
                         data[mol]["atoms"]
                     )
+    
+    fileName = Database.location + "Fuels.json"
+    with open(fileName) as f:
+        data = json.load(f)
+        for mol in data:
+            database["chemistry"]["specie"]["Molecules"][mol] = \
+                Molecule\
+                    (
+                        data[mol]["name"],
+                        [database["chemistry"]["specie"]["PeriodicTable"][atom] for atom in data[mol]["specie"]],
+                        data[mol]["atoms"]
+                    )
+            database["chemistry"]["specie"]["Fuels"].append(mol)
         
 except BaseException as err:
     runtimeWarning(f"Failed to load the molecule database '{fileName}':\n{err}.")

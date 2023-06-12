@@ -1,4 +1,13 @@
 #####################################################################
+#                                 DOC                               #
+#####################################################################
+
+"""
+@author: F. Ramognino       <federico.ramognino@polimi.it>
+Last update:        12/06/2023
+"""
+
+#####################################################################
 #                               IMPORT                              #
 #####################################################################
 
@@ -6,7 +15,7 @@ from src.base.Utilities import Utilities
 from src.base.Functions.runtimeWarning import runtimeWarning
 
 from chempy.util import periodic
-from src.Database import database
+from Database import database
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -165,11 +174,11 @@ class Atom(Utilities):
 #############################################################################
 #                                   DATA                                    #
 #############################################################################
-database["PeriodicTable"] = {}
+database["chemistry"]["specie"]["PeriodicTable"] = {}
 
 #Periodic table of atoms
 for ii, atom in enumerate(periodic.symbols):
-    database["PeriodicTable"][atom] = \
+    database["chemistry"]["specie"]["PeriodicTable"][atom] = \
         Atom\
             (
                 atom,

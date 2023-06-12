@@ -1,8 +1,23 @@
 #####################################################################
+#                                 DOC                               #
+#####################################################################
+
+"""
+@author: F. Ramognino       <federico.ramognino@polimi.it>
+Last update:        12/06/2023
+"""
+
+#####################################################################
 #                               IMPORT                              #
 #####################################################################
 
+from src.base.Functions.runtimeWarning import runtimeWarning
+
 from src.thermophysicalModels.specie.thermo.Thermo import Thermo
+
+import json
+import Database
+from Database import database
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -144,6 +159,18 @@ class janaf7(Thermo):
         
         return StrToPrint
     
+    ##############################
+    #Representation:
+    def __repr__(self):
+        R = eval(super(self.__class__,self).__repr__())
+        R["cpLow"]   = self.cpLow 
+        R["cpHigh"]  = self.cpHigh 
+        R["Tth"]     = self.Tth    
+        R["Tlow"]    = self.Tlow   
+        R["Thigh"]   = self.Thigh  
+                       
+        return R.__repr__()
+    
     #########################################################################
     #Member functions:
     
@@ -207,3 +234,26 @@ class janaf7(Thermo):
         
         return (self.cp(T) / self.cv(T))
         
+#############################################################################
+#                                   DATA                                    #
+#############################################################################
+database["chemistry"]["thermo"]["thermo"]["janaf7"] = {}
+
+fileName = Database.location + "janaf7.json"
+try:
+    with open(fileName) as f:
+        data = json.load(f)
+        for mol in data:
+            database["chemistry"]["thermo"]["thermo"]["janaf7"][mol] = \
+                janaf7\
+                    (
+                        database["chemistry"]["specie"]["Molecules"][mol],
+                        data[mol]["lowCpCoeffs"],
+                        data[mol]["highCpCoeffs"],
+                        data[mol]["Tcommon"],
+                        data[mol]["Tlow"],
+                        data[mol]["Thigh"]
+                    )
+        
+except BaseException as err:
+    runtimeWarning(f"Failed to load the mixtures database '{fileName}':\n{err}.")

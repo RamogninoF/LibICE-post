@@ -1,4 +1,13 @@
 #####################################################################
+#                                 DOC                               #
+#####################################################################
+
+"""
+@author: F. Ramognino       <federico.ramognino@polimi.it>
+Last update:        12/06/2023
+"""
+
+#####################################################################
 #                               IMPORT                              #
 #####################################################################
 
@@ -9,8 +18,8 @@ from .Atom import Atom
 from .Molecule import Molecule
 
 import json
-from src import Database
-from src.Database import database
+import Database
+from Database import database
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -478,17 +487,17 @@ def mixtureBlend(mixtures, composition, fracType ="mass"):
 #############################################################################
 #                                   DATA                                    #
 #############################################################################
-database["Mixtures"] = {}
+database["chemistry"]["specie"]["Mixtures"] = {}
 
 fileName = Database.location + "Mixtures.json"
 try:
     with open(fileName) as f:
         data = json.load(f)
         for mix in data:
-            database["Mixtures"][mix] = \
+            database["chemistry"]["specie"]["Mixtures"][mix] = \
                 Mixture\
                     (
-                        [database["Molecules"][mol] for mol in data[mix]["specie"]],
+                        [database["chemistry"]["specie"]["Molecules"][mol] for mol in data[mix]["specie"]],
                         data[mix]["composition"],
                         data[mix]["fracType"] if "fracType" in data[mix] else "mole"
                     )

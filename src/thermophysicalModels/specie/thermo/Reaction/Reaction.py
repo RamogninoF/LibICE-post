@@ -1,14 +1,28 @@
 #####################################################################
+#                                 DOC                               #
+#####################################################################
+
+"""
+@author: F. Ramognino       <federico.ramognino@polimi.it>
+Last update:        12/06/2023
+"""
+
+#####################################################################
 #                               IMPORT                              #
 #####################################################################
 
 from src.base.Utilities import Utilities
+from src.base.Functions.runtimeWarning import runtimeWarning
 
 from ...specie.Mixture import Mixture
 from ...specie.Molecule import Molecule
 
 from operator import attrgetter
 import sympy
+
+import json
+import Database
+from Database import database
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -31,7 +45,6 @@ class Reaction(Utilities):
     
     reactants = Mixture.empty()
     products = Mixture.empty()
-    inherts = []
     
     #########################################################################
     def __init__(self, reactants, products):
@@ -78,7 +91,7 @@ class Reaction(Utilities):
             string += " + "
         string = string[:-3]
         
-        string += " => "
+        string += " -> "
         
         for p in self.products:
             if (p["X"] == 1):
@@ -92,6 +105,18 @@ class Reaction(Utilities):
         string = string[:-3]
         
         return string
+    
+    ##############################
+    #Representation:
+    def __repr__(self):
+        R = \
+            {
+                "name": self.__str__(),
+                "reactants": self.reactants,
+                "products": self.products
+            }
+        
+        return R.__repr__()
     
     #########################################################################
     def checkAtomicSpecie(self):
@@ -109,7 +134,7 @@ class Reaction(Utilities):
             for a in p["specie"]:
                 if not a["atom"] in atomsP:
                     atomsP.append(a["atom"].copy())
-        
+                    
         if not ( sorted(atomsR, key=attrgetter('name')) == sorted(atomsP, key=attrgetter('name')) ):
             raise ValueError("Incompatible atomic compositions of reactants and products.")
         
@@ -158,66 +183,79 @@ class Reaction(Utilities):
                 specieIndex = self.products.index(specie["specie"]) + len(self.reactants)
                 coeffs[atomIndices,specieIndex] -= specie["specie"].atomicCompositionMatrix().T
             
-            #Look for inhert specie, i.e. those present both in reactants and products:
-            self.inherts = []
+            #Check if all specie are involved in the reaction:
             for ii, specie in enumerate(molecules):
                 if (specie in self.reactants) and (specie in self.products) and not(specie in self.inherts):
-                    self.inherts.append(specie)
+                    raise ValueError("Some chemical specie are not active in the reaction.")
             
-            #Remove inhert from matrix:
-            indexInhert = []
-            for specie in self.inherts:
-                index = self.reactants.index(specie)
-                indexInhert.append(index)
-                index = self.products.index(specie) + len(self.reactants)
-                indexInhert.append(index)
-            coeffs = self.np.delete(coeffs, indexInhert, axis=1)
+            #Remove empty atom balances:
+            for ii, atom in enumerate(atoms):
+                if (coeffs[ii,:] == 0).all():
+                    coeffs = self.np.delete(coeffs, ii, axis=0)
             
-            #Create the mixture with only the inhert specie, with equal mole fractions. Then dilute the overall mixture with the inhert specie, with 50:50 mole fractions.
-            if len(self.inherts) > 0:
-                inhertMix = Mixture(self.inherts, [1./len(self.inherts)]*len(self.inherts), "mole")
-            else:
-                inhertMix = Mixture.empty()
-                
-            if (coeffs.size > 0):
-                #Remove empty atom balances:
-                for ii, atom in enumerate(atoms):
-                    if (coeffs[ii,:] == 0).all():
-                        coeffs = self.np.delete(coeffs, ii, axis=0)
-                
-                #Solve homogenoeus linear system coeffs*X = 0
-                from scipy import linalg
-                X = linalg.null_space(coeffs).T
-                
-                #Reconstruct the map
-                indexes = []
-                for ii, specie in enumerate(molecules):
-                    if not specie in self.inherts:
-                        indexes.append(ii)
-                
-                #Compute reactants and products compositions:
-                xGlob = [0.0]*(len(self.reactants)+len(self.products))
-                for x in X:
-                    x *= self.np.sign(x[0])
-                    for ii, x_ii in enumerate(x):
-                        xGlob[indexes[ii]] += x_ii
-                
-                xReact = xGlob[:len(self.reactants)]
-                xProd = xGlob[len(self.reactants):]
-                
-                xReact /= sum(xReact)
-                xProd /= sum(xProd)
-                
-                self.reactants = Mixture([s["specie"] for s in self.reactants], list(xReact), "mole")
-                self.products = Mixture([s["specie"] for s in self.products], list(xProd), "mole")
-            else:
-                self.reactants = Mixture.empty()
-                self.products = Mixture.empty()
+            #Solve homogenoeus linear system coeffs*X = 0
+            from scipy import linalg
+            X = linalg.null_space(coeffs).T
             
-            #Dilute with inhert:
-            self.reactants.dilute(inhertMix, 0.5, "mole")
-            self.products.dilute(inhertMix, 0.5, "mole")
+            #Reconstruct the map
+            indexes = []
+            for ii, specie in enumerate(molecules):
+                indexes.append(ii)
+            
+            #Compute reactants and products compositions:
+            xGlob = [0.0]*(len(self.reactants)+len(self.products))
+            for x in X:
+                x *= self.np.sign(x[0])
+                for ii, x_ii in enumerate(x):
+                    xGlob[indexes[ii]] += x_ii
+            
+            xReact = xGlob[:len(self.reactants)]
+            xProd = xGlob[len(self.reactants):]
+            
+            xReact /= sum(xReact)
+            xProd /= sum(xProd)
+            
+            self.reactants = Mixture([s["specie"] for s in self.reactants], list(xReact), "mole")
+            self.products = Mixture([s["specie"] for s in self.products], list(xProd), "mole")
             
         except BaseException as err:
             self.fatalErrorIn(self.update, "Failed balancing the reaction", err)
             
+
+#############################################################################
+#                                   DATA                                    #
+#############################################################################
+database["chemistry"]["thermo"]["Reactions"] = {}
+
+fileName = Database.location + "Reactions.json"
+try:
+    with open(fileName) as f:
+        data = json.load(f)
+        for react in data:
+            database["chemistry"]["thermo"]["Reactions"][react] = \
+                Reaction\
+                    (
+                        [database["chemistry"]["specie"]["Molecules"][mol] for mol in data[react]["reactants"]],
+                        [database["chemistry"]["specie"]["Molecules"][mol] for mol in data[react]["products"]]
+                    )
+
+    for fuel in database["chemistry"]["specie"]["Fuels"]:
+        prod = []
+        if database["chemistry"]["specie"]["PeriodicTable"]["N"] in database["chemistry"]["specie"]["Molecules"][fuel].atoms:
+            prod.append(database["chemistry"]["specie"]["Molecules"]["N2"])
+        if database["chemistry"]["specie"]["PeriodicTable"]["H"] in database["chemistry"]["specie"]["Molecules"][fuel].atoms:
+            prod.append(database["chemistry"]["specie"]["Molecules"]["H2O"])
+        if database["chemistry"]["specie"]["PeriodicTable"]["C"] in database["chemistry"]["specie"]["Molecules"][fuel].atoms:
+            prod.append(database["chemistry"]["specie"]["Molecules"]["CO2"])
+        if database["chemistry"]["specie"]["PeriodicTable"]["S"] in database["chemistry"]["specie"]["Molecules"][fuel].atoms:
+            prod.append(database["chemistry"]["specie"]["Molecules"]["SO2"])
+        
+        database["chemistry"]["thermo"]["Reactions"][fuel + "-ox"] = \
+            Reaction\
+                (
+                    [database["chemistry"]["specie"]["Molecules"][fuel], database["chemistry"]["specie"]["Molecules"]["O2"]],
+                    prod
+                )
+
+except BaseException as err:
+    runtimeWarning(f"Failed to load the reactions database '{fileName}':\n{err}.")

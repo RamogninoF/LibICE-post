@@ -24,4 +24,4 @@ Content of the package
             Laminar flame speed correlations
 """
 
-from .Database import database
+from Database import database

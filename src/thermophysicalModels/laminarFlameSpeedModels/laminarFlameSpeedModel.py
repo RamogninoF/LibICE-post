@@ -1,4 +1,13 @@
 #####################################################################
+#                                 DOC                               #
+#####################################################################
+
+"""
+@author: F. Ramognino       <federico.ramognino@polimi.it>
+Last update:        12/06/2023
+"""
+
+#####################################################################
 #                               IMPORT                              #
 #####################################################################
 
@@ -24,6 +33,7 @@ class laminarFlameSpeedModel(Utilities):
     
     #Name:
     typeName = "laminarFlameSpeedModel"
+    coeffs = {}
     
     #########################################################################
     #Constructor:
@@ -91,13 +101,14 @@ class laminarFlameSpeedModel(Utilities):
 
     ##############################
     #Change coefficients (or some of them):
-    def setCoeffs(self, **argv):
+    def setCoeffs(self,coeffs={}, **argv):
         """
         coeffs:     dict ({})
             Dictionary containing the parameters of the model (in laminarFlameSpeed.coeffs) 
             that need to be changed/set. Keyword arguments are also accepted.
         """
-        try: 
+        try:
+            self.coeffs = Utilities.updateKeywordArguments(coeffs, self.coeffs)
             self.coeffs = Utilities.updateKeywordArguments(argv, self.coeffs)
         except BaseException as err:
             self.fatalErrorInArgumentChecking(self.setCoeffs, err)

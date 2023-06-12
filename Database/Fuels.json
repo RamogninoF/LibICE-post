@@ -1,32 +1,4 @@
 {
-    "CO2":
-    {
-        "name": "CO2",
-        "specie": ["C", "O"],
-        "atoms": [1.0, 2.0]
-    },
-
-    "O2":
-    {
-        "name": "CO2",
-        "specie": ["C", "O"],
-        "atoms": [1.0, 2.0]
-    },
-
-    "H2O":
-    {
-        "name": "H2O",
-        "specie": ["H", "O"],
-        "atoms": [2.0, 1.0]
-    },
-
-    "N2":
-    {
-        "name": "N2",
-        "specie": ["N"],
-        "atoms": [2.0]
-    },
-    
     "NH3":
     {
         "name": "NH3",
@@ -53,5 +25,12 @@
         "name": "IC8H18",
         "specie": ["C", "H"],
         "atoms": [8.0, 18.0]
+    },
+
+    "CH3O":
+    {
+        "name": "CH3O",
+        "specie": ["C", "H", "O"],
+        "atoms": [1.0, 3.0, 1.0]
     }
 }

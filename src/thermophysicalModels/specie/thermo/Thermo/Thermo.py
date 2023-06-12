@@ -1,4 +1,13 @@
 #####################################################################
+#                                 DOC                               #
+#####################################################################
+
+"""
+@author: F. Ramognino       <federico.ramognino@polimi.it>
+Last update:        12/06/2023
+"""
+
+#####################################################################
 #                               IMPORT                              #
 #####################################################################
 
@@ -56,6 +65,17 @@ class Thermo(Utilities, metaclass=ABCMeta):
         stringToPrint += "Type:\t" + self.typeName + "\n"
         
         return stringToPrint
+    
+    ##############################
+    #Representation:
+    def __repr__(self):
+        R = \
+            {
+                "type": self.typeName,
+                "specie": self.specie
+            }
+                       
+        return R.__repr__()
 
     
     ################################

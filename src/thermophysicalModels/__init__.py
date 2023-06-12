@@ -9,7 +9,7 @@ Classess used to handle:
 
 Content of the package
     specie (package)
-        ...
+        Package for handling chemistry and thermodynamic properties of gasseous mixtures.
     
     laminarFlameSpeedModels (package)
         ...

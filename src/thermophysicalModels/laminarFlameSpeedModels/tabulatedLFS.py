@@ -1,9 +1,18 @@
 #####################################################################
+#                                 DOC                               #
+#####################################################################
+
+"""
+@author: F. Ramognino       <federico.ramognino@polimi.it>
+Last update:        12/06/2023
+"""
+
+#####################################################################
 #                               IMPORT                              #
 #####################################################################
 
 from src.base.Tables.OFtabulation import OFtabulation
-from src.thermophysicalModels.laminarFlameSpeedModels.laminarFlameSpeedModel import laminarFlameSpeedModel
+from .laminarFlameSpeedModel import laminarFlameSpeedModel
 
 from abc import ABCMeta, abstractmethod
 
