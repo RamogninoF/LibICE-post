@@ -1,0 +1,43 @@
+{
+    "CO2":
+    {
+        "name": "CO2",
+        "specie": ["C", "O"],
+        "atoms": [1.0, 2.0]
+    },
+
+    "O2":
+    {
+        "name": "O2",
+        "specie": ["O"],
+        "atoms": [2.0]
+    },
+
+    "H2O":
+    {
+        "name": "H2O",
+        "specie": ["H", "O"],
+        "atoms": [2.0, 1.0]
+    },
+
+    "N2":
+    {
+        "name": "N2",
+        "specie": ["N"],
+        "atoms": [2.0]
+    },
+
+    "Ar":
+    {
+        "name": "Ar",
+        "specie": ["Ar"],
+        "atoms": [1.0]
+    },
+
+    "SO2":
+    {
+        "name": "SO2",
+        "specie": ["S", "O"],
+        "atoms": [1.0, 2.0]
+    }
+}

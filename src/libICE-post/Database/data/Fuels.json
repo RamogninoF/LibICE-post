@@ -1,0 +1,36 @@
+{
+    "NH3":
+    {
+        "name": "NH3",
+        "specie": ["N", "H"],
+        "atoms": [1.0, 3.0]
+    },
+
+    "H2":
+    {
+        "name": "H2",
+        "specie": ["H"],
+        "atoms": [2.0]
+    },
+
+    "CH4":
+    {
+        "name": "CH4",
+        "specie": ["C", "H"],
+        "atoms": [1.0, 4.0]
+    },
+
+    "IC8H18":
+    {
+        "name": "IC8H18",
+        "specie": ["C", "H"],
+        "atoms": [8.0, 18.0]
+    },
+
+    "CH3O":
+    {
+        "name": "CH3O",
+        "specie": ["C", "H", "O"],
+        "atoms": [1.0, 3.0, 1.0]
+    }
+}
