@@ -19,7 +19,7 @@ import inspect
 import colorama
 colorama.init(autoreset=False)
 
-from src import GLOBALS
+from ... import GLOBALS
 
 GLOBALS.ERROR_RECURSION = 0
 GLOBALS.CUSTOM_ERROR_MESSAGE = True

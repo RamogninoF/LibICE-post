@@ -16,8 +16,9 @@ from abc import ABCMeta, abstractmethod
 from src.base.Utilities import Utilities
 from src.base.BaseClass import BaseClass
 
-from ....specie.Mixture import Mixture
-from .ThermoModel import ThermoModel
+from ....specie.ThermoMixture import ThermoMixture
+from ...specie.thermo.EquationOfState.EquationOfState import EquationOfState
+from ...specie.thermo.Thermo.Thermo import Thermo
 
 # NOTE: Basic requirements to build a thermodynamic model:
 #   - Equation of state
@@ -37,27 +38,19 @@ class ThermoModel(BaseClass):
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
     Attributes:
-        db:     ThermoTable
-            Database of thermodynamic data
+
     """
     
     #########################################################################
     #Constructor:
-    def __init__(self, thermoTable=None):
+    def __init__(self, EoSType : str, ThermoType : str):
         """
-        thermoTable:    ThermoTable (None)
-            Table with thermodynamic data (atomic specie, molecules, reactions, thermos, etc...)
+        EoSType:    str
+            TypeName of the equation of state
         Construct new instance of thermodynamic model (virtual) with optional thermoTable.
         """
-        try:
-            if not thermoTable is None:
-                self.checkType(thermoTable, ThermoTable, "thermoTable")
-                self.db = thermoTable.copy()
-            else:
-                self.db = ThermoTable()
                 
-        except BaseException as err:
-            self.fatalErrorInClass(self.__init__, "Failed construction", err)
+        
         
     #########################################################################
     #Operators:

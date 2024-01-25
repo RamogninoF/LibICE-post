@@ -13,7 +13,7 @@ Functions for handling dictionaries.
 #                               IMPORT                              #
 #####################################################################
 
-from src.base.Functions.typeChecking import *
+from .typeChecking import *
 
 #############################################################################
 #                               MAIN FUNCTIONS                              #

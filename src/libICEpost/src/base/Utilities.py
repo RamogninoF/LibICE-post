@@ -11,9 +11,9 @@ Last update:        12/06/2023
 #                               IMPORT                              #
 #####################################################################
 
-from src.base.Functions.typeChecking import *
-from src.base.Functions.functionsForDictionaries import *
-from src.base.Functions.runtimeWarning import runtimeWarning, runtimeError, printStack, fatalErrorIn, fatalErrorInClass, fatalErrorInFunction, fatalErrorInArgumentChecking, fatalError
+from .Functions.typeChecking import *
+from .Functions.functionsForDictionaries import *
+from .Functions.runtimeWarning import runtimeWarning, runtimeError, printStack, fatalErrorIn, fatalErrorInClass, fatalErrorInFunction, fatalErrorInArgumentChecking, fatalError
 
 import numpy as np
 import copy as cp

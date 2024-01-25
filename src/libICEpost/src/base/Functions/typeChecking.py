@@ -17,7 +17,7 @@ import copy as cp
 import inspect
 from .runtimeWarning import fatalErrorInArgumentChecking
 
-from src import GLOBALS
+from ... import GLOBALS
 GLOBALS.DEBUG = True
 
 #############################################################################

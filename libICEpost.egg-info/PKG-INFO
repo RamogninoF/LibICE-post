@@ -1,7 +1,8 @@
 Metadata-Version: 2.1
-Name: libICE-post
+Name: libICEpost
 Version: 0.0.1
 Summary: Postprocessing of data sampled from internal combustion engines (Experimental, 1D/0D (Gasdyn), 3D (LibICE), etc.)
+Author: Federico Ramognino
 Author-email: Federico Ramognino <federico.ramognino@polimi.it>
 Project-URL: Homepage, https://github.com/RamogninoF/LibICE-post
 Project-URL: Issues, https://github.com/RamogninoF/LibICE-post/issues
