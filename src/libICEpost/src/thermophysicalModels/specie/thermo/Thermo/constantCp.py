@@ -11,16 +11,17 @@ Last update:        12/06/2023
 #                               IMPORT                              #
 #####################################################################
 
-from src.base.Functions.runtimeWarning import runtimeWarning
+from libICEpost.src.base.Functions.runtimeWarning import runtimeWarning
 
 from .Thermo import Thermo
 
 import json
-import Database
-from Database import database
+from libICEpost.Database.chemistry import constants
+from libICEpost.Database import database
 from numpy import math
 
-Tstd = database["constants"]["Tstd"]
+
+Tstd = database.chemistry.constants.Tstd
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -202,4 +203,4 @@ class constantCp(Thermo):
             cls.fatalErrorInClass(cls.fromDictionary, "Failed construction from dictionary", err)
     
 #############################################################################
-janaf7.addToRuntimeSelectionTable("constant")
+constantCp.addToRuntimeSelectionTable()

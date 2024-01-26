@@ -13,11 +13,15 @@ Chemical constants
 #                               IMPORT                              #
 #####################################################################
 
+from libICEpost.Database import database
+
+database.chemistry.addFolder("constants")
+
 #############################################################################
 #                                   DATA                                    #
 #############################################################################
 
-Rgas = 8.314462
+database.chemistry.constants.Rgas = 8.314462
 
-Tstd = 298.15      # [K]
-pstd = 101325      # [Pa]
+database.chemistry.constants.Tstd = 298.15      # [K]
+database.chemistry.constants.pstd = 101325      # [Pa]

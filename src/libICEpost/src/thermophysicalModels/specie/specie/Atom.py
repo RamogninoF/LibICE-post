@@ -11,8 +11,8 @@ Last update:        12/06/2023
 #                               IMPORT                              #
 #####################################################################
 
-from src.base.Utilities import Utilities
-from src.base.Functions.runtimeWarning import runtimeWarning
+from libICEpost.src.base.Utilities import Utilities
+from libICEpost.src.base.Functions.runtimeWarning import runtimeWarning
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -167,3 +167,7 @@ class Atom(Utilities):
             }
         
         return R.__repr__()
+
+#############################################################################
+#Load database
+import libICEpost.Database.chemistry.specie.periodicTable

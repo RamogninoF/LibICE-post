@@ -11,7 +11,7 @@ Last update:        12/06/2023
 #                               IMPORT                              #
 #####################################################################
 
-from src.base.BaseClass import BaseClass
+from libICEpost.src.base.BaseClass import BaseClass
 
 from .EquationOfState import EquationOfState
 
@@ -146,4 +146,4 @@ class PerfectGas(EquationOfState):
         return -p/(chem.Rgas() * (self.rho(p,T) ** 2.0))
 
 #############################################################################
-EquationOfState.addToRuntimeSelectionTable("PerfectGas")
+PerfectGas.addToRuntimeSelectionTable()

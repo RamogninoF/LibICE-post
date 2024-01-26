@@ -13,20 +13,22 @@ Chemical reactions
 #                               IMPORT                              #
 #####################################################################
 
-from src.base.Functions.runtimeWarning import runtimeWarning
+from libICEpost.src.base.Functions.runtimeWarning import runtimeWarning
 
-from src.thermophysicalModels.specie.thermo.Reaction import Reaction
+from libICEpost.src.thermophysicalModels.specie.thermo.Reaction import Reaction
 
 import json
 
-import Database
-from Database.chemistry.specie import periodicTable, Molecules
+import libICEpost.Database as Database
+from libICEpost.Database import database
+periodicTable = database.chemistry.specie.periodicTable
+Molecules = database.chemistry.specie.Molecules
+
+Reactions = database.chemistry.thermo.addFolder("Reactions")
 
 #############################################################################
 #                                   DATA                                    #
 #############################################################################
-
-_theseLocals = locals()
 
 def fromJson(fileName, typeName="Molecules"):
     """
@@ -36,7 +38,7 @@ def fromJson(fileName, typeName="Molecules"):
         with open(fileName) as f:
             data = json.load(f)
             for react in data:
-                _theseLocals = \
+                Reactions[react] = \
                     Reaction\
                         (
                             [Molecules.__dict__[mol] for mol in data[react]["reactants"]],
@@ -56,7 +58,7 @@ def fromFuels():
             fuel = Molecules.Fuels[fuelName]
             reactName = fuelName + "-ox"
             print (reactName)
-            if not reactName in _theseLocals:
+            if not reactName in Reactions:
                 prod = []
                 if periodicTable.N in fuel.atoms:
                     prod.append(Molecules.N2)
@@ -69,7 +71,7 @@ def fromFuels():
                 
                 print(prod)
                 
-                _theseLocals[reactName] = \
+                Reactions[reactName] = \
                     Reaction\
                         (
                             [fuel, Molecules.O2],

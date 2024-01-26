@@ -21,16 +21,21 @@ colorama.init(autoreset=False)
 
 from ... import GLOBALS
 
-GLOBALS.ERROR_RECURSION = 0
-GLOBALS.CUSTOM_ERROR_MESSAGE = True
-GLOBALS.VERBOSITY_LEVEL=1
-"""
-Verbosity levels:
-    0:  Do not display any runtime message
-    1:  Display runtime warnings
-    2:  Base verbosity (TODO)
-    3:  Advanced debug verbosity (TODO)
-"""
+if not "ERROR_RECURSION" in GLOBALS.__dict__:
+    GLOBALS.ERROR_RECURSION = 0
+
+if not "CUSTOM_ERROR_MESSAGE" in GLOBALS.__dict__:
+    GLOBALS.CUSTOM_ERROR_MESSAGE = True
+
+if not "VERBOSITY_LEVEL" in GLOBALS.__dict__:
+    GLOBALS.VERBOSITY_LEVEL=1
+    """
+    Verbosity levels:
+        0:  Do not display any runtime message
+        1:  Display runtime warnings
+        2:  Base verbosity (TODO)
+        3:  Advanced debug verbosity (TODO)
+    """
 
 class bcolors:
     HEADER = '\033[95m'
@@ -116,7 +121,7 @@ def fatalErrorIn(self, func, msg, err=None):
     Raise a RuntimeError.
     """
     MSG = msg
-    
+
     funcName = func.__name__
     if not(self is None):
         funcName = self.__class__.__name__ + "." + funcName
@@ -268,6 +273,9 @@ def fatalError(msg, err=None):
     if not(err is None):
         msg += " - " + str(err)
     
+    if not(GLOBALS.CUSTOM_ERROR_MESSAGE):
+        raise RuntimeError(msg)
+
     if GLOBALS.ERROR_RECURSION > 0:
         print("")
         print(enf(enf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~", "warning"), "bold"))

@@ -11,11 +11,11 @@ Last update:        12/06/2023
 #                               IMPORT                              #
 #####################################################################
 
-from src.base.Utilities import Utilities
+from libICEpost.src.base.Utilities import Utilities
 
 from .Atom import Atom
 
-from Database.chemistry import constants
+from libICEpost.Database.chemistry import constants
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -435,3 +435,7 @@ class MoleculeIter:
             return out
         else:
             raise StopIteration
+
+#############################################################################
+#Load database
+import libICEpost.Database.chemistry.specie.Molecules

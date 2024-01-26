@@ -2,13 +2,13 @@
 #                               IMPORT                              #
 #####################################################################
 
-from src.base.Utilities import Utilities
+from libICEpost.src.base.Utilities import Utilities
 
-from ..specie.Atom import Atom
-from ..specie.Molecule import Molecule
+from ..specie.specie.Atom import Atom
+from ..specie.specie.Molecule import Molecule
 
-from .Reaction.Reaction import Reaction
-from .Thermo.Thermo import Thermo
+from ..specie.thermo.Reaction.Reaction import Reaction
+from ..specie.thermo.Thermo.Thermo import Thermo
 
 #############################################################################
 #                               MAIN CLASSES                                #

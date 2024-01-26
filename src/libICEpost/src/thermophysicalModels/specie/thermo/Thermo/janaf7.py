@@ -13,9 +13,10 @@ Last update:        12/06/2023
 
 from .Thermo import Thermo
 
-from Database.chemistry.constants import Tstd
+from libICEpost.Database import database
 from numpy import math
 
+Tstd = database.chemistry.constants.Tstd
 #############################################################################
 #                               MAIN CLASSES                                #
 #############################################################################
@@ -300,5 +301,8 @@ class janaf7(Thermo):
             cls.fatalErrorInClass(cls.fromDictionary, "Failed construction from dictionary", err)
     
 #############################################################################
-janaf7.addToRuntimeSelectionTable("janaf7")
+janaf7.addToRuntimeSelectionTable()
 
+#############################################################################
+#Load database:
+from libICEpost.Database.chemistry.thermo.Thermo import janaf7

@@ -13,10 +13,10 @@ Last update:        12/06/2023
 
 from abc import ABCMeta, abstractmethod
 
-from src.base.Utilities import Utilities
-from src.base.BaseClass import BaseClass
+from ....base.Utilities import Utilities
+from ....base.BaseClass import BaseClass
 
-from ....specie.ThermoMixture import ThermoMixture
+from ..thermoMixture.ThermoMixture import ThermoMixture
 from ...specie.thermo.EquationOfState.EquationOfState import EquationOfState
 from ...specie.thermo.Thermo.Thermo import Thermo
 
@@ -38,20 +38,34 @@ class ThermoModel(BaseClass):
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
     Attributes:
-
+        EoSType:    str
+            TypeName of the equation of state (EquationOfState)
+        ThermoType: str
+            TypeName of the thermodynamic properties model (Thermo)
     """
     
+    #########################################################################
+    @classmethod
+    def fromDictionary(cls, dictionary):
+        raise NotImplementedError()
     #########################################################################
     #Constructor:
     def __init__(self, EoSType : str, ThermoType : str):
         """
         EoSType:    str
-            TypeName of the equation of state
+            TypeName of the equation of state (EquationOfState)
+        ThermoType: str
+            TypeName of the thermodynamic properties model (Thermo)
+
         Construct new instance of thermodynamic model (virtual) with optional thermoTable.
         """
-                
-        
-        
+        try:
+            EquationOfState.selectionTable().check(EoSType)
+            Thermo.selectionTable().check(ThermoType)
+
+        except BaseException as err:
+            self.fatalErrorInClass(self.__init__, f"Failed construction of {self.__class__.__name__}<{EoSType},{ThermoType}> class",err)
+    
     #########################################################################
     #Operators:
     

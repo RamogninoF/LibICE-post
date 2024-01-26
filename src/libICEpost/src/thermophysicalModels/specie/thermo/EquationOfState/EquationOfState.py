@@ -11,7 +11,7 @@ Last update:        12/06/2023
 #                               IMPORT                              #
 #####################################################################
 
-from src.base.BaseClass import BaseClass
+from libICEpost.src.base.BaseClass import BaseClass, abstractmethod
 
 from ...specie.Molecule import Molecule
 
@@ -224,4 +224,4 @@ class EquationOfState(BaseClass):
             self.fatalErrorInArgumentChecking(self.drhodT, err)
 
 #############################################################################
-EquationOfState.createRuntimeSelectionTable("EquationOfState")
+EquationOfState.createRuntimeSelectionTable()

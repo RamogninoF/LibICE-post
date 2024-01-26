@@ -13,24 +13,23 @@ Chemical specie
 #                               IMPORT                              #
 #####################################################################
 
-from src.base.Functions.runtimeWarning import runtimeWarning
+from libICEpost.src.base.Functions.runtimeWarning import runtimeWarning
 
-from src.thermophysicalModels.specie.specie.Molecule import Molecule
+from libICEpost.src.thermophysicalModels.specie.specie.Molecule import Molecule
 
 import json
 
-import Database
-import Database.chemistry.specie.periodicTable
+import libICEpost.Database as Database
+
+from libICEpost.Database import database
+periodicTable = database.chemistry.specie.periodicTable
+
+Molecules = database.chemistry.specie.addFolder("Molecules")
+Fuels = database.chemistry.specie.addFolder("Fuels")
 
 #############################################################################
 #                                   DATA                                    #
 #############################################################################
-
-Molecules = {}
-Fuels = {}
-
-_theseLocals = locals()
-
 def fromJson(fileName, typeName="Molecules"):
     """
     Add molecules to the database from a json file.
@@ -39,19 +38,17 @@ def fromJson(fileName, typeName="Molecules"):
         with open(fileName) as f:
             data = json.load(f)
             for mol in data:
-                _theseLocals[mol] = \
+                Molecules[mol] = \
                     Molecule\
                         (
                             data[mol]["name"],
-                            [Database.chemistry.specie.periodicTable.__dict__[atom] for atom in data[mol]["specie"]],
+                            [periodicTable[atom] for atom in data[mol]["specie"]],
                             data[mol]["atoms"]
                         )
                     
-                if typeName == "Molecules":
-                    Molecules[mol] = _theseLocals[mol]
-                elif typeName == "Fuels":
-                    Fuels[mol] = _theseLocals[mol]
-                else:
+                if typeName == "Fuels":
+                    Fuels[mol] = Molecules[mol]
+                elif not (typeName == "Molecules"):
                     raise ValueError(f"Invalid typeName {typeName}. Available are:\t Molecules, Fuels.")
             
     except BaseException as err:

@@ -11,7 +11,7 @@ Last update:        12/06/2023
 #                               IMPORT                              #
 #####################################################################
 
-from src.base.Utilities import Utilities
+from libICEpost.src.base.Utilities import Utilities
 
 from ...specie.Mixture import Mixture
 from ...specie.Molecule import Molecule

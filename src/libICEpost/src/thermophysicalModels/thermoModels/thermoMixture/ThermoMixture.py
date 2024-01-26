@@ -11,9 +11,9 @@ Last update:        12/06/2023
 #                               IMPORT                              #
 #####################################################################
 
-from src.base.Utilities import Utilities
+from libICEpost.src.base.Utilities import Utilities
 
-from src.thermophysicalModels.specie.specie.Mixture import Mixture
+from libICEpost.src.thermophysicalModels.specie.specie.Mixture import Mixture
 from ..ThermoTable import ThermoTable
 from .MixingRule.MixingRule import MixingRule
 

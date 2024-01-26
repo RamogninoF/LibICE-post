@@ -11,11 +11,11 @@ Last update:        17/10/2023
 #                               IMPORT                              #
 #####################################################################
 
-from src.base.BaseClass import BaseClass
+from libICEpost.src.base.BaseClass import BaseClass
 
-from ...specie.thermo.EquationOfState import EquationOfState
-from ...specie.specie.Molecule import Molecule
-from ...specie.specie.Mixture import Mixture
+from ....specie.thermo.EquationOfState import EquationOfState
+from ....specie.specie.Molecule import Molecule
+from ....specie.specie.Mixture import Mixture
 
 #############################################################################
 #                               MAIN CLASSES                                #

@@ -13,9 +13,9 @@ Last update:        12/06/2023
 
 from abc import ABCMeta, abstractmethod
 
-from src.base.BaseClass import BaseClass
+from libICEpost.src.base.BaseClass import BaseClass
 
-from src.thermophysicalModels.specie.specie.Molecule import Molecule
+from libICEpost.src.thermophysicalModels.specie.specie.Molecule import Molecule
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -154,4 +154,4 @@ class Thermo(BaseClass):
             self.fatalErrorInArgumentChecking(self.dcpdT, err)
         
 #############################################################################
-Thermo.createRuntimeSelectionTable("Thermo")
+Thermo.createRuntimeSelectionTable()

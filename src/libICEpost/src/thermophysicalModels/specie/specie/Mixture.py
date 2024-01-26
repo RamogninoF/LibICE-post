@@ -11,12 +11,12 @@ Last update:        12/06/2023
 #                               IMPORT                              #
 #####################################################################
 
-from src.base.Utilities import Utilities
+from libICEpost.src.base.Utilities import Utilities
 
 from .Atom import Atom
 from .Molecule import Molecule
 
-from Database.chemistry import constants
+from libICEpost.Database.chemistry import constants
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -471,18 +471,22 @@ def mixtureBlend(mixtures, composition, fracType ="mass", name=None):
         if not((min(composition) >= 0.0) and (max(composition) <= 1.0)):
             raise ValueError("All "+ fracType+ " fractions must be in range [0,1].")
         
-        if not(specie == [i for n, i in enumerate(specie) if i not in specie[:n]]):
-            raise ValueError("Found duplicate entries in 'specie' list.")
+        if not(mixtures == [i for n, i in enumerate(mixtures) if i not in mixtures[:n]]):
+            raise ValueError("Found duplicate entries in 'mixtures' list.")
         
     except BaseException as err:
         Utilities.fatalErrorInArgumentChecking(None,mixtureBlend, err)
     
     mixBlend = mixtures[0].copy()
-    Yblen = Y[0]
+    Yblen = composition[0]
     for ii in range(len(mixtures) - 1):
-        Ydil = Y[ii+1]/(Yblen + Y[ii+1])
+        Ydil = composition[ii+1]/(Yblen + composition[ii+1])
         mixBlend.dilute(mixtures[ii+1], Ydil, fracType)
-        Yblen += Y[ii+1]
+        Yblen += composition[ii+1]
     mixBlend.name = name
     
     return mixBlend
+
+#############################################################################
+#Load database
+import libICEpost.Database.chemistry.specie.Mixtures

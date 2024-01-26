@@ -62,13 +62,15 @@ class BaseClass(Utilities, metaclass=ABCMeta):
         except BaseException as err:
             cls.fatalErrorInClass(cls.selector, f"Argument checking failed", err)
         
-        if not cls.hasSelectionTable():
-            cls.fatalErrorInClass(cls.selector,"No run-time selection available")
-        
-        if not typeName in cls._selectionTable:
-            cls.fatalErrorInClass(cls.selector,f"No class '{typeName}' found in selection table\n" + cls.showRuntimeSelectionTable())
-        
         try:
+            #Check if has table
+            if not cls.hasSelectionTable():
+                raise ValueError("No run-time selection table available for class {cls.__name__} available")
+            
+            #Check if class in table
+            cls._selectionTable.check(typeName)
+            
+            #Try instantiation
             instance = cls._selectionTable[typeName].fromDictionary(dictionary)
         except BaseException as err:
             cls.fatalErrorInClass(cls.selector, f"Failed constructing instance of type '{cls._selectionTable[typeName].__name__}'", err)
@@ -186,6 +188,16 @@ class SelectionTable(Utilities):
         
         return string
     
+    def __repr__(self):
+        """
+        Representation of selection table
+        """
+        string = f"SelectionTable({self.type.__name__})["
+        for className in self.__db:
+            string += f" {className}"
+        
+        return string + " ]"
+    
     ##########################################################################################
     def __contains__(self, typeName:str):
         """
@@ -204,7 +216,7 @@ class SelectionTable(Utilities):
         """
         try:
             self.checkType(typeName, str, "typeName")
-            if not typeName in self.__db:
+            if not typeName in self:
                 raise ValueError(f"Class {typeName} not found in selection table.")
         except BaseException as err:
             self.fatalErrorInClass(self.__get__, f"Argument checking failed", err)
@@ -227,3 +239,20 @@ class SelectionTable(Utilities):
                 self.fatalErrorInClass(self.add,f"Class '{cls.__name__}' is not derived from '{self.type.__name__}'; cannot add '{typeName}' to runtime selection table.")
         else:
             self.fatalErrorInClass(self.add,f"Subclass '{typeName}' already present in selection table, cannot add to selection table.")
+
+    ##########################################################################################
+    def check(self, typeName:str):
+        """
+        typeName: str
+            Name of class to be checked
+
+        Checks if a class name is in the selection table, raises ValueError if false
+        """
+
+        if not typeName in self:
+            string = f"No class '{typeName}' found in selection table for class {self.__type.__name__}. Available classes are:"
+            for className, classType in [(CLSNM, self[CLSNM]) for CLSNM in self.__db]:
+                string += "\n\t{:40s}{:s}".format(className, "(Abstract class)" if inspect.isabstract(classType) else "")
+            
+            raise ValueError(string)
+        return True

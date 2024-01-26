@@ -13,20 +13,22 @@ janaf7 thermodynamic propeties
 #                               IMPORT                              #
 #####################################################################
 
-from src.base.Functions.runtimeWarning import runtimeWarning
+from libICEpost.src.base.Functions.runtimeWarning import runtimeWarning
 
-from src.thermophysicalModels.specie.thermo.Thermo.janaf7 import janaf7
+from libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7 import janaf7
 
 import json
 
-import Database
-import Database.chemistry.specie.Molecules
+import libICEpost.Database as Database
+from libICEpost.Database import database
+
+Molecules = database.chemistry.specie.Molecules
+
+janaf7_db = database.chemistry.thermo.Thermo.addFolder("janaf7")
 
 #############################################################################
 #                                   DATA                                    #
 #############################################################################
-
-_theseLocals = locals()
 
 def fromJson(fileName, typeName="Molecules"):
     """
@@ -36,10 +38,10 @@ def fromJson(fileName, typeName="Molecules"):
         with open(fileName) as f:
             data = json.load(f)
             for mol in data:
-                _theseLocals[mol] = \
+                janaf7_db[mol] = \
                     janaf7\
                         (
-                            Database.chemistry.specie.Molecules.__dict__[mol],
+                            Molecules[mol],
                             data[mol]["lowCpCoeffs"],
                             data[mol]["highCpCoeffs"],
                             data[mol]["Tcommon"],

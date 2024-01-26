@@ -14,7 +14,10 @@ Atomic specie
 #####################################################################
 
 from chempy.util import periodic
-from src.thermophysicalModels.specie.specie.Atom import Atom
+from libICEpost.src.thermophysicalModels.specie.specie.Atom import Atom
+
+from libICEpost.Database import database
+periodicTable = database.chemistry.specie.addFolder("periodicTable")
 
 #############################################################################
 #                                   DATA                                    #
@@ -22,7 +25,7 @@ from src.thermophysicalModels.specie.specie.Atom import Atom
 
 #Periodic table of atoms
 for ii, atom in enumerate(periodic.symbols):
-    locals()[atom] = \
+    periodicTable[atom] = \
         Atom\
             (
                 atom,
