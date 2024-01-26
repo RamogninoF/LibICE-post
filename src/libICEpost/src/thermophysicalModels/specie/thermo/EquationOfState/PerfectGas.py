@@ -25,18 +25,43 @@ class PerfectGas(EquationOfState):
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
     Attributes:
-        chem: Molecule
-            Chemical specie for which the thermodynamic properties are defined
+        Rgas: float
+            The mass specific gas constant
     """
     
     #########################################################################
+    @classmethod
+    def fromDictionary(cls, dictionary):
+        """
+        Create from dictionary.
+        """
+        try:
+            entryList = ["Rgas"]
+            for entry in entryList:
+                if not entry in dictionary:
+                    raise ValueError(f"Mandatory entry '{entry}' not found in dictionary.")
+            
+            out = cls\
+                (
+                    dictionary["Rgas"]
+                )
+            return out
+            
+        except BaseException as err:
+            cls.fatalErrorInClass(cls.fromDictionary, "Failed construction from dictionary", err)
+    
+    #########################################################################
     #Constructor:
-    def __init__(self, chem):
+    def __init__(self, Rgas:float):
         """
-        chem: Molecule
-            Chemical specie for which the thermodynamic properties are defined
+        Rgas: float
+            The mass specific gas constant
         """
-        super(self.__class__, self).__init__(chem)
+        try:
+            self.checkType(Rgas, float, "Rgas")
+        except BaseException as err:
+            self.fatalErrorInClass(self.__init__, "Argument checking failed", err)
+        self.Rgas = Rgas
         
     #########################################################################
     #Operators:
@@ -71,7 +96,7 @@ class PerfectGas(EquationOfState):
         Density [kg/m^3]
         """
         super(self.__class__,self).rho(p,T)
-        return p/(T * self.chem.Rgas())
+        return p/(T * self.Rgas)
     
     #########################################################################
     def T(self, p, rho):
@@ -79,7 +104,7 @@ class PerfectGas(EquationOfState):
         Temperature [K]
         """
         super(self.__class__,self).T(p,rho)
-        return p/(rho * self.chem.Rgas())
+        return p/(rho * self.Rgas)
     
     #########################################################################
     def p(self, T, rho):
@@ -87,7 +112,7 @@ class PerfectGas(EquationOfState):
         Pressure [Pa]
         """
         super(self.__class__,self).p(T,rho)
-        return rho * T * self.chem.Rgas()
+        return rho * T * self.Rgas
     
     #########################################################################
     def Z(self, p, T):
@@ -103,7 +128,7 @@ class PerfectGas(EquationOfState):
         dp/dT [Pa/K]
         """
         super(self.__class__,self).dpdT(p,T)
-        return self.rho(p,T)*self.chem.Rgas()
+        return self.rho(p,T)*self.Rgas
     
     #########################################################################
     def dTdp(self, p, T):
@@ -111,7 +136,7 @@ class PerfectGas(EquationOfState):
         dT/dp [K/Pa]
         """
         super(self.__class__,self).dTdp(p,T)
-        return self.rho(p,T)*self.chem.Rgas()
+        return self.rho(p,T)*self.Rgas
     
     #########################################################################
     def drhodp(self, p, T):
@@ -119,7 +144,7 @@ class PerfectGas(EquationOfState):
         drho/dp [kg/(m^3 Pa)]
         """
         super(self.__class__,self).drhodp(p,T)
-        return 1.0/(chem.Rgas() * T)
+        return 1.0/(self.Rgas * T)
     
     #########################################################################
     def dpdrho(self, p, T):
@@ -127,7 +152,7 @@ class PerfectGas(EquationOfState):
         dp/drho [Pa * m^3 / kg]
         """
         super(self.__class__,self).dpdrho(p,T)
-        return (chem.Rgas() * T)
+        return (self.Rgas * T)
     
     #########################################################################
     def drhodT(self, p, T):
@@ -135,7 +160,7 @@ class PerfectGas(EquationOfState):
         drho/dT [kg/(m^3 K)]
         """
         super(self.__class__,self).drhodT(p,T)
-        return -p/(chem.Rgas() * (T ** 2.0))
+        return -p/(self.Rgas * (T ** 2.0))
     
     #########################################################################
     def dTdrho(self, p, T):
@@ -143,7 +168,7 @@ class PerfectGas(EquationOfState):
         dT/drho [K * m^3 / kg]
         """
         super(self.__class__,self).dTdrho(p,T)
-        return -p/(chem.Rgas() * (self.rho(p,T) ** 2.0))
+        return -p/(self.Rgas * (self.rho(p,T) ** 2.0))
 
 #############################################################################
 PerfectGas.addToRuntimeSelectionTable()

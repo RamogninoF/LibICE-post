@@ -15,8 +15,6 @@ from abc import ABCMeta, abstractmethod
 
 from libICEpost.src.base.BaseClass import BaseClass
 
-from libICEpost.src.thermophysicalModels.specie.specie.Molecule import Molecule
-
 #############################################################################
 #                               MAIN CLASSES                                #
 #############################################################################
@@ -27,25 +25,18 @@ class Thermo(BaseClass):
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
     Attributes:
-        specie: Molecule
-            Chemical specie for which the thermodynamic properties are defined
+        Rgas: float
+            The mass specific gas constant
     """
     
     #########################################################################
     #Constructor:
-    def __init__(self, specie):
-        """
-        specie: Molecule
-            Chemical specie for which the thermodynamic properties are defined
-            
-        Base (virtual) class: does not support instantiation.
-        """
+    def __init__(self, Rgas:float):
         try:
-            self.checkType(specie, Molecule, entryName="specie")
+            self.checkType(Rgas, float, "Rgas")
         except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.__init__,err)
-        
-        self.specie = specie.copy()
+            self.fatalErrorInClass(self.__init__, "Argument checking failed", err)
+        self.Rgas = Rgas
     
     #########################################################################
     #Operators:
@@ -54,7 +45,7 @@ class Thermo(BaseClass):
     #Print:
     def __str__(self):
         stringToPrint = ""
-        stringToPrint += "Thermodynamic data associated to molecule:\t" + self.specie.name + "\n"
+        stringToPrint += "Thermodynamic data\n"
         stringToPrint += "Type:\t" + self.TypeName + "\n"
         
         return stringToPrint
@@ -65,9 +56,8 @@ class Thermo(BaseClass):
         R = \
             {
                 "type": self.TypeName,
-                "specie": self.specie
+                "Rgas": self.Rgas
             }
-                       
         return R.__repr__()
 
      #########################################################################

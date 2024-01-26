@@ -13,7 +13,6 @@ Last update:        12/06/2023
 
 from abc import ABCMeta, abstractmethod
 
-from ....base.Utilities import Utilities
 from ....base.BaseClass import BaseClass
 
 from ..thermoMixture.ThermoMixture import ThermoMixture
@@ -45,10 +44,6 @@ class ThermoModel(BaseClass):
     """
     
     #########################################################################
-    @classmethod
-    def fromDictionary(cls, dictionary):
-        raise NotImplementedError()
-    #########################################################################
     #Constructor:
     def __init__(self, EoSType : str, ThermoType : str):
         """
@@ -72,5 +67,7 @@ class ThermoModel(BaseClass):
     ################################
     
     #########################################################################
+        
+    ################################
     
     

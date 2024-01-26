@@ -13,37 +13,26 @@ Last update:        12/06/2023
 
 from libICEpost.src.base.BaseClass import BaseClass, abstractmethod
 
-from ...specie.Molecule import Molecule
-
 #############################################################################
 #                               MAIN CLASSES                                #
 #############################################################################
 class EquationOfState(BaseClass):
     """
-    Class handling thermodynamic equation of state of a chemical specie
+    Class handling thermodynamic equation of state
     
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
     Attributes:
-        chem: Molecule
-            Chemical specie for which the thermodynamic properties are defined
+        None
     """
     
     #########################################################################
     #Constructor:
-    def __init__(self, chem):
+    def __init__(self):
         """
-        chem: Molecule
-            Chemical specie for which the thermodynamic properties are defined
-            
         Base (virtual) class: does not support instantiation.
         """
-        try:
-            self.checkType(chem, Molecule, entryName="chem")
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.__init__,err)
-        
-        self.chem = chem.copy()
+        pass
     #########################################################################
     #Operators:
     
@@ -51,7 +40,7 @@ class EquationOfState(BaseClass):
     #Print:
     def __str__(self):
         stringToPrint = ""
-        stringToPrint += f"Equation of state for {chem.__class__.__name__}:\t{chem.name}\n"
+        stringToPrint += f"Equation of state class\n"
         stringToPrint += "Type:\t" + self.TypeName + "\n"
         
         return stringToPrint
@@ -61,10 +50,8 @@ class EquationOfState(BaseClass):
     def __repr__(self):
         R = \
             {
-                "type": self.TypeName,
-                "chem": self.chem
+                "type": self.TypeName
             }
-                       
         return R.__repr__()
 
      #########################################################################
@@ -224,4 +211,8 @@ class EquationOfState(BaseClass):
             self.fatalErrorInArgumentChecking(self.drhodT, err)
 
 #############################################################################
+#Generate selection table
 EquationOfState.createRuntimeSelectionTable()
+
+#Add database
+import libICEpost.Database.chemistry.thermo.EquationOfState

@@ -22,6 +22,7 @@ import json
 import libICEpost.Database as Database
 from libICEpost.Database import database
 
+from libICEpost.src.thermophysicalModels.specie.specie import Molecule
 Molecules = database.chemistry.specie.Molecules
 
 janaf7_db = database.chemistry.thermo.Thermo.addFolder("janaf7")
@@ -41,7 +42,7 @@ def fromJson(fileName, typeName="Molecules"):
                 janaf7_db[mol] = \
                     janaf7\
                         (
-                            Molecules[mol],
+                            Molecules[mol].Rgas,
                             data[mol]["lowCpCoeffs"],
                             data[mol]["highCpCoeffs"],
                             data[mol]["Tcommon"],
@@ -50,7 +51,7 @@ def fromJson(fileName, typeName="Molecules"):
                         )
                 
     except BaseException as err:
-        runtimeWarning(f"Failed to load the mixtures database '{fileName}':\n{err}.")
+        runtimeWarning(f"Failed to load the janaf7 database '{fileName}':\n{err}.")
 
 fileName = Database.location + "/data/janaf7.json"
 fromJson(fileName)

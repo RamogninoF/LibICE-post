@@ -48,7 +48,7 @@ class _DatabaseClass(BaseClass, dict):
             return super().__getattribute__(__name)
         except:
             if not (__name in self):
-                string = f"{__name} not found in database '{self.__name}'. Available entries are:"
+                string = f"{__name} not found in database '{self._name}'. Available entries are:"
                 for item in self:
                     string += f"\n\t{item}\n"
                 raise ValueError(string)

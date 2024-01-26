@@ -16,6 +16,7 @@ from .Thermo import Thermo
 from libICEpost.Database import database
 from numpy import math
 
+from libICEpost.Database.chemistry import constants
 Tstd = database.chemistry.constants.Tstd
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -27,8 +28,8 @@ class janaf7(Thermo):
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
     Attibutes:
-        specie: Molecule
-            Chemical specie for which the thermodynamic properties are defined
+        Rgas: float
+            The mass specific gas constant
         
         cpLow:  list<float>
             List of polynomial coefficients to compute cp of the specie
@@ -57,10 +58,10 @@ class janaf7(Thermo):
     
     #########################################################################
     #Constructor:
-    def __init__(self, specie, cpLow, cpHigh, Tth, Tlow, Thigh):
+    def __init__(self, Rgas, cpLow, cpHigh, Tth, Tlow, Thigh):
         """
-        specie: Molecule
-            Chemical specie for which the thermodynamic properties are defined
+        Rgas: float
+            The mass specific gas constant
         cpLow:  list<float>
             List of polynomial coefficients to compute cp of the specie
             in the range of temperature below Tth
@@ -78,7 +79,7 @@ class janaf7(Thermo):
             coefficients for computation of cp
         """
         #Argument checking:
-        super(self.__class__, self).__init__(specie)
+        super().__init__(Rgas)
         try:
             self.checkInstanceTemplate(cpLow, [1.0], entryName="cpLow")
             self.checkInstanceTemplate(cpHigh, [1.0], entryName="cpHigh")
@@ -192,7 +193,7 @@ class janaf7(Thermo):
         for nn in [0, 1, 2, 3, 4]:
             cp += coeffs[nn] * (T **nn)
         
-        return cp*self.specie.Rgas()
+        return cp*self.Rgas
     
     ##################################
     #Constant volume heat capacity
@@ -207,7 +208,7 @@ class janaf7(Thermo):
         #Argument checking
         super(self.__class__,self).cv(p,T)
         
-        return (self.cp(p,T) - self.specie.Rgas())
+        return (self.cp(p,T) - self.Rgas)
     
     ##################################
     #Gamma
@@ -244,7 +245,7 @@ class janaf7(Thermo):
         for nn in [0, 1, 2, 3, 4]:
             ha += coeffs[nn] * (T ** (nn + 1)) / (nn + 1.0)
         
-        return ha*self.specie.Rgas()
+        return ha*self.Rgas
     
     ##################################
     def hf(self):
@@ -272,7 +273,7 @@ class janaf7(Thermo):
         for nn in [1, 2, 3, 4]:
             dcpdT += nn * coeffs[nn] * (T ** (nn - 1))
         
-        return dcpdT*self.specie.Rgas()
+        return dcpdT*self.Rgas
     
     #########################################################################
     @classmethod

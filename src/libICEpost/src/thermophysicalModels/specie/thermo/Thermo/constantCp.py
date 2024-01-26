@@ -33,19 +33,39 @@ class constantCp(Thermo):
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
     Attibutes:
-        specie: Molecule
-            Chemical specie for which the thermodynamic properties are defined
+        Rgas: float
+            The mass specific gas constant
         
     """
     
     #########################################################################
-    
-    numCoeffs = 7
+    @classmethod
+    def fromDictionary(cls,dictionary):
+        """
+        Create from dictionary.
+        """
+        try:
+            entryList = ["cp", "cv", "gamma", "hf"]
+            Dic = {}
+            for entry in entryList:
+                if entry in dictionary:
+                    Dic[entry] = dictionary[entry]
+            
+            if not "Rgas" in dictionary:
+                raise ValueError(f"Mandatory entry 'Rgas' not found in dictionary.")
+            
+            out = cls(dictionary["Rgas"], **Dic)
+            return out
+            
+        except BaseException as err:
+            cls.fatalErrorInClass(cls.fromDictionary, "Failed construction from dictionary", err)
     
     #########################################################################
     #Constructor:
-    def __init__(self, specie, cp=None, cv=None, gamma=None, hf=0.0):
+    def __init__(self, Rgas, cp=None, cv=None, gamma=None, hf=0.0):
         """
+        Rgas: float
+            The mass specific gas constant
         cp:     float (None)
             Constant pressure heat capacity [J/kgK]
         cv:     float (None)
@@ -59,7 +79,7 @@ class constantCp(Thermo):
         Construct from one of the above data.
         """
         #Argument checking:
-        super(self.__class__, self).__init__(specie)
+        super(self.__class__, self).__init__(Rgas)
         try:
             cpNone, cvNone, gammaNone = True, True, True
             
@@ -67,22 +87,22 @@ class constantCp(Thermo):
                 cpNone = False
                 self.checkType(cp, float, entryName="cp")
                 self._cp = cp
-                self._cv = cp - self.specie.Rgas()
+                self._cv = cp - self.Rgas
                 self._gamma = self._cp / self._cv
             
             if not cv is None:
                 cvNone = False
                 self.checkType(cv, float, entryName="cv")
                 self._cv = cv
-                self._cp = cv + self.specie.Rgas()
+                self._cp = cv + self.Rgas
                 self._gamma = self._cp / self._cv
             
             if not gamma is None:
                 gammaNone = False
                 self.checkType(gamma, float, entryName="gamma")
                 self._gamma = gamma
-                self._cv = self.specie.Rgas()/(gamma - 1.0)
-                self._cp = self._cv + self.specie.Rgas()
+                self._cv = self.Rgas/(gamma - 1.0)
+                self._cp = self._cv + self.Rgas
             
             if len([i for i in [cpNone, cvNone, gammaNone] if i]) != 1:
                 raise ValueError("Trying to construct from more then one input (cp, cv, gamma).")
@@ -179,28 +199,6 @@ class constantCp(Thermo):
         super(self.__class__,self).dcpdT(p,T)
         
         return 0.0
-    
-    #########################################################################
-    @classmethod
-    def fromDictionary(cls,dictionary):
-        """
-        Create from dictionary.
-        """
-        try:
-            entryList = ["cp", "cv", "gamma", "hf"]
-            Dic = {}
-            for entry in entryList:
-                if entry in dictionary:
-                    Dic[entry] = dictionary[entry]
-            
-            if not "specie" in dictionary:
-                raise ValueError(f"Mandatory entry 'specie' not found in dictionary.")
-            
-            out = cls(dictionary["specie"], **Dic)
-            return out
-            
-        except BaseException as err:
-            cls.fatalErrorInClass(cls.fromDictionary, "Failed construction from dictionary", err)
     
 #############################################################################
 constantCp.addToRuntimeSelectionTable()

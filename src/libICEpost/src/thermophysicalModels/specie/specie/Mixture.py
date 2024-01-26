@@ -16,7 +16,10 @@ from libICEpost.src.base.Utilities import Utilities
 from .Atom import Atom
 from .Molecule import Molecule
 
-from libICEpost.Database.chemistry import constants
+from libICEpost.Database import database
+from libICEpost.Database import chemistry
+
+constants = database.chemistry.constants
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -47,6 +50,15 @@ class Mixture(Utilities):
     X = []
     Y = []
     
+    #########################################################################
+    @property
+    def Rgas(self):
+        """
+        The mass-specific gas constant of the mixture.
+        """
+        specGasConst = constants.Rgas / self.MM()
+        return specGasConst
+
     #########################################################################
     #Constructor:
     def __init__(self, specieList, composition, fracType ="mass", name=None):
@@ -299,15 +311,6 @@ class Mixture(Utilities):
         for specj in self:
             MMmixture += specj["X"] * specj["specie"].MM()
         return MMmixture
-    
-    ###############################
-    #Compute Rgas:
-    def Rgas(self):
-        """
-        Return the mass-specific gas constant of the mixture.
-        """
-        specGasConst = constants.Rgas / self.MM()
-        return specGasConst
     
     ###############################
     #Return the sum of mass fractions of species:

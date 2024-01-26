@@ -15,7 +15,10 @@ from libICEpost.src.base.Utilities import Utilities
 
 from .Atom import Atom
 
-from libICEpost.Database.chemistry import constants
+import libICEpost.Database.chemistry.constants
+from libICEpost.Database import database
+
+constants = database.chemistry.constants
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -44,6 +47,17 @@ class Molecule(Utilities):
     atoms = []
     numberOfAtoms = []
     
+
+    #Compute Rgas:
+    @property
+    def Rgas(self):
+        """
+        Compute the mass-specific gas constant of the molecule:
+            Rgas = R / MM
+        """
+        specGasConst = constants.Rgas / self.MM()
+        return specGasConst
+
     #########################################################################
     @classmethod
     def fromDictionary(cls, dictionary):
@@ -342,16 +356,6 @@ class Molecule(Utilities):
         return MoleculeIter(self)
     
     #########################################################################
-    #Compute Rgas:
-    def Rgas(self):
-        """
-        Compute the mass-specific gas constant of the molecule:
-            Rgas = R / MM
-        """
-        specGasConst = constants.Rgas / self.MM()
-        return specGasConst
-    
-    ##############################
     #Molecular mass:
     def MM(self):
         """
