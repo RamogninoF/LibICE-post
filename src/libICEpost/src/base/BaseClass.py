@@ -27,6 +27,12 @@ def _add_TypeName(cls:type):
     """
     cls.TypeName = cls.__name__
 
+def _getBaseClass(cls:type):
+    """
+    Get the base class of a class.
+    """
+    return inspect.getmro(cls)[1]
+
 #############################################################################
 #                               MAIN CLASSES                                #
 #############################################################################
@@ -34,15 +40,15 @@ class BaseClass(Utilities, metaclass=ABCMeta):
     """
     Class wrapping useful methods for base virtual classes (e.g. run-time selector)
     """
-    
+    ##########################################################################################
     @classmethod
     def selectionTable(cls):
         """
-        The run-time selection table associated to the base class
+        The run-time selection table associated to this class.
         """
         if not cls.hasSelectionTable():
-            cls.fatalErrorInClass(cls.selectionTable,"No run-time selection available.")
-        return cp.deepcopy(cls._selectionTable)
+            cls.fatalErrorInClass(cls.selectionTable,f"No run-time selection available for class {cls.__name__}.")
+        return getattr(cls,f"_{cls.__name__}__selectionTable")
 
     ##########################################################################################
     @classmethod
@@ -54,7 +60,7 @@ class BaseClass(Utilities, metaclass=ABCMeta):
         dictionary: dict
             Dictionary used for construction
         
-        Construct an instance of a subclass of this method that was added to the selection table.
+        Construct an instance of a subclass of this that was added to the selection table.
         """
         try:
             cls.checkType(dictionary, dict, "dictionary")
@@ -65,15 +71,15 @@ class BaseClass(Utilities, metaclass=ABCMeta):
         try:
             #Check if has table
             if not cls.hasSelectionTable():
-                raise ValueError("No run-time selection table available for class {cls.__name__} available")
+                raise ValueError(f"No run-time selection table available for class {cls.__name__}")
             
             #Check if class in table
-            cls._selectionTable.check(typeName)
+            cls.selectionTable().check(typeName)
             
             #Try instantiation
-            instance = cls._selectionTable[typeName].fromDictionary(dictionary)
+            instance = cls.selectionTable()[typeName].fromDictionary(dictionary)
         except BaseException as err:
-            cls.fatalErrorInClass(cls.selector, f"Failed constructing instance of type '{cls._selectionTable[typeName].__name__}'", err)
+            cls.fatalErrorInClass(cls.selector, f"Failed constructing instance of type '{cls.selectionTable()[typeName].__name__}'", err)
         
         return instance
     
@@ -81,9 +87,9 @@ class BaseClass(Utilities, metaclass=ABCMeta):
     @classmethod
     def hasSelectionTable(cls):
         """
-        Check if selection table was defined.
+        Check if selection table was defined for this class.
         """
-        return hasattr(cls, "_selectionTable")
+        return hasattr(cls, f"_{cls.__name__}__selectionTable")
     
     ##########################################################################################
     @classmethod
@@ -112,10 +118,10 @@ class BaseClass(Utilities, metaclass=ABCMeta):
             
         Add the subclass to the database of available subclasses for runtime selection.
         """
-        if not cls.hasSelectionTable():
-            cls.fatalErrorInClass(cls.addToRuntimeSelectionTable,"No run-time selection available.")
+        if not _getBaseClass(cls).hasSelectionTable():
+            cls.fatalErrorInClass(cls.addToRuntimeSelectionTable,f"No run-time selection available for base class {_getBaseClass(cls).__name__}.")
         
-        cls._selectionTable.add(cls)
+        _getBaseClass(cls).selectionTable().add(cls)
 
     ##########################################################################################
     @classmethod
@@ -125,9 +131,9 @@ class BaseClass(Utilities, metaclass=ABCMeta):
         """
 
         if cls.hasSelectionTable():
-            cls.fatalErrorInClass(cls.createRuntimeSelectionTable,"A selection table is already present for this class, cannot generate a new selection table.")
+            cls.fatalErrorInClass(cls.createRuntimeSelectionTable,f"A selection table is already present for class {cls.__name__}, cannot generate a new selection table.")
         
-        cls._selectionTable = SelectionTable(cls)
+        setattr(cls,f"_{cls.__name__}__selectionTable",SelectionTable(cls))
     
     ##########################################################################################
     @classmethod
@@ -142,7 +148,7 @@ class BaseClass(Utilities, metaclass=ABCMeta):
             ClassB     
             ClassC
         """
-        print(cls._selectionTable)
+        print(cls.selectionTable())
 
 #############################################################################
 # SelectionTable
