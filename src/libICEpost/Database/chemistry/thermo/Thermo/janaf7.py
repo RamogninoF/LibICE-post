@@ -13,10 +13,7 @@ janaf7 thermodynamic propeties
 #                               IMPORT                              #
 #####################################################################
 
-from libICEpost.src.base.Functions.runtimeWarning import runtimeWarning
-
-from libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7 import janaf7
-
+from libICEpost.src.base.Functions.runtimeWarning import fatalErrorInFunction
 import json
 
 import libICEpost.Database as Database
@@ -31,10 +28,18 @@ janaf7_db = database.chemistry.thermo.Thermo.addFolder("janaf7")
 #                                   DATA                                    #
 #############################################################################
 
+#Define method to load from json dictionay
 def fromJson(fileName, typeName="Molecules"):
     """
     Add janaf7 type Thermo to the database from a json file.
     """
+    from libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7 import janaf7
+
+    from libICEpost.Database import database
+    from libICEpost.src.thermophysicalModels.specie.specie import Molecule
+    Molecules = database.chemistry.specie.Molecules
+    janaf7_db = database.chemistry.thermo.Thermo.janaf7
+    
     try:
         with open(fileName) as f:
             data = json.load(f)
@@ -51,9 +56,12 @@ def fromJson(fileName, typeName="Molecules"):
                         )
                 
     except BaseException as err:
-        runtimeWarning(f"Failed to load the janaf7 database '{fileName}':\n{err}.")
+        fatalErrorInFunction(fromJson,f"Failed to load the janaf7 database '{fileName}'", err)
 
+#Load database
 fileName = Database.location + "/data/janaf7.json"
 fromJson(fileName)
-
 del fileName
+
+#Add method to database
+janaf7_db.fromJson = fromJson

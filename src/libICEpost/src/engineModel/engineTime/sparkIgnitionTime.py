@@ -88,4 +88,4 @@ class sparkIgnitionTime(engineTime):
         return self.SA
     
 #############################################################################
-sparkIgnitionTime.addToRuntimeSelectionTable("sparkIgnitionTime")
+engineTime.addToRuntimeSelectionTable(sparkIgnitionTime)

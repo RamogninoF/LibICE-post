@@ -42,7 +42,25 @@ class constantCp(Thermo):
     @classmethod
     def fromDictionary(cls,dictionary):
         """
-        Create from dictionary.
+        Create from dictionary:
+        {
+            Rgas:  float
+                Mass specific gas constant
+            
+            cp:    float
+                Mass-specific constant-pressure heat capacity
+            
+            cv:    float
+                Mass-specific constant-volume heat capacity
+
+            gamma: float
+                cp/cv ratio
+            
+            hf:    float (0.0)
+                Enthalpy of formation (optional)
+        }
+
+        Give 2 out of three of (cp, cv, gamma)
         """
         try:
             entryList = ["cp", "cv", "gamma", "hf"]
@@ -76,7 +94,7 @@ class constantCp(Thermo):
         hf:     float (0.0)
             Enthalpy of formation (Optional)
             
-        Construct from one of the above data.
+        Construct from one of the above data. Give 2 out of three of (cp, cv, gamma)
         """
         #Argument checking:
         super(self.__class__, self).__init__(Rgas)
@@ -201,4 +219,4 @@ class constantCp(Thermo):
         return 0.0
     
 #############################################################################
-constantCp.addToRuntimeSelectionTable()
+Thermo.addToRuntimeSelectionTable(constantCp)

@@ -20,9 +20,7 @@ from libICEpost.src.thermophysicalModels.specie.specie.Molecule import Molecule
 import json
 
 import libICEpost.Database as Database
-
 from libICEpost.Database import database
-periodicTable = database.chemistry.specie.periodicTable
 
 Molecules = database.chemistry.specie.addFolder("Molecules")
 Fuels = database.chemistry.specie.addFolder("Fuels")
@@ -30,10 +28,18 @@ Fuels = database.chemistry.specie.addFolder("Fuels")
 #############################################################################
 #                                   DATA                                    #
 #############################################################################
+
+#Define method to load from dictionary
 def fromJson(fileName, typeName="Molecules"):
     """
     Add molecules to the database from a json file.
     """
+
+    from libICEpost.Database import database
+    from libICEpost.Database.chemistry.specie.periodicTable import periodicTable
+    Molecules = database.chemistry.specie.Molecules
+    Fuels = database.chemistry.specie.Fuels
+
     try:
         with open(fileName) as f:
             data = json.load(f)
@@ -54,6 +60,7 @@ def fromJson(fileName, typeName="Molecules"):
     except BaseException as err:
         runtimeWarning(f"Failed to load the molecule database '{fileName}':\n{err}.")
 
+#Load database
 fileName = Database.location + "/data/Molecules.json"
 fromJson(fileName, "Molecules")
 
@@ -61,3 +68,6 @@ fileName = Database.location + "/data/Fuels.json"
 fromJson(fileName, "Fuels")
 
 del fileName
+
+#Add method to database
+Molecules.fromJson = fromJson

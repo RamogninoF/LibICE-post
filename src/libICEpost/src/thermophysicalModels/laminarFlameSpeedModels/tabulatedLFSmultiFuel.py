@@ -367,4 +367,4 @@ class tabulatedLFS(OFTabulation,laminarFlameSpeedModel):
             self.fatalErrorInClass(self.Su,"Failed computing laminar flame thickness", err)
     
 #############################################################################
-tabulatedLFS.addToRuntimeSelectionTable("tabulatedLFS")
+laminarFlameSpeedModel.addToRuntimeSelectionTable(tabulatedLFS)

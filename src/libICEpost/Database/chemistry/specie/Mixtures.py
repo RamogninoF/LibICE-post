@@ -14,14 +14,14 @@ Mixtures
 #####################################################################
 
 from libICEpost.src.base.Functions.runtimeWarning import runtimeWarning
-
 from libICEpost.src.thermophysicalModels.specie.specie.Mixture import Mixture
 
 import json
 
 import libICEpost.Database as Database
 from libICEpost.Database import database
-Molecules = database.chemistry.specie.Molecules
+
+from  libICEpost.Database.chemistry.specie.Molecules import Molecules
 
 Mixtures = database.chemistry.specie.addFolder("Mixtures")
 
@@ -29,10 +29,16 @@ Mixtures = database.chemistry.specie.addFolder("Mixtures")
 #                                   DATA                                    #
 #############################################################################
 
+#Define method for loading from json dictionary
 def fromJson(fileName):
     """
     Add mixtures to the database from a json file.
     """
+    from libICEpost.Database import database
+
+    from  libICEpost.Database.chemistry.specie.Molecules import Molecules
+    Mixtures = database.chemistry.specie.Mixtures
+
     try:
         with open(fileName) as f:
             data = json.load(f)
@@ -45,11 +51,14 @@ def fromJson(fileName):
                             data[mix]["fracType"] if "fracType" in data[mix] else "mole",
                             mix
                         )
-            
+    
     except BaseException as err:
         runtimeWarning(f"Failed to load the mixtures database '{fileName}':\n{err}.")
-    
+
+#Load database
 fileName = Database.location + "/data/Mixtures.json"
 fromJson(fileName)
-
 del fileName
+
+#Add method to database
+Mixtures.fromJson = fromJson

@@ -280,6 +280,26 @@ class janaf7(Thermo):
     def fromDictionary(cls,dictionary):
         """
         Create from dictionary.
+
+        {
+            Rgas: float
+                The mass specific gas constant
+            cpLow:  list<float>
+                List of polynomial coefficients to compute cp of the specie
+                in the range of temperature below Tth
+            cpHigh: list<float>
+                List of polynomial coefficients to compute cp of the specie
+                in the range of temperature above Tth
+            Tth:    float
+                Threshold temperature to change polynomial coefficient to
+                be used to compute the cp of the specie
+            Tlow:   float
+                Lower limit of the range of valodity of the polynomial
+                coefficients for computation of cp
+            Thigh:   float
+                Higher limit of the range of valodity of the polynomial
+                coefficients for computation of cp
+        }
         """
         try:
             entryList = ["specie", "cpLow", "cpHigh", "Tth", "Tlow", "Thigh"]
@@ -302,8 +322,8 @@ class janaf7(Thermo):
             cls.fatalErrorInClass(cls.fromDictionary, "Failed construction from dictionary", err)
     
 #############################################################################
-janaf7.addToRuntimeSelectionTable()
+Thermo.addToRuntimeSelectionTable(janaf7)
 
 #############################################################################
 #Load database:
-from libICEpost.Database.chemistry.thermo.Thermo import janaf7
+import libICEpost.Database.chemistry.thermo.Thermo.janaf7

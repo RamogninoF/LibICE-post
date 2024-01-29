@@ -111,17 +111,17 @@ class BaseClass(Utilities, metaclass=ABCMeta):
     
     ##########################################################################################
     @classmethod
-    def addToRuntimeSelectionTable(cls):
+    def addToRuntimeSelectionTable(cls, childClass:type):
         """
-        typeName:  str
-            Name of the class to be added to the database
+        childClass:  class
+            The class to be added to the selection table
             
         Add the subclass to the database of available subclasses for runtime selection.
         """
-        if not _getBaseClass(cls).hasSelectionTable():
-            cls.fatalErrorInClass(cls.addToRuntimeSelectionTable,f"No run-time selection available for base class {_getBaseClass(cls).__name__}.")
+        if not cls.hasSelectionTable():
+            cls.fatalErrorInClass(cls.addToRuntimeSelectionTable,f"No run-time selection available for class {cls.__name__}.")
         
-        _getBaseClass(cls).selectionTable().add(cls)
+        cls.selectionTable().add(childClass)
 
     ##########################################################################################
     @classmethod

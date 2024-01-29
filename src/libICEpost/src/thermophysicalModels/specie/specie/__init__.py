@@ -7,6 +7,3 @@ Classes for describing:
     -> Molecules
     -> Mixtures
 """
-from .Atom import Atom
-from .Molecule import Molecule
-from .Mixture import Mixture

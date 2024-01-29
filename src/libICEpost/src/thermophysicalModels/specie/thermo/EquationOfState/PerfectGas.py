@@ -171,4 +171,4 @@ class PerfectGas(EquationOfState):
         return -p/(self.Rgas * (self.rho(p,T) ** 2.0))
 
 #############################################################################
-PerfectGas.addToRuntimeSelectionTable()
+EquationOfState.addToRuntimeSelectionTable(PerfectGas)
