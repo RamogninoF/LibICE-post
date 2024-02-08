@@ -8,4 +8,8 @@ To do list:
     
     Rimuovere implementazione del metodo __iadd__ , viene automaticamente implementato dagli operatori assegnazione e __add__
     
-    
+    Riformattare la gestione degli errori, introducendo un errore FatalError per questo pacchetto in modo da capire quando si sta gestendo un errore
+
+    Riformattare tutti i docstring in accordo con PEP
+
+    Aggiornare le descrizioni degli __init__
