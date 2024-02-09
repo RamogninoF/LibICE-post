@@ -6,8 +6,8 @@ outputFileName = thisPath + "/TODO.out"
 with open(outputFileName,"w") as outputFile:
     #Grep TODOs
     fileName = "grep.tmp"
-    print(f"grep TODO -rn {thisPath}/src/libICEpost > {thisPath}/{fileName}")
-    os.system(f"grep TODO -rn {thisPath}/src/libICEpost > {thisPath}/{fileName}")
+    print(f"grep TODO -rn {thisPath}/../libICEpost > {thisPath}/{fileName}")
+    os.system(f"grep TODO -rn {thisPath}/../libICEpost > {thisPath}/{fileName}")
 
     with open(thisPath+"/"+fileName) as f:
         for line in f:
