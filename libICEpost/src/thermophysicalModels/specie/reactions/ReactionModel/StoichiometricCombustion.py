@@ -246,7 +246,7 @@ class StoichiometricCombustion(ReactionModel):
             self._products = self._reactants
             return self
         
-        print("Active reactions:",[str(r) for r in activeReactions])
+        # print("Active reactions:",[str(r) for r in activeReactions])
         
         #To assess if lean or rich, mix the oxidation reactions based on the
         #fuel mole/mass fractions in the fuels-only mixture. If the concentration

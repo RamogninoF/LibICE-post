@@ -96,6 +96,11 @@ class janaf7Mixing(ThermoMixing):
         def ha(self, p, T):
             super().hs(p, T)
             return self._combineMethod("ha", p, T)
+        
+        ###################################
+        def update(self, mix:Mixture=None):
+            if not mix is None:
+                self._mix = mix
 
     #########################################################################
     @classmethod
@@ -141,9 +146,8 @@ class janaf7Mixing(ThermoMixing):
         """
         Not class data to be updated
         """
-        super()._update(mix)
-        if not mix is None:
-            self._Thermo._mix = mix
+        self._Thermo.update(mix)
+        return super()._update(mix)
 
 #########################################################################
 #Add to selection table

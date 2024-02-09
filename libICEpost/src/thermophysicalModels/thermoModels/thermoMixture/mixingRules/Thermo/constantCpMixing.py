@@ -85,9 +85,9 @@ class constantCpMixing(ThermoMixing):
         """
         Compute new properties as mass-weighted from individual specie in mixture.
         """
-        super()._update(mix)
-        if not mix is None:
-            self._mix = mix
+        #Update of base class, return if already updated
+        if super()._update(mix):
+            return True
 
         #Update
         cp = []
@@ -108,6 +108,7 @@ class constantCpMixing(ThermoMixing):
         self._Thermo._cv = (sum([weigths[ii]*v for ii, v in enumerate(cv)]))
         self._Thermo._hf = (sum([weigths[ii]*v for ii, v in enumerate(hf)]))
 
+        return False
 
         
 

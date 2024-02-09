@@ -91,6 +91,7 @@ class EquationOfStateMixing(BaseClass):
             self.fatalErrorInClass(self.__init__,"Argument checking failed", err)
         
         self._update(mix)
+
         return self
     
     #####################################
@@ -101,9 +102,22 @@ class EquationOfStateMixing(BaseClass):
         """
         if not mix is None:
             self._mix = mix
-            # Store current mixture composition. Used to update the class 
-            # data in case the mixutre has changed
+        
+        # Store current mixture composition. Used to update the class 
+        # data in case the mixutre has changed
+        if not hasattr(self,"_mixOld"):
+            #First initialization
             self._mixOld = self._mix.copy()
+            return False
+        else:
+            #Updating
+            if not (self._mix == self._mixOld):
+                #Change detected
+                self._mixOld = self._mix
+                return False
+        
+        #Already updated (True)
+        return True
 
 #########################################################################
 #Create selection table

@@ -79,8 +79,10 @@ class PerfectGasMixing(EquationOfStateMixing):
         
         Pv/R*T = 1
         """
-        super()._update(mix)
+        if super()._update(mix):
+            return True
         self._EoS.Rgas = self.mix.Rgas
+        return False
 
 #########################################################################
 #Add to selection table:

@@ -71,9 +71,7 @@ class ThermoMixing(BaseClass):
         """
         The thermodynamic data of the mixture.
         """
-        #In case mixture has changed, update the class data
-        if self.mix != self._mixOld:
-            self.update(self.mix)
+        self.update()
         return self._Thermo
 
     #########################################################################
@@ -99,9 +97,22 @@ class ThermoMixing(BaseClass):
         """
         if not mix is None:
             self._mix = mix
-            # Store current mixture composition. Used to update the class 
-            # data in case the mixutre has changed
+        
+        # Store current mixture composition. Used to update the class 
+        # data in case the mixutre has changed
+        if not hasattr(self,"_mixOld"):
+            #First initialization
             self._mixOld = self._mix.copy()
+            return False
+        else:
+            #Updating
+            if not (self._mix == self._mixOld):
+                #Change detected
+                self._mixOld = self._mix
+                return False
+        
+        #Already updated (True)
+        return True
 
 #########################################################################
 #Create selection table

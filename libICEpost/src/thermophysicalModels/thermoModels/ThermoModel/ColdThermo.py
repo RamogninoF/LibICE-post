@@ -4,33 +4,32 @@
 
 """
 @author: F. Ramognino       <federico.ramognino@polimi.it>
-Last update:        12/06/2023
+Last update:        08/02/24
 """
 
 #####################################################################
 #                               IMPORT                              #
 #####################################################################
 
-from libICEpost.src.base.BaseClass import BaseClass
+from .ThermoModel import ThermoModel
 
 #############################################################################
 #                               MAIN CLASSES                                #
 #############################################################################
-class ThermoModel(BaseClass):
+class ColdThermo(ThermoModel):
     """
-    Base class for handling a thermodynamic model
+    Class for handling a thermodynamic model of a non-reacting system
     
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
     """
     #Nothing by now
-    pass
     #########################################################################
     #Properties:
     
     #########################################################################
     #Constructor:
-    
+
     #########################################################################
     #Operators:
     
@@ -43,4 +42,4 @@ class ThermoModel(BaseClass):
     
 #########################################################################
 #Create selection table:
-ThermoModel.createRuntimeSelectionTable()
+ThermoModel.addToRuntimeSelectionTable(ColdThermo)

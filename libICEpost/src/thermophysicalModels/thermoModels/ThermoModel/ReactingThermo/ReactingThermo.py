@@ -11,14 +11,14 @@ Last update:        12/06/2023
 #                               IMPORT                              #
 #####################################################################
 
-from libICEpost.src.base.BaseClass import BaseClass
+from ..ThermoModel import ThermoModel
 
 #############################################################################
 #                               MAIN CLASSES                                #
 #############################################################################
-class ThermoModel(BaseClass):
+class ReactingThermo(ThermoModel):
     """
-    Base class for handling a thermodynamic model
+    Base class for reacting thermodynamic systems
     
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
@@ -30,7 +30,7 @@ class ThermoModel(BaseClass):
     
     #########################################################################
     #Constructor:
-    
+
     #########################################################################
     #Operators:
     
@@ -43,4 +43,5 @@ class ThermoModel(BaseClass):
     
 #########################################################################
 #Create selection table:
-ThermoModel.createRuntimeSelectionTable()
+ThermoModel.addToRuntimeSelectionTable(ReactingThermo)
+ReactingThermo.createRuntimeSelectionTable()
