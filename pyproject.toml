@@ -18,6 +18,8 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 
+[tool.setuptools.packages.find]
+where = ["libICEpost"]
 [project.scripts]
 
 [project.urls]
