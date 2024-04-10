@@ -52,7 +52,7 @@ class BaseClass(Utilities, metaclass=ABCMeta):
 
     ##########################################################################################
     @classmethod
-    def selector(cls, typeName, dictionary):
+    def selector(cls, typeName:str, dictionary:dict):
         """
         typeName:  str
             Name of the class to be constructed

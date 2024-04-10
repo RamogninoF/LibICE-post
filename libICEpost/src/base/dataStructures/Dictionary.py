@@ -74,7 +74,7 @@ class Dictionary(OrderedDict, Utilities):
         Same as __getitem__ but embeds error handling
         """
         try:
-            cls.checkType(entryName, str, "entryName")
+            self.checkType(entryName, str, "entryName")
         except BaseException as err:
             self.fatalErrorInClass(self.lookup,f"Argument checking failed", err)
             
