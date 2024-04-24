@@ -84,7 +84,7 @@ class Dictionary(OrderedDict, Utilities):
             return self[entryName]
     
     ######################################
-    def lookupOrDefault(entryName, default, fatal=True):
+    def lookupOrDefault(self, entryName:str, default, fatal:bool=True):
         """
         entryName:  str
             Name of the entry to look for
@@ -96,14 +96,16 @@ class Dictionary(OrderedDict, Utilities):
         Lookup of give a default value if not found
         """
         try:
-            cls.checkType(entryName, str, "entryName")
-            cls.checkType(fatal, bool, "fatal")
+            self.checkType(entryName, str, "entryName")
+            self.checkType(fatal, bool, "fatal")
         except BaseException as err:
-            self.fatalErrorInClass(self.lookupOrDefault,f"Argument checking failed", err)
-            
+            self.fatalErrorInClass(self.lookupOrDefault,"Argument checking failed", err)
+        
         if not entryName in self:
-            self.fatalErrorInClass(self.lookupOrDefault, f"Entry '{entryName}' not found in Dictionary. Available entries are:\n\t" + "\n\t".join([str(k) for k in self.keys()]))
+            return default
         else:
+            if not isinstance(self[entryName], type(default)) and fatal:
+                self.fatalErrorInClass(self.lookupOrDefault,f"Inconsistent type of returne value ({type(self[entryName]).__name__}) with default ({type(default).__name__}).", err)
             return self[entryName]
     
     ######################################

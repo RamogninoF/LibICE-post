@@ -11,12 +11,12 @@ Last update:        12/06/2023
 #                               IMPORT                              #
 #####################################################################
 
-from abc import ABCMeta, abstractmethod
+from __future__ import annotations
 
-from src.base.Utilities import Utilities
-from src.base.BaseClass import BaseClass
+from src.base.BaseClass import BaseClass, abstractmethod
 from src.base.dataStructures.EngineData.EngineData import EngineData
 
+#TODO:
 from src.base.dataStructures.Dictionary import Dictionary
 
 from ..engineTime import engineTime
@@ -25,7 +25,7 @@ from ..engineGeometry import engineGeometry
 #############################################################################
 #                               MAIN CLASSES                                #
 #############################################################################
-class engineModel(Utilities):
+class engineModel(BaseClass):
     """
     Base class for modeling of an engine and processing experimental/numerical data
     
@@ -33,22 +33,22 @@ class engineModel(Utilities):
     
     Attibutes:
     """
-    Types = \
+    Types:dict[str:type] = \
         {
             "engineGeometry":           engineGeometry,
             "engineTime":               engineTime,
             #"thermo":                   thermoModel,
         }
     
-    Submodels = \
+    Submodels:dict[str:type] = \
         {
-            "heatTransferModel":        None,
-            "laminarFlameSpeedModel":   None,
+            # "heatTransferModel":        None,
+            # "laminarFlameSpeedModel":   None,
         }
     
     #########################################################################
     @classmethod
-    def fromDictionary(cls, dictionary):
+    def fromDictionary(cls, dictionary:Dictionary) -> engineModel:
         """
         Construct from dictionary like:
         {
@@ -60,15 +60,18 @@ class engineModel(Utilities):
                 then this dictionary must be named 'sparkIgnitionTimeDict'). 
                 See at the helper for function 'fromDictionary' of the specific 
                 engineTime model selected.
-        
-            engineGeometryDict: dict
+                
+            engineGeometry:         str
+                Name of the engineTime model to use
+            <engineGeometry>Dict:   dict
                 Dictionary with data required from engineGeometry (see help for 
                 engineGeometry.fromDictionary for input data)
         }
         """
         try:
-            cls.checkType(dictionary, dict, "dictionary")
-            dictionary = Dictionary(dictionary)
+            cls.checkTypes(dictionary, [dict, Dictionary], "dictionary")
+            if isinstance(dictionary, dict):
+                dictionary = Dictionary(dictionary)
             
             print("Constructing engine model from dictionary")
             
@@ -79,39 +82,45 @@ class engineModel(Utilities):
             
             #EngineGeometry:
             print("Construct engineGeometry")
-            EG = engineGeometry.fromDictionary(dictionary.lookup("engineGeometryDict"))
+            egModel = dictionary.lookup("engineGeometry")
+            EG = engineGeometry.selector(egModel, dictionary.lookup(egModel + "Dict"))
+
+            #Submodels
+            subModels = {}
+            smDict = dictionary.lookupOrDefault("submodels", Dictionary())
+            for sm in cls.Submodels:
+                if sm in smDict:
+                    smTypeName = dictionary.lookup(sm)
+                    subModels[sm] = cls.Submodels[sm].selector(smTypeName, smDict.lookup(sm + "Dict"))
             
-            return cls(ET, EG)
+            return cls(ET, EG, subModels)
         except BaseException as err:
             cls.fatalErrorInClass(cls.fromDictionary, "Failed contruction from dictionary", err)
     
     #########################################################################
     #Constructor:
-    def __init__(self, time, geometry, submodels={}, **argv):
+    def __init__(self, time:engineTime, geometry:engineGeometry, submodels:dict={}):
         """
         time:       EngineTime
         geometry:   EngineGeometry
         submodels:  dict
             Dictionary containing the optional sub-models to load
         
-        [keyword arguments]
-        ...
-        
         Base class for engine model, used for type-checking and loading the 
-        sub-models. To be overwritten by derived class.
+        sub-models.
         """
         try:
             #Main models
-            self.checkType(geometry, self.__class__.Types["engineGeometry"], "geometry")
-            self.checkType(time, self.__class__.Types["engineTime"], "engineTime")
+            self.checkType(geometry, self.Types["engineGeometry"], "geometry")
+            self.checkType(time, self.Types["engineTime"], "engineTime")
             self.geometry = geometry
             self.time = time
             
             #Submodels
             self.checkType(submodels, dict, "submodels")
-            for model in self.__class__.Submodels:
+            for model in self.Submodels:
                 if model in submodels:
-                    self.checkType(submodels[model], self.__class__.Types[model], f"{submodels}[{model}]")
+                    self.checkType(submodels[model], self.Types[model], f"{submodels}[{model}]")
             
             #Data structures
             self.raw = EngineData()     #Raw data
@@ -133,7 +142,7 @@ class engineModel(Utilities):
         
     
     #########################################################################
-    def loadFile(self,*args,**argv):
+    def loadFile(self,*args,**argv) -> engineModel:
         """
         Loads a file with raw data to self.raw. See EngineData.loadFile 
         documentation for arguments:
@@ -155,7 +164,7 @@ class engineModel(Utilities):
     loadArray.__doc__ += EngineData.loadArray.__doc__
     
     ####################################
-    def filterData(self, dt, Filter=None):
+    def filterData(self, dt:float, /, *,Filter=None):
         """
         dt:     float
             New time-step to use for resampling the raw data
@@ -166,6 +175,8 @@ class engineModel(Utilities):
         Filter the data in self.raw applying a filer (optional) 
         and resampling with given time-step. Save the corresponding 
         filtered data to self.data
+        
+        TODO: Filer
         """
         try:
             self.checkType(dt, float, "dt")
@@ -181,7 +192,9 @@ class engineModel(Utilities):
         
         return self
     ####################################
+    @abstractmethod
     def process(self):
         """
-        Process the data
+        Process the data (to be overwritten)
         """
+        pass

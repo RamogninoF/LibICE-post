@@ -11,24 +11,24 @@ Last update:        12/06/2023
 #                               IMPORT                              #
 #####################################################################
 
-from pylab import math, cos, sin, sqrt, radians, degrees
+from .EngineGeometry import EngineGeometry
 
-from src.base.Utilities import Utilities
+from pylab import math, cos, sin, sqrt, radians
 
 #############################################################################
 #                               MAIN CLASSES                                #
 #############################################################################
-class engineGeometry(Utilities):
+class ConRodGeometry(EngineGeometry):
     """
-    Base class for handling engine geometrical parameters during cycle.
+    Geometry for simple engine piston.
     
-    NOTE: Crank angles are defined with 0 CAD at FIRING TDC
+    NOTE: Crank angles are defined with 0 CAD at TDC
     
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
     Attibutes:
         
-        [Variable] | [Type]     | [Unit] | [Description]
+        Variable   | Type       | Unit   | Description
         -----------|------------|--------|-------------------------
         CR         | float      | -      | Compression ratio
         lam        | float      | -      | conRodLen/crankRadius
@@ -82,7 +82,7 @@ class engineGeometry(Utilities):
                 if not entry in mandatoryEntries:
                     raise ValueError(f"Entry '{entry}' not found in contruction dictionary.")
             
-            Dict = Utilities.updateKeywordArguments(inputDict, defaultDict)
+            Dict = self.updateKeywordArguments(inputDict, defaultDict)
             
             return cls(Dict["CR"], Dict["bore"], Dict["stroke"], Dict["conRodLen"], Dict["pistCylAreaRatio"], Dict["headCylAreaRatio"])
             
@@ -106,7 +106,7 @@ class engineGeometry(Utilities):
     
     #########################################################################
     #Constructor:
-    def __init__(self, CR, bore, stroke, conRodLen, pistonCylAreaRatio=1.0, headCylAreaRatio=1.0):
+    def __init__(self, /, CR:float, bore:float, stroke:float, conRodLen:float, pistonCylAreaRatio:float=1.0, headCylAreaRatio:float=1.0):
         """
         [Variable]        | [Type] | [Default] | [Unit] | [Description]
         ------------------|--------|-----------|--------|----------------------------------
@@ -141,7 +141,7 @@ class engineGeometry(Utilities):
         
         #Argument checking:
         try:
-            Dict = Utilities.updateKeywordArguments(inputDict, defaultDict)
+            Dict = self.updateKeywordArguments(inputDict, defaultDict)
         except BaseException as err:
             self.fatalErrorInArgumentChecking(self.__init__, err)
         
@@ -241,3 +241,8 @@ class engineGeometry(Utilities):
                 return self.s(CA) * math.pi * self.D
         except BaseException as err:
             self.fatalErrorInClass(self.linerArea, "", err)
+
+
+#########################################################################
+#Add to selection table:
+EngineGeometry.addToRuntimeSelectionTable(ConRodGeometry)
