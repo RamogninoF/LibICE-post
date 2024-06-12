@@ -13,7 +13,7 @@ Chemical specie
 #                               IMPORT                              #
 #####################################################################
 
-from libICEpost.src.base.Functions.runtimeWarning import runtimeWarning
+from libICEpost.src.base.Functions.runtimeWarning import fatalErrorInFunction
 
 from libICEpost.src.thermophysicalModels.specie.specie.Molecule import Molecule
 
@@ -58,7 +58,7 @@ def fromJson(fileName, typeName="Molecules"):
                     raise ValueError(f"Invalid typeName {typeName}. Available are:\t Molecules, Fuels.")
             
     except BaseException as err:
-        runtimeWarning(f"Failed to load the molecule database '{fileName}':\n{err}.")
+        fatalErrorInFunction(fromJson, f"Failed to load the molecule database '{fileName}':\n{err}.")
 
 #Load database
 fileName = Database.location + "/data/Molecules.json"

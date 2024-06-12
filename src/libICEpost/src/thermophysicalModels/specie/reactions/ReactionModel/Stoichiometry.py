@@ -24,26 +24,17 @@ from libICEpost.Database import database
 #############################################################################
 #                               MAIN CLASSES                                #
 #############################################################################
-class StoichiometricCombustion(ReactionModel):
+class Stoichiometry(ReactionModel):
     """
-    Reaction model of fuel combustion with infinitely fast chemistry. The
-    system is modeled as two zones, reactants and products, separated by an
-    infinitely thin reaction zone.
-    
-    NOTE:
-    All fuels in the mixture must be contained in the 'fuel' entry, while the oxidizers
-    in 'oxidizer'. By default the oxidizer is O2.
+    Reaction model of fuel combustion with infinitely fast chemistry
     
     TODO:
     Extend to handle a generic reaction set, where there might be more then one oxidizer
     
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     Attributes:
-        fuel:  list<Molecule>
-            The oxidizing molecule
-            
         oxidiser:  Molecule
-            The oxidisers
+            The oxidiser
 
         reactants:  (Mixture)
             The mixture of the reactants
@@ -55,7 +46,8 @@ class StoichiometricCombustion(ReactionModel):
            Database of oxidation reactions. Reference to database.chemistry.reactions
     
     """
-    _ReactionType = "StoichiometricReaction"
+    #The type of reation to look-up for
+    _ReactionType:str = "StoichiometricReaction"
     
     #########################################################################
     @property
@@ -83,7 +75,6 @@ class StoichiometricCombustion(ReactionModel):
                 {
                     "reactants" (Mixture): the mixture of reactants
                     "oxidiser" (Molecule): the oxidizer
-                    "fuel" (list<Molecule>): the fuel molecuels in the mixture
                 }
         
         Constructs from dictionary
@@ -138,23 +129,29 @@ class StoichiometricCombustion(ReactionModel):
         """
         fuels = []
         for s in self.reactants:
-            if s["specie"].name in database.chemistry.specie.Fuels:
-                fuels.append(s["specie"])
+            if s.specie.name in database.chemistry.specie.Fuels:
+                fuels.append(s.specie)
         self._fuels = fuels
         
         return self
         
     ###################################
-    def _update(self, reactants=None):
+    def _update(self, reactants:Mixture=None, **state) -> bool:
         """
-        Method to update the reactants based on the mixture composition (interface).
+        Method to update the products.
+
+        Args:
+            reactants (Mixture, optional): Update mixture of reactants. Defaults to None.
+
+        Returns:
+            bool: wether the system was updated
         """
         #Update reactants, return True if the reactants are already up-to-date:
         if super()._update(reactants):
             return True
         self._updateFuels()
         
-        #Splitting the reactants into three steps:
+        #Splitting the computation into three steps:
         #1) Removing the non-reacting compounds
         #   ->  Identified as those not found in the reactants 
         #       of any reactions
@@ -177,7 +174,7 @@ class StoichiometricCombustion(ReactionModel):
                 raise ValueError(f"Oxidation reaction not found in database 'rections.{self.ReactionType}' for the couple (fuel, oxidizer) = ({f.name, self.oxidizer.name})")
         
         #Identification of reacting compounds
-        xReact = 0.0
+        yReact = 0.0
         reactingMix = None
         activeReactions = []
         #Loop over specie of the reactants
@@ -187,12 +184,12 @@ class StoichiometricCombustion(ReactionModel):
             for r in oxReactions:
                 react = oxReactions[r]
                 #Check if the specie in the reactants of the reaction
-                if specie["specie"] in react.reactants:
+                if specie.specie in react.reactants:
                     #Check that all reactants of the reaction are found in the mixture,
                     #otherwise the reaction does not take place
                     active = True
                     for sR in react.reactants:
-                        if not (sR["specie"] in self.reactants):
+                        if not (sR.specie in self.reactants):
                             active = False
                             break
                     
@@ -216,42 +213,44 @@ class StoichiometricCombustion(ReactionModel):
             #add the specie to the reacting mixture if an active reaction was found
             if found:
                 if reactingMix is None:
-                    reactingMix = Mixture([specie["specie"]], [1])
+                    reactingMix = Mixture([specie.specie], [1])
+                elif specie.specie in reactingMix:
+                    #skip
+                    continue
                 else:
-                    reactingMix.dilute(specie["specie"], specie["X"]/(xReact + specie["X"]), "mole")
-                xReact += specie["X"]
+                    reactingMix.dilute(specie.specie, specie.Y/(yReact + specie.Y), "mass")
+                yReact += specie.Y
+        
+        #If reacting mixture still empty, products are equal to reactants:
+        if reactingMix is None:
+            self._products = self._reactants
+            return False    #Updated
         
         #Removing inerts
         inerts = None
-        xInert = 0.0
+        yInert = 0.0
         for specie in self.reactants:
-            if not specie["specie"] in reactingMix:
+            if not specie.specie in reactingMix:
                 if inerts is None:
-                    inerts = Mixture([specie["specie"]], [1])
+                    inerts = Mixture([specie.specie], [1])
                 else:
-                    inerts.dilute(specie["specie"], specie["X"]/(xInert + specie["X"]), "mole")
-                xInert += specie["X"]
+                    inerts.dilute(specie.specie, specie.Y/(yInert + specie.Y), "mass")
+                yInert += specie.Y
         
         # print("Reactants:")
         # print(self.reactants)
         
-        # print(f"Reacting mixture (X = {xReact})")
+        # print(f"Reacting mixture (Y = {yReact})")
         # print(reactingMix)
         
-        # print(f"Inerts (X = {xInert})")
+        # print(f"Inerts (Y = {yInert})")
         # print(inerts)
-        
-        #If no active reaction found, clone reactants to products:
-        if reactingMix is None:
-            self._products = self._reactants
-            return self
         
         # print("Active reactions:",[str(r) for r in activeReactions])
         
         #To assess if lean or rich, mix the oxidation reactions based on the
         #fuel mole/mass fractions in the fuels-only mixture. If the concentration
-        #of oxigen is higher then the actual, the mixture is rich, else lean.
-        
+        #of oxidizer is higher then the actual, the mixture is rich, else lean.
         
         #Get stoichiometric combustion products:
         #   -> Solving linear sistem of equations 
@@ -281,8 +280,8 @@ class StoichiometricCombustion(ReactionModel):
         
         fuelMix = self.fuel
         
-        M = self.np.diag([oxReactions[f.name].reactants[f.name]["X"] for f in self._fuels])
-        M = self.np.c_[M, [-fuelMix[f]["X"] for f in self._fuels]]
+        M = self.np.diag([oxReactions[f.name].reactants[f.name].X for f in self._fuels])
+        M = self.np.c_[M, [-fuelMix[f].X for f in self._fuels]]
         M = self.np.c_[M.T, [1.]*(len(fuelMix)) + [0.]].T
         v = self.np.c_[self.np.zeros((1,len(fuelMix))), [1]].T
         xStoich = self.np.linalg.solve(M,v).T[0][:-1]
@@ -313,30 +312,39 @@ class StoichiometricCombustion(ReactionModel):
         # print(prods)
         
         #If the reaction is not stoichiometric, add the non-reacting part:
-        if not math.isclose(stoichReactingMix[self.oxidizer]["X"],reactingMix[self.oxidizer]["X"]):
-            if (reactingMix[self.oxidizer]["X"] > stoichReactingMix[self.oxidizer]["X"]):
-                #Get the mole fraction of excess oxidizer
-                xExc = reactingMix[self.oxidizer]["X"] - stoichReactingMix[self.oxidizer]["X"]
+        # y_exc_prod = y_exc - y_def*(y_exc_st/y_def_st)
+        
+        if not math.isclose(stoichReactingMix[self.oxidizer].Y,reactingMix[self.oxidizer].Y):
+            if (reactingMix[self.oxidizer].Y > stoichReactingMix[self.oxidizer].Y):
+                #Excess oxidizer
+                y_exc = reactingMix[self.oxidizer].Y
+                y_exc_st = stoichReactingMix[self.oxidizer].Y
                 excMix = Mixture([self.oxidizer],[1.])
             else:
-                xExc = stoichReactingMix[self.oxidizer]["X"] - reactingMix[self.oxidizer]["X"]
+                #Excess fuel
+                y_exc = 1. - reactingMix[self.oxidizer].Y
+                y_exc_st = 1. - stoichReactingMix[self.oxidizer].Y
                 excMix = self.fuel
             #Add non-reacting compound
-            prods.dilute(excMix,xExc, "mole")
             
-            # print(f"Excess mixture: (X = {xExc})")
-            # print(excMix)
+            y_def = 1 - y_exc
+            y_def_st = 1. - y_exc_st
+            y_exc_prod = y_exc - y_def*(y_exc_st/y_def_st)
+            prods.dilute(excMix,y_exc_prod, "mass")
+            
+            print(f"Excess mixture: (Y = {y_exc_prod})")
+            print(excMix)
         
         #Add inherts:
         if not inerts is None:
-            prods.dilute(inerts, xInert, "mole")
+            prods.dilute(inerts, yInert, "mass")
         
         self._products = prods
         
         # print("Products:")
         # print(prods)
         
-        #Has updated
+        #Updated
         return False
         
     ################################
@@ -344,4 +352,4 @@ class StoichiometricCombustion(ReactionModel):
     
 #########################################################################
 #Add to selection table
-ReactionModel.addToRuntimeSelectionTable(StoichiometricCombustion)
+ReactionModel.addToRuntimeSelectionTable(Stoichiometry)

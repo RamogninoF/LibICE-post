@@ -11,6 +11,8 @@ Last update:        17/10/2023
 #                               IMPORT                              #
 #####################################################################
 
+from __future__ import annotations
+
 from libICEpost.src.base.BaseClass import BaseClass, abstractmethod
 
 from .....specie.thermo.Thermo import Thermo
@@ -47,7 +49,7 @@ class ThermoMixing(BaseClass):
     #########################################################################
     #Properties
     @property
-    def mix(self):
+    def mix(self) -> Mixture:
         return self._mix
 
     #########################################################################
@@ -67,7 +69,7 @@ class ThermoMixing(BaseClass):
     #########################################################################
     #Properties:
     @property
-    def Thermo(self):
+    def Thermo(self) -> Thermo:
         """
         The thermodynamic data of the mixture.
         """
@@ -75,7 +77,7 @@ class ThermoMixing(BaseClass):
         return self._Thermo
 
     #########################################################################
-    def update(self, mix:Mixture=None):
+    def update(self, mix:Mixture=None) -> ThermoMixing:
         """
         Method to update the thermodynamic data based on the mixture composition (interface).
         """

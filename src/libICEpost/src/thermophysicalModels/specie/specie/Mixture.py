@@ -15,7 +15,10 @@ TODO:
 #                               IMPORT                              #
 #####################################################################
 
+from __future__ import annotations
+
 from libICEpost.src.base.Utilities import Utilities
+from dataclasses import dataclass
 
 import math
 from .Atom import Atom
@@ -29,6 +32,15 @@ constants = database.chemistry.constants
 #############################################################################
 #                               MAIN CLASSES                                #
 #############################################################################
+@dataclass
+class MixtureItem:
+    """
+    Dataclass used as return value by Mixture.__getitem__ method
+    """
+    specie:Molecule
+    X:float
+    Y:float
+
 #Mixture class:
 class Mixture(Utilities):
     #########################################################################
@@ -49,6 +61,9 @@ class Mixture(Utilities):
     """
     
     _decimalPlaces = 10
+    _X:list[float]
+    _Y:list[float]
+    _specie:list[Molecule]
     
     #########################################################################
     @property
@@ -102,8 +117,20 @@ class Mixture(Utilities):
         return self._specie[:]
     
     #########################################################################
+    @classmethod
+    def empty(cls):
+        """
+        Overload empty initializer.
+        """
+        item = super().empty()
+        item._X = []
+        item._Y = []
+        item._specie = []
+        return item
+    
+    #########################################################################
     #Constructor:
-    def __init__(self, specieList, composition, fracType ="mass"):
+    def __init__(self, specieList:list[Molecule], composition:list[float], fracType ="mass"):
         """
         specieList:         list<Molecule>
             Names of the chemical specie in the mixture (must be in
@@ -175,7 +202,7 @@ class Mixture(Utilities):
         StrToPrint += hLine(title)
         
         for data in self:
-            StrToPrint += template.format(data["specie"].name, template1.format(data["specie"].MM), template1.format(data["X"]), template1.format(data["Y"]))
+            StrToPrint += template.format(data.specie.name, template1.format(data.specie.MM), template1.format(data.X), template1.format(data.Y))
         
         StrToPrint += hLine(title)
         StrToPrint += template.format("tot", template1.format(self.MM), template1.format(self.Xsum()), template1.format(self.Ysum()))
@@ -199,7 +226,7 @@ class Mixture(Utilities):
     
     ###############################
     #Access:
-    def __getitem__(self, specie):
+    def __getitem__(self, specie) -> MixtureItem:
         """
         specie:     str / Molecule / int
         
@@ -208,14 +235,8 @@ class Mixture(Utilities):
             -> If Molecule: checking for specie
             -> If int:  checing for entry following the order
         
-        {
-            specie:     Molecule
-                The molecule
-            X:          float
-                Mole fraction in mixture
-            Y:          float
-                Mass fraction in mixture
-        }
+        Returns:
+            MixtureItem: dataclass for data of specie in mixture.
         """
         #Argument checking:
         try:
@@ -239,12 +260,12 @@ class Mixture(Utilities):
         except BaseException as err:
             self.fatalErrorInClass(self.__getitem__, "failure retrieving molecule in mixture", err)
         
-        data = \
-            {
-                "specie":self.specie[index].copy(),
-                "X":self.X[index],
-                "Y":self.Y[index]
-            }
+        data = MixtureItem(specie=self.specie[index].copy(), X=self.X[index], Y=self.Y[index])
+            # {
+            #     "specie":self.specie[index].copy(),
+            #     "X":self.X[index],
+            #     "Y":self.Y[index]
+            # }
         
         return data
     
@@ -309,8 +330,8 @@ class Mixture(Utilities):
     ###############################
     def __eq__(self, mix):
         self.checkType(mix, Mixture, "mix")
-        specieList1 = sorted([s for s in self],key=(lambda x: x["specie"]))
-        specieList2 = sorted([s for s in mix],key=(lambda x: x["specie"]))
+        specieList1 = sorted([s for s in self],key=(lambda x: x.specie))
+        specieList2 = sorted([s for s in mix],key=(lambda x: x.specie))
 
         return specieList1 == specieList2
     
@@ -325,10 +346,10 @@ class Mixture(Utilities):
         """
         aux = 0.0
         for speci in self:
-            aux += speci["Y"] / speci["specie"].MM
+            aux += speci.Y / speci.specie.MM
             
         for ii, speci in enumerate(self):
-            self._X[ii] = (speci["Y"] / speci["specie"].MM) / aux
+            self._X[ii] = (speci.Y / speci.specie.MM) / aux
     
     ###############################
     #Compute Mass fractions:
@@ -338,10 +359,10 @@ class Mixture(Utilities):
         """
         aux = 0.0
         for speci in self:
-            aux += speci["X"] * speci["specie"].MM
+            aux += speci.X * speci.specie.MM
         
         for ii, speci in enumerate(self):
-            self._Y[ii] = (speci["X"] * speci["specie"].MM) / aux
+            self._Y[ii] = (speci.X * speci.specie.MM) / aux
             
     ###############################
     #Compute MMmix:
@@ -352,7 +373,7 @@ class Mixture(Utilities):
         """
         MMmixture = 0.0
         for specj in self:
-            MMmixture += specj["X"] * specj["specie"].MM
+            MMmixture += specj.X * specj.specie.MM
         return MMmixture
     
     ###############################
@@ -363,7 +384,7 @@ class Mixture(Utilities):
         """
         Ysum = 0.0
         for speci in self:
-            Ysum += speci["Y"]
+            Ysum += speci.X
         return Ysum
     
     ###############################
@@ -374,12 +395,12 @@ class Mixture(Utilities):
         """
         Xsum = 0.0
         for speci in self:
-            Xsum += speci["X"]
+            Xsum += speci.X
         return Xsum
     
     ###############################
     #Dilute the mixture with a second mixture, given the mass fraction of dilutant with respect to overall mixture (for example EGR):
-    def dilute(self, dilutingMix, dilutionFract, fracType ="mass"):
+    def dilute(self, dilutingMix:Mixture, dilutionFract:float, fracType:str="mass"):
         """
         dilutingMix:        Mixture/Molecule
             Diluting mixture
@@ -407,6 +428,10 @@ class Mixture(Utilities):
         except BaseException as err:
             self.fatalErrorInArgumentChecking(self.dilute, err)
         
+        #If dilution fraction is too low, skip
+        if dilutionFract < 10.**(-1.*self._decimalPlaces):
+            return self
+        
         #Cast molecule to mixture
         if isinstance(dilutingMix, Molecule):
             dilutingMix = Mixture([dilutingMix], [1.0])
@@ -425,30 +450,30 @@ class Mixture(Utilities):
         try:
             for speci in dilutingMix:
                 #Check if it was already present:
-                if not(speci["specie"] in self):
+                if not(speci.specie in self):
                     #Add the new specie
-                    self._specie.append(speci["specie"])
+                    self._specie.append(speci.specie)
                     print()
                     if (fracType == "mass"):
-                        self._Y.append(speci["Y"] * dilutionFract)
+                        self._Y.append(speci.Y * dilutionFract)
                         self._X.append(float('nan'))
-                        self.updateMolFracts()
+                        # self.updateMolFracts()
                     elif (fracType == "mole"):
-                        self._X.append(speci["X"] * dilutionFract)
+                        self._X.append(speci.X * dilutionFract)
                         self._Y.append(float('nan'))
-                        self.updateMassFracts()
+                        # self.updateMassFracts()
                 else:
                     #Dilute the already present specie
-                    index = self.index(speci["specie"])
+                    index = self.index(speci.specie)
                     if (fracType == "mass"):
-                        self._Y[index] = (self.Y[index] * (1.0 - dilutionFract)) + (speci["Y"] * dilutionFract)
+                        self._Y[index] = (self.Y[index] * (1.0 - dilutionFract)) + (speci.Y * dilutionFract)
                     elif (fracType == "mole"):
-                        self._X[index] = (self.X[index] * (1.0 - dilutionFract)) + (speci["X"] * dilutionFract)
+                        self._X[index] = (self.X[index] * (1.0 - dilutionFract)) + (speci.X * dilutionFract)
             
             #Update mass/mole fractions of other specie:
             for speci in self:
-                if not(speci["specie"] in dilutingMix):
-                    index = self.index(speci["specie"])
+                if not(speci.specie in dilutingMix):
+                    index = self.index(speci.specie)
                     if (fracType == "mass"):
                         self._Y[index] *= (1.0 - dilutionFract)
                     elif (fracType == "mole"):
@@ -482,8 +507,8 @@ class Mixture(Utilities):
                     if output is None:
                         output = Mixture([specie], [1])
                     else:
-                        output.dilute(specie, self[specie]["X"]/(xOutput + self[specie]["X"]), "mole")
-                    xOutput += self[specie]["X"]
+                        output.dilute(specie, self[specie].X/(xOutput + self[specie].X), "mole")
+                    xOutput += self[specie].X
                 else:
                     raise ValueError(f"Specie {specie.name} not found in mixture.")
             
@@ -522,7 +547,7 @@ class MixtureIter:
 #                             FRIEND FUNCTIONS                              #
 #############################################################################
 #Mixture blend:
-def mixtureBlend(mixtures:list, composition:list, fracType:str="mass") -> Mixture:
+def mixtureBlend(mixtures:list[Mixture], composition:list[float], fracType:str="mass") -> Mixture:
     """
     mixture:    list<mixture>
             List of mixtures to be blended
@@ -559,12 +584,19 @@ def mixtureBlend(mixtures:list, composition:list, fracType:str="mass") -> Mixtur
     except BaseException as err:
         Utilities.fatalErrorInArgumentChecking(None,mixtureBlend, err)
     
-    mixBlend = mixtures[0].copy()
-    Yblen = composition[0]
-    for ii in range(len(mixtures) - 1):
-        Ydil = composition[ii+1]/(Yblen + composition[ii+1])
-        mixBlend.dilute(mixtures[ii+1], Ydil, fracType)
-        Yblen += composition[ii+1]
+    mixBlend:Mixture = None
+    for ii, mix in enumerate(mixtures):
+        if composition[ii] <= 0.:
+            continue
+        
+        if mixBlend is None:
+            mixBlend = mix.copy()
+            Yblen = composition[ii]
+            continue
+            
+        Ydil = composition[ii]/(Yblen + composition[ii])
+        mixBlend.dilute(mix, Ydil, fracType)
+        Yblen += composition[ii]
     
     return mixBlend
 

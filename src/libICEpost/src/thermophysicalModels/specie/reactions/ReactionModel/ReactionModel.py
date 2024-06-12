@@ -11,6 +11,9 @@ Last update:        12/06/2023
 #                               IMPORT                              #
 #####################################################################
 
+from __future__ import annotations
+
+
 from libICEpost.src.base.BaseClass import BaseClass, abstractmethod
 
 from ..Reaction.Reaction import Reaction
@@ -86,9 +89,16 @@ class ReactionModel(BaseClass):
     
 
     #########################################################################
-    def update(self, reactants:Mixture=None):
+    def update(self, reactants:Mixture=None, **state:dict[str:float]) -> ReactionModel:
         """
         Method to update the reactants data based on the mixture composition (interface).
+
+        Args:
+            reactants (Mixture, optional): Mixture of reactants if to be changed. Defaults to None.
+            **state (dict[str:float]): State variables that could be needed by specific reaction model.
+
+        Returns:
+            ReactionModel: self
         """
         try:
             if not reactants is None:
@@ -96,16 +106,23 @@ class ReactionModel(BaseClass):
         except BaseException as err:
             self.fatalErrorInClass(self.__init__,"Argument checking failed", err)
         
-        self._update(reactants)
+        self._update(reactants,**state)
         
         return self
     
     #####################################
     @abstractmethod
-    def _update(self, reactants:Mixture=None):
+    def _update(self, reactants:Mixture=None) -> bool:
         """
         Method to update the reactants based on the mixture composition (implementation).
+        
+        Args:
+            reactants (Mixture, optional): Mixture of reactants if to be changed. Defaults to None.
+        
+        Returns:
+            bool: returns true if already up-to-date, otherwise False. Used in derived class to know if can skipp updating the state.
         """
+        #Update reactants
         if not reactants is None:
             self._reactants = reactants
         

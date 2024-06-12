@@ -89,12 +89,12 @@ class StoichiometricReaction(Reaction):
         """
         string = ""
         for r in self.reactants:
-            if (r["X"] == 1):
-                string += r["specie"].name
-            elif r["X"] == int(r["X"]):
-                string += str(int(r["X"])) + " " + r["specie"].name
+            if (r.X == 1):
+                string += r.specie.name
+            elif r.X == int(r.X):
+                string += str(int(r.X)) + " " + r.specie.name
             else:
-                string += "{:.3f}".format(r["X"]) + " " + r["specie"].name
+                string += "{:.3f}".format(r.X) + " " + r.specie.name
             
             string += " + "
         string = string[:-3]
@@ -102,12 +102,12 @@ class StoichiometricReaction(Reaction):
         string += " -> "
         
         for p in self.products:
-            if (p["X"] == 1):
-                string += p["specie"].name
-            elif p["X"] == int(p["X"]):
-                string += str(int(p["X"])) + " " + p["specie"].name
+            if (p.X == 1):
+                string += p.specie.name
+            elif p.X == int(p.X):
+                string += str(int(p.X)) + " " + p.specie.name
             else:
-                string += "{:.3f}".format(p["X"]) + " " + p["specie"].name
+                string += "{:.3f}".format(p.X) + " " + p.specie.name
             
             string += " + "
         string = string[:-3]
@@ -136,29 +136,29 @@ class StoichiometricReaction(Reaction):
         #Determine all chemical specie involved in the reaction
         molecules = []
         for specie in self.reactants:
-            molecules.append(specie["specie"])
+            molecules.append(specie.specie)
         for specie in self.products:
-            molecules.append(specie["specie"])
+            molecules.append(specie.specie)
         
         #Determine all atomic specie involved in the reaction
         atoms = []
         for specie in molecules:
             for atom in specie:
-                if not atom["atom"] in atoms:
-                    atoms.append(atom["atom"])
+                if not atom.atom in atoms:
+                    atoms.append(atom.atom)
         
         #Build the matrix of coefficients, associated to the balances of each atomic specie
         coeffs = self.np.zeros((len(atoms), len(molecules)))
         
         for specie in self.reactants:
-            atomIndices = [atoms.index(a["atom"]) for a in specie["specie"]]
-            specieIndex = self.reactants.index(specie["specie"])
-            coeffs[atomIndices,specieIndex] += specie["specie"].atomicCompositionMatrix().T
+            atomIndices = [atoms.index(a.atom) for a in specie.specie]
+            specieIndex = self.reactants.index(specie.specie)
+            coeffs[atomIndices,specieIndex] += specie.specie.atomicCompositionMatrix().T
         
         for specie in self.products:
-            atomIndices = [atoms.index(a["atom"]) for a in specie["specie"]]
-            specieIndex = self.products.index(specie["specie"]) + len(self.reactants)
-            coeffs[atomIndices,specieIndex] -= specie["specie"].atomicCompositionMatrix().T
+            atomIndices = [atoms.index(a.atom) for a in specie.specie]
+            specieIndex = self.products.index(specie.specie) + len(self.reactants)
+            coeffs[atomIndices,specieIndex] -= specie.specie.atomicCompositionMatrix().T
         
         #Check if all specie are involved in the reaction:
         for ii, specie in enumerate(molecules):

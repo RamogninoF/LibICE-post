@@ -12,6 +12,7 @@ Last update:        12/06/2023
 #####################################################################
 
 from libICEpost.src.base.Utilities import Utilities
+from dataclasses import dataclass
 
 from .Atom import Atom
 
@@ -23,6 +24,14 @@ constants = database.chemistry.constants
 #############################################################################
 #                               MAIN CLASSES                                #
 #############################################################################
+@dataclass
+class MoleculeItem:
+    """
+    Dataclass used as return value by Molecule.__getitem__ method
+    """
+    atom:Atom
+    n:float
+
 #Chemical specie:
 class Molecule(Utilities):
     
@@ -43,9 +52,9 @@ class Molecule(Utilities):
         
     """
     
-    name = ""
-    atoms = []
-    numberOfAtoms = []
+    name:str
+    atoms:list[Atom]
+    numberOfAtoms:list[float]
     
 
     #Compute Rgas:
@@ -58,6 +67,17 @@ class Molecule(Utilities):
         specGasConst = constants.Rgas / self.MM
         return specGasConst
 
+    #########################################################################
+    @classmethod
+    def empty(cls):
+        """
+        Overload empty initializer.
+        """
+        item = super().empty()
+        item.atoms = []
+        item.numberOfAtoms = []
+        return item
+    
     #########################################################################
     @classmethod
     def fromDictionary(cls, dictionary):
@@ -214,17 +234,17 @@ class Molecule(Utilities):
             #Add atoms of second specie
             for atom in otherSpecie:
                 #Check if already present
-                if atom["atom"].name in self:
+                if atom.atom.name in self:
                     #Check if with different properties:
-                    if not(atom["atom"] in self):
-                        raise ValueError("Atomic specie named '{}' already present in molecule with different properties, cannot add atomic specie to molecule.".format(atom["atom"].name))
+                    if not(atom.atom in self):
+                        raise ValueError("Atomic specie named '{}' already present in molecule with different properties, cannot add atomic specie to molecule.".format(atom.atom.name))
                     #Add number of atoms of second specie
-                    indexSelf = self.index(atom["atom"])
-                    self.numberOfAtoms[indexSelf] += atom["numberOfAtoms"]
+                    indexSelf = self.index(atom.atom)
+                    self.numberOfAtoms[indexSelf] += atom.n
                 else:
                     #Add new atomic specie
-                    self.atoms.append(atom["atom"].copy())
-                    self.numberOfAtoms.append(atom["numberOfAtoms"])
+                    self.atoms.append(atom.atom.copy())
+                    self.numberOfAtoms.append(atom.n)
             
             #Set name from brute formula
             self.name = self.bruteFormula()
@@ -264,7 +284,7 @@ class Molecule(Utilities):
         StrToPrint += hLine(title)
         
         for atom in self:
-            StrToPrint += template.format(atom["atom"].name, str(atom["atom"].mass), str(atom["numberOfAtoms"]))
+            StrToPrint += template.format(atom.atom.name, str(atom.atom.mass), str(atom.n))
         
         StrToPrint += hLine(title)
         StrToPrint += template.format("tot.", str(self.MM), "")
@@ -345,13 +365,7 @@ class Molecule(Utilities):
             -> If Atom: checking for atomic specie
             -> If int:  checing for entry following the order
         
-        {
-            atom:           Atom
-                The atom
-            numberOfAtoms:  float
-                Number of atoms of corresponding atomic 
-                specie in the Molecule
-        }
+        Return: MoleculeItem
         """
         #Argument checking:
         try:
@@ -377,11 +391,11 @@ class Molecule(Utilities):
         except BaseException as err:
             self.fatalErrorInClass(self.__getitem__, "failure retrieving atom in molecule", err)
         
-        data = \
-            {
-                "atom":self.atoms[index].copy(),
-                "numberOfAtoms":self.numberOfAtoms[index]
-            }
+        data = MoleculeItem(self.atoms[index].copy(), self.numberOfAtoms[index])
+            # {
+            #     "atom":self.atoms[index].copy(),
+            #     "numberOfAtoms":self.numberOfAtoms[index]
+            # }
         
         return data
     
@@ -402,7 +416,7 @@ class Molecule(Utilities):
         """
         MM = 0.0
         for atom in self:
-            MM += atom["atom"].mass * atom["numberOfAtoms"]
+            MM += atom.atom.mass * atom.n
         return MM
     
     ##############################
@@ -414,12 +428,12 @@ class Molecule(Utilities):
         BF = ""
         
         for atom in self:
-            if (atom["numberOfAtoms"] == 1):
-                BF += atom["atom"].name
-            elif atom["numberOfAtoms"] == int(atom["numberOfAtoms"]):
-                BF += atom["atom"].name + str(int(atom["numberOfAtoms"]))
+            if (atom.n == 1):
+                BF += atom.atom.name
+            elif atom.n == int(atom.n):
+                BF += atom.atom.name + str(int(atom.n))
             else:
-                BF += atom["atom"].name + "{:.3f}".format(atom["numberOfAtoms"])
+                BF += atom.atom.name + "{:.3f}".format(atom.n)
         
         return BF
     
@@ -445,7 +459,7 @@ class Molecule(Utilities):
         of atoms of the atomic specie in the mixture, sorted 
         according to their order in 'atoms' array.
         """
-        return self.__class__.np.array([a["numberOfAtoms"] for a in self])
+        return self.__class__.np.array([a.n for a in self])
     
     def setName(self, value):
         """
@@ -462,7 +476,7 @@ class MoleculeIter:
     """
     Iterator for Molecule class.
     """
-    def __init__(self, molecule):
+    def __init__(self, molecule:Molecule):
         self.molecule = molecule
         self.atoms = [a.name for a in molecule.atoms]
         

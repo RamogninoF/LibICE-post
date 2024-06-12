@@ -11,9 +11,21 @@ Last update:        12/06/2023
 #                               IMPORT                              #
 #####################################################################
 
+from __future__ import annotations
+
 from libICEpost.src.base.Utilities import Utilities
+from libICEpost.src.base.dataStructures.Dictionary import Dictionary
 
 from libICEpost.src.thermophysicalModels.specie.specie.Mixture import Mixture
+
+from libICEpost.Database import _DatabaseClass
+
+from .mixingRules.EquationOfState.EquationOfStateMixing import EquationOfStateMixing
+from .mixingRules.Thermo.ThermoMixing import ThermoMixing
+
+from libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.EquationOfState import EquationOfState
+from libICEpost.src.thermophysicalModels.specie.thermo.Thermo.Thermo import Thermo
+
 from . import mixingRules
 
 #############################################################################
@@ -29,18 +41,23 @@ class ThermoMixture(Utilities):
         _mix:    Mixture
             The composition of the mixture.
         
-        _EoS: mixingRules.EquationOfState
+        _EoS: mixingRules.EquationOfStateMixing
             The mixing rule used for computation of the equation of state of the mixture.
 
-        _Thermo: mixingRules.Thermo
+        _Thermo: mixingRules.ThermoMixing
             The mixing rule used for computation of the thermo of the mixture.
     """
+    
+    _mix:Mixture
+    _EoS:EquationOfStateMixing
+    _Thermo:ThermoMixing
+    _db:_DatabaseClass
     
     #########################################################################
     #Properties:
 
     @property
-    def mix(self):
+    def mix(self) -> Mixture:
         """
         The composition of the mixture (Mixture).
         """
@@ -48,7 +65,7 @@ class ThermoMixture(Utilities):
     
     ################################
     @property
-    def db(self):
+    def db(self) -> _DatabaseClass:
         """
         Database of thermodynamic data (reference to database.chemistry.thermo)
         """
@@ -56,7 +73,7 @@ class ThermoMixture(Utilities):
     
     ################################
     @property
-    def Thermo(self):
+    def Thermo(self) -> Thermo:
         """
         Thermodynamic data of this mixture.
         """
@@ -64,24 +81,28 @@ class ThermoMixture(Utilities):
     
     ################################
     @property
-    def EoS(self):
+    def EoS(self) -> EquationOfState:
         """
         The equation of state of this mixture.
+
+        Returns:
+            EquationOfState
         """
         return self._EoS.EoS
 
     #########################################################################
     #Constructor:
-    def __init__(self, mixture: Mixture, ThermoType: str, EoSType: str, ThermoDict=None, EoSDict=None):
+    def __init__(self, mixture: Mixture, thermoType: dict[str:str], **thermoData):
         """
         mixture:    ThermoTable
             The composition of the mixture.
         
-        ThermoType: str
-            There MixingRules.Thermo type to use
-        
-        EoSType: str
-            There MixingRules.EquationOfState type to use
+        thermoType: dict[str:str]
+            The types of thermodynamic models. Required are:
+            {
+                Thermo
+                EquationOfState
+            }
         
         Construct new instance of thermodynamic model of mixture from the mixture composition and mixingRule
         """
@@ -89,25 +110,19 @@ class ThermoMixture(Utilities):
 
         try:
             self.checkType(mixture, Mixture, "mixture")
-            self.checkType(ThermoType, str, "ThermoType")
-            self.checkType(EoSType, str, "EoSType")
+            self.checkType(thermoType, dict, "ThermoType")
 
-            self._db = database.chemistry.thermo
-            self._mix = mixture
+            self._db:_DatabaseClass = database.chemistry.thermo
+            self._mix:Mixture = mixture
             
-            #Set the dictionaries
-            if ThermoDict is None:
-                ThermoDict = {"mixture":mixture}
-            else:
-                ThermoDict["mixture"] = mixture
+            thermoType = Dictionary(**thermoType)
+            ThermoType = thermoType.lookup("Thermo")
+            EoSType = thermoType.lookup("EquationOfState")
             
-            if EoSDict is None:
-                EoSDict = {"mixture":mixture}
-            else:
-                EoSDict["mixture"] = mixture
-                
-            self._Thermo = mixingRules.ThermoMixing.selector(ThermoType + "Mixing", ThermoDict)
-            self._EoS = mixingRules.EquationOfStateMixing.selector(EoSType + "Mixing", EoSDict)
+            #Set the Thermo and EoS
+            thermoData:Dictionary = Dictionary(thermoData)
+            self._Thermo = mixingRules.ThermoMixing.selector(ThermoType + "Mixing", thermoData.lookup(ThermoType + "Dict").update(mixture=mixture))
+            self._EoS = mixingRules.EquationOfStateMixing.selector(EoSType + "Mixing", thermoData.lookup(EoSType + "Dict").update(mixture=mixture))
                 
         except BaseException as err:
             self.fatalErrorInClass(self.__init__, "Failed construction", err)
@@ -121,6 +136,23 @@ class ThermoMixture(Utilities):
     # are defined only in the equation of state, as they are not 
     # affected by the specific thermo. Similarly, hf is only in 
     # thermo.
+    
+    def update(self, mixture:Mixture=None) -> ThermoMixture:
+        """
+        Update the mixture composition
+
+        Args:
+            mixture (Mixture, optional): The new mixture. Defaults to None.
+
+        Returns:
+            ThermoMixture: self
+        """
+        
+        if not mixture is None:
+            self._mix = mixture
+            self._Thermo.update(mixture)
+            self._EoS.update(mixture)
+        return self
     
     ################################
     def dcpdT(self, p, T):

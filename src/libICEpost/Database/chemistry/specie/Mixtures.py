@@ -13,7 +13,7 @@ Mixtures
 #                               IMPORT                              #
 #####################################################################
 
-from libICEpost.src.base.Functions.runtimeWarning import runtimeWarning
+from libICEpost.src.base.Functions.runtimeWarning import fatalErrorInFunction
 from libICEpost.src.thermophysicalModels.specie.specie.Mixture import Mixture
 
 import json
@@ -52,7 +52,7 @@ def fromJson(fileName):
                         )
     
     except BaseException as err:
-        runtimeWarning(f"Failed to load the mixtures database '{fileName}':\n{err}.")
+        fatalErrorInFunction(fromJson, f"Failed to load the mixtures database '{fileName}':\n{err}.", err)
 
 #Load database
 fileName = Database.location + "/data/Mixtures.json"

@@ -44,6 +44,7 @@ class EquationOfStateMixing(BaseClass):
 
     """
 
+    _EoS:EquationOfState
     EoSType:str
     thermos = EoS_db
     

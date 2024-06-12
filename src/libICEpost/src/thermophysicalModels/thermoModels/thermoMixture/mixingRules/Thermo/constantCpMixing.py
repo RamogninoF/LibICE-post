@@ -95,11 +95,11 @@ class constantCpMixing(ThermoMixing):
         hf = []
         weigths = []
         for specie in self.mix:
-            if not specie["specie"].name in self.thermos[self.ThermoType]:
+            if not specie.specie.name in self.thermos[self.ThermoType]:
                 raise ValueError(f"Thermo.{self.ThermoType} data not found in database for specie {specie['specie'].name}.\n{self.thermos}")
-            th = self.thermos[self.ThermoType][specie["specie"].name]
+            th = self.thermos[self.ThermoType][specie.specie.name]
             
-            weigths.append(self._mix.Y[self.mix.index(specie["specie"])])
+            weigths.append(self._mix.Y[self.mix.index(specie.specie)])
             cp.append(th._cp)
             cv.append(th._cv)
             hf.append(th._hf)

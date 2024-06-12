@@ -33,8 +33,8 @@ class Atom(Utilities):
     
     """
     
-    name = ""
-    mass = float("nan")
+    name:str
+    mass:float
     
     #############################################################################
     #Constructor:

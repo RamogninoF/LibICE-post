@@ -8,9 +8,9 @@ Content of the package:
     ReactionModel (module)
         Base class
         
-    StoichiometricCombustion (module)
+    Stoichiometry (module)
         Combustion with infinitely fast combustion through balancing of stoichiometry
 """
 
 from .ReactionModel import ReactionModel
-from .StoichiometricCombustion import StoichiometricCombustion
+from .Stoichiometry import Stoichiometry

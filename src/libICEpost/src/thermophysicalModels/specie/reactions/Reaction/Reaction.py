@@ -94,15 +94,15 @@ class Reaction(BaseClass):
         """
         atomsR = []
         for r in self.reactants:
-            for a in r["specie"]:
-                if not a["atom"] in atomsR:
-                    atomsR.append(a["atom"])
+            for a in r.specie:
+                if not a.atom in atomsR:
+                    atomsR.append(a.atom)
         
         atomsP = []
         for p in self.products:
-            for a in p["specie"]:
-                if not a["atom"] in atomsP:
-                    atomsP.append(a["atom"])
+            for a in p.specie:
+                if not a.atom in atomsP:
+                    atomsP.append(a.atom)
         
         if not ( sorted(atomsR, key=attrgetter('name')) == sorted(atomsP, key=attrgetter('name')) ):
             raise ValueError("Incompatible atomic compositions of reactants and products.")
