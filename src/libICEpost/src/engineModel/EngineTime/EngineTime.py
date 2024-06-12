@@ -11,16 +11,14 @@ Last update:        12/06/2023
 #                               IMPORT                              #
 #####################################################################
 
-from pylab import math, cos, sin, sqrt, radians, degrees
+import math
 
-from abc import ABCMeta, abstractmethod
-
-from src.base.BaseClass import BaseClass
+from libICEpost.src.base.BaseClass import BaseClass
 
 #############################################################################
 #                               MAIN CLASSES                                #
 #############################################################################
-class engineTime(BaseClass):
+class EngineTime(BaseClass):
     """
     Base class for handling engine geometrical parameters during cycle.
     
@@ -31,52 +29,48 @@ class engineTime(BaseClass):
     Attibutes:
         
         [Variable] | [Type]     | [Unit] | [Description]
-        -----------|------------|--------|-------------------------
+        -----------|------------|--------|-------------------------------------------
+        startTime  | float(None)| CA     | The start-time for post-processing.
+                   |            |        | If None, uses the begin of pressure trace
         IVC        | float      | CA     | Inlet valve closing
         EVO        | float      | CA     | Inlet valve closing
-        -----------|------------|--------|-------------------------
+        -----------|------------|--------|-------------------------------------------
         n          | float      | rpm    | Rotational speed
         omega      | float      | rad/s  | 
     """
     
     #########################################################################
     #Constructor:
-    def __init__(self,**argv):
+    def __init__(self,speed, *, IVC, EVO, startTime=None):
         """
         Construct from keyword arguments containing the following parameters:
         
         [Variable]        | [Type] | [Default] | [Unit] | [Description]
         ------------------|--------|-----------|--------|----------------------------------
+        startTime         | float  | None      | CA     | The start-time for post-processing.
+                          |        |           |        | If None, uses the begin of pressure trace
         IVC               | float  | -         | CA     | Inlet valve closing
         EVO               | float  | -         | CA     | Inlet valve closing
         ------------------|--------|-----------|--------|----------------------------------
         speed             | float  | -         | rpm    | Rotational speed
         
         """
-        mandatoryEntries = ["IVC", "EVO", "speed"]
-        
-        defaultDict = \
-            {
-                "IVC"              : float('nan'),
-                "EVO"              : float('nan'),
-                "speed"            : float('nan'),
-            }
-        
         #Argument checking:
         try:
-            for entry in mandatoryEntries:
-                if not entry in argv:
-                    raise ValueError(f"Mandatory entry '{entry}' not found among keyword arguments.")
-            
-            Dict = self.updateKeywordArguments(argv, defaultDict)
+            self.checkType(IVC, float, "IVC")
+            self.checkType(EVO, float, "EVO")
+            self.checkType(speed, float, "speed")
+            if not startTime is None:
+                self.checkType(startTime, float, "startTime")
         except BaseException as err:
             self.fatalErrorInArgumentChecking(self.__init__, err)
         
         try:
-            self.n = Dict["speed"]
-            self.omega = Dict["speed"] / 60.0 * 2.0 * math.pi
-            self.IVC = Dict["IVC"]
-            self.EVO = Dict["EVO"]
+            self.n = speed
+            self.omega = speed / 60.0 * 2.0 * math.pi
+            self.IVC = IVC
+            self.EVO = EVO
+            self.startTime = startTime
         except BaseException as err:
             self.fatalErrorInClass(self.__init__, "Construction failed", err)
     
@@ -85,6 +79,7 @@ class engineTime(BaseClass):
         STR =  "{:15s} {:15s}".format("TypeName", self.TypeName)
         STR += "\n{:15s} {:15.3f} {:15s}".format("n", self.n,"[rpm]")
         STR += "\n{:15s} {:15.3f} {:15s}".format("omega", self.omega,"[rad/s]")
+        STR += "\n{:15s} {:}".format("startTime", "{:15.3f} {:}".format(self.startTime, "[CAD]") if not (self.startTime is None) else "{:>15s}".format("None"))
         STR += "\n{:15s} {:15.3f} {:15s}".format("IVC", self.IVC,"[CAD]")
         STR += "\n{:15s} {:15.3f} {:15s}".format("EVO", self.EVO,"[CAD]")
         
@@ -99,6 +94,11 @@ class engineTime(BaseClass):
         return cls(**dictionary)
     
     #########################################################################
+    @property
+    def dCAdt(self):
+        return (self.n * 6.0)
+    
+    #########################################################################
     #CA to Time:
     def CA2Time(self,CA):
         """
@@ -108,10 +108,10 @@ class engineTime(BaseClass):
         Converts CA to time [s]
         """
         try:
-            if isinstance(t, list):
-                return [ca / (self.n * 6.0) for ca in CA]
+            if isinstance(CA, list):
+                return [ca/self.dCAdt for ca in CA]
             else:
-                return CA / (self.n * 6.0)
+                return CA/self.dCAdt
         except BaseException as err:
             self.fatalErrorInClass(self.CA2Time, "", err)
     
@@ -126,9 +126,9 @@ class engineTime(BaseClass):
         """
         try:
             if isinstance(t, list):
-                return [T * self.n * 6.0 for T in t]
+                return [T*self.dCAdt for T in t]
             else:
-                return t * self.n * 6.0
+                return t*self.dCAdt
         except BaseException as err:
             self.fatalErrorInClass(self.Time2CA, "", err)
     
@@ -173,4 +173,4 @@ class engineTime(BaseClass):
         return ((CA >= self.IVC) and (CA <= self.EVO))
 
 #############################################################################
-engineTime.createRuntimeSelectionTable("engineTime")
+EngineTime.createRuntimeSelectionTable()

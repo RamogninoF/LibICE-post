@@ -14,7 +14,7 @@ Last update:        12/06/2023
 from __future__ import annotations
 import os
 
-from src.base.Utilities import Utilities
+from libICEpost.src.base.Utilities import Utilities
 
 import pandas as pd
 import numpy as np
@@ -44,6 +44,20 @@ class EngineData(Utilities):
     
     #########################################################################
     #Dunder methods:
+    def __len__(self):
+        return len(self.data)
+    
+    def __str__(self):
+        return str(self.data)
+    
+    def __repr__(self):
+        return repr(self.data)
+    
+    def __getitem__(self, item):
+        return self.data.__getitem__(item)
+    
+    def __setitem__(self, key, item):
+        return self.data.__setitem__(key, item)
     
     #########################################################################
     #Methods:
@@ -210,7 +224,10 @@ class EngineData(Utilities):
             if not varName in self.columns:
                 self.createInterpolator(varName)
                 self.columns.append(varName)
-                
+            
+            # Set CA as first column
+            #TODO
+            
         except BaseException as err:
             self.fatalErrorInClass(self.loadArray, f"Failed loading array", err)
             
@@ -234,7 +251,7 @@ class EngineData(Utilities):
             def interpolator(CA):
                 try:
                     self.checkType(CA, float, "CA")
-                    return self.__class__.np.interp(CA, self.data["CA"], self.data[varName], float("nan"), float("nan"))
+                    return self.np.interp(CA, self.data["CA"], self.data[varName], float("nan"), float("nan"))
                 except BaseException as err:
                     self.fatalErrorInClass(self.varName, "Failed interpolation", err)
             

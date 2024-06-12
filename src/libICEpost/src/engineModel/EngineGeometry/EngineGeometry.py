@@ -11,7 +11,7 @@ Last update:        12/06/2023
 #                               IMPORT                              #
 #####################################################################
 
-from src.base.BaseClass import BaseClass, abstractmethod
+from libICEpost.src.base.BaseClass import BaseClass, abstractmethod
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -27,6 +27,13 @@ class EngineGeometry(BaseClass):
     Attibutes:
         
     """
+    
+    
+    #########################################################################
+    def __str__(self):
+        STR =  "{:15s} {:15s}".format("TypeName", self.TypeName)
+        
+        return STR
     
     ###################################
     #Instant. chamber volume:
