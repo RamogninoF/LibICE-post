@@ -223,7 +223,6 @@ def checkInstanceTemplate(entry, templateEntry, entryName=None, **argv):
             
             temp = templateEntry[key]
             checkInstanceTemplate(It, temp, entryName=(entryName + "[\"{}\"]".format(it)), **argv)
-        #3) Others:
         else:
             It = it
             temp = templateEntry[0]

@@ -18,6 +18,11 @@ from .Utilities import Utilities
 from abc import ABCMeta, abstractmethod
 import inspect
 
+try:
+    from typing import Self, Type #Python >= 3.11
+except ImportError:
+    from typing_extensions import Self, Type  #Python < 3.11
+
 #############################################################################
 #                             Auxiliary functions                           #
 #############################################################################
@@ -36,141 +41,29 @@ def _getBaseClass(cls:type):
 #############################################################################
 #                               MAIN CLASSES                                #
 #############################################################################
-class BaseClass(Utilities, metaclass=ABCMeta):
-    """
-    Class wrapping useful methods for base virtual classes (e.g. run-time selector)
-    """
-    ##########################################################################################
-    @classmethod
-    def selectionTable(cls):
-        """
-        The run-time selection table associated to this class.
-        """
-        if not cls.hasSelectionTable():
-            cls.fatalErrorInClass(cls.selectionTable,f"No run-time selection available for class {cls.__name__}.")
-        return getattr(cls,f"_{cls.__name__}__selectionTable")
-
-    ##########################################################################################
-    @classmethod
-    def selector(cls, typeName:str, dictionary:dict):
-        """
-        typeName:  str
-            Name of the class to be constructed
-            
-        dictionary: dict
-            Dictionary used for construction
-        
-        Construct an instance of a subclass of this that was added to the selection table.
-        """
-        try:
-            cls.checkType(dictionary, dict, "dictionary")
-            cls.checkType(typeName, str, "typeName")
-        except BaseException as err:
-            cls.fatalErrorInClass(cls.selector, f"Argument checking failed", err)
-        
-        try:
-            #Check if has table
-            if not cls.hasSelectionTable():
-                raise ValueError(f"No run-time selection table available for class {cls.__name__}")
-            
-            #Check if class in table
-            cls.selectionTable().check(typeName)
-            
-            #Try instantiation
-            instance = cls.selectionTable()[typeName].fromDictionary(dictionary)
-        except BaseException as err:
-            cls.fatalErrorInClass(cls.selector, f"Failed constructing instance of type '{cls.selectionTable()[typeName].__name__}'", err)
-        
-        return instance
-    
-    ##########################################################################################
-    @classmethod
-    def hasSelectionTable(cls):
-        """
-        Check if selection table was defined for this class.
-        """
-        return hasattr(cls, f"_{cls.__name__}__selectionTable")
-    
-    ##########################################################################################
-    @classmethod
-    @abstractmethod
-    def fromDictionary(cls, dictionary):
-        """
-        dictionary: dict ({})
-            Dictionary used for construction
-        
-        Construct an instance of this class from a dictionary. To be overwritten by derived class.
-        """
-        try:
-            cls.checkType(dictionary, dict, "dictionary")
-        except BaseException as err:
-            cls.fatalErrorInClass(cls.fromDictionary, f"Argument checking failed", err)
-        
-        if inspect.isabstract(cls):
-            cls.fatalErrorInClass(cls.fromDictionary, f"Can't instantiate abstract class {cls.__name__} with abstract methods: " + ", ".join(am for am in cls.__abstractmethods__) + ".")
-    
-    ##########################################################################################
-    @classmethod
-    def addToRuntimeSelectionTable(cls, childClass:type):
-        """
-        childClass:  class
-            The class to be added to the selection table
-            
-        Add the subclass to the database of available subclasses for runtime selection.
-        """
-        if not cls.hasSelectionTable():
-            cls.fatalErrorInClass(cls.addToRuntimeSelectionTable,f"No run-time selection available for class {cls.__name__}.")
-        
-        cls.selectionTable().add(childClass)
-
-    ##########################################################################################
-    @classmethod
-    def createRuntimeSelectionTable(cls):
-        """
-        Create the runtime selection table, initializing the property 'selectionTable' of the class.
-        """
-
-        if cls.hasSelectionTable():
-            cls.fatalErrorInClass(cls.createRuntimeSelectionTable,f"A selection table is already present for class {cls.__name__}, cannot generate a new selection table.")
-        
-        setattr(cls,f"_{cls.__name__}__selectionTable",SelectionTable(cls))
-    
-    ##########################################################################################
-    @classmethod
-    def showRuntimeSelectionTable(cls):
-        """
-        Prints a string containing a list of available classes in the selection table and if they are instantiable.
-        
-        E.g.:
-        
-        Available classes in selection table:
-            ClassA       (Abstract class)
-            ClassB     
-            ClassC
-        """
-        print(cls.selectionTable())
-
-#############################################################################
 # SelectionTable
-#############################################################################
 class SelectionTable(Utilities):
     """
     Table for storing classes for run-time selection.
     """
+    
+    __type:type
+    __db:dict[str:type]
+    
     @property
-    def type(self):
+    def type(self) -> type:
         """
         The base class to which the selection table is linked.
         """
         return self.__type
     
     @property
-    def db(self):
+    def db(self) -> dict[str:type]:
         """
         Database of available sub-classes in the selection table.
         """
         return cp.deepcopy(self.__db)
-
+    
     ##########################################################################################
     def __init__(self, cls:type):
         """
@@ -205,7 +98,7 @@ class SelectionTable(Utilities):
         return string + " ]"
     
     ##########################################################################################
-    def __contains__(self, typeName:str):
+    def __contains__(self, typeName:str) -> bool:
         """
         typeName: str
             Name of the class to look-up
@@ -233,24 +126,26 @@ class SelectionTable(Utilities):
         return self.__db[typeName]
     
     ##########################################################################################
-    def add(self, cls:type):
+    def add(self, cls:type, overwrite=True) -> None:
         """
         cls: type
             Subclass to add to the selection table
+        overwrite: bool (True)
+            Overwrite?
         Add class to selection table
         """
         typeName = cls.__name__
-        if not typeName in self:
-            if issubclass(cls, self.type):
-                self.__db[typeName] = cls
-                _add_TypeName(cls)
-            else:
-                self.fatalErrorInClass(self.add,f"Class '{cls.__name__}' is not derived from '{self.type.__name__}'; cannot add '{typeName}' to runtime selection table.")
-        else:
+        if (typeName in self) and (not overwrite):
             self.fatalErrorInClass(self.add,f"Subclass '{typeName}' already present in selection table, cannot add to selection table.")
-
+        
+        if issubclass(cls, self.type):
+            self.__db[typeName] = cls
+            _add_TypeName(cls)
+        else:
+            self.fatalErrorInClass(self.add,f"Class '{cls.__name__}' is not derived from '{self.type.__name__}'; cannot add '{typeName}' to runtime selection table.")
+            
     ##########################################################################################
-    def check(self, typeName:str):
+    def check(self, typeName:str) -> bool:
         """
         typeName: str
             Name of class to be checked
@@ -265,3 +160,121 @@ class SelectionTable(Utilities):
             
             raise ValueError(string)
         return True
+
+##########################################################################################
+#Base class
+class BaseClass(Utilities, metaclass=ABCMeta):
+    """
+    Class wrapping useful methods for base virtual classes (e.g. run-time selector)
+    """
+    ##########################################################################################
+    @classmethod
+    def selectionTable(cls) -> SelectionTable:
+        """
+        The run-time selection table associated to this class.
+        """
+        if not cls.hasSelectionTable():
+            cls.fatalErrorInClass(cls.selectionTable,f"No run-time selection available for class {cls.__name__}.")
+        return getattr(cls,f"_{cls.__name__}__selectionTable")
+
+    ##########################################################################################
+    @classmethod
+    def selector(cls, typeName:str, dictionary:dict) -> Self:
+        """
+        typeName:  str
+            Name of the class to be constructed
+            
+        dictionary: dict
+            Dictionary used for construction
+        
+        Construct an instance of a subclass of this that was added to the selection table.
+        """
+        try:
+            cls.checkType(dictionary, dict, "dictionary")
+            cls.checkType(typeName, str, "typeName")
+        except BaseException as err:
+            cls.fatalErrorInClass(cls.selector, f"Argument checking failed", err)
+        
+        try:
+            #Check if has table
+            if not cls.hasSelectionTable():
+                raise ValueError(f"No run-time selection table available for class {cls.__name__}")
+            
+            #Check if class in table
+            cls.selectionTable().check(typeName)
+            
+            #Try instantiation
+            instance = cls.selectionTable()[typeName].fromDictionary(dictionary)
+        except BaseException as err:
+            cls.fatalErrorInClass(cls.selector, f"Failed constructing instance of type '{cls.selectionTable()[typeName].__name__}'", err)
+        
+        return instance
+    
+    ##########################################################################################
+    @classmethod
+    def hasSelectionTable(cls) -> bool:
+        """
+        Check if selection table was defined for this class.
+        """
+        return hasattr(cls, f"_{cls.__name__}__selectionTable")
+    
+    ##########################################################################################
+    @classmethod
+    @abstractmethod
+    def fromDictionary(cls, dictionary) -> Self:
+        """
+        dictionary: dict ({})
+            Dictionary used for construction
+        
+        Construct an instance of this class from a dictionary. To be overwritten by derived class.
+        """
+        try:
+            cls.checkType(dictionary, dict, "dictionary")
+        except BaseException as err:
+            cls.fatalErrorInClass(cls.fromDictionary, f"Argument checking failed", err)
+        
+        if inspect.isabstract(cls):
+            cls.fatalErrorInClass(cls.fromDictionary, f"Can't instantiate abstract class {cls.__name__} with abstract methods: " + ", ".join(am for am in cls.__abstractmethods__) + ".")
+    
+    ##########################################################################################
+    @classmethod
+    def addToRuntimeSelectionTable(cls, childClass:type, /, *, overwrite=True) -> None:
+        """
+        childClass:  class
+            The class to be added to the selection table
+        overwrite: bool (True)
+            Overwrite if already present in selection table, otherwise rise error.
+            
+        Add the subclass to the database of available subclasses for runtime selection.
+        """
+        if not cls.hasSelectionTable():
+            cls.fatalErrorInClass(cls.addToRuntimeSelectionTable,f"No run-time selection available for class {cls.__name__}.")
+        
+        cls.selectionTable().add(childClass, overwrite=True)
+
+    ##########################################################################################
+    @classmethod
+    def createRuntimeSelectionTable(cls) -> None:
+        """
+        Create the runtime selection table, initializing the property 'selectionTable' of the class.
+        """
+
+        if cls.hasSelectionTable():
+            cls.fatalErrorInClass(cls.createRuntimeSelectionTable,f"A selection table is already present for class {cls.__name__}, cannot generate a new selection table.")
+        
+        setattr(cls,f"_{cls.__name__}__selectionTable",SelectionTable(cls))
+    
+    ##########################################################################################
+    @classmethod
+    def showRuntimeSelectionTable(cls) -> None:
+        """
+        Prints a string containing a list of available classes in the selection table and if they are instantiable.
+        
+        E.g.:
+        
+        Available classes in selection table:
+            ClassA       (Abstract class)
+            ClassB     
+            ClassC
+        """
+        print(cls.selectionT)

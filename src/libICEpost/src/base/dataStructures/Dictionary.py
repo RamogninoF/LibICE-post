@@ -13,6 +13,7 @@ Last update:        12/06/2023
 
 from ..Utilities import Utilities
 from collections import OrderedDict
+from types import ModuleType
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -48,17 +49,18 @@ class Dictionary(OrderedDict, Utilities):
             cls.fatalErrorInClass(cls.fromFile,f"Argument checking failed", err)
             
         try:
-            outDict = cls.__init__()
+            outDict = cls()
             
-            loc = locals().copy()
-            oldLoc = list(loc)
+            __LOCALS = locals().copy()
+            __OLDLOCALS = list(__LOCALS)
             
-            exec(open(self.fileName).read())
+            with open(fileName) as __FILE:
+                exec(__FILE.read())
             
-            loc = locals().copy()
-            for l in loc.keys():
-                if not l in (oldLoc + ["oldLoc", "loc"]) and (not isinstance(loc[l], ModuleType)):
-                    outDict[l] = loc[l]
+            __LOCALS = locals().copy()
+            for l in __LOCALS.keys():
+                if not l in (__OLDLOCALS + ["__OLDLOCALS", "__LOCALS", "__FILE"]) and (not isinstance(__LOCALS[l], ModuleType)):
+                    outDict[l] = __LOCALS[l]
             
         except BaseException as err:
             cls.fatalErrorInClass(cls.fromFile,f"Error reading {cls.__name__} from file {fileName}", err)
@@ -66,7 +68,7 @@ class Dictionary(OrderedDict, Utilities):
         return outDict
         
     #############################################################################
-    def lookup(self, entryName):
+    def lookup(self, entryName:str):
         """
         entryName:  str
             Name of the entry to look for
@@ -82,6 +84,24 @@ class Dictionary(OrderedDict, Utilities):
             self.fatalErrorInClass(self.lookup, f"Entry '{entryName}' not found in Dictionary. Available entries are:\n\t" + "\n\t".join([str(k) for k in self.keys()]))
         else:
             return self[entryName]
+    
+    #############################################################################
+    def pop(self, entryName:str):
+        """
+        entryName:  str
+            Name of the entry to look for
+        
+        Same as dictionary.pop but embeds error handling
+        """
+        try:
+            self.checkType(entryName, str, "entryName")
+        except BaseException as err:
+            self.fatalErrorInClass(self.lookup,f"Argument checking failed", err)
+            
+        if not entryName in self:
+            self.fatalErrorInClass(self.lookup, f"Entry '{entryName}' not found in Dictionary. Available entries are:\n\t" + "\n\t".join([str(k) for k in self.keys()]))
+        else:
+            return super().pop(entryName)
     
     ######################################
     def lookupOrDefault(self, entryName:str, default, fatal:bool=True):
@@ -125,7 +145,7 @@ class Dictionary(OrderedDict, Utilities):
     ######################################
     def __setitem__(self, *args, **argv):
         try:
-            super(self,self).__setitem__(*args, **argv)
+            super().__setitem__(*args, **argv)
             self._correctSubdicts()
             return self
         except BaseException as err:
@@ -140,16 +160,11 @@ class Dictionary(OrderedDict, Utilities):
         Performs like dict.update() method but recursively updates sub-dictionaries
         """
         try:
-            cls.checkType(Dict, dict, "Dict")
-        except BaseException as err:
-            self.fatalErrorInClass(self.update,f"Argument checking failed", err)
-        
-        try:
             for key in kwargs:
                 if (isinstance(kwargs[key],dict)) and (key in self):
                     self[key].update(**kwargs[key])
                 else:
-                    super(self,self).update({key:kwargs[key]})
+                    super().update({key:kwargs[key]})
                     
             self._correctSubdicts()
         except BaseException as err:
