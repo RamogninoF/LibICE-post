@@ -23,21 +23,40 @@ class Dictionary(OrderedDict, Utilities):
     """
     Ordered dictionary embedding some useful OpenFOAM-like methods.
     """
+    path:str|None
+    file:str|None
     
     #############################################################################
-    def __init__(self, *args,**argv):
+    def __init__(self, *args, _fileName:str=None, **argv):
         """
         Same constructor as collections.OrderedDict class.
         """
         try:
-            OrderedDict.__init__(self,*args,**argv)
+            if _fileName is None:
+                # no file assosiaction
+                self.fileName = None
+                self.path = None
+            elif _fileName.startswith("/"):
+                #Absolute path
+                self.fileName = _fileName.split("/")[-1]
+                self.path = "/" + "/".join(_fileName.split("/")[:-1]) + "/"
+            elif "/" in _fileName:
+                #Relative path
+                self.fileName = _fileName.split("/")[-1]
+                self.path = "/".join(_fileName.split("/")[:-1]) + "/"
+            else:
+                #Just file-name
+                self.fileName = _fileName
+                self.path = "./"
             
+            super().__init__(*args,**argv)
+                
         except BaseException as err:
             self.fatalErrorInClass(self.__init__,f"Construction of {self.__class__.__name__} entry failed", err)
     
     #############################################################################
     @classmethod
-    def fromFile(cls, fileName):
+    def fromFile(cls, fileName:str):
         """
         fileName:   str
             Path of the file
@@ -49,23 +68,23 @@ class Dictionary(OrderedDict, Utilities):
             cls.fatalErrorInClass(cls.fromFile,f"Argument checking failed", err)
             
         try:
-            outDict = cls()
+            this = cls(_fileName=fileName)
             
-            __LOCALS = locals().copy()
-            __OLDLOCALS = list(__LOCALS)
+            _LOCALS = locals().copy()
+            _OLDLOCALS = list(_LOCALS)
             
-            with open(fileName) as __FILE:
-                exec(__FILE.read())
+            with open(fileName) as _FILE:
+                exec(_FILE.read())
             
-            __LOCALS = locals().copy()
-            for l in __LOCALS.keys():
-                if not l in (__OLDLOCALS + ["__OLDLOCALS", "__LOCALS", "__FILE"]) and (not isinstance(__LOCALS[l], ModuleType)):
-                    outDict[l] = __LOCALS[l]
+            _LOCALS = locals().copy()
+            for l in _LOCALS.keys():
+                if not l in (_OLDLOCALS + ["_OLDLOCALS", "_LOCALS", "_FILE"]) and (not isinstance(_LOCALS[l], ModuleType)):
+                    this[l] = _LOCALS[l]
             
         except BaseException as err:
             cls.fatalErrorInClass(cls.fromFile,f"Error reading {cls.__name__} from file {fileName}", err)
         
-        return outDict
+        return this
         
     #############################################################################
     def lookup(self, entryName:str):

@@ -21,6 +21,7 @@ from libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.ThermoMixtur
 from libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.ReactionModel import ReactionModel
 
 from .EgrModel.EgrModel import EgrModel
+from ..ThermoState import ThermoState
 
 from libICEpost.src.base.dataStructures.Dictionary import Dictionary
 
@@ -47,9 +48,10 @@ class CombustionModel(BaseClass):
     _air:ThermoMixture
     _combustionProducts:ThermoMixture
     _mixture:ThermoMixture
-    _state:Dictionary
+    _state:ThermoState
     _appliedEGR:bool
     _reactionModel:ReactionModel
+    _EGRModel:EgrModel
     
     #########################################################################
     #Properties:
@@ -142,15 +144,15 @@ class CombustionModel(BaseClass):
     
     ################################
     @property
-    def state(self) -> Dictionary:
+    def state(self) -> ThermoState:
         """
         The current state (read only access)
 
         Returns:
-            Dictionary
+            ThermoState
         """
         return self._state.copy()
-    
+        
     #########################################################################
     #Class methods and static methods:
     
@@ -158,11 +160,10 @@ class CombustionModel(BaseClass):
     #Constructor
     def __init__(self, /, *,
                  air:Mixture, 
-                 thermo:Dictionary, 
-                 combustionEfficiency:float=1.0,
-                 egrModel:str="EgrModel",
+                 thermo:Dictionary,
+                 egrModel:EgrModel=EgrModel(),
                  reactionModel:str="Stoichiometry",
-                 state:dict[str:float]={},
+                 state:ThermoState|dict[str:type]=ThermoState(),
                  **kwargs
                  ):
         """
@@ -171,10 +172,10 @@ class CombustionModel(BaseClass):
         Args:
             air (Mixture): Air
             thermo (Dictionary): Information for thermodynamic properties of mixtures
-            egrModel (str, optional): Model for computation of EGR. Defaults to "EgrModel", i.e., no EGR.
+            egrModel (EgrModel, optional): Model for computation of EGR. Defaults to EgrModel(), i.e., no EGR.
             reactionModel (str, optional): Model handling reactions. defaults to "Stoichiometry".
-            state (dict[str:float], optional): Giving current state to manage state-dependend 
-                combustion models(e.g. equilibrium). Defaults to {}.
+            state (ThermoState, optional): Giving current state to manage state-dependend 
+                combustion models(e.g. equilibrium). Defaults to empty state ThermoState().
         """
 
         #Argument checking:
@@ -182,7 +183,8 @@ class CombustionModel(BaseClass):
             #Type checking
             self.checkType(air, Mixture, "air")
             self.checkTypes(thermo, [dict, Dictionary], "thermo")
-            self.checkType(egrModel, str, "egrModel")
+            self.checkType(egrModel, EgrModel, "egrModel")
+            self.checkTypes(state, [ThermoState, dict], "state")
             
             if isinstance(thermo, dict):
                 thermo = Dictionary(**thermo)
@@ -196,14 +198,17 @@ class CombustionModel(BaseClass):
             #Initialize the object
             self._thermo = self.cp.deepcopy(thermo)
             self._air = ThermoMixture(air.copy(), **thermo)
-            self._state = Dictionary(**state)
+            
+            if isinstance(state, dict):
+                state = ThermoState(**state)
+            self._state = state
             
             #To be updated by specific combustion model
             self._mixture = ThermoMixture(air.copy(), **thermo)
             self._freshMixture = ThermoMixture(air.copy(), **thermo)
             self._combustionProducts = ThermoMixture(air.copy(), **thermo)
             
-            self._EGRModel = EgrModel.selector(egrModel, kwargs.lookupOrDefault(egrModel + "Dict", {}))
+            self._EGRModel = egrModel
             self._reactionModel = ReactionModel.selector(
                 reactionModel, 
                 kwargs.lookupOrDefault(reactionModel + "Dict", Dictionary()).update(reactants=self._freshMixture.mix)
@@ -220,12 +225,12 @@ class CombustionModel(BaseClass):
     #########################################################################
     #Methods:
     @abstractmethod
-    def update(self, **state:dict[str:float]) -> CombustionModel:
+    def update(self, *, state:ThermoState|dict[str:type]=None) -> CombustionModel:
         """
         Update the state of the system. To be overwritten in child classes.
         
         Args:
-            **state (dict[str:float], optional): the state variables of the system (needed to 
+            state (ThermoState|dict[str:type], optional): the state variables of the system (needed to 
                 update the combustion model - e.g. equilibrium)
                 
         Returns:
@@ -242,7 +247,10 @@ class CombustionModel(BaseClass):
             self._appliedEGR = True
         
         #Update state variables
-        self._state.update(**state)
+        if not state is None:
+            if isinstance(state, dict):
+                state = ThermoState(**state)
+            self._state = state
         
         return self
     

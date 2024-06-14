@@ -15,6 +15,8 @@ Last update:        DD/MM/YYYY
 from .EngineModel import EngineModel
 
 #Other imports
+from libICEpost.src.base.dataStructures.Dictionary import Dictionary
+from libICEpost.src.thermophysicalModels.thermoModels.CombustionModel.PremixedCombustion import PremixedCombustion
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -28,6 +30,8 @@ class SparkIgnitionEngine(EngineModel):
     Attributes:
         
     """
+    Types = {t:EngineModel.Types[t] for t in EngineModel.Types}
+    Types["CombustionModel"] = PremixedCombustion
     
     #########################################################################
     #Properties:
@@ -35,38 +39,43 @@ class SparkIgnitionEngine(EngineModel):
     #########################################################################
     #Class methods and static methods:
     
-    # @classmethod
-    # def fromDictionary(cls, dictionary):
-    #     """
-    #     Create from dictionary.
-
-    #     {
-    #         arg1 (<type_arg1>): Description (default: default_val1)
-    #         arg2 (<type_arg2>): Description
-    #     }
-    #     """
-    #     try:
-    #         #Create the dictionary for construction
-    #         Dict = {}
+    @classmethod
+    def fromDictionary(cls, dictionary:Dictionary) -> EngineModel:
+        """
+        Construct from dictionary like:
+        {
+            EngineTime:         str
+                Name of the EngineTime model to use
+            <EngineTime>Dict:   dict
+                Dictionary containing the data specific of the selected 
+                SngineTime model (e.g., if engineTime is 'SparkIgnitionTime',
+                then this dictionary must be named 'SparkIgnitionTimeDict'). 
+                See at the helper for function 'fromDictionary' of the specific 
+                EngineTime model selected.
+                
+            EngineGeometry:         str
+                Name of the EngineGeometry model to use
+            <EngineGeometry>Dict:   dict
+                Dictionary with data required from engineGeometry.
+                See at the helper for function 'fromDictionary' of the specific 
+                EngineGeometry model selected.
             
-    #         #List of mandatory entries in the dictionary. Here only arg2 as it does not
-    #         #have a default value
-    #         entryList = ["arg2"]
-    #         for entry in entryList:
-    #             if not entry in dictionary:
-    #                 raise ValueError(f"Mandatory entry '{entry}' not found in dictionary.")
-    #             #Set the entry
-    #             Dict[entry] = dictionary[entry]
+            CombustionModel:         str
+                Name of the CombustionModel to use
+            <CombustionModel>Dict:   dict
+                Dictionary with data required from CombustionModel
+                See at the helper for function 'fromDictionary' of the specific 
+                CombustionModel model selected.
+        }
+        """
+        try:
+            #Manipulating the combustionProperties
             
-    #         #Constructing this class with the specific entries
-    #         out = cls\
-    #             (
-    #                 **Dict
-    #             )
-    #         return out
+            
+            return super().fromDictionary(dictionary)
         
-    #     except BaseException as err:
-    #         cls.fatalErrorInClass(cls.fromDictionary, "Failed construction from dictionary", err)
+        except BaseException as err:
+            cls.fatalErrorInClass(cls.fromDictionary, "Failed contruction from dictionary", err)
     
     #########################################################################
     # def __init__(self, arg2:<type_arg2>, arg1:<type_arg1>=default_val1):

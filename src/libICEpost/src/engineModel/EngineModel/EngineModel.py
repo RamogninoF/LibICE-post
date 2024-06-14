@@ -24,14 +24,27 @@ from libICEpost.src.base.dataStructures.Dictionary import Dictionary
 from ..EngineTime.EngineTime import EngineTime
 from ..EngineGeometry.EngineGeometry import EngineGeometry
 
+from libICEpost.src.thermophysicalModels.thermoModels.CombustionModel.CombustionModel import CombustionModel
 from libICEpost.src.thermophysicalModels.thermoModels.ThermoModel import ThermoModel
 
 #############################################################################
 #                               MAIN CLASSES                                #
 #############################################################################
+# TODO:
+#   Handle direct injection (injectionModel?)
+#   Handle interaction with other zones (creviceModel? prechamberModel?)
+
+# NOTE: to handle diesel combustion, need to compute the phi from the injected mass 
+# (probably the main parameter for the combustion model, and pass it to the EGR model)
+
 class EngineModel(BaseClass):
     """
     Base class for modeling of an engine and processing experimental/numerical data
+    
+    NOTE:
+    For naming of variables:
+        -> By default they refer to the "cylinder" region
+        -> Variables referred to a specific region are allocated as "<variableName>_<regionName>"
     
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
@@ -41,7 +54,7 @@ class EngineModel(BaseClass):
         {
             "EngineGeometry":           EngineGeometry,
             "EngineTime":               EngineTime,
-            #"thermo":                   thermoModel,
+            "CombustionModel":          CombustionModel,
         }
     
     Submodels:dict[str:type] = \
@@ -76,19 +89,58 @@ class EngineModel(BaseClass):
         Construct from dictionary like:
         {
             EngineTime:         str
-                Name of the engineTime model to use
+                Name of the EngineTime model to use
             <EngineTime>Dict:   dict
                 Dictionary containing the data specific of the selected 
-                engineTime model (e.g., if engineTime is 'sparkIgnitionTime',
-                then this dictionary must be named 'sparkIgnitionTimeDict'). 
+                SngineTime model (e.g., if engineTime is 'SparkIgnitionTime',
+                then this dictionary must be named 'SparkIgnitionTimeDict'). 
                 See at the helper for function 'fromDictionary' of the specific 
-                engineTime model selected.
+                EngineTime model selected.
                 
             EngineGeometry:         str
-                Name of the engineTime model to use
+                Name of the EngineGeometry model to use
             <EngineGeometry>Dict:   dict
-                Dictionary with data required from engineGeometry (see help for 
-                engineGeometry.fromDictionary for input data)
+                Dictionary with data required from engineGeometry.
+                See at the helper for function 'fromDictionary' of the specific 
+                EngineGeometry model selected.
+            
+            thermoPhysicalProperties:   dict
+                Dictionary with types and data for thermophysical modeling of mixtures
+            {
+                ThermoType: dict
+                {
+                    Thermo: str
+                    EquationOfState:    str
+                }
+                <Thermo>Dict: dict
+                <EquationOfState>Dict: dict
+            }
+            
+            combustionProperties:   dict
+                Dictionaries for data required for mixture preparation and combustion modeling.
+            {
+                injectionModels: dict
+                {
+                    TODO
+                },
+
+                premixedCharge: dict
+                {
+                    air:    Mixture (default: database.chemistry.specie.Mixtures.dryAir),
+                    premixedFuel: dict|None
+                    {
+                        mixture: Mixture,
+                        phi:     float,
+                    }
+                },
+                
+                CombustionModel:         str
+                    Name of the CombustionModel to use
+                <CombustionModel>Dict:   dict
+                    Dictionary with data required from CombustionModel
+                    See at the helper for function 'fromDictionary' of the specific 
+                    CombustionModel model selected.
+            }
         }
         """
         try:
@@ -105,16 +157,25 @@ class EngineModel(BaseClass):
             print(ET,"\n")
             
             #EngineGeometry:
-            print("Construct engineGeometry")
+            print("Construct EngineGeometry")
             egModel = dictionary.lookup("EngineGeometry")
             EG = EngineGeometry.selector(egModel, dictionary.lookup(egModel + "Dict"))
             print(EG,"\n")
 
+            #CombustionModel:
+            print("Construct CombustionModel")
+            #TODO:
+            
+            # combustionModel = dictionary.lookup("CombustionModel")
+            # CM = CombustionModel.selector(combustionModel, dictionary.lookup(combustionModel + "Dict"))
+            # print(CM,"\n")
+            
             #Submodels
             subModels = {}
             smDict = dictionary.lookupOrDefault("submodels", Dictionary())
             for sm in cls.Submodels:
                 if sm in smDict:
+                    print(f"Construct {sm} sub-model")
                     smTypeName = dictionary.lookup(sm)
                     subModels[sm] = cls.Submodels[sm].selector(smTypeName, smDict.lookup(sm + "Dict"))
             
@@ -124,22 +185,25 @@ class EngineModel(BaseClass):
     
     #########################################################################
     #Constructor:
+    # def __init__(self, time:EngineTime, geometry:EngineGeometry, combustionModel:CombustionModel, submodels:dict={}):
     def __init__(self, time:EngineTime, geometry:EngineGeometry, submodels:dict={}):
         """
-        time:       EngineTime
-        geometry:   EngineGeometry
-        submodels:  dict
-            Dictionary containing the optional sub-models to load
-        
-        Base class for engine model, used for type-checking and loading the 
-        sub-models.
+        Base class for engine model, used for type-checking and loading the sub-models.
+
+        Args:
+            time (EngineTime): The engine time
+            geometry (EngineGeometry): The engine geometry
+            combustionModel (CombustionModel): Combustion model to use
+            submodels (dict, optional): Dictionary containing the optional sub-models to load. Defaults to {}.
         """
         try:
             #Main models
             self.checkType(geometry, self.Types["EngineGeometry"], "geometry")
             self.checkType(time, self.Types["EngineTime"], "engineTime")
+            # self.checkType(combustionModel, self.Types["CombustionModel"], "combustionModel")
             self.geometry = geometry
             self.time = time
+            # self.combustionModel = combustionModel
             
             #Submodels
             self.checkType(submodels, dict, "submodels")

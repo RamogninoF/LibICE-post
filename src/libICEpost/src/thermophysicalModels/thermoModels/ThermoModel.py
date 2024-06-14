@@ -156,10 +156,16 @@ class ThermoModel(Utilities): #(BaseClass):
             volume (float, optional): [m^3]. Defaults to None.
             temperature (float, optional): [K]. Defaults to None.
             density (float, optional): [kg/m^3]. Defaults to None.
+            
+            TODO: dQ_in, dm_in, mixture_in
 
         Returns:
             ThermoModel: self
         """
+        #TODO:
+        # define energy and mass equations to update the state. The source and 
+        # sink terms are defined with the change of state variables (delta m and delta T)
+        
         pass
     
     ################################

@@ -332,8 +332,8 @@ class Stoichiometry(ReactionModel):
             y_exc_prod = y_exc - y_def*(y_exc_st/y_def_st)
             prods.dilute(excMix,y_exc_prod, "mass")
             
-            print(f"Excess mixture: (Y = {y_exc_prod})")
-            print(excMix)
+            # print(f"Excess mixture: (Y = {y_exc_prod})")
+            # print(excMix)
         
         #Add inherts:
         if not inerts is None:

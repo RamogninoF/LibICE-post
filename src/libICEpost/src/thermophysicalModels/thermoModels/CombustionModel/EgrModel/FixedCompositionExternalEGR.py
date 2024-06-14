@@ -36,7 +36,7 @@ class FixedCompositionExternalEGR(EgrModel):
     #########################################################################
     #Class methods and static methods:
     @classmethod
-    def fromDictionary(cls, dictionary:dict):
+    def fromDictionary(cls, dictionary:dict|Dictionary):
         """
         Create from dictionary
         {
@@ -45,8 +45,10 @@ class FixedCompositionExternalEGR(EgrModel):
         }
         """
         try:
-            cls.checkType(dictionary,dict,"dictionary")
-            dictionary = Dictionary(**dictionary)
+            cls.checkTypes(dictionary,(dict, Dictionary),"dictionary")
+            #Cast to Dictionary
+            if isinstance(dictionary, dict):
+                dictionary = Dictionary(**dictionary)
             
             return cls(**dictionary)
             

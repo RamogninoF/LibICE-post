@@ -453,7 +453,6 @@ class Mixture(Utilities):
                 if not(speci.specie in self):
                     #Add the new specie
                     self._specie.append(speci.specie)
-                    print()
                     if (fracType == "mass"):
                         self._Y.append(speci.Y * dilutionFract)
                         self._X.append(float('nan'))
