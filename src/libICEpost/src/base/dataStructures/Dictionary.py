@@ -11,9 +11,13 @@ Last update:        12/06/2023
 #                               IMPORT                              #
 #####################################################################
 
+
 from ..Utilities import Utilities
 from collections import OrderedDict
+
 from types import ModuleType
+from typing import TypeVar
+T = TypeVar("T")
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -123,7 +127,7 @@ class Dictionary(OrderedDict, Utilities):
             return super().pop(entryName)
     
     ######################################
-    def lookupOrDefault(self, entryName:str, default, fatal:bool=True):
+    def lookupOrDefault(self, entryName:str, default:T, fatal:bool=True) -> T:
         """
         entryName:  str
             Name of the entry to look for

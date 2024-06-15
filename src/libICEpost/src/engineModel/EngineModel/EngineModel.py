@@ -27,6 +27,8 @@ from ..EngineGeometry.EngineGeometry import EngineGeometry
 from libICEpost.src.thermophysicalModels.thermoModels.CombustionModel.CombustionModel import CombustionModel
 from libICEpost.src.thermophysicalModels.thermoModels.ThermoModel import ThermoModel
 
+from libICEpost.Database.chemistry.specie.Mixtures import Mixtures, Mixture
+
 #############################################################################
 #                               MAIN CLASSES                                #
 #############################################################################
@@ -37,19 +39,25 @@ from libICEpost.src.thermophysicalModels.thermoModels.ThermoModel import ThermoM
 # NOTE: to handle diesel combustion, need to compute the phi from the injected mass 
 # (probably the main parameter for the combustion model, and pass it to the EGR model)
 
+# NOTE: This model handles a single-zone model of the cylinder. Sub-classes may be 
+# defined to introduce additional zones, like in case of pre-chamber engines, crevice 
+# modeling, or maybe gas-exchange analysis (ducts)
+
 class EngineModel(BaseClass):
     """
     Base class for modeling of an engine and processing experimental/numerical data
     
     NOTE:
     For naming of variables:
-        -> By default they refer to the "cylinder" region
-        -> Variables referred to a specific region are allocated as "<variableName>_<regionName>"
+        -> By default they refer to the "cylinder" zone
+        -> Variables referred to a specific zone are allocated as "<variableName>_<zoneName>"
     
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
     Attibutes:
     """
+    
+    """Types for each main model"""
     Types:dict[str:type] = \
         {
             "EngineGeometry":           EngineGeometry,
@@ -57,11 +65,20 @@ class EngineModel(BaseClass):
             "CombustionModel":          CombustionModel,
         }
     
+    """The available sub-models"""
     Submodels:dict[str:type] = \
         {
             # "heatTransferModel":        None,
         }
     
+    """The zones avaliable in the model"""
+    Zones:list[str] = \
+        [
+            "cylinder"
+        ]
+    
+    #########################################################################
+    # Properties
     @property
     def raw(self)-> EngineData:
         """
@@ -83,6 +100,7 @@ class EngineModel(BaseClass):
         return self._data
     
     #########################################################################
+    # Class methods
     @classmethod
     def fromDictionary(cls, dictionary:Dictionary) -> EngineModel:
         """
@@ -124,13 +142,16 @@ class EngineModel(BaseClass):
                     TODO
                 },
 
-                premixedCharge: dict
+                initialMixture: dict
                 {
-                    air:    Mixture (default: database.chemistry.specie.Mixtures.dryAir),
-                    premixedFuel: dict|None
+                    <zoneName>:
                     {
-                        mixture: Mixture,
-                        phi:     float,
+                        air:    Mixture (default: database.chemistry.specie.Mixtures.dryAir),
+                        premixedFuel: dict (optional)
+                        {
+                            mixture: Mixture,
+                            phi:     float,
+                        }
                     }
                 },
                 
@@ -164,11 +185,18 @@ class EngineModel(BaseClass):
 
             #CombustionModel:
             print("Construct CombustionModel")
-            #TODO:
             
-            # combustionModel = dictionary.lookup("CombustionModel")
-            # CM = CombustionModel.selector(combustionModel, dictionary.lookup(combustionModel + "Dict"))
-            # print(CM,"\n")
+            #Manipulating the combustionProperties
+            combustionModelDict = dictionary.lookupOrDefault(cls.Types["CombustionModel"].__name__ + "Dict", Dictionary())
+            
+            #Give premixed composition entries to combustion model. They will updated in constructor.
+            
+            
+            combustionModel = dictionary.lookup("CombustionModel")
+            CM = CombustionModel.selector(combustionModel, dictionary.lookupOrDefault(combustionModel + "Dict", Dictionary()))
+            print(CM,"\n")
+            
+            #TODO: Injection models
             
             #Submodels
             subModels = {}
@@ -179,14 +207,25 @@ class EngineModel(BaseClass):
                     smTypeName = dictionary.lookup(sm)
                     subModels[sm] = cls.Submodels[sm].selector(smTypeName, smDict.lookup(sm + "Dict"))
             
-            return cls(ET, EG, subModels)
+            out = cls(ET, EG, subModels)
+            
+            #Initialize mixtures
+            out.initializeMixtures(**dictionary.lookup("initialMixture"))
+            
+            return out
+            
         except BaseException as err:
             cls.fatalErrorInClass(cls.fromDictionary, "Failed contruction from dictionary", err)
     
     #########################################################################
     #Constructor:
-    # def __init__(self, time:EngineTime, geometry:EngineGeometry, combustionModel:CombustionModel, submodels:dict={}):
-    def __init__(self, time:EngineTime, geometry:EngineGeometry, submodels:dict={}):
+    def __init__(self, *, 
+                 time:EngineTime, 
+                 geometry:EngineGeometry, 
+                 combustionModel:CombustionModel,
+                 submodels:dict={}, 
+                 injectionModels:dict={},
+                 ):
         """
         Base class for engine model, used for type-checking and loading the sub-models.
 
@@ -195,15 +234,16 @@ class EngineModel(BaseClass):
             geometry (EngineGeometry): The engine geometry
             combustionModel (CombustionModel): Combustion model to use
             submodels (dict, optional): Dictionary containing the optional sub-models to load. Defaults to {}.
+            injectionModels (dict, optional): Dictionary containing the optional injection models to load. Defaults to {}.
         """
         try:
             #Main models
             self.checkType(geometry, self.Types["EngineGeometry"], "geometry")
             self.checkType(time, self.Types["EngineTime"], "engineTime")
-            # self.checkType(combustionModel, self.Types["CombustionModel"], "combustionModel")
+            self.checkType(combustionModel, self.Types["CombustionModel"], "combustionModel")
             self.geometry = geometry
             self.time = time
-            # self.combustionModel = combustionModel
+            self.combustionModel = combustionModel
             
             #Submodels
             self.checkType(submodels, dict, "submodels")
@@ -287,7 +327,17 @@ class EngineModel(BaseClass):
         return self
     
     ####################################
-    def initializeThemodynamicModels(self, /, *, cylinder:dict) -> EngineModel:
+    #TODO:
+    # Initializing the mixture composition on each thermodynamic zone. The be overwritten in subclasses 
+    # to handle specific initializations (SI engine will use the premixed-fuel entry, which will be 
+    # sent to the the combustion model)
+    @abstractmethod
+    def initializeMixtures(self, /, *, cylinder:dict, **zones) -> EngineModel:
+        #Here set the air, in sub-classes update
+        pass
+    
+    ####################################
+    def initializeThemodynamicModels(self, /, *, cylinder:dict, **zones) -> EngineModel:
         """
         Set the initial conditions of all thermodynamic regions of the EngineModel.
         For region to be initialized, a dict is given for the inital conditions,
@@ -308,11 +358,19 @@ class EngineModel(BaseClass):
         
         Args:
             cylinder (dict): data for initialization of in-cylinder state.
+            **zones:  data initialization of each zone in the model.
         """
         try:
             self.checkType(cylinder, dict, "cylinder")
             self._cilinder = ThermoModel(**self._preprocessThermoModelInput(cylinder))
-                    
+            
+            for zone in zones:
+                if not zone in self.Zones:
+                    raise ValueError(f"Unknown zone {zone}. Available zones in engine model are: {self.Zones}")
+                
+                self.checkType(zones[zone], dict, zone)
+                self.__setattr__("_" + zone, ThermoModel(**self._preprocessThermoModelInput(zones[zone])))
+            
         except BaseException as err:
             self.fatalErrorInClass(self.filterData, f"Failed initializing thermodynamic regions", err)
         

@@ -18,20 +18,19 @@ from .EngineTime import EngineTime
 #############################################################################
 class SparkIgnitionTime(EngineTime):
     """
-    Class for spark-ignition time. Derived from engineTime, defines the attribute SA (spark-advance) and sets it for determining the start-of-combustion.
+    Class for spark-ignition time. Derived from engineTime, defines the attribute 
+    SA (spark-advance) and sets it for determining the start-of-combustion.
     
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
     Attibutes:
-        
-        [Variable] | [Type]     | [Unit] | [Description]
-        -----------|------------|--------|-------------------------
-        IVC        | float      | CA     | Inlet valve closing
-        EVO        | float      | CA     | Inlet valve closing
-        SA         | float      | CA     | Spark advance
-        -----------|------------|--------|-------------------------
-        n          | float      | rpm    | Rotational speed
-        omega      | float      | rad/s  | 
+        Variable   |Type       |Unit   |Description
+        -----------|-----------|-------|------------------------
+        IVC        |float      |CA     |Inlet valve closing
+        EVO        |float      |CA     |Inlet valve closing
+        SA         |float      |CA     |Spark advance
+        n          |float      |rpm    |Rotational speed
+        omega      |float      |rad/s  |
     """
     
     #########################################################################

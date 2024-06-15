@@ -1,0 +1,18 @@
+{
+        "engineTime": "sparkIgnitionTime",
+        "sparkIgnitionTimeDict":
+        {
+            "IVC":-120,
+            "EVO":120,
+            "speed":1500,
+            "SA":-20
+        },
+    
+        "engineGeometryDict":
+        {
+            "CR"               : 16,
+            "bore"             : 85e-3,
+            "stroke"           : 85e-3,
+            "conRodLen"        : 150e-3
+        }
+    }

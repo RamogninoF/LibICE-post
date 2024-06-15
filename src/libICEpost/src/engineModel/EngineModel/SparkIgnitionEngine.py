@@ -17,6 +17,7 @@ from .EngineModel import EngineModel
 #Other imports
 from libICEpost.src.base.dataStructures.Dictionary import Dictionary
 from libICEpost.src.thermophysicalModels.thermoModels.CombustionModel.PremixedCombustion import PremixedCombustion
+from libICEpost.src.engineModel.EngineTime.SparkIgnitionTime import SparkIgnitionTime
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -32,6 +33,7 @@ class SparkIgnitionEngine(EngineModel):
     """
     Types = {t:EngineModel.Types[t] for t in EngineModel.Types}
     Types["CombustionModel"] = PremixedCombustion
+    Types["EngineTime"] = SparkIgnitionTime
     
     #########################################################################
     #Properties:
@@ -69,9 +71,12 @@ class SparkIgnitionEngine(EngineModel):
         }
         """
         try:
-            #Manipulating the combustionProperties
+            #Cast to Dictionary
+            cls.checkTypes(dictionary,(dict, Dictionary),"dictionary")
+            if isinstance(dictionary, dict):
+                dictionary = Dictionary(**dictionary)
             
-            
+            #Same as EngineModel
             return super().fromDictionary(dictionary)
         
         except BaseException as err:
