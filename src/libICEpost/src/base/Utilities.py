@@ -11,6 +11,8 @@ Last update:        12/06/2023
 #                               IMPORT                              #
 #####################################################################
 
+from typing import Self
+
 from .Functions.typeChecking import *
 from .Functions.functionsForDictionaries import *
 from .Functions.runtimeWarning import runtimeWarning, runtimeError, printStack, fatalErrorIn, fatalErrorInClass, fatalErrorInFunction, fatalErrorInArgumentChecking, fatalError
@@ -98,7 +100,7 @@ class Utilities(object):
     fatalErrorInArgumentChecking = fatalErrorInArgumentChecking
     
     #Copy
-    def copy(self):
+    def copy(self) -> Self:
         """
         Wrapper of copy.deepcopy function.
         """

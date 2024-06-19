@@ -16,4 +16,10 @@ Content of the package:
         
     StateInitializer (package)
         Classes for initialization of a thermodynamic state (used by ThermoModel constructor)
+    
+    CombustionModel (package)
+        Classes for combustion models
+        
+    EgrModel (package)
+        Models for computation of EGR mixture and fresh mxiture with EGR
 """

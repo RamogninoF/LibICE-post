@@ -30,6 +30,8 @@ class mpV(StateInitializer):
             Reference to the thermodynamic mixture
     """
     
+    _state:ThermoState
+    
     #########################################################################
     #Properties:
 

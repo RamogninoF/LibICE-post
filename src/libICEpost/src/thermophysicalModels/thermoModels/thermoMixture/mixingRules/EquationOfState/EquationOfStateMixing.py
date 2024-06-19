@@ -51,7 +51,7 @@ class EquationOfStateMixing(BaseClass):
     #########################################################################
     #Properties:
     @property
-    def EoS(self):
+    def EoS(self) -> EquationOfState:
         """
         The equation of state of the mixture.
         """
@@ -62,7 +62,7 @@ class EquationOfStateMixing(BaseClass):
     
     ##############################
     @property
-    def mix(self):
+    def mix(self) -> Mixture:
         return self._mix
 
     #########################################################################

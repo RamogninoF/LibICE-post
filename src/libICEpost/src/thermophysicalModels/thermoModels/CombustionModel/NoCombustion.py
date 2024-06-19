@@ -13,90 +13,87 @@ Last update:        DD/MM/YYYY
 
 from __future__ import annotations
 
-#Import BaseClass class (interface for base classes)
-from libICEpost.src.base.BaseClass import BaseClass, abstractmethod
+#load the base class
+from .CombustionModel import CombustionModel
 
+#Other imports
 from libICEpost.src.thermophysicalModels.specie.specie.Mixture import Mixture
+from libICEpost.src.base.dataStructures.Dictionary import Dictionary
 
 #############################################################################
 #                               MAIN CLASSES                                #
 #############################################################################
-
-class EgrModel(BaseClass):
+class NoCombustion(CombustionModel):
     """
-    Class for computation of EGR mixture. Instantiation of this class imposes no EGR.
-    
-    NOTE: egr mass fraction is referred to fresh mixture only, before mixing with fuel:
-        y_egr = m_egr/(m_egr + m_air)
-    Hence it goes from 0 (only air), to 100% (only egr).
+    No combustion (inhert)
     
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
     Attributes:
-        
     """
     
     #########################################################################
     #Properties:
-    @property
-    def EgrMixture(self) -> Mixture:
-        """
-        The EGR mixture composition
-
-        Returns:
-            Mixture
-        """
-        return self._egrMixture
-    
-    ################################
-    @property
-    def egr(self) -> float:
-        """
-        The egr mass fraction for dilution of the fresh mixture
-
-        NOTE: egr mass fraction is referred to fresh mixture only, before mixing with fuel:
-            y_egr = m_egr/(m_egr + m_air)
-        Hence it goes from 0 (only air), to 100% (only egr).
-        
-        Returns:
-            float
-        """
-        return self._egr
     
     #########################################################################
     #Class methods and static methods:
     @classmethod
-    def fromDictionary(cls, dictionary:dict):
+    def fromDictionary(cls, dictionary:dict|Dictionary):
         """
-        Create from dictionary
+        Create from dictionary.
         {
+            reactants (Mixture): The reactants composition
         }
         """
         try:
-            return cls()
+            #Cast to Dictionary
+            cls.checkTypes(dictionary,(dict, Dictionary),"dictionary")
+            if isinstance(dictionary, dict):
+                dictionary = Dictionary(**dictionary)
+                
+            #Constructing this class with the specific entries
+            out = cls\
+                (
+                    **dictionary,
+                )
+            return out
             
         except BaseException as err:
             cls.fatalErrorInClass(cls.fromDictionary, "Failed construction from dictionary", err)
     
     #########################################################################
-    #Constructor
-    def __init__(self, **kwargs):
+    def __init__(self, /, *, 
+                 reactants:Mixture,
+                 **kwargs):
         """
-        No egr to be applied.
+        Construct combustion model from reactants.
+        Other keyword arguments passed to base class CombustionModel.
+        
+        Args:
+            reactants (Mixture): The fresh mixture of reactants
         """
-        try:
-            #Initialize the object
-            self._egrMixture = Mixture.empty()
-            self._egr = 0.0
-        except BaseException as err:
-            self.fatalErrorInClass(self.__init__, f"Failed construction of {self.__class__.__name__}", err)
+        super().__init__(reactants=reactants, **kwargs)
     
     #########################################################################
     #Dunder methods:
     
     #########################################################################
     #Methods:
-    
+    def update(self, 
+               *args,
+               **kwargs,
+               ) -> bool:
+        """
+        Update mixture composition
+        
+        Args:
+            reactants (Mixture, optional): update reactants composition. Defaults to None.
+
+        Returns:
+            bool: if something changed
+        """
+        return super().update(*args,**kwargs)
+
 #########################################################################
-#Create selection table for the class used for run-time selection of type
-EgrModel.createRuntimeSelectionTable()
+#Add to selection table of Base
+CombustionModel.addToRuntimeSelectionTable(NoCombustion)

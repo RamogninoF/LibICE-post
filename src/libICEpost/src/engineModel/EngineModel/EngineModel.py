@@ -14,6 +14,9 @@ Last update:        12/06/2023
 from __future__ import annotations
 from types import FunctionType
 from operator import attrgetter
+import os
+
+import numpy as np
 
 from libICEpost.src.base.BaseClass import BaseClass, abstractmethod
 from libICEpost.src.base.dataStructures.EngineData.EngineData import EngineData
@@ -25,7 +28,11 @@ from ..EngineTime.EngineTime import EngineTime
 from ..EngineGeometry.EngineGeometry import EngineGeometry
 
 from libICEpost.src.thermophysicalModels.thermoModels.CombustionModel.CombustionModel import CombustionModel
+from libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.ThermoMixture import ThermoMixture
 from libICEpost.src.thermophysicalModels.thermoModels.ThermoModel import ThermoModel
+from libICEpost.src.thermophysicalModels.thermoModels.EgrModel.EgrModel import EgrModel
+
+from libICEpost.src.thermophysicalModels.thermoModels.CombustionModel.NoCombustion import NoCombustion
 
 from libICEpost.Database.chemistry.specie.Mixtures import Mixtures, Mixture
 
@@ -37,7 +44,7 @@ from libICEpost.Database.chemistry.specie.Mixtures import Mixtures, Mixture
 #   Handle interaction with other zones (creviceModel? prechamberModel?)
 
 # NOTE: to handle diesel combustion, need to compute the phi from the injected mass 
-# (probably the main parameter for the combustion model, and pass it to the EGR model)
+# (probably the main parameter for the combustion model)
 
 # NOTE: This model handles a single-zone model of the cylinder. Sub-classes may be 
 # defined to introduce additional zones, like in case of pre-chamber engines, crevice 
@@ -56,26 +63,48 @@ class EngineModel(BaseClass):
     
     Attibutes:
     """
+    _cylinder:ThermoModel
     
-    """Types for each main model"""
     Types:dict[str:type] = \
         {
             "EngineGeometry":           EngineGeometry,
             "EngineTime":               EngineTime,
+            "EgrModel":                 EgrModel,
             "CombustionModel":          CombustionModel,
         }
+    """Types for each main model"""
     
-    """The available sub-models"""
     Submodels:dict[str:type] = \
         {
+            "EgrModel":             EgrModel(),
+            "CombustionModel":      NoCombustion(reactants=Mixture.empty()),
             # "heatTransferModel":        None,
         }
+    """The available sub-models and their default initializers"""
     
-    """The zones avaliable in the model"""
     Zones:list[str] = \
         [
             "cylinder"
         ]
+    """The zones avaliable in the model"""
+    
+    thermophysicalProperties:Dictionary
+    """Dictionary with thermophysical properties for mixtures"""
+    
+    combustionProperties:Dictionary
+    """Dictionary with properties for combustion modeling and chemical composition of mixtures"""
+    
+    CombustionModel:CombustionModel
+    """The combustion model"""
+    
+    EgrModel:EgrModel
+    """The EGR model"""
+    
+    _air:Mixture
+    """Air mixture"""
+    
+    info:Dictionary
+    """General information for pre-post processing"""
     
     #########################################################################
     # Properties
@@ -89,6 +118,7 @@ class EngineModel(BaseClass):
         """
         return self._raw
     
+    #################################
     @property
     def data(self)-> EngineData:
         """
@@ -141,17 +171,17 @@ class EngineModel(BaseClass):
                 {
                     TODO
                 },
-
+                
+                air:    Mixture (default: database.chemistry.specie.Mixtures.dryAir)
+                    The air mixture composition
+                
                 initialMixture: dict
+                    Dictionary with data for initialization of the mixture 
+                    in the thermodynamic zones
                 {
                     <zoneName>:
                     {
-                        air:    Mixture (default: database.chemistry.specie.Mixtures.dryAir),
-                        premixedFuel: dict (optional)
-                        {
-                            mixture: Mixture,
-                            phi:     float,
-                        }
+                        [depends on specific engine model]
                     }
                 },
                 
@@ -161,6 +191,11 @@ class EngineModel(BaseClass):
                     Dictionary with data required from CombustionModel
                     See at the helper for function 'fromDictionary' of the specific 
                     CombustionModel model selected.
+            }
+            
+            dataDict (dictionary): Dictionary with info for loading data, pre-processing and setting initial conditions.
+            {
+                TODO
             }
         }
         """
@@ -183,20 +218,14 @@ class EngineModel(BaseClass):
             EG = EngineGeometry.selector(egModel, dictionary.lookup(egModel + "Dict"))
             print(EG,"\n")
 
-            #CombustionModel:
-            print("Construct CombustionModel")
+            #combustionProperties
+            combustionProperties = dictionary.lookup("combustionProperties")
             
-            #Manipulating the combustionProperties
-            combustionModelDict = dictionary.lookupOrDefault(cls.Types["CombustionModel"].__name__ + "Dict", Dictionary())
+            #thermophysical properties
+            thermophysicalProperties = dictionary.lookup("thermophysicalProperties")
             
-            #Give premixed composition entries to combustion model. They will updated in constructor.
-            
-            
-            combustionModel = dictionary.lookup("CombustionModel")
-            CM = CombustionModel.selector(combustionModel, dictionary.lookupOrDefault(combustionModel + "Dict", Dictionary()))
-            print(CM,"\n")
-            
-            #TODO: Injection models
+            #Data for pre-processing
+            dataDict = dictionary.lookup("dataDict")
             
             #Submodels
             subModels = {}
@@ -207,11 +236,7 @@ class EngineModel(BaseClass):
                     smTypeName = dictionary.lookup(sm)
                     subModels[sm] = cls.Submodels[sm].selector(smTypeName, smDict.lookup(sm + "Dict"))
             
-            out = cls(ET, EG, subModels)
-            
-            #Initialize mixtures
-            out.initializeMixtures(**dictionary.lookup("initialMixture"))
-            
+            out = cls(time=ET, geometry=EG, thermophysicalProperties=thermophysicalProperties, combustionProperties=combustionProperties, dataDict=dataDict, **subModels)
             return out
             
         except BaseException as err:
@@ -219,12 +244,13 @@ class EngineModel(BaseClass):
     
     #########################################################################
     #Constructor:
-    def __init__(self, *, 
-                 time:EngineTime, 
-                 geometry:EngineGeometry, 
-                 combustionModel:CombustionModel,
-                 submodels:dict={}, 
-                 injectionModels:dict={},
+    def __init__(self, *,
+                 time:EngineTime,
+                 geometry:EngineGeometry,
+                 thermophysicalProperties:dict|Dictionary,
+                 combustionProperties:dict|Dictionary,
+                 dataDict:dict|Dictionary=None,
+                 **submodels,
                  ):
         """
         Base class for engine model, used for type-checking and loading the sub-models.
@@ -232,44 +258,218 @@ class EngineModel(BaseClass):
         Args:
             time (EngineTime): The engine time
             geometry (EngineGeometry): The engine geometry
-            combustionModel (CombustionModel): Combustion model to use
-            submodels (dict, optional): Dictionary containing the optional sub-models to load. Defaults to {}.
-            injectionModels (dict, optional): Dictionary containing the optional injection models to load. Defaults to {}.
+            thermophysicalProperties (dict|Dictionary): Dictionary with thermophysical properties of mixtures
+            combustionProperties (dict|Dictionary): Dictionary with combustion data and chemical composition
+            dataDict (dict|Dictionary, optional): Dictionary for loading data. If not given, data are not loaded 
+                and thermodynamic regions not initialized. Defaults to None.
+            **submodels (dict, optional): Optional sub-models to load. Defaults to {}.
         """
         try:
             #Main models
             self.checkType(geometry, self.Types["EngineGeometry"], "geometry")
             self.checkType(time, self.Types["EngineTime"], "engineTime")
-            self.checkType(combustionModel, self.Types["CombustionModel"], "combustionModel")
             self.geometry = geometry
             self.time = time
-            self.combustionModel = combustionModel
-            
-            #Submodels
-            self.checkType(submodels, dict, "submodels")
-            for model in self.Submodels:
-                if model in submodels:
-                    self.checkType(submodels[model], self.Types[model], f"{submodels}[{model}]")
             
             #Data structures
             self._raw = EngineData()     #Raw data
             self._data = EngineData()    #Filtered data
             
+            #Submodels
+            for model in self.Submodels:
+                if model in submodels:
+                    #Get from input
+                    sm = submodels[model]
+                    self.checkType(sm, self.Types[model], f"{submodels}[{model}]")
+                else:
+                    #Take default
+                    sm = self.Submodels[model].copy()
+                #Set sub-model
+                self.__setattr__(model, sm)
+            
+            #Thermos
+            self.checkType(thermophysicalProperties, dict, "thermophysicalProperties")
+            if isinstance(thermophysicalProperties, dict):
+                thermophysicalProperties = Dictionary(**thermophysicalProperties)
+            self.thermophysicalProperties = thermophysicalProperties.copy()
+            
+            #Combustion properties
+            self.checkType(combustionProperties, dict, "combustionProperties")
+            if isinstance(combustionProperties, dict):
+                combustionProperties = Dictionary(**combustionProperties)
+            self.combustionProperties = combustionProperties.copy()
+            
+            #Contruct the thermodynamic models
+            self._constructThemodynamicModels(combustionProperties)
+            
+            #TODO: construct injection models
+            
+            #Construct the Egr model
+            self._constructEgrModel(combustionProperties)
+            
+            #Construct the combustion model
+            self._constructCombustionModel(combustionProperties)
+            
+            #Misc parameters
+            self.info = Dictionary()
+            self.info["path"] = None
+            self.info["dataDict"] = None
+            self.info["filter"] = None
+            self.info["initialConditions"] = None
+            
+            #Pre-processing
+            if not dataDict is None:
+                self.preProcess(**dataDict)
+            
         except BaseException as err:
             self.fatalErrorInClass(self.__init__, f"Failed constructing instance of class {self.__class__.__name__}", err)
     
     #########################################################################
+    #Construction methods:
+    def _constructThemodynamicModels(self, combustionProperties:dict|Dictionary) -> EngineModel:
+        """
+        Construct the thermodynamic models of the system, setting their initial 
+        mixture composition. Here setting everything to air, might be overwritten
+        in sub-classes to handle specific initializations (SI engine will use 
+        the premixedFuel entry)
+        
+        Args:
+            combustionProperties (dict|Dictionary): the combustion properties
+        
+        Returns:
+            EngineModel: self
+        """
+        self.checkType(combustionProperties, dict, "combustionProperties")
+        if not isinstance(combustionProperties, Dictionary):
+            combustionProperties = Dictionary(**combustionProperties)
+            
+        #Air composition
+        air = combustionProperties.lookupOrDefault("air", Mixtures.dryAir)
+        self._air = air.copy()
+        
+        #Here set everything to air, in sub-classes update
+        for zone in self.Zones:
+            self.__setattr__("_" + zone, ThermoModel(ThermoMixture(self._air.copy(), **self.thermophysicalProperties)))
+        return self
+    
+    ####################################
+    def _constructEgrModel(self, combustionProperties:dict|Dictionary):
+        """
+        Construct the EGR model and apply it to the cylinder region.
+        Might be overwritten in child for applying EGR also to sub-regions of cylinder.
+        
+        Args:
+            combustionProperties (dict|Dictionary): the combustion properties
+        
+        Returns:
+            EngineModel: self
+        """
+        print("Constructing EGR model")
+        
+        self.checkType(combustionProperties, dict, "combustionProperties")
+        if not isinstance(combustionProperties, Dictionary):
+            combustionProperties = Dictionary(**combustionProperties)
+        
+        if "EgrModel" in combustionProperties:
+            #Construct egr model from combustion properties
+            egrModelType:str = combustionProperties.lookup("EgrModel")
+            egrModelDict = combustionProperties.lookupOrDefault(egrModelType + "Dict", Dictionary())
+            egrModelDict.update(reactants=self._cylinder.mixture.mix) #Append to dictionary the cylinder properties
+        else:
+            #Use default
+            self.EgrModel = self.Submodels["EgrModel"].copy().update(reactants=self._cylinder.mixture.mix)
+        
+        #NOTE: When introducing the injection models, need to compute EVO composition instead
+        
+        #Construct the EGR model
+        self.EgrModel = EgrModel.selector(egrModelType, egrModelDict)
+        
+        print(f"\tType: {self.EgrModel.__class__.__name__}")
+        
+        #Apply EGR to reactants
+        self._cylinder.mixture.mix.dilute(self.EgrModel.EgrMixture, self.EgrModel.egr)
+    
+    ####################################
+    def _constructCombustionModel(self, combustionProperties:dict|Dictionary):
+        """
+        Construct the combustion model.
+        Might be overwritten in child to set additional parameters to combustionModelDict 
+        (fuel for PremixedCombustion model is updated in SparkIgnitionEngine)
+        
+        Args:
+            combustionProperties (dict|Dictionary): the combustion properties
+        
+        Returns:
+            EngineModel: self
+        """
+        print("Constructing combustion model")
+        
+        self.checkType(combustionProperties, dict, "combustionProperties")
+        if not isinstance(combustionProperties, Dictionary):
+            combustionProperties = Dictionary(**combustionProperties)
+        
+        combustionModelType = combustionProperties.lookupOrDefault("CombustionModel", None, fatal=False)
+        if not combustionModelType is None:
+            #Get dictionary
+            combustionModelDict = combustionProperties.lookupOrDefault(combustionModelType + "Dict", Dictionary())
+            combustionModelDict.update( #Append reactants to combustion model dictionary
+                reactants=self._cylinder.mixture.mix    #Initial in-cylinder mixture
+            )
+            
+            #Construct
+            self.CombustionModel = CombustionModel.selector(combustionModelType, combustionModelDict)
+        else:
+            #Use default
+            self.CombustionModel = self.Submodels["CombustionModel"].copy().update(reactants=self._cylinder.mixture.mix)
+        
+        print(f"\tType: {self.CombustionModel.__class__.__name__}")
+        
+        #Check consistency
+        if not isinstance(self.CombustionModel, self.Types["CombustionModel"]):
+            raise TypeError(f"Combustion model type {combustionModelType} in combustionProperties dictionaries not compatible with allowed type for engine model {self.__class__.__name__} ({self.Types['CombustionModel']})")
+        
+    #########################################################################
+    #Updating methods:
+    def _updateMixtures(self) -> None:
+        """
+        Update mixture compositions (might be overwritten in child classes)
+        """
+        #TODO: Update the in-cylinder mixture based on injection models (may have already injected some mass)
+        
+        #Update the combustion model at current time
+        self._updateCombustionModel()
+        
+        #Update in-cylinder mixture based on combustion model current mixture
+        self._cylinder.mixture.update(self.CombustionModel.mixture)
+        
+    ####################################
+    def _updateCombustionModel(self):
+        """
+        Update combustion model
+        """
+        #TODO: Update the reactants mixture based on injection models (may have already injected some mass)
+        
+        index = self.data.data.index[self.data['CA'] == self.time.time].tolist()[0]
+        data = self.data.data.loc()[index].to_dict()
+        self.CombustionModel.update(**data) #NOTE: update also fuel when implementing injection models
+    
+    #########################################################################
+    #Dunder methods:
     def __str__(self):
         STR = ""
         STR += "Engine model instance:\n"
         STR += "Engine time\n\t" + self.time.__str__().replace("\n", "\n\t")
         STR += "\n"
         STR += "Engine geometry:\n\t" + self.geometry.__str__().replace("\n", "\n\t")
-        
+        STR += "\n"
+        STR += "EGR model:\n\t" + self.EgrModel.__str__().replace("\n", "\n\t")
+        STR += "\n"
+        STR += "Combustion model:\n\t" + self.CombustionModel.__str__().replace("\n", "\n\t")
         return STR
         
     #########################################################################
-    def loadFile(self,*args,**argv) -> EngineModel:
+    #Pre-processing methods:
+    def _loadFile(self,*args,**argv) -> EngineModel:
         """
         Loads a file with raw data to self.raw. See EngineData.loadFile 
         documentation for arguments:
@@ -277,10 +477,8 @@ class EngineModel(BaseClass):
         self.raw.loadFile(*args,**argv)
         return self
     
-    loadFile.__doc__ += EngineData.loadFile.__doc__
-    
     ####################################
-    def loadArray(self,*args,**argv):
+    def _loadArray(self,*args,**argv):
         """
         Loads an array with raw data to self.raw. See EngineData.loadArray 
         documentation for arguments:
@@ -288,7 +486,83 @@ class EngineModel(BaseClass):
         self._raw.loadArray(*args,**argv)
         return self
     
-    loadArray.__doc__ += EngineData.loadArray.__doc__
+    ####################################
+    def loadData(self, dataPath:str=os.curdir, *, data:dict|Dictionary) -> EngineModel:
+        """
+        Load raw data.
+        
+        Args:
+            data (dict | Dictionary): Dictionary containing the data to load for each region.
+            dataPath (str, optional): Global path where to load/write data. Defaults to os.curdir.
+
+        Returns:
+            EngineModel: self
+        """
+        print("Loading data")
+        print(f"Data path: {dataPath}")
+        
+        #Seth path info
+        self.info["path"] = dataPath
+        
+        #Cast to Dictionary
+        data = Dictionary(**data)
+        self.info["dataDict"] = data
+        
+        #Load data:
+        for zone in self.Zones:
+            zoneDict = data.lookup(zone)
+            
+            #Check that pressure is found (mandatory)
+            if not "p" in zoneDict:
+                raise ValueError(f"Mandatory entry 'p' in data dictionary for zone {zone} not found. Pressure trace must be loaded for each thermodynamic region.")
+            
+            #Loop over data to be loaded:
+            for entry in zoneDict:
+                dataDict = zoneDict.lookup(entry)
+                self.checkType(dataDict, Dictionary, f"{zone}[{entry}]")
+                
+                #If the region is not cylinder, append its name to the field
+                entryName:str = entry + (f"_{zone}" if zone != "cylinder" else "")
+                currData:Dictionary = dataDict.lookup("data")
+                opts:Dictionary = currData.lookupOrDefault("opts", Dictionary())
+                
+                #Get format
+                dataFormat:str = dataDict.lookup("format")
+                if (dataFormat == "file"):
+                    #File
+                    fileName = currData.lookup("fileName")
+                    
+                    #relative to dataPath if given
+                    fileName = (dataPath + os.path.sep if dataPath else "") + fileName
+                    
+                    #Load
+                    self._loadFile(fileName, entryName, **opts)
+                    
+                elif (dataFormat == "array"):
+                    #(CA,val) array
+                    dataArray = currData.lookup("array")
+                    self._loadArray(dataArray, entryName, **opts)
+                
+                elif (dataFormat == "function"):
+                    #Function f(CA)
+                    function:FunctionType = currData.lookup("function")
+                    self.checkType(function, FunctionType, f"{zone}[{entry}][function]")
+                    
+                    CA = self.raw["CA"]
+                    f = CA.apply(function)
+                    
+                    self._loadArray(np.array((CA,f)).T, entryName, **opts)
+                    
+                elif (dataFormat == "uniform"):
+                    #Uniform value
+                    value:float = currData.lookup("value")
+                    self.checkType(function, float, f"{zone}[{entry}][value]")
+                    self.raw[entryName] = value
+                
+                else:
+                    raise ValueError(f"Unknown data format '{dataFormat}' for entry {zone}[{entry}]")
+                    
+        return self
     
     ####################################
     def filterData(self, filter:"Filter|FunctionType|None"=None) -> EngineModel:
@@ -303,10 +577,13 @@ class EngineModel(BaseClass):
         If filter is None, data are cloned from self.raw
         """
         try:
-            # Clear filtered data
-            self._data = EngineData()
+            #Save filter
+            self.info["filter"] = filter
+            
+            #Clone if no filter is given
             if filter is None:
-                self._data = self._raw
+                for field in self._raw.columns:
+                    self._data.loadArray(np.array((self._raw.data["CA"],self._raw.data[field])).T, field)
                 return self
             
             #Apply filter
@@ -314,12 +591,7 @@ class EngineModel(BaseClass):
             for var in self._raw.columns:
                 #Filter data
                 if var != "CA":
-                    _, self._data.data[var] = filter(self._raw.data["CA"], self._raw.data[var])
-                else:
-                    self._data.data[var], _ = filter(self._raw.data["CA"], self._raw.data[var])
-                    
-                #Create interpolator
-                self._data.createInterpolator(var)
+                    self._data.loadArray(np.array(filter(self._raw.data["CA"], self._raw.data[var])).T, var)
             
         except BaseException as err:
             self.fatalErrorInClass(self.filterData, f"Failed filtering data", err)
@@ -327,17 +599,7 @@ class EngineModel(BaseClass):
         return self
     
     ####################################
-    #TODO:
-    # Initializing the mixture composition on each thermodynamic zone. The be overwritten in subclasses 
-    # to handle specific initializations (SI engine will use the premixed-fuel entry, which will be 
-    # sent to the the combustion model)
-    @abstractmethod
-    def initializeMixtures(self, /, *, cylinder:dict, **zones) -> EngineModel:
-        #Here set the air, in sub-classes update
-        pass
-    
-    ####################################
-    def initializeThemodynamicModels(self, /, *, cylinder:dict, **zones) -> EngineModel:
+    def initializeThemodynamicModels(self, **initialConditions) -> EngineModel:
         """
         Set the initial conditions of all thermodynamic regions of the EngineModel.
         For region to be initialized, a dict is given for the inital conditions,
@@ -346,8 +608,8 @@ class EngineModel(BaseClass):
         ->  If a float is given, the value is used
         ->  If a str is given, it refers to the name of the vabiables stored in the EngineModel,
             in which case the corresponding initial condition is sampled from the the corresponding
-            data-set at self.engineTime.startTime (if None, to first instant of pressure trace)
-        ->  If string starting with @ is given, it applies that method with input (self.engineTime.startTime)
+            data-set at self.time.startTime.
+        ->  If string starting with @ is given, it applies that method with input (self.time.startTime)
 
         Ex:
         {
@@ -357,77 +619,299 @@ class EngineModel(BaseClass):
         }
         
         Args:
-            cylinder (dict): data for initialization of in-cylinder state.
-            **zones:  data initialization of each zone in the model.
+            **initialConditions:  data initialization of each zone in the model.
         """
         try:
-            self.checkType(cylinder, dict, "cylinder")
-            self._cilinder = ThermoModel(**self._preprocessThermoModelInput(cylinder))
+            #Update start-time of engine time so that it is bounded to first avaliable time-step
             
-            for zone in zones:
-                if not zone in self.Zones:
-                    raise ValueError(f"Unknown zone {zone}. Available zones in engine model are: {self.Zones}")
+            if not "CA" in self.data.columns:
+                raise ValueError("No data loaded yet.")
+            
+            #Set start-time
+            self.time.updateStartTime(self.data["CA"])
+            self.info["time"] = self.time.time
+            
+            #Update the mixtures at start-time (combustion models, injection models, etc.)
+            self._updateMixtures()
+            
+            initialConditions = Dictionary(**initialConditions)
+            #Store initial conditions
+            self.info["initialConditions"] = initialConditions
+            
+            for zone in self.Zones:
+                zoneDict = initialConditions.lookup(zone)
+                self.checkType(zoneDict, dict, "zoneDict")
                 
-                self.checkType(zones[zone], dict, zone)
-                self.__setattr__("_" + zone, ThermoModel(**self._preprocessThermoModelInput(zones[zone])))
-            
+                attrgetter("_" + zone)(self).initializeState(**self._preprocessThermoModelInput(zoneDict, zone=zone))
+
         except BaseException as err:
             self.fatalErrorInClass(self.filterData, f"Failed initializing thermodynamic regions", err)
         
         return self
     
     ####################################
-    def _preprocessThermoModelInput(self, inputDict:dict) -> dict:
+    def _preprocessThermoModelInput(self, inputDict:dict, zone:str) -> dict:
         """
         Auxiliary function to pre-process input dictionary 
         to initialization of a thermodynamic region
 
+        NOTE:
+            Might be overwritten in child class to also initialize 
+            the mixture composition, for example based on the combustion model.
+            In such case, do so:
+                def _preprocessThermoModelInput(self, inputDict:dict, zone:str) -> dict:
+                    tempDict = super()._preprocessThermoModelInput(inputDict, zone)
+                    
+                    ... #Manipulate mixture based on output dictionary
+                    
+                    nameList = ["mass", "temperature", "pressure", "volume", "density"]
+                    outputDict = {v:[tempDict[v]] for v in tempDict if v in nameList}   #Set state variables
+                    outputDict["mixture"] = mix #Set mixture
+                    
+                    return outputDict
+                    
+        
         Args:
             inputDict (dict): dictionary for thermodynamic inputs
-
-        #TODO error handling
+            zone (str): the zone name
         
         Returns:
             dict: processed dictionary
         """
+        #TODO error handling
+        
         outputDict = {}
         for key in inputDict:
             val = inputDict[key]
+            
             if isinstance(val,float):
                 #Float -> use value
                 outputDict[key] = val
-                
             elif isinstance(val,str):
-                #str -> interpolate
-                if self.time.startTime is None:
-                    startTime:float = self.data["CA"][0]
-                else:
-                    startTime:float = self.time.startTime
+                #str
+                startTime:float = self.time.startTime
                 
-                #str with @ -> apply method
                 if val.startswith("@"):
+                    #str with @ -> apply method
                     code = f"outputDict[key] = self.{val[1:]}(startTime)"
                     exec(code)
                 else:
-                    outputDict[key] = attrgetter(val)(self.data)(startTime)
-                  
+                    #str -> interpolate
+                    outputDict[key] = attrgetter(val + (f"_{zone}" if not (zone == "cylinder") else ""))(self.data)(startTime)
+            else:
+                #Error
+                raise TypeError(f"Type '{val.__class__.__name__}' not supported ({key}).")
+        
         return outputDict
     
     ####################################
-    # TODO:Boundary conditions: heat transfer at walls
-    # def setBoundaryConditions(self, /, *, cylinder:dict):
-    #     """
-    #     Set the boundary conditions of all thermodynamic regions of the EngineModel
-    #     """
-    #     pass
+    def preProcess(self, dataPath:str=os.curdir, *, data:dict|Dictionary, preProcessing:dict|Dictionary=None, initialConditions:dict|Dictionary, **zones) -> EngineModel:
+        """
+        Pre-processing:
+            1) Loading data (from files or arrays)
+            2) Pre-process the data (filtering, optional)
+            3) Initialize thermodynamic regions
+        
+        NOTE:
+        Naming of variables when loading data as follows:
+            -> By default they refer to the "cylinder" zone
+            -> Variables referred to a specific zone are allocated as "<variableName>_<zoneName>"
+
+        TODO: example
+        
+        Args:
+            data (dict | Dictionary): Dictionary with info for loading data.
+            preProcessing (dict | Dictionary, optional): Dictionary with pre-processing information. Defaults to None.
+            initialConditions (dict | Dictionary): Dictionary with initial condition for thermodynamic models
+            dataPath (str, optional): _description_. Defaults to os.curdir.
+
+        Returns:
+            EngineModel: self
+        """
+        
+        print("Pre-processing")
+        
+        #Loading data:
+        self.loadData(dataPath, data=data)
+        
+        # Filtering data
+        filter = None
+        if not preProcessing is None:
+            filterType = preProcessing.lookupOrDefault("Filter", None, fatal=False)
+            if isinstance(filterType, str):
+                #Got type name for run-time construction
+                filter:Filter = Filter.selector(filterType, preProcessing.lookup(f"{filterType}Dict"))
+            elif isinstance(filterType, Filter):
+                #Got filter item
+                filter = filterType
+            else:
+                #No filtering
+                pass
+            
+        self.filterData(filter)
+        
+        #Initial conditions for thermodinamic models:
+        self.initializeThemodynamicModels(**initialConditions)
+        
+        return self
+        
+    #########################################################################
+    #Processing methods:
+    def process(self) -> EngineModel:
+        """
+        Process the data, main time-loop.
+        
+        This is split into two function calls, which may be overwritten in child classes to tailored processings:
+        1) _process__pre__: Create the columns in self.data for the fields generted by post-processing
+        2) _update: The state-updating procedure in the main time-loop
+        
+        Returns:
+            EngineModel: self
+        """
+        try:
+            print("")
+            print("Processing")
+            print("startTime:",self.time.startTime)
+            print("endTime:",self.time.endTime)
+            print("current time:",self.info["time"])
+            
+            #Create fields
+            self._process__pre__()
+            
+            #Process cylinder data
+            for t in self.time(self.data["CA"]):
+                #Restart from last time
+                if t > self.info["time"]:
+                    self.info["time"] = t
+                    self._update()
+
+            return self
+        except BaseException as err:
+            self.fatalErrorInClass(self.process, f"Failed processing data for engine model {self.__class__.__name__}", err)
     
     ####################################
-    @abstractmethod
-    def process(self):
+    def _process__pre__(self) -> None:
         """
-        Process the data (to be overwritten)
+        Creation of the post-processed fields.
+        
+        NOTE:
+            When overwriting, first call this method:
+            def _process__pre__(self) -> None:
+                super()._process__pre__()
+                ...
         """
-        pass
+        #Add fields to data:
+        fields = ["dpdCA", "V", "T", "gamma", "ahrr", "cumAhrr"]
+        for f in fields:
+            if not f in self.data.columns:
+                self.data[f] = float("nan")
+        
+        for specie in self._cylinder.mixture.mix:
+            self.data[specie.specie.name + ".x"] = 0.0
+            self.data[specie.specie.name + ".y"] = 0.0
+        
+        #Set initial values:
+        CA = self.time.time
+        index = self.data.data.index[self.data['CA'] == CA].tolist()
+        
+        V = self.geometry.V(CA)
+        p = self.data.p(CA)
+        T = self._cylinder.state.T
+        gamma = self._cylinder.mixture.gamma(p,T)
+        self.data["V"][index] = V
+        self.data["T"][index] = T
+        self.data["gamma"][index] = gamma
+        
+        self.data["ahrr"][index] = 0.0
+        self.data["cumAhrr"][index] = 0.0
+        
+        for specie in self._cylinder.mixture.mix:
+            self.data[specie.specie.name + ".x"][index] = specie.X
+            self.data[specie.specie.name + ".y"][index] = specie.Y
+    
+    ####################################
+    def _update(self) -> None:
+        """
+        Method for updating the state during the time-loop. Here updating 
+        cylinder as single-zone model without interaction with other regions.
+        Could be overwritten for more detailed models (e.g., two-zone SI model, TJI, etc.)
+        
+        NOTE:
+            When overwriting, afterwards call this method:
+            def _update(self) -> None:
+                ...
+                super()._update()
+        """
+        #TODO injection models for mass end energy souce terms
+        #TODO heat transfer models for temperature (open systems only!)
+        
+        #Current time
+        CA = self.time.time
+        
+        #Update state
+        p = self.data.p(CA)
+        V = self.geometry.V(CA)
+        dpdCA = (self.data.p(CA) - self.data.p(self.time.oldTime))/self.time.deltaT
+        self._cylinder.update(pressure=p, volume=V)
+        
+        #Gamma
+        T = self._cylinder.state.T
+        gamma = self._cylinder.mixture.gamma(p,T)
+        
+        #Apparent heat release rate [J/CA]
+        t1 = gamma/(gamma - 1.0)*p*self.geometry.dVdCA(CA) 
+        t2 = 1.0/(gamma - 1.0)*self.geometry.V(CA)*dpdCA
+        ahrr = t1 + t2
+        
+        self._updateMixtures()
+        
+        #Store
+        index = self.data.data.index[self.data['CA'] == CA].tolist()[0]
+        
+        #Main parameters
+        self.data["dpdCA"][index] = dpdCA
+        self.data["V"][index] = V
+        self.data["T"][index] = T
+        self.data["gamma"][index] = gamma
+        self.data["ahrr"][index] = ahrr
+        
+        #Integrate
+        self.data["cumAhrr"][index] = self.data["cumAhrr"][index-1] + 0.5*(self.data["ahrr"][index-1] + ahrr)*self.time.deltaT
+        
+        #Mixture composition
+        for specie in self._cylinder.mixture.mix:
+            if not specie.specie.name + ".x" in self.data.columns:
+                self.data[specie.specie.name + ".x"] = 0.0
+                self.data[specie.specie.name + ".y"] = 0.0
+            else:
+                self.data[specie.specie.name + ".x"][index] = specie.X
+                self.data[specie.specie.name + ".y"][index] = specie.Y
+    
+    ####################################
+    def refresh(self, reset:bool=False) -> EngineModel:
+        """
+        Refresh data and restart processing:
+            1) loadData
+            2) filterData
+            3) process
+
+        Args:
+            reset (bool, optional): If need to restart from scratch. Defaults to False.
+        
+        Returns:
+            EngineModel: self
+        """
+        self.loadData(self.info["path"], data=self.info["dataDict"])
+        self.filterData(self.info["filter"])
+        
+        #TODO: refactoring of initialization of thermodynamic models
+        if reset:
+            self._constructThemodynamicModels(self.combustionProperties)
+            self._constructEgrModel(self.combustionProperties)
+            self._constructCombustionModel(self.combustionProperties)
+            self.initializeThemodynamicModels(self.info["initialConditions"])
+        
+        self.process()
     
 #########################################################################
 #Create selection table

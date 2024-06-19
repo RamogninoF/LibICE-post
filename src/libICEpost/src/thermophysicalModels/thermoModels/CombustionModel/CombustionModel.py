@@ -17,10 +17,8 @@ from __future__ import annotations
 from libICEpost.src.base.BaseClass import BaseClass, abstractmethod
 
 from libICEpost.src.thermophysicalModels.specie.specie.Mixture import Mixture
-from libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.ThermoMixture import ThermoMixture
 from libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.ReactionModel import ReactionModel
 
-from .EgrModel.EgrModel import EgrModel
 from ..ThermoState import ThermoState
 
 from libICEpost.src.base.dataStructures.Dictionary import Dictionary
@@ -39,97 +37,48 @@ class CombustionModel(BaseClass):
         air:    ThermoMixture
             The thermodynamic mixture of air
         
-        thermo: Dictionary
-            Data for the thermodynamic properteis
-        
     """
-    _freshMixture:ThermoMixture
-    _fuel:ThermoMixture
-    _air:ThermoMixture
-    _combustionProducts:ThermoMixture
-    _mixture:ThermoMixture
+    _freshMixture:Mixture
+    _combustionProducts:Mixture
+    _mixture:Mixture
     _state:ThermoState
-    _appliedEGR:bool
     _reactionModel:ReactionModel
-    _EGRModel:EgrModel
     
     #########################################################################
     #Properties:
-    @property
-    def air(self) -> ThermoMixture:
-        """
-        The air mixture
-        
-        Returns:
-            ThermoMixture
-        """
-        return self._air
     
     ################################
     @property
-    def fuel(self) -> ThermoMixture:
-        """
-        The current fuel mixture
-        
-        Returns:
-            ThermoMixture
-        """
-        return self._fuel
-    
-    ################################
-    @property
-    def freshMixture(self) -> ThermoMixture:
+    def freshMixture(self) -> Mixture:
         """
         The current fresh (unburnt) mixture
         
         Returns:
-            ThermoMixture
+            Mixture
         """
         return self._freshMixture
     
     ################################
     @property
-    def combustionProducts(self) -> ThermoMixture:
+    def combustionProducts(self) -> Mixture:
         """
         The combustion products
         
         Returns:
-            ThermoMixture
+            Mixture
         """
         return self._combustionProducts
     
     ################################
     @property
-    def mixture(self) -> ThermoMixture:
+    def mixture(self) -> Mixture:
         """
         The mixture at current state
         
         Returns:
-            ThermoMixture
+            Mixture
         """
         return self._mixture
-    
-    ################################
-    @property
-    def thermo(self) -> Dictionary:
-        """
-        Data for thermodynamic properties of mixtures
-
-        Returns:
-            Dictionary
-        """
-        return self._thermo.copy()
-    
-    ################################
-    @property
-    def egrModel(self) -> EgrModel:
-        """
-        The EGR model
-
-        Returns:
-            EgrModel
-        """
-        return self._EGRModel
     
     ################################
     @property
@@ -159,9 +108,7 @@ class CombustionModel(BaseClass):
     #########################################################################
     #Constructor
     def __init__(self, /, *,
-                 air:Mixture, 
-                 thermo:Dictionary,
-                 egrModel:EgrModel=EgrModel(),
+                 reactants:Mixture,
                  reactionModel:str="Stoichiometry",
                  state:ThermoState|dict[str:type]=ThermoState(),
                  **kwargs
@@ -170,9 +117,7 @@ class CombustionModel(BaseClass):
         Initialization of main parameters of combustion model.
         
         Args:
-            air (Mixture): Air
-            thermo (Dictionary): Information for thermodynamic properties of mixtures
-            egrModel (EgrModel, optional): Model for computation of EGR. Defaults to EgrModel(), i.e., no EGR.
+            reactants (Mixture): Air
             reactionModel (str, optional): Model handling reactions. defaults to "Stoichiometry".
             state (ThermoState, optional): Giving current state to manage state-dependend 
                 combustion models(e.g. equilibrium). Defaults to empty state ThermoState().
@@ -181,14 +126,9 @@ class CombustionModel(BaseClass):
         #Argument checking:
         try:
             #Type checking
-            self.checkType(air, Mixture, "air")
-            self.checkTypes(thermo, [dict, Dictionary], "thermo")
-            self.checkType(egrModel, EgrModel, "egrModel")
+            self.checkType(reactants, Mixture, "reactants")
             self.checkTypes(state, [ThermoState, dict], "state")
             
-            if isinstance(thermo, dict):
-                thermo = Dictionary(**thermo)
-                
             kwargs = Dictionary(**kwargs)
             
         except BaseException as err:
@@ -196,22 +136,18 @@ class CombustionModel(BaseClass):
         
         try:
             #Initialize the object
-            self._thermo = self.cp.deepcopy(thermo)
-            self._air = ThermoMixture(air.copy(), **thermo)
-            
             if isinstance(state, dict):
                 state = ThermoState(**state)
             self._state = state
             
             #To be updated by specific combustion model
-            self._mixture = ThermoMixture(air.copy(), **thermo)
-            self._freshMixture = ThermoMixture(air.copy(), **thermo)
-            self._combustionProducts = ThermoMixture(air.copy(), **thermo)
+            self._mixture = reactants.copy()
+            self._freshMixture = reactants.copy()
+            self._combustionProducts = reactants.copy()
             
-            self._EGRModel = egrModel
             self._reactionModel = ReactionModel.selector(
                 reactionModel, 
-                kwargs.lookupOrDefault(reactionModel + "Dict", Dictionary()).update(reactants=self._freshMixture.mix)
+                kwargs.lookupOrDefault(reactionModel + "Dict", Dictionary()).update(reactants=self._freshMixture)
                 )
             
             #In child classes need to initialize the state (fresh mixture, combustion products, etc.)
@@ -225,34 +161,43 @@ class CombustionModel(BaseClass):
     #########################################################################
     #Methods:
     @abstractmethod
-    def update(self, *, state:ThermoState|dict[str:type]=None) -> CombustionModel:
+    def update(self, *, reactants:Mixture=None, state:ThermoState|dict[str:type]=None, **kwargs) -> bool:
         """
         Update the state of the system. To be overwritten in child classes.
         
         Args:
+            reactants (Mixture, optional): update reactants composition. Defaults to None.
             state (ThermoState|dict[str:type], optional): the state variables of the system (needed to 
                 update the combustion model - e.g. equilibrium)
                 
         Returns:
-            CombustionModel: self
+            bool: if something changed
         """
-        if not hasattr(self, "_appliedEGR"):
-            #First time
-            self._appliedEGR = False
+        update = False
         
-        #Apply EGR to fresh mixture
-        if not self._appliedEGR:
-            fm:Mixture = self._freshMixture.mix
-            fm.dilute(self._EGRModel.EgrMixture,self._EGRModel.egr, "mass")
-            self._appliedEGR = True
-        
+        #Update reactants
+        if not reactants is None:
+            self.checkType(reactants, Mixture, "air")
+            
+            old = self._freshMixture
+            self._freshMixture = reactants
+            # self._combustionProducts = reactants
+            # self._mixture = reactants
+            if old != self.freshMixture:
+                update = True
+            
         #Update state variables
         if not state is None:
+            self.checkTypes(state, (dict, ThermoState), "state")
             if isinstance(state, dict):
                 state = ThermoState(**state)
+            
+            oldState = self.state
             self._state = state
-        
-        return self
+            if oldState != self.state:
+                update = True
+            
+        return update
     
 #########################################################################
 #Create selection table for the class used for run-time selection of type

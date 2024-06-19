@@ -23,42 +23,6 @@ SparkIgnitionEngineDict = \
     
     "thermophysicalProperties":Dictionary.fromFile(f"{this.path}/thermophysicalProperties.py"),
     "combustionProperties":Dictionary.fromFile(f"{this.path}/combustionProperties.py"),
+    
+    "dataDict":Dictionary.fromFile(f"{this.path}/dataDict.py")
 }
-
-
-def f(x,y):
-    return x,y
-
-data = \
-    {
-        "path":"./data",
-        "pressure":\
-        {
-            "format":"file", # TODO: array
-            "data":
-            {
-                "fileName":"p.Cyl",
-                "opts":{}
-            }
-        },
-        "otherVariables":\
-        {
-        },
-        "preProcessing":\
-        {
-            "FilterType":"Resample", # "Resample", "UserDefinedFilter", "LowPass"
-            "ResampleDict":\
-                {
-                    "delta":1.0
-                },
-            "UserDefinedFilterDict":\
-                {
-                    "function":f
-                },
-            "LowPassDict":\
-                {
-                    "cutoff":1,
-                    "order":5
-                }
-        }
-    }

@@ -9,6 +9,7 @@ Last update:        12/06/2023
 TODO:
     Optimize the dilute method
     The 'for item in self' could be non optimal with current implementation
+    Define a update(mix:Mixture) method to change the mixture composition. Then use it whenever a Mixture is changed in a class, so that its pointer is preserved.
 """
 
 #####################################################################
@@ -270,6 +271,54 @@ class Mixture(Utilities):
         return data
     
     ###############################
+    #Delete item:
+    def __delitem__(self, specie):
+        """
+        specie:     str / Molecule / int
+        
+        Remove molecule from mixture
+            -> If str: checking for molecule matching the name
+            -> If Molecule: checking for specie
+            -> If int:  checing for entry following the order
+        
+        Returns:
+            MixtureItem: dataclass for data of specie in mixture.
+        """
+        #Argument checking:
+        try:
+            self.checkTypes(specie, [str, Molecule, int], entryName="specie")
+        except BaseException as err:
+            self.fatalErrorInArgumentChecking(self.__getitem__, err)
+        
+        try:
+            if isinstance(specie, str):
+                if not specie in [s.name for s in self.specie]:
+                    raise ValueError("Specie {} not found in mixture composition".format(specie))
+                index = [s.name for s in self.specie].index(specie)
+            
+            elif isinstance(specie, Molecule):
+                index = self.specie.index(specie)
+            
+            elif isinstance(specie, int):
+                if specie < 0 or specie >= len(self):
+                    raise ValueError("Index {} out of range".format(specie))
+                index = specie
+        except BaseException as err:
+            self.fatalErrorInClass(self.__getitem__, "failure retrieving molecule in mixture", err)
+        
+        #Rescale mole fractions
+        for ii in range(len(self)):
+            self._X[ii] /= (1 - self._X[index])
+        
+        #Delete item:
+        del self._specie[index]
+        del self._X[index]
+        del self._Y[index]
+        
+        #Update mass fractions
+        self.updateMassFracts()
+    
+    ###############################
     #Iteration:
     def __iter__(self):
         """
@@ -518,6 +567,78 @@ class Mixture(Utilities):
         except BaseException as err:
             self.fatalErrorInClass(self.extract, "Error extracting sub-mixture", err)
 
+    ###############################
+    def removeZeros(self) -> Mixture:
+        """
+        Remove Molecules with too low mass and mole fraction (Mixture._decimalPlaces).
+
+        Returns:
+            Mixture: self
+        """
+        toDel = []
+        for item in self:
+            if (item.X <= 10.**(-1.0*(Mixture._decimalPlaces))) or (item.Y <= 10.**(-1.0*(Mixture._decimalPlaces))):
+                toDel.append(item.specie)
+
+        for item in toDel:
+            del self[item]
+        
+        return self
+        
+    ###############################
+    #Substract a mixture from this:
+    def subtractMixture(self, mix:Mixture) -> tuple[float,Mixture]:
+        """
+        Finds the maximum sub-mixture with composition 'mix' in this. Then returns a tuple with (yMix, remainder)
+        which are the mass-fraction of mixture 'mix' in this and the remaining mixture once 'mix' is removed.
+
+        Args:
+            mix (Mixture): Mixture to subtract from this
+
+        Returns:
+            tuple[float,Mixture]: couple (yMix, remainder)
+        """
+        #Full mixture:
+        if mix == self:
+            return (1.0, Mixture.empty())
+        
+        #Mass fraction of mix in self
+        yMix = sum([self[s.specie].Y for s in mix if s.specie in self])
+        
+        #Find limiting element:
+        yLimRatio = float("inf")
+        for specie in mix:
+            if not specie.specie in self:
+                yLimRatio = 0.0
+                break
+            
+            currY = self[specie.specie].Y
+            #Check if this specie is limiting and if it is the most limiting
+            if (currY <= specie.Y*yMix) and (currY/(specie.Y*yMix) <= yLimRatio):
+                limSpecie = specie.specie
+                yLimRatio = currY/(specie.Y*yMix)
+        
+        #Some element is not found
+        if yLimRatio == 0.0:
+            return (0.0, self.copy().removeZeros())
+        
+        #Compute difference
+        yMixNew = yMix*yLimRatio
+        newY = [s.Y - (mix[s.specie].Y*yMixNew if s.specie in mix else 0.0) for s in self]
+        
+        #Remove near-zero remainders
+        newY = [(y if y > 10.**(-1.*self._decimalPlaces) else 0.0) for y in newY]
+        
+        #Normalize
+        sumY = sum(newY)
+        newY = [y/sumY for y in newY]
+        
+        #Build mixture
+        remainder = Mixture([s.specie for s in self], newY, "mass").removeZeros()
+        
+        return yMixNew,remainder
+        
+        
 #############################################################################
 #                               FRIEND CLASSES                              #
 #############################################################################
@@ -526,10 +647,10 @@ class MixtureIter:
     """
     Iterator for Mixture class.
     """
-    def __init__(self, composition):
-        self.composition = composition
-        self.specieList = [s.name for s in composition.specie]
-        self.current_index = 0
+    def __init__(self, composition:Mixture):
+        self.composition:Mixture = composition
+        self.specieList:list[Molecule] = [s.name for s in composition.specie]
+        self.current_index:int = 0
     
     def __iter__(self):
         return self

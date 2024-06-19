@@ -31,7 +31,14 @@ class EngineData(Utilities):
     easily access data at generic instants.
     """
     #########################################################################
-    #Data:
+    #properties:
+    @property
+    def columns(self) -> list[str]:
+        return self.data.columns 
+    
+    @columns.setter
+    def columns(self, *args, **kwargs) -> None:
+        self.data.columns(*args, **kwargs)
     
     #########################################################################
     #Constructor:
@@ -39,7 +46,6 @@ class EngineData(Utilities):
         """
         Create the table.
         """
-        self.columns = ["CA"]
         self.data = pd.DataFrame()
     
     #########################################################################
@@ -57,7 +63,12 @@ class EngineData(Utilities):
         return self.data.__getitem__(item)
     
     def __setitem__(self, key, item):
-        return self.data.__setitem__(key, item)
+        self.data.__setitem__(key, item)
+        #Create interpolator if not present
+        try:
+            self.createInterpolator(key)
+        except:
+            pass
     
     #########################################################################
     #Methods:
@@ -154,10 +165,10 @@ class EngineData(Utilities):
         """
         try:
             self.checkType(varName  , str   , "varName" )
-            self.checkTypes(data    , [list, self.np.ndarray]   , "data"   )
+            self.checkTypes(data    , [tuple, list, self.np.ndarray]   , "data"   )
             self.checkType(verbose  , bool  , "verbose")
             
-            if isinstance(data, list):
+            if isinstance(data, (list, tuple)):
                 data = self.np.array(data)
             
             if not ((data.dtype == float) or (data.dtype == int)):
@@ -169,8 +180,11 @@ class EngineData(Utilities):
                 if not data.shape[1] == 2:
                     raise ValueError(f"Data must be with shape (N,2), {data.shape} found.")
             
+            #Check if data are already present
+            firstTime = False
             if not varName in self.data:
-                self.data.insert(len(self.data.columns), varName, [float("nan")]*len(self.data))
+                self.data[varName] = float("nan")
+                firstTime = True
             else:
                 if verbose:
                     self.runtimeWarning(f"Overwriting existing data for field '{varName}'", stack=False)
@@ -220,13 +234,10 @@ class EngineData(Utilities):
                     raise ValueError("CA range in file not consistent with the one alredy loaded in data-structure")
                 
                 self.data[varName][ID_MIN:ID_MAX] = var[ID_MIN_CA:ID_MAX_CA]
-                
-            if not varName in self.columns:
-                self.createInterpolator(varName)
-                self.columns.append(varName)
             
-            # Set CA as first column
-            #TODO
+            #If first time this entry is set, create the interpolator:
+            if firstTime:
+                self.createInterpolator(varName)
             
         except BaseException as err:
             self.fatalErrorInClass(self.loadArray, f"Failed loading array", err)

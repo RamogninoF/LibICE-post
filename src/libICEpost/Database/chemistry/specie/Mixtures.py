@@ -30,7 +30,7 @@ Mixtures = database.chemistry.specie.addFolder("Mixtures")
 #############################################################################
 
 #Define method for loading from json dictionary
-def fromJson(fileName):
+def fromJson(fileName:str) -> None:
     """
     Add mixtures to the database from a json file.
     """

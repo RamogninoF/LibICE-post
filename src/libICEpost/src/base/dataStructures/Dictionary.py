@@ -19,6 +19,10 @@ from types import ModuleType
 from typing import TypeVar
 T = TypeVar("T")
 
+import os.path as path
+
+path.isabs
+
 #############################################################################
 #                               MAIN CLASSES                                #
 #############################################################################
@@ -40,18 +44,20 @@ class Dictionary(OrderedDict, Utilities):
                 # no file assosiaction
                 self.fileName = None
                 self.path = None
-            elif _fileName.startswith("/"):
-                #Absolute path
-                self.fileName = _fileName.split("/")[-1]
-                self.path = "/" + "/".join(_fileName.split("/")[:-1]) + "/"
-            elif "/" in _fileName:
-                #Relative path
-                self.fileName = _fileName.split("/")[-1]
-                self.path = "/".join(_fileName.split("/")[:-1]) + "/"
             else:
-                #Just file-name
-                self.fileName = _fileName
-                self.path = "./"
+                #Relative  or absolute path
+                base, file = path.split(_fileName)
+                
+                #Path
+                if (base == "") or (base is None):
+                    self.path = "." + path.sep
+                else:
+                    self.path = base
+                
+                #File name:
+                if (file == "") or (file is None):
+                    raise ValueError(f"Invalid file name {_fileName}")
+                self.fileName = file
             
             super().__init__(*args,**argv)
                 

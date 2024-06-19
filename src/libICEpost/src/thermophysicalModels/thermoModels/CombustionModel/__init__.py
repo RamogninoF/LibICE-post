@@ -2,7 +2,7 @@
 @author: <N. Surname>       <e-mail>
 Last update:        DD/MM/YYYY
 
-Description of the package
+Combustion models
 
 Content of the package:
     CombustionModel (class)
@@ -16,4 +16,5 @@ Content of the package:
 #Load the classes
 from .CombustionModel import CombustionModel
 from .PremixedCombustion import PremixedCombustion
+from .NoCombustion import NoCombustion
 # import .Child

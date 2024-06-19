@@ -15,12 +15,14 @@ from libICEpost.src.thermophysicalModels.specie.specie.Mixture import Mixture, m
 from libICEpost.src.thermophysicalModels.specie.specie.Molecule import Molecule
 from libICEpost.src.thermophysicalModels.specie.reactions.Reaction.StoichiometricReaction import StoichiometricReaction
 
-
 from libICEpost.Database import database
+
+#TODO caching (memoization package handles also unhashable types)
 
 #############################################################################
 #                              MAIN FUNCTIONS                               #
 #############################################################################
+
 def computeAlphaSt(air:Mixture, fuel:Mixture, *, oxidizer:Molecule=database.chemistry.specie.Molecules.O2) -> float:
     """
     Compute the stoichiometric air-fuel ratio given air and fuel mixture compositions.
@@ -107,3 +109,33 @@ def computeAlphaSt(air:Mixture, fuel:Mixture, *, oxidizer:Molecule=database.chem
     alphaSt = Y_air/Y_fuel
     
     return alphaSt
+
+def computeAlpha(air:Mixture, fuel:Mixture, reactants:Mixture, *, oxidizer:Molecule=database.chemistry.specie.Molecules.O2) -> float:
+    """
+    Compute the air-fuel ratio given air, fuel, and reactants mixture compositions.
+
+    Args:
+        air (Mixture): The air mixture composition
+        fuel (Mixture): The fuel mixture composition
+        reactants (Mixture): The reactants mixture composition
+        oxidizer (Molecule, optional): The oxidizing molecule. Defaults to database.chemistry.specie.Molecules.O2.
+        
+    Returns:
+        float
+    """
+    #Procedure:
+    #   1) Isolate air based on its composition (preserve proportion of mass/mole fractions)
+    #   2) Isolate fuel based on its composition (preserve proportion of mass/mole fractions)
+    #   3) Compute ratio of their mass fractions in full mixture
+    
+    # 1)
+    yAir, remainder = reactants.subtractMixture(air)
+    
+    # 2)
+    yFuel, remainder = remainder.subtractMixture(fuel)
+    yFuel *= (1. - yAir)
+    
+    # 3)
+    return yAir/yFuel
+    
+    
