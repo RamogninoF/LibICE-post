@@ -20,6 +20,11 @@ import pandas as pd
 import numpy as np
 import collections.abc
 
+#Auxiliary functions
+from keyword import iskeyword
+def is_valid_variable_name(name):
+    return name.isidentifier() and not iskeyword(name)
+
 #############################################################################
 #                               MAIN CLASSES                                #
 #############################################################################
@@ -39,6 +44,7 @@ class EngineData(Utilities):
     @columns.setter
     def columns(self, *args, **kwargs) -> None:
         self.data.columns(*args, **kwargs)
+        
     
     #########################################################################
     #Constructor:
@@ -63,12 +69,15 @@ class EngineData(Utilities):
         return self.data.__getitem__(item)
     
     def __setitem__(self, key, item):
+        new = False
+        if not key in self.columns:
+            new = True
+        
         self.data.__setitem__(key, item)
+        
         #Create interpolator if not present
-        try:
+        if new:
             self.createInterpolator(key)
-        except:
-            pass
     
     #########################################################################
     #Methods:
@@ -86,7 +95,8 @@ class EngineData(Utilities):
             maxRows:int=None, 
             comments:str='#', 
             verbose:bool=True, 
-            delimiter:str=None
+            delimiter:str=None,
+            default:float=float("nan")
             ) -> EngineData:
         """
         [Variable] | [Type] | [Default] | [Description]
@@ -104,6 +114,7 @@ class EngineData(Utilities):
         skipRows   | int    | 0         | Number of raws to skip at beginning of file
         maxRows    | int    | None      | Maximum number of raws to use
         verbose    | bool   | True      | Print info/warnings
+        default    | float  | nan       | Default value to add in out-of-range values
         
         Load a file containing the time-series of a variable. If 
         data were already loaded, the CA range must be consistent 
@@ -144,7 +155,7 @@ class EngineData(Utilities):
             data[:,1] *= varScale
             data[:,1] += varOff
             
-            self.loadArray(data, varName, verbose)
+            self.loadArray(data, varName, verbose, default)
             
         except BaseException as err:
             self.fatalErrorInClass(self.loadFile, f"Failed loading field '{varName}' from file '{fileName}'", err)
@@ -152,25 +163,31 @@ class EngineData(Utilities):
         return self
     
     #######################################
-    def loadArray(self, data:collections.abc.Iterable, varName:str, verbose=True) -> EngineData:
+    def loadArray(self, data:collections.abc.Iterable, varName:str, verbose:bool=True, default:float=float("nan")) -> EngineData:
         """
-        data:       numpy.ndarray<float>, list<list<float>>
-            Container of shape (N,2) with first column the CA range and 
-            second the variable time-series to load.
-        varName:    str
-            Name of variable in data structure
-            
         Load an ndarray of shape (N,2) with first column the CA range and 
         second the variable time-series to load. Automatically removes duplicate times.
+            
+        Args:
+            data (collections.abc.Iterable): Container of shape (N,2) with first 
+                column the CA range and second the variable time-series to load.
+            varName (str): Name of variable in data structure
+            verbose (bool, optional): If need to print loading information. Defaults to True.
+            default (float, optional): Default value for out-of-range elements. Defaults to float("nan").
+
+        Returns:
+            EngineData: self
         """
         try:
             self.checkType(varName  , str   , "varName" )
-            self.checkTypes(data    , [tuple, list, self.np.ndarray]   , "data"   )
+            self.checkType(data    , collections.abc.Iterable   , "data")
             self.checkType(verbose  , bool  , "verbose")
+            self.checkType(default  , float  , "default")
             
-            if isinstance(data, (list, tuple)):
-                data = self.np.array(data)
+            #Cast to numpy array
+            data = self.np.array(data)
             
+            #Check for type
             if not ((data.dtype == float) or (data.dtype == int)):
                 raise TypeError("Data must be numeric (float or int).")
             
@@ -183,7 +200,7 @@ class EngineData(Utilities):
             #Check if data are already present
             firstTime = False
             if not varName in self.data:
-                self.data[varName] = float("nan")
+                self.data[varName] = default
                 firstTime = True
             else:
                 if verbose:
@@ -252,6 +269,10 @@ class EngineData(Utilities):
         Create the interpolator for a variable and defines the method varName(CA) which returns the interpolated value of variable 'varName' at instant 'CA' from the data in self.data
         """
         try:
+            #Check if varName is an allowed variable name, as so that it can be used to access by . operator
+            if not is_valid_variable_name(varName):
+                raise ValueError(f"Field name '{varName}' is not a valid variable name.")
+            
             #Check if attribute already exists, to prevent overloading existing attribustes.
             if hasattr(self, varName):
                 raise ValueError(f"Name '{varName}' is either reserved or the interpolation method was already created for this variable")
@@ -269,7 +290,7 @@ class EngineData(Utilities):
             setattr(self, varName, interpolator)
         
         except BaseException as err:
-            self.fatalErrorInClass(self.createInterpolator, "Failed creating interpolator for variable '{varName}'", err)
+            self.fatalErrorInClass(self.createInterpolator, f"Failed creating interpolator for variable '{varName}'", err)
     
     #######################################
     def write(self, fileName:str, overwrite:bool=False, sep:str=' '):

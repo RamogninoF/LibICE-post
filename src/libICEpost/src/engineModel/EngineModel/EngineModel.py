@@ -491,6 +491,8 @@ class EngineModel(BaseClass):
         """
         Load raw data.
         
+        TODO: Info
+        
         Args:
             data (dict | Dictionary): Dictionary containing the data to load for each region.
             dataPath (str, optional): Global path where to load/write data. Defaults to os.curdir.
@@ -513,7 +515,7 @@ class EngineModel(BaseClass):
             zoneDict = data.lookup(zone)
             
             #Check that pressure is found (mandatory)
-            if not "p" in zoneDict:
+            if (not "p" in zoneDict) and (not "p" in self.raw.columns):
                 raise ValueError(f"Mandatory entry 'p' in data dictionary for zone {zone} not found. Pressure trace must be loaded for each thermodynamic region.")
             
             #Loop over data to be loaded:
@@ -556,8 +558,29 @@ class EngineModel(BaseClass):
                 elif (dataFormat == "uniform"):
                     #Uniform value
                     value:float = currData.lookup("value")
-                    self.checkType(function, float, f"{zone}[{entry}][value]")
+                    self.checkType(value, float, f"{zone}[{entry}][value]")
                     self.raw[entryName] = value
+                
+                elif (dataFormat == "calc"):
+                    #Apply operation between alredy loaded data
+                    function:FunctionType = currData.lookup("function")
+                    self.checkType(function, FunctionType, f"{zone}[{entry}][function]")
+                    
+                    #Function arguments
+                    argNames:list[str] = function.__code__.co_varnames
+                    
+                    #Check if are present:
+                    for arg in argNames:
+                        if not arg in self.raw.columns:
+                            raise ValueError(f"Field '{arg}' was not loaded.")
+                    
+                    #Extract corresponding columns from data-frame:
+                    cols = {c:self.raw[c] for c in argNames}
+                    
+                    CA = self.raw["CA"]
+                    f = function(**cols)
+                    
+                    self._loadArray(np.array((CA,f)).T, entryName, **opts)
                 
                 else:
                     raise ValueError(f"Unknown data format '{dataFormat}' for entry {zone}[{entry}]")
@@ -723,7 +746,7 @@ class EngineModel(BaseClass):
             data (dict | Dictionary): Dictionary with info for loading data.
             preProcessing (dict | Dictionary, optional): Dictionary with pre-processing information. Defaults to None.
             initialConditions (dict | Dictionary): Dictionary with initial condition for thermodynamic models
-            dataPath (str, optional): _description_. Defaults to os.curdir.
+            dataPath (str, optional): Master path of the tree. Defaults to os.curdir.
 
         Returns:
             EngineModel: self
@@ -807,27 +830,28 @@ class EngineModel(BaseClass):
                 self.data[f] = float("nan")
         
         for specie in self._cylinder.mixture.mix:
-            self.data[specie.specie.name + ".x"] = 0.0
-            self.data[specie.specie.name + ".y"] = 0.0
+            self.data[specie.specie.name + "_x"] = 0.0
+            self.data[specie.specie.name + "_y"] = 0.0
         
-        #Set initial values:
+        #Set initial values as start-time:
         CA = self.time.time
-        index = self.data.data.index[self.data['CA'] == CA].tolist()
-        
-        V = self.geometry.V(CA)
-        p = self.data.p(CA)
-        T = self._cylinder.state.T
-        gamma = self._cylinder.mixture.gamma(p,T)
-        self.data["V"][index] = V
-        self.data["T"][index] = T
-        self.data["gamma"][index] = gamma
-        
-        self.data["ahrr"][index] = 0.0
-        self.data["cumAhrr"][index] = 0.0
-        
-        for specie in self._cylinder.mixture.mix:
-            self.data[specie.specie.name + ".x"][index] = specie.X
-            self.data[specie.specie.name + ".y"][index] = specie.Y
+        if CA == self.time.startTime:
+            index = self.data.data.index[self.data['CA'] == CA].tolist()
+            
+            V = self.geometry.V(CA)
+            p = self.data.p(CA)
+            T = self._cylinder.state.T
+            gamma = self._cylinder.mixture.gamma(p,T)
+            self.data["V"][index] = V
+            self.data["T"][index] = T
+            self.data["gamma"][index] = gamma
+            
+            self.data["ahrr"][index] = 0.0
+            self.data["cumAhrr"][index] = 0.0
+            
+            for specie in self._cylinder.mixture.mix:
+                self.data[specie.specie.name + "_x"][index] = specie.X
+                self.data[specie.specie.name + "_y"][index] = specie.Y
     
     ####################################
     def _update(self) -> None:
@@ -880,12 +904,12 @@ class EngineModel(BaseClass):
         
         #Mixture composition
         for specie in self._cylinder.mixture.mix:
-            if not specie.specie.name + ".x" in self.data.columns:
-                self.data[specie.specie.name + ".x"] = 0.0
-                self.data[specie.specie.name + ".y"] = 0.0
+            if not specie.specie.name + "_x" in self.data.columns:
+                self.data[specie.specie.name + "_x"] = 0.0
+                self.data[specie.specie.name + "_y"] = 0.0
             else:
-                self.data[specie.specie.name + ".x"][index] = specie.X
-                self.data[specie.specie.name + ".y"][index] = specie.Y
+                self.data[specie.specie.name + "_x"][index] = specie.X
+                self.data[specie.specie.name + "_y"][index] = specie.Y
     
     ####################################
     def refresh(self, reset:bool=False) -> EngineModel:
