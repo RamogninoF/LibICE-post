@@ -27,7 +27,7 @@ from libICEpost.src.engineModel.EngineTime.SparkIgnitionTime import SparkIgnitio
 
 from libICEpost.src.thermophysicalModels.thermoModels.ThermoModel import ThermoModel
 from libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.functions import computeAlphaSt
-from libICEpost.Database.chemistry.specie.Mixtures import Mixtures, Mixture
+from libICEpost.Database.chemistry.specie.Mixtures import Mixture
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -56,7 +56,6 @@ class SparkIgnitionEngine(EngineModel):
 
     #########################################################################
     #Class methods and static methods:
-    
     @classmethod
     def fromDictionary(cls, dictionary:Dictionary) -> EngineModel:
         """

@@ -13,99 +13,56 @@ Last update:        12/06/2023
 
 from abc import ABCMeta, abstractmethod
 
-from src.base.Utilities import Utilities
+from libICEpost.src.base.BaseClass import BaseClass
 
-from ..engineModel import engineModel
+from ..EngineModel.EngineModel import EngineModel
 
 #############################################################################
 #                               MAIN CLASSES                                #
 #############################################################################
 #Heat transfer model (base class):
-class heatTransferModel(Utilities, metaclass=ABCMeta):
+class HeatTransferModel(BaseClass):
     """
     Base class for modeling of wall heat transfer.
     
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
-    Attibutes:
-        coeffs:   dict
-            Container for model constants used to compute the convective heat transfer
-            coefficient at cylinder walls (depend on the specific model used)
-    
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    
-    Constructors:
-        heatTransferModel():
-            Raising a 'NotImplementedError' if attempting to construct an object of
-            this class. Used only as base class (overwritten from derived classes).
-    
     """
-    
-    #Name:
-    typeName = "heatTransferModel"
-    coeffs = {}
     
     #########################################################################
     #Constructor:
-    def __init__(self, coeffs, verbose=True):
-        """
-        Constructors:
-            heatTransferModel():
-                Raising a 'NotImplementedError' if attempting to construct an object of
-                this class. Used only as base class (overwritten from derived classes).
-        """
-        print("Building heatTransferModel instance:")
-        print(f"Type:\t{self.__class__.typeName}")
-        try:
-            self.checkType(coeffs, dict, entryName="coeffs")
-            
-            Coeffs = self.__class__.coeffs
-            for c in coeffs:
-                if c in Coeffs:
-                    self.checkType(coeffs[c], type(Coeffs[c]), entryName="coeffs[{:}]".format(c))
-                    Coeffs[c] = coeffs[c]
-                    
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.__init__,err)
-        
-        print(f"Coefficients:")
-        for CC in Coeffs:
-            print(f"{CC}:\t{Coeff[CC]}")
-            
-        self.coeffs = coeffs
     
     #########################################################################
-    #Compute laminar flame speed:
+    #Compute heat transfer coefficient:
     @abstractmethod
-    def h(self, CA, engine):
+    def h(self, engine:EngineModel, *, CA:float|None=None) -> float:
         """
-        CA:     float
-            Crank angle
-        engine: engineModel
-            The engine model
+        Compute wall heat transfer coefficient at cylinder walls.
         
-        Used to compute convective wall heat trasfer. To be overwritten
+        Args:
+            engine (EngineModel): The engine model from which taking data.
+            CA (float | None, optional): Time for which computing heat transfer. If None, uses engine.time.time. Defaults to None.
+
+        Returns:
+            float: convective wall heat transfer coefficient
         """
-        try:
-            self.checkType(CA, float, entryName="CA")
-            self.checkType(engine, engineModel, entryName="engine")
-                    
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.h,err)
+        self.checkType(engine,EngineModel,"engine")
+        if not CA is None:
+            self.checkType(CA,float,"CA")
     
     ##############################
     #Change coefficients (or some of them):
-    def setCoeffs(self, coeffs={}, **argv):
+    def update(self, /, **args) -> None:
         """
-        coeffs:     dict ({})
-            Dictionary containing the parameters of the model (in heatTransferModel.coeffs) 
-            that need to be changed/set. Keyword arguments are also accepted.
+        Update coefficients of the model
         """
-        try:
-            self.coeffs = Utilities.updateKeywordArguments(coeffs, self.coeffs)
-            self.coeffs = Utilities.updateKeywordArguments(argv, self.coeffs)
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.setCoeffs, err)
+        for arg in args:
+            if arg in self.coeffs:
+                self.coeffs[arg] = args[arg]
+            else:
+                raise ValueError(f"Coefficient '{arg}' not found. Available coefficients of heat transfer model {self.__class__.__name__} are:\n\t" + "\n\t".join(list(self.coeffs.keys)))
         
-        return self
         
+#########################################################################
+#Create selection table
+HeatTransferModel.createRuntimeSelectionTable()

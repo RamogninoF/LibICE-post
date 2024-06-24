@@ -13,8 +13,7 @@ Last update:        12/06/2023
 
 from .EngineGeometry import EngineGeometry
 
-import math
-from math import cos, sin, sqrt, radians
+from numpy import cos, sin, sqrt, radians, pi
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -164,7 +163,7 @@ class ConRodGeometry(EngineGeometry):
             self.l = Dict["conRodLen"]
             self.pinOffset = Dict["pinOffset"]
             #[m^2]
-            self.cylArea = math.pi * Dict["bore"]**2 / 4.0
+            self.cylArea = pi * Dict["bore"]**2 / 4.0
             self.pistonArea = self.cylArea * Dict["pistCylAreaRatio"]
             self.headArea = self.cylArea * Dict["headCylAreaRatio"]
             #[m^3]
@@ -229,9 +228,9 @@ class ConRodGeometry(EngineGeometry):
         
         try:
             if isinstance(CA, list):
-                return [f(radians(ca))*math.pi/180. for ca in CA]
+                return [f(radians(ca))*pi/180. for ca in CA]
             else:
-                return f(radians(CA))*math.pi/180.
+                return f(radians(CA))*pi/180.
         except BaseException as err:
             self.fatalErrorInClass(self.dsdCA, "", err)
     
@@ -257,9 +256,9 @@ class ConRodGeometry(EngineGeometry):
         """
         try:
             if isinstance(CA, list):
-                return [s * math.pi * self.D for s in self.s(CA)]
+                return [s * pi * self.D for s in self.s(CA)]
             else:
-                return self.s(CA) * math.pi * self.D
+                return self.s(CA) * pi * self.D
         except BaseException as err:
             self.fatalErrorInClass(self.linerArea, "", err)
 

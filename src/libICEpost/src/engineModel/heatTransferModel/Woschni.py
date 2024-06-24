@@ -11,27 +11,16 @@ Last update:        12/06/2023
 #                               IMPORT                              #
 #####################################################################
 
-from .heatTransferModel import heatTransferModel
-from ..engineGeometry.engineGeometry import engineGeometry
+from typing import Self
+
+from .heatTransferModel import HeatTransferModel, EngineModel
 
 #############################################################################
 #                               MAIN CLASSES                                #
 #############################################################################
 #Woschni model to compute wall heat transfer coefficient:
-class Woschni(heatTransferModel):
-    coeffs = \
-        {
-            "nwos":         1.36,
-            "C1":           5.26,
-            "C2cv":         2.28,
-            "C2ge":         6.18,
-            "C3comp":       0.0,
-            "C3comb":       3.24e-3,
-            #"C3_t":         0.308,
-            #"turbCorr":     False,
-        }
-    
-    __doc__ = """
+class Woschni(HeatTransferModel):
+    """
     Class for computation of wall heat transfer with Woschni model:
     
     h = C1 * (p/1000.)^.8 * T^(-0.53) * D^(-0.2) * uwos^(0.8)
@@ -41,162 +30,124 @@ class Woschni(heatTransferModel):
     Where:
         1) C2 changes depending if at closed-valves (C2cv) or during gas-exchange (C2ge)
         2) C3 changes depending if during compression (C3comp) or during combustion/expansion (C3comb)
+        3) Reference conditions (0) are at IVC or startTime if it is in closed-valve region.
     
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
     Attibutes:
         coeffs:   dict
             Container for model constants
-            
-        ref: dict
-            {
-                p:      float
-                    Reference pressure
-                T:      float
-                    Reference temperature
-                CA:     float
-                    Reference instant
-            }
-            Reference conditions
     """
-    __doc__ += "\t\t{:15s}{:15s}{:15s}\n".format("Variable","Units","Default")
-    __doc__ += "\t\t" + "-"*45 + "\n"
     
-    for var in coeffs:
-        __doc__ += "\t\t{:15s}{:15s}{:15s}\n".format(str(var), type(coeffs[var]).__name__, str(coeffs[var]))
-    
-    __doc__ += "\t\t" + "-"*45 + "\n"
-    
-    ref = \
-        {
-            "p":float('nan'),
-            "T":float('nan'),
-            "CA":float('nan')
-        }
+    #########################################################################
+    #Class methods:
+    @classmethod
+    def fromDictionary(cls, dictionary) -> Self:
+        try:
+            return cls(**dictionary)
+            
+        except BaseException as err:
+            cls.fatalErrorInClass(cls.fromDictionary, "Failed contruction from dictionary", err)
     
     #########################################################################
     #Constructor:
-    def __init__(self, coeffs={}, ref=None):
+    def __init__(self, /,
+                 nwos:float=1.36,
+                 C1:float=5.26,
+                 C2cv:float=2.28,
+                 C2ge:float=6.18,
+                 C3comp:float=0.0,
+                 C3comb:float=3.24e-3):
         """
-        coeffs:   dict
-            Container for model constants (see help(Woschni) for default values)
-        
         Initialize the parameters required by Woschni model.
         """
         try:
-            super(self.__class__,self).__init__(self, coeffs)
-            
-            if not ref is None:
-                ref = Utilities.updateKeywordArguments(ref, self.__class__.ref)
-            else:
-                ref = self.__class__.ref
+            self.coeffs = \
+            {
+                 "nwos"   : nwos   ,
+                 "C1"     : C1     ,
+                 "C2cv"   : C2cv   ,
+                 "C2ge"   : C2ge   ,
+                 "C3comp" : C3comp ,
+                 "C3comb" : C3comb ,
+            }
                 
         except BaseException as err:
             self.fatalErrorInArgumentChecking(self.__init__, err)
             
     #########################################################################
     #Cumpute wall heat transfer:
-    def h(self, CA, engine, ref=None):
+    def h(self, engine:EngineModel, *, CA:float|None=None) -> float:
         """
-        CA:     float
-            Crank angle
-        engine: engineModel
-            The engine model
-        ref:   dict
-            {
-                p:      float
-                    Reference pressure
-                T:      float
-                    Reference temperature
-                CA:     float
-                    Reference instant
-            }
-            Reference conditions (at IVC or at known point of compression). If not given, uses those given at construction
-        
-        Used to compute convective wall heat transfer with Woschni correlation:
-        
+        Compute convective wall heat transfer with Woschni correlation:
             h = C1 * (p/1000.)^.8 * T^(-0.53) * engine.geometry.D^(-0.2) * uwos^(0.8)
             uwos = C2 * engine.geometry.upMean + C3 * (p - p_mot) * V * T0 / (p0 * V0)
             p_mot = p * ( V0 / V )**nwos
+        
+        Args:
+            engine (EngineModel): The engine model from which taking data.
+            CA (float | None, optional): Time for which computing heat transfer. If None, uses engine.time.time. Defaults to None.
+
+        Returns:
+            float: convective wall heat transfer coefficient
         """
         
         #Check arguments:
         try:
-            super(self.__class__,self).h(self, CA, engine)
-            
-            if not ref is None:
-                ref = Utilities.updateKeywordArguments(ref, self.ref)
-            else:
-                ref = self.ref
+            super(self.__class__,self).h(self, engine, CA)
             
         except BaseException as err:
             self.fatalErrorInArgumentChecking(self.h, err)
         
+        CA = engine.time.time if CA is None else CA
         p = engine.data.p(CA)
         T = engine.data.T(CA)
         geometry = engine.geometry
         
         #Compute heat transfer coefficient:
-        uwos = self.uwos(CA, engine, ref)
+        uwos = self.uwos(CA, engine)
         h = self.coeffs["C1"] * (p/1000.)**.8 * T**(-0.53) * geometry.D**(-0.2) * uwos**(0.8)
         
         return h
     
     #########################################################################
     #Compute uwos:
-    def uwos(self, CA, engine, ref=None):
+    def uwos(self, engine:EngineModel, *, CA:float|None=None) -> float:
         """
-        CA:     float
-            Crank angle
-        engine: engineModel
-            The engine model
-        ref:   dict
-            {
-                p:      float
-                    Reference pressure
-                T:      float
-                    Reference temperature
-                CA:     float
-                    Reference instant
-            }
-            Reference conditions (at IVC or at known point of compression). If not given, uses those given at construction
-        
         uwos = C2 * geometry.upMean + C3 * (p - p_mot) * V * T_ref / (p_ref * V_ref)
         p_mot = p * ( V_ref / V )**nwos
+        
+        Args:
+            engine (EngineModel): The engine model from which taking data.
+            CA (float | None, optional): Time for which computing heat transfer. If None, uses engine.time.time. Defaults to None.
         """
         #Check arguments:
         try:
-            self.checkType(CA, float, entryName="CA")
-            self.checkType(engine, engineModel, entryName="engine")
-            
-            if not ref is None:
-                ref = Utilities.updateKeywordArguments(ref, self.ref)
-            else:
-                ref = self.ref
+            self.checkType(CA, float, "CA")
+            self.checkType(engine, EngineModel, "engine")
             
         except BaseException as err:
             self.fatalErrorInArgumentChecking(self.uwos, err)
         
+        CA = engine.time.time if CA is None else CA
         p = engine.data.p(CA)
-        geometry = engine.geometry
+        V = engine.geometry.V(CA)
         
-        if engine.time.isCombustion(CA):
-            C3 = self.coeffs["C3comb"]
-        else:
-            C3 = self.coeffs["C3comp"]
+        C3 = self.coeffs["C3comb"] if engine.time.isCombustion(CA) else self.coeffs["C3comp"]
+        C2 = self.coeffs["C2"] if engine.time.isClosedValves(CA) else self.coeffs["C2ge"]
         
-        if engine.time.isClosedValves(CA):
-            C2 = self.coeffs["C2"]
-        else:
-            C2 = self.coeffs["C2ge"]
+        refCA = engine.time.startTime if engine.time.isClosedValves(engine.time.startTime) else engine.time.IVC
+        refP = engine.data.p(refCA)
+        refT = engine.data.T(refCA)
+        refV = engine.geometry.V(refCA)
         
         uwos = \
-            C2 * engine.upMean() + C3 * (p - self.p_mot(p, CA, ref["CA"], geometry)) * ref["T"] / (ref["p"] * geometry.V(ref["CA"]))
+            C2 * engine.upMean() + C3 * (p - self.p_mot(p=p, V=V, V0=refV)) * refT / (refP * refV)
         return uwos
     
     #########################################################################
     #Compute ptr:
-    def p_mot(self, p, CA, CA0, geometry):
+    def p_mot(self, *, p:float, V:float, V0:float):
         """
         p_mot = p * ( V0 / V )**nwos
         """
@@ -208,21 +159,10 @@ class Woschni(heatTransferModel):
         except BaseException as err:
             self.fatalErrorInArgumentChecking(self.p_mot, err)
         
-        ptr = p*(geometry.V(CA0)/geometry.V(CA))**self.coeffs["nwos"]
+        ptr = p*(V0/V)**self.coeffs["nwos"]
         return ptr
-    
-    ##############################
-    #Change reference conditions:
-    def setRef(self, ref={}, **argv):
-        """
-        ref:     dict ({})
-            Dictionary containing the reference conditions Woschni.ref 
-            that need to be changed/set. Keyword arguments are also accepted.
-        """
-        try:
-            self.ref = Utilities.updateKeywordArguments(ref, self.ref)
-            self.ref = Utilities.updateKeywordArguments(argv, self.ref)
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.setRef, err)
-        
-        return self
+
+
+#########################################################################
+#Add to selection table of Base
+HeatTransferModel.addToRuntimeSelectionTable(Woschni)

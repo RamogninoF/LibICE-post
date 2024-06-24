@@ -936,6 +936,64 @@ class EngineModel(BaseClass):
             self.initializeThemodynamicModels(self.info["initialConditions"])
         
         self.process()
+        
+    ####################################
+    def integrateVariable(self, y:str, *, x:str="CA", start:float=None, end:float=None) -> EngineModel:
+        """
+        Integrate a variable over another. If inital or final CA are not given, are set to first/last in CA range.
+
+        Args:
+            y (str): name of y variable.
+            x (str, optional): Name of x variable. Defaults to "CA".
+            start (float, optional): Initial CA. Defaults to None.
+            end (float, optional): Final CA. Defaults to None.
+        
+        Returns:
+            EngineModel: self
+        """
+        if not x in self.data.columns:
+            raise ValueError(f"Variable '{x}' not present among data.")
+        if not y in self.data.columns:
+            raise ValueError(f"Variable '{y}' not present among data.")
+        
+        from scipy import integrate
+        
+        start = self.data["CA"][0] if start is None else start
+        end = self.data["CA"][len(self.data)-1] if end is None else end
+        
+        self.checkType(start,float,"start")
+        self.checkType(end,float,"end")
+        
+        index = self.data.data.index[np.array(self.data.data["CA"] >= start) & np.array(self.data.data["CA"] <= end)]
+        data = self.data.data.iloc[index]
+        
+        return integrate.trapz(data[y], x=data[x])
+    
+    ####################################
+    def IMEP(self, start:float=None, end:float=None) -> EngineModel:
+        """
+        Compute indicated mean effective pressure. If inital or final CA are not given, are set to first/last in CA range.
+
+        Args:
+            start (float, optional): Initial CA. Defaults to None.
+            end (float, optional): Final CA. Defaults to None.
+        
+        Returns:
+            EngineModel: self
+        """
+        from scipy import integrate
+        
+        start = self.data["CA"][0] if start is None else start
+        end = self.data["CA"][len(self.data)-1] if end is None else end
+        
+        self.checkType(start,float,"start")
+        self.checkType(end,float,"end")
+        
+        index = self.data.data.index[np.array(self.data.data["CA"] >= start) & np.array(self.data.data["CA"] <= end)]
+        data = self.data.data.iloc[index]
+        data["V"] = self.geometry.V(data["CA"])
+        
+        return integrate.trapz(data["p"], x=data["V"])/(max(data["V"]) - min(data["V"]))
     
 #########################################################################
 #Create selection table
