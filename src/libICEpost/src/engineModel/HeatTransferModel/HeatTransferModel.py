@@ -11,11 +11,9 @@ Last update:        12/06/2023
 #                               IMPORT                              #
 #####################################################################
 
-from abc import ABCMeta, abstractmethod
+from typing import Self
 
-from libICEpost.src.base.BaseClass import BaseClass
-
-from ..EngineModel.EngineModel import EngineModel
+from libICEpost.src.base.BaseClass import BaseClass, abstractmethod
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -30,25 +28,32 @@ class HeatTransferModel(BaseClass):
     """
     
     #########################################################################
-    #Constructor:
+    #Class methods:
+    @classmethod
+    def fromDictionary(cls, dictionary:dict) -> Self:
+        """
+        Construct from dictionary with heat transfer model parameters (to be overloaded for docstring)
+
+        Returns:
+            Self: instance of selected heatTransferModel
+        """
+        try:
+            return cls(**dictionary)
+            
+        except BaseException as err:
+            cls.fatalErrorInClass(cls.fromDictionary, "Failed contruction from dictionary", err)
     
     #########################################################################
     #Compute heat transfer coefficient:
     @abstractmethod
-    def h(self, engine:EngineModel, *, CA:float|None=None) -> float:
+    def h(self, *args, **kwargs) -> float:
         """
-        Compute wall heat transfer coefficient at cylinder walls.
-        
-        Args:
-            engine (EngineModel): The engine model from which taking data.
-            CA (float | None, optional): Time for which computing heat transfer. If None, uses engine.time.time. Defaults to None.
+        Compute wall heat transfer coefficient at walls. To be overwritten.
 
         Returns:
             float: convective wall heat transfer coefficient
         """
-        self.checkType(engine,EngineModel,"engine")
-        if not CA is None:
-            self.checkType(CA,float,"CA")
+        pass
     
     ##############################
     #Change coefficients (or some of them):

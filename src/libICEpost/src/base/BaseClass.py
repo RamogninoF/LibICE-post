@@ -62,7 +62,7 @@ class SelectionTable(Utilities):
         """
         Database of available sub-classes in the selection table.
         """
-        return cp.deepcopy(self.__db)
+        return self.__db
     
     ##########################################################################################
     def __init__(self, cls:type):

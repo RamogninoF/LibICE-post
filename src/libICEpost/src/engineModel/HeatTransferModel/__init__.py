@@ -5,5 +5,5 @@ Last update:        12/06/2023
 Package with models for describing heat losses at walls.
 """
 
-from .heatTransferModel import heatTransferModel
+from .HeatTransferModel import HeatTransferModel
 from .Woschni import Woschni

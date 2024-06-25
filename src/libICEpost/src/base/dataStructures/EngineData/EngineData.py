@@ -280,15 +280,21 @@ class EngineData(Utilities):
             if not varName in self.data.columns:
                 raise ValueError(f"Variable '{varName}' not found. Available fields are:" + "\t" + "\n\t".join(self.data.columns))
             
-            def interpolator(CA):
+            def interpolator(CA:float|collections.abc.Iterable) -> float|collections.abc.Iterable:
                 try:
-                    self.checkType(CA, float, "CA")
+                    self.checkTypes(CA, (float,collections.abc.Iterable), "CA")
                     return self.np.interp(CA, self.data["CA"], self.data[varName], float("nan"), float("nan"))
                 except BaseException as err:
-                    self.fatalErrorInClass(self.varName, "Failed interpolation", err)
+                    self.fatalErrorInClass(getattr(self,varName), "Failed interpolation", err)
+
+            interpolator.__doc__  = f"Linear interpolation of {varName} at CA."
+            interpolator.__doc__ += f"\n\Args:"
+            interpolator.__doc__ += f"\n\t\tCA (float | collections.abc.Iterable): CA at which iterpolating data."
+            interpolator.__doc__ += f"\n\tReturns:"
+            interpolator.__doc__ += f"\n\t\tCA at which iterpolating data."
             
             setattr(self, varName, interpolator)
-        
+            
         except BaseException as err:
             self.fatalErrorInClass(self.createInterpolator, f"Failed creating interpolator for variable '{varName}'", err)
     

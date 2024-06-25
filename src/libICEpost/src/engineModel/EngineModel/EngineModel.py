@@ -27,12 +27,15 @@ from libICEpost.src.base.dataStructures.Dictionary import Dictionary
 from ..EngineTime.EngineTime import EngineTime
 from ..EngineGeometry.EngineGeometry import EngineGeometry
 
-from libICEpost.src.thermophysicalModels.thermoModels.CombustionModel.CombustionModel import CombustionModel
 from libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.ThermoMixture import ThermoMixture
 from libICEpost.src.thermophysicalModels.thermoModels.ThermoModel import ThermoModel
+
+from libICEpost.src.thermophysicalModels.thermoModels.CombustionModel.CombustionModel import CombustionModel
 from libICEpost.src.thermophysicalModels.thermoModels.EgrModel.EgrModel import EgrModel
+from libICEpost.src.engineModel.HeatTransferModel.HeatTransferModel import HeatTransferModel
 
 from libICEpost.src.thermophysicalModels.thermoModels.CombustionModel.NoCombustion import NoCombustion
+from libICEpost.src.engineModel.HeatTransferModel.Woschni import Woschni
 
 from libICEpost.Database.chemistry.specie.Mixtures import Mixtures, Mixture
 
@@ -60,10 +63,12 @@ class EngineModel(BaseClass):
         -> Variables referred to a specific zone are allocated as "<variableName>_<zoneName>"
     
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    TODO: documentation and user info
     
-    Attibutes:
     """
+    #Attibutes:
     _cylinder:ThermoModel
+    """Cylinder thermodynamic region"""
     
     Types:dict[str:type] = \
         {
@@ -71,6 +76,7 @@ class EngineModel(BaseClass):
             "EngineTime":               EngineTime,
             "EgrModel":                 EgrModel,
             "CombustionModel":          CombustionModel,
+            "HeatTransferModel":        HeatTransferModel,
         }
     """Types for each main model"""
     
@@ -78,7 +84,7 @@ class EngineModel(BaseClass):
         {
             "EgrModel":             EgrModel(),
             "CombustionModel":      NoCombustion(reactants=Mixture.empty()),
-            # "heatTransferModel":        None,
+            "HeatTransferModel":    Woschni(),
         }
     """The available sub-models and their default initializers"""
     
@@ -99,6 +105,9 @@ class EngineModel(BaseClass):
     
     EgrModel:EgrModel
     """The EGR model"""
+    
+    HeatTransferModel:HeatTransferModel
+    """The wall heat transfer model"""
     
     _air:Mixture
     """Air mixture"""

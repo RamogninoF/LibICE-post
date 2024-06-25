@@ -13,6 +13,9 @@ Last update:        12/06/2023
 
 from .EngineGeometry import EngineGeometry
 
+from collections.abc import Iterable
+
+import numpy as np
 from numpy import cos, sin, sqrt, radians, pi
 
 #############################################################################
@@ -176,92 +179,103 @@ class ConRodGeometry(EngineGeometry):
     
     #########################################################################
     #Piston position:
-    def s(self,CA):
+    def s(self,CA:float|Iterable) -> float|np.ndarray:
         """
-        CA:     float / list<float/int>
-            Crank angle
-        
         Returns the piston position at CA (reference to TDC)
+
+        Args:
+            CA (float | Iterable): Time in CA
+
+        Returns:
+            float|np.ndarray[float]: Piston position [m]
         """
         def f(angle):
-            return self.S/2.0 * (1.0 - cos(1.*angle) + 1.0/self.lam *(1. - cos(self.np.arcsin((sin(1.*angle) + self.delta)*self.lam))))
+            return self.S/2.0 * (1.0 - cos(1.*angle) + 1.0/self.lam *(1. - cos(np.arcsin((sin(1.*angle) + self.delta)*self.lam))))
         
         try:
             if isinstance(CA, list):
-                return [f(radians(ca)) for ca in CA]
+                return np.array([f(radians(ca)) for ca in CA])
             else:
                 return f(radians(CA))
         except BaseException as err:
-            self.fatalErrorInClass(self.s, "", err)
+            self.fatalErrorInClass(self.s, "Failed computing piston position", err)
     
     ###################################
     #Instant. cylinder volume:
-    def V(self,CA):
+    def V(self,CA:float|Iterable) -> float|np.ndarray:
         """
-        CA:     float / list<float/int>
-            Crank angle
-        
         Returns the instantaneous in-cylinder volume at CA
+
+        Args:
+            CA (float | Iterable): Time in CA
+
+        Returns:
+            float|np.ndarray[float]: In-cylinder volume [m^3]
         """
         def f(ca):
             return self.Vmin + self.s(ca)*self.cylArea
         
         try:
             if isinstance(CA, list):
-                return [f(ca) for ca in CA]
+                return np.array([f(ca) for ca in CA])
             else:
                 return f(CA)
         except BaseException as err:
-            self.fatalErrorInClass(self.V, "", err)
+            self.fatalErrorInClass(self.V, "Failed computing in-cylinder volume", err)
     
     ###################################
     #Time (in CA) derivative of cyl. position:
-    def dsdCA(self,CA):
+    def dsdCA(self,CA:float|Iterable) -> float|np.ndarray:
         """
-        CA:     float / list<float/int>
-            Crank angle
-        
         Returns the time (in CA) derivative of instantaneous piston position at CA
+        Args:
+            CA (float | Iterable): Time in CA
+
+        Returns:
+            float|np.ndarray[float]: ds/dCA [m/CA]
         """
         def f(angle):
             return 0.5 * self.S * (self.lam*cos(1.*angle)*(self.delta + sin(1.*angle))/sqrt(1. - (self.lam**2.)*((self.delta + sin(1.*angle))**2.)) + sin(1.*angle))
         
         try:
             if isinstance(CA, list):
-                return [f(radians(ca))*pi/180. for ca in CA]
+                return np.array([f(radians(ca))*pi/180. for ca in CA])
             else:
                 return f(radians(CA))*pi/180.
         except BaseException as err:
-            self.fatalErrorInClass(self.dsdCA, "", err)
+            self.fatalErrorInClass(self.dsdCA, "Failed computing ds/dCA", err)
     
     ###################################
     #Time (in CA) derivative of cyl. volume:
-    def dVdCA(self,CA):
+    def dVdCA(self,CA:float|Iterable) -> float|np.ndarray:
         """
-        CA:     float / list<float/int>
-            Crank angle
-        
         Returns the time (in CA) derivative of instantaneous in-cylinder volume at CA
+        Args:
+            CA (float | Iterable): Time in CA
+
+        Returns:
+            float|np.ndarray[float]: dV/dCA [m^3/CA]
         """
         return self.dsdCA(CA) * self.cylArea
     
     ###################################
     #Instant. liner area:
-    def linerArea(self,CA):
+    def linerArea(self,CA:float|Iterable) -> float|np.ndarray:
         """
-        CA:     float / list<float/int>
-            Crank angle
-        
         Returns the liner area at CA
+        Args:
+            CA (float | Iterable): Time in CA
+
+        Returns:
+            float|np.ndarray[float]: [m^2]
         """
         try:
             if isinstance(CA, list):
-                return [s * pi * self.D for s in self.s(CA)]
+                return np.array([s * pi * self.D for s in self.s(CA)])
             else:
                 return self.s(CA) * pi * self.D
         except BaseException as err:
-            self.fatalErrorInClass(self.linerArea, "", err)
-
+            self.fatalErrorInClass(self.linerArea, "Failed computing liner area", err)
 
 #########################################################################
 #Add to selection table:

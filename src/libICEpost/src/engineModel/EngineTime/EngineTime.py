@@ -11,6 +11,7 @@ Last update:        12/06/2023
 #                               IMPORT                              #
 #####################################################################
 
+from collections.abc import Iterable
 import numpy as np
 import math
 
@@ -160,53 +161,66 @@ class EngineTime(BaseClass):
     
     #########################################################################
     #CA to Time:
-    def CA2Time(self,CA):
+    def CA2Time(self,CA:float|Iterable) -> float|np.ndarray[float]:
         """
-        CA:     float / list<float/int>
-            Crank angle
-        
         Converts CA to time [s]
+
+        Args:
+            CA (float | Iterable): Time in CA
+
+        Returns:
+            float|np.ndarray[float]: Time in seconds
         """
         try:
             if isinstance(CA, list):
-                return [ca/self.dCAdt for ca in CA]
+                return np.array([ca/self.dCAdt for ca in CA])
             else:
                 return CA/self.dCAdt
         except BaseException as err:
-            self.fatalErrorInClass(self.CA2Time, "", err)
+            self.fatalErrorInClass(self.CA2Time, "Failed conversion from CA to time", err)
     
     ###################################
     #Time to CA:
-    def Time2CA(self,t):
+    def Time2CA(self,t:float|Iterable) -> float|np.ndarray:
         """
-        CA:     float / list<float/int>
-            Crank angle
-            
         Converts time [s] to CA
+
+        Args:
+            t (float | Iterable): Time in seconds
+
+        Returns:
+            float|np.ndarray: time in CA
         """
         try:
             if isinstance(t, list):
-                return [T*self.dCAdt for T in t]
+                return np.array([T*self.dCAdt for T in t])
             else:
                 return t*self.dCAdt
         except BaseException as err:
-            self.fatalErrorInClass(self.Time2CA, "", err)
+            self.fatalErrorInClass(self.Time2CA, "Failed conversion from time to CA", err)
     
     ###################################
-    def isCombustion(self,CA):
+    def isCombustion(self,CA:float|Iterable=None) -> bool|np.ndarray[bool]:
         """
-        CA:     float
-            Crank angle
-            
-        Check if combustion has started. To be overwritten by derived classes
+        Check if combustion has started.
+
+        Args:
+            CA (float | Iterable | None): Cranc angle to check. If None, checks for self.time
+
+        Returns:
+            bool|np.ndarray[bool]: If combustion started
         """
         try:
-            self.checkType(CA, float, "CA")
+            if not CA is None:
+                self.checkTypes(CA, (float, Iterable), "CA")
+            else:
+                CA = self.time
         except BaseException as err:
             self.fatalErrorInArgumentChecking(self.isCombustion, err)
         
         if not self.startOfCombustion() is None:
-            return CA > self.startOfCombustion()
+            out = (CA > self.startOfCombustion())
+            return np.array(out) if isinstance(CA, Iterable) else out
         else:
             return False
     
@@ -218,27 +232,37 @@ class EngineTime(BaseClass):
         return None
     
     ###################################
-    def isClosedValves(self,CA):
+    def isClosedValves(self,CA:float|Iterable=None) -> bool|np.ndarray[bool]:
         """
-        CA:     float
-            Crank angle
-            
-        Check if at closed valves (avter IVC and before EVO)
+        Check if at closed valves (after IVC and before EVO)
+
+        Args:
+            CA (float | Iterable | None): Cranc angle to check. If None, checks for self.time
+
+        Returns:
+            bool|np.ndarray[bool]: If at closed valves
         """
         try:
-            self.checkType(CA, float, "CA")
+            if not CA is None:
+                self.checkTypes(CA, (float, Iterable), "CA")
+            else:
+                CA = self.time
         except BaseException as err:
             self.fatalErrorInArgumentChecking(self.isCombustion, err)
-            
-        return ((CA >= self.IVC) and (CA <= self.EVO))
+        
+        if isinstance(CA, Iterable):
+            out = (np.array(CA >= self.IVC) & np.array(CA <= self.EVO))
+        else:
+            out = ((CA >= self.IVC) and (CA <= self.EVO))
+        return out
 
     ###################################
-    def updateStartTime(self, timeList:list[float]) -> None:
+    def updateStartTime(self, timeList:Iterable[float]) -> None:
         """
         Update the start-time to be consistent with the avaliable data
 
         Args:
-            timeList (list[float]): The avaliable time series
+            timeList (Iterable[float]): The avaliable time series
         """
         timeList = np.array(timeList)
         self.startTime = timeList[timeList >= self.startTime][0]
