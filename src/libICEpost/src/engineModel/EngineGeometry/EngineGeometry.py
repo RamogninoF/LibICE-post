@@ -13,6 +13,11 @@ Last update:        12/06/2023
 
 from libICEpost.src.base.BaseClass import BaseClass, abstractmethod
 
+
+from collections.abc import Iterable
+import numpy as np
+import pandas as pd
+
 #############################################################################
 #                               MAIN CLASSES                                #
 #############################################################################
@@ -38,24 +43,53 @@ class EngineGeometry(BaseClass):
     ###################################
     #Instant. chamber volume:
     @abstractmethod
-    def V(self,CA):
+    def V(self,CA:float|Iterable) -> float|np.ndarray:
+        """
+        Returns the instantaneous in-cylinder volume at CA
+
+        Args:
+            CA (float | Iterable): Time in CA
+
+        Returns:
+            float|np.ndarray[float]: In-cylinder volume [m^3]
+        """
+        pass
+    
+    ###################################
+    @abstractmethod
+    def A(self,CA:float|Iterable) -> float|np.ndarray:
+        """
+        Returns the chamber area at CA
+        Args:
+            CA (float | Iterable): Time in CA
+
+        Returns:
+            float|np.ndarray[float]: [m^2]
+        """
+        pass
+    
+    ###################################
+    @abstractmethod
+    def areas(self,CA:float|Iterable) -> pd.DataFrame:
         """
         CA:     float / list<float/int>
             Crank angle
         
-        Returns the instantaneous chamber volume at CA
+        Returns a pandas.Dataframe with area of all patches at CA
         """
         pass
     
     ###################################
     #Time (in CA) derivative of chamber volume:
     @abstractmethod
-    def dVdCA(self,CA):
+    def dVdCA(self,CA:float|Iterable) -> float|np.ndarray:
         """
-        CA:     float / list<float/int>
-            Crank angle
-        
-        Returns the time (in CA) derivative of instantaneous in-cylinder at CA
+        Returns the time (in CA) derivative of instantaneous in-cylinder volume at CA
+        Args:
+            CA (float | Iterable): Time in CA
+
+        Returns:
+            float|np.ndarray[float]: dV/dCA [m^3/CA]
         """
         pass
     

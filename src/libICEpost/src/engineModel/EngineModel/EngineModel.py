@@ -833,11 +833,19 @@ class EngineModel(BaseClass):
                 ...
         """
         #Add fields to data:
-        fields = ["dpdCA", "V", "T", "gamma", "ahrr", "cumAhrr"]
+        fields = ["dpdCA", "V", "T", "gamma", "ahrr", "cumAhrr", "A"]
         for f in fields:
             if not f in self.data.columns:
                 self.data[f] = float("nan")
         
+        #Areas
+        areas = self.geometry.areas(self.time.time)
+        for patch in areas.columns:
+            name = patch + "Area"
+            if not name in self.data.columns:
+                self.data[name] = float("nan")
+        
+        #Specie
         for specie in self._cylinder.mixture.mix:
             self.data[specie.specie.name + "_x"] = 0.0
             self.data[specie.specie.name + "_y"] = 0.0
@@ -847,6 +855,7 @@ class EngineModel(BaseClass):
         if CA == self.time.startTime:
             index = self.data.data.index[self.data['CA'] == CA].tolist()
             
+            #In-cylinder data
             V = self.geometry.V(CA)
             p = self.data.p(CA)
             T = self._cylinder.state.T
@@ -855,12 +864,24 @@ class EngineModel(BaseClass):
             self.data["T"][index] = T
             self.data["gamma"][index] = gamma
             
+            #Ahrr
             self.data["ahrr"][index] = 0.0
             self.data["cumAhrr"][index] = 0.0
             
+            #Specie
             for specie in self._cylinder.mixture.mix:
                 self.data[specie.specie.name + "_x"][index] = specie.X
                 self.data[specie.specie.name + "_y"][index] = specie.Y
+            
+            #Patch areas
+            for patch in areas.columns:
+                name = patch + "Area"
+                if not name in self.data.columns:
+                    self.data[name][index] = areas[patch]
+            
+            #Total area
+            self.data["A"][index] = self.geometry.A(CA)
+    
     
     ####################################
     def _update(self) -> None:
@@ -919,6 +940,16 @@ class EngineModel(BaseClass):
             else:
                 self.data[specie.specie.name + "_x"][index] = specie.X
                 self.data[specie.specie.name + "_y"][index] = specie.Y
+                
+        #Patch areas
+        areas = self.geometry.areas(CA)
+        for patch in areas.columns:
+            name = patch + "Area"
+            if not name in self.data.columns:
+                self.data[name][index] = areas[patch]
+        
+        #Total area
+        self.data["A"][index] = self.geometry.A(CA)
     
     ####################################
     def refresh(self, reset:bool=False) -> EngineModel:

@@ -18,6 +18,8 @@ from collections.abc import Iterable
 import numpy as np
 from numpy import cos, sin, sqrt, radians, pi
 
+import pandas as pd
+
 #############################################################################
 #                               MAIN CLASSES                                #
 #############################################################################
@@ -276,7 +278,49 @@ class ConRodGeometry(EngineGeometry):
                 return self.s(CA) * pi * self.D
         except BaseException as err:
             self.fatalErrorInClass(self.linerArea, "Failed computing liner area", err)
+    
+    ###################################
+    def A(self,CA:float|Iterable) -> float|np.ndarray:
+        """
+        Returns the chamber area at CA
+        Args:
+            CA (float | Iterable): Time in CA
 
+        Returns:
+            float|np.ndarray[float]: [m^2]
+        """
+        try:
+            return self.linerArea(CA) + self.pistonArea + self.headArea
+        except BaseException as err:
+            self.fatalErrorInClass(self.linerArea, "Failed computing chamber area", err)
+
+    ###################################
+    def areas(self,CA:float|Iterable) -> pd.DataFrame:
+        """
+        CA:     float / list<float/int>
+            Crank angle
+        
+        Returns a pandas.Dataframe with area of all patches at CA
+        
+        Args:
+            CA (float | Iterable): Time in CA
+
+        Returns:
+            pandas.Dataframe: DataFrame of areas [m^2] at CA. Columns are patch names and CA.
+        """
+        try:
+            data = \
+            {
+                "CA":CA if isinstance(CA, Iterable) else [CA], 
+                "liner":self.linerArea(CA) if isinstance(CA, Iterable) else [self.linerArea(CA)],
+                "piston":[self.pistonArea for _ in CA] if isinstance(CA, Iterable) else [self.pistonArea],
+                "head":[self.headArea for _ in CA] if isinstance(CA, Iterable) else [self.headArea],
+            }
+            return pd.DataFrame.from_dict(data, orient="columns")
+            
+        except BaseException as err:
+            self.fatalErrorInClass(self.linerArea, "Failed computing patch areas", err)
+    
 #########################################################################
 #Add to selection table:
 EngineGeometry.addToRuntimeSelectionTable(ConRodGeometry)
