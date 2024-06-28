@@ -496,7 +496,7 @@ class EngineModel(BaseClass):
         return self
     
     ####################################
-    def loadData(self, dataPath:str=os.curdir, *, data:dict|Dictionary) -> EngineModel:
+    def loadData(self, dataPath:str=None, *, data:dict|Dictionary) -> EngineModel:
         """
         Load raw data.
         
@@ -504,7 +504,7 @@ class EngineModel(BaseClass):
         
         Args:
             data (dict | Dictionary): Dictionary containing the data to load for each region.
-            dataPath (str, optional): Global path where to load/write data. Defaults to os.curdir.
+            dataPath (str, optional): Global path where to load/write data. Defaults to None.
 
         Returns:
             EngineModel: self
@@ -513,11 +513,11 @@ class EngineModel(BaseClass):
         print(f"Data path: {dataPath}")
         
         #Seth path info
-        self.info["path"] = dataPath
+        self.info["dataPath"] = dataPath
         
         #Cast to Dictionary
         data = Dictionary(**data)
-        self.info["dataDict"] = data
+        self.info["data"] = data
         
         #Load data:
         for zone in self.Zones:
@@ -737,7 +737,7 @@ class EngineModel(BaseClass):
         return outputDict
     
     ####################################
-    def preProcess(self, dataPath:str=os.curdir, *, data:dict|Dictionary, preProcessing:dict|Dictionary=None, initialConditions:dict|Dictionary, **zones) -> EngineModel:
+    def preProcess(self, dataPath:str=None, *, data:dict|Dictionary, preProcessing:dict|Dictionary=None, initialConditions:dict|Dictionary) -> EngineModel:
         """
         Pre-processing:
             1) Loading data (from files or arrays)
@@ -754,8 +754,8 @@ class EngineModel(BaseClass):
         Args:
             data (dict | Dictionary): Dictionary with info for loading data.
             preProcessing (dict | Dictionary, optional): Dictionary with pre-processing information. Defaults to None.
+            dataPath (str, optional): Master path of the tree. Defaults to None.
             initialConditions (dict | Dictionary): Dictionary with initial condition for thermodynamic models
-            dataPath (str, optional): Master path of the tree. Defaults to os.curdir.
 
         Returns:
             EngineModel: self
@@ -767,8 +767,10 @@ class EngineModel(BaseClass):
         self.loadData(dataPath, data=data)
         
         # Filtering data
+        self.info["preProcessing"] = preProcessing
         filter = None
         if not preProcessing is None:
+            preProcessing = Dictionary(**preProcessing)
             filterType = preProcessing.lookupOrDefault("Filter", None, fatal=False)
             if isinstance(filterType, str):
                 #Got type name for run-time construction
@@ -965,16 +967,20 @@ class EngineModel(BaseClass):
         Returns:
             EngineModel: self
         """
-        self.loadData(self.info["path"], data=self.info["dataDict"])
-        self.filterData(self.info["filter"])
-        
         #TODO: refactoring of initialization of thermodynamic models
         if reset:
-            self._constructThemodynamicModels(self.combustionProperties)
-            self._constructEgrModel(self.combustionProperties)
-            self._constructCombustionModel(self.combustionProperties)
-            self.initializeThemodynamicModels(self.info["initialConditions"])
+            self._data = EngineData()
+            self._raw = EngineData()
+            self.preProcess(
+                dataPath=self.info["dataPath"],
+                data=self.info["data"],
+                preProcessing=self.info["preProcessing"],
+                initialConditions=self.info["initialConditions"])
         
+        else:
+            self.loadData(self.info["dataPath"], data=self.info["data"])
+            self.filterData(self.info["filter"])
+            
         self.process()
         
     ####################################

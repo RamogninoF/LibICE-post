@@ -121,8 +121,8 @@ class ThermoMixture(Utilities):
             
             #Set the Thermo and EoS
             thermoData:Dictionary = Dictionary(thermoData)
-            self._Thermo = mixingRules.ThermoMixing.selector(ThermoType + "Mixing", thermoData.lookup(ThermoType + "Dict").update(mixture=mixture))
-            self._EoS = mixingRules.EquationOfStateMixing.selector(EoSType + "Mixing", thermoData.lookup(EoSType + "Dict").update(mixture=mixture))
+            self._Thermo = mixingRules.ThermoMixing.selector(ThermoType + "Mixing", thermoData.lookupOrDefault(ThermoType + "Dict", Dictionary()).update(mixture=mixture))
+            self._EoS = mixingRules.EquationOfStateMixing.selector(EoSType + "Mixing", thermoData.lookupOrDefault(EoSType + "Dict", Dictionary()).update(mixture=mixture))
                 
         except BaseException as err:
             self.fatalErrorInClass(self.__init__, "Failed construction", err)

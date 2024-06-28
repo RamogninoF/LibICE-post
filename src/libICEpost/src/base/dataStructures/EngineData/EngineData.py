@@ -92,7 +92,8 @@ class EngineData(Utilities):
             CAscale:float=1.0, 
             varScale:float=1.0, 
             skipRows:int=0, 
-            maxRows:int=None, 
+            maxRows:int=None,
+            interpolate:bool=False,
             comments:str='#', 
             verbose:bool=True, 
             delimiter:str=None,
@@ -113,6 +114,7 @@ class EngineData(Utilities):
         delimiter  | str    | None      | Delimiter for the columns (defaults to whitespace)
         skipRows   | int    | 0         | Number of raws to skip at beginning of file
         maxRows    | int    | None      | Maximum number of raws to use
+        interpolate| bool   | False     | Interpolate the data-set at existing CA range (used to load non-consistent data)
         verbose    | bool   | True      | Print info/warnings
         default    | float  | nan       | Default value to add in out-of-range values
         
@@ -155,7 +157,7 @@ class EngineData(Utilities):
             data[:,1] *= varScale
             data[:,1] += varOff
             
-            self.loadArray(data, varName, verbose, default)
+            self.loadArray(data, varName, verbose, default, interpolate)
             
         except BaseException as err:
             self.fatalErrorInClass(self.loadFile, f"Failed loading field '{varName}' from file '{fileName}'", err)
@@ -163,7 +165,13 @@ class EngineData(Utilities):
         return self
     
     #######################################
-    def loadArray(self, data:collections.abc.Iterable, varName:str, verbose:bool=True, default:float=float("nan")) -> EngineData:
+    def loadArray(
+        self,
+        data:collections.abc.Iterable,
+        varName:str,
+        verbose:bool=True,
+        default:float=float("nan"),
+        interpolate:bool=False) -> EngineData:
         """
         Load an ndarray of shape (N,2) with first column the CA range and 
         second the variable time-series to load. Automatically removes duplicate times.
@@ -172,8 +180,12 @@ class EngineData(Utilities):
             data (collections.abc.Iterable): Container of shape (N,2) with first 
                 column the CA range and second the variable time-series to load.
             varName (str): Name of variable in data structure
-            verbose (bool, optional): If need to print loading information. Defaults to True.
-            default (float, optional): Default value for out-of-range elements. Defaults to float("nan").
+            verbose (bool, optional): If need to print loading information. 
+                Defaults to True.
+            default (float, optional): Default value for out-of-range elements. 
+                Defaults to float("nan").
+            interpolate (bool, optional): Interpolate the data-set at existing CA 
+                range (used to load non-consistent data). Defaults to False.
 
         Returns:
             EngineData: self
@@ -185,7 +197,7 @@ class EngineData(Utilities):
             self.checkType(default  , float  , "default")
             
             #Cast to numpy array
-            data = self.np.array(data)
+            data:np.ndarray = self.np.array(data)
             
             #Check for type
             if not ((data.dtype == float) or (data.dtype == int)):
@@ -210,48 +222,62 @@ class EngineData(Utilities):
             _, idx = np.unique(data[:,0], return_index=True)
             data = data[idx,:]
             
-            if not (len(self.data) > 0):
+            #Remove nan:
+            if np.isnan(data[:,0]).any():
+                data = data[np.array([not np.isnan(v) for v in data[:,0]])]
+            if np.isnan(data[:,1]).any():
+                data = data[np.array([not np.isnan(v) for v in data[:,1]])]
+            
+            #If data were not stored yet, just load this
+            if len(self.data) == 0:
+                #Cannot use interpolate here
+                if interpolate:
+                    raise ValueError("Cannot load first with 'interpolate' method")
+                
                 self.data["CA"] = data[:,0]
                 self.data[varName] = data[:,1]
-            
+                
+            elif interpolate:
+                #Interpolate data at CA range
+                CA = self.data["CA"]
+                var  = np.interp(CA, data[:,0], data[:,1])
+                self.data[varName] = var
+                
             else:
                 CA = data[:,0]
                 var = data[:,1]
                 
-                ID_MIN = 0
-                ID_MIN_CA = 0
-                ID_MAX = len(self.data)+1
-                ID_MAX_CA = len(CA)+1
+                #NOTE: can only extend range on right (higher CA)
+                if CA[0] < self["CA"][0]:
+                    raise ValueError("CA not consistent: can only extend range to the right (higher CA)")
                 
-                #Checking for sublists
-                #Match minimum CA
-                try:
-                    ID_MIN = self.np.array(self.data["CA"] == CA[0]).tolist().index(True)
-                except:
-                    pass
+                #Check indicies of already present data:
+                index = self.data.index[[ca in CA for ca in self["CA"]]]
                 
-                try:
-                    ID_MIN_CA = self.np.array(CA == self.data["CA"][0]).tolist().index(True)
-                except:
-                    pass
+                #Overwritten data must be contiguous
+                if not (len(index) == (index[-1] - index[0] + 1)):
+                    #Missing data in between
+                    raise ValueError("CA not consistent: overwrited data must be contiguous (0)")
+                elif not (index.to_numpy() == np.array(range(index[0], index[-1]+1))).all():
+                    # Already loaded data to overwrite are not contiguous
+                    raise ValueError("CA not consistent: overwrited data must be contiguous (1)")
+                elif (index[-1] < (len(self) - 1)) and (CA[-1] > self["CA"][index[-1]]):
+                    #Last index not at end, but there are other data left
+                    raise ValueError("CA not consistent: overwrited data must be contiguous (2)")
+                
+                #Identify extended elements:
+                if CA[-1] > self["CA"][len(self.data)-1]:
+                    numNewCA = len(CA) - len(index)
+                    newIndex = list(range(len(self.data),len(self.data)+numNewCA))
+                    index = index.to_list() + newIndex
                     
-                #Match maximum CA
-                try:
-                    ID_MAX = self.np.array(self.data["CA"] == CA[-1]).tolist().index(True) + 1
-                except:
-                    pass
+                    #Add new indicies:
+                    newData = pd.DataFrame(columns=self.data.columns, index=range(len(newIndex)))
+                    self.data = pd.concat([self.data, newData], ignore_index=True)
                 
-                try:
-                    ID_MAX_CA = self.np.array(CA == self.data["CA"][-1]).tolist().index(True) + 1
-                except:
-                    pass
-                
-                #Check sublist
-                if (self.data["CA"][ID_MIN:ID_MAX] != CA[ID_MIN_CA:ID_MAX_CA]).any():
-                    raise ValueError("CA range in file not consistent with the one alredy loaded in data-structure")
-                
-                self.data[varName][ID_MIN:ID_MAX] = var[ID_MIN_CA:ID_MAX_CA]
-            
+                self.data["CA"][index] = CA
+                self.data[varName][index] = var
+                                
             #If first time this entry is set, create the interpolator:
             if firstTime:
                 self.createInterpolator(varName)
@@ -274,26 +300,26 @@ class EngineData(Utilities):
                 raise ValueError(f"Field name '{varName}' is not a valid variable name.")
             
             #Check if attribute already exists, to prevent overloading existing attribustes.
-            if hasattr(self, varName):
-                raise ValueError(f"Name '{varName}' is either reserved or the interpolation method was already created for this variable")
+            if varName in _reservedMethds:
+                raise ValueError(f"Name '{varName}' is reserved.")
             
             if not varName in self.data.columns:
                 raise ValueError(f"Variable '{varName}' not found. Available fields are:" + "\t" + "\n\t".join(self.data.columns))
             
-            def interpolator(CA:float|collections.abc.Iterable) -> float|collections.abc.Iterable:
+            def interpolator(self, CA:float|collections.abc.Iterable) -> float|collections.abc.Iterable:
                 try:
                     self.checkTypes(CA, (float,collections.abc.Iterable), "CA")
                     return self.np.interp(CA, self.data["CA"], self.data[varName], float("nan"), float("nan"))
                 except BaseException as err:
                     self.fatalErrorInClass(getattr(self,varName), "Failed interpolation", err)
-
+            
             interpolator.__doc__  = f"Linear interpolation of {varName} at CA."
             interpolator.__doc__ += f"\n\Args:"
             interpolator.__doc__ += f"\n\t\tCA (float | collections.abc.Iterable): CA at which iterpolating data."
             interpolator.__doc__ += f"\n\tReturns:"
             interpolator.__doc__ += f"\n\t\tCA at which iterpolating data."
             
-            setattr(self, varName, interpolator)
+            setattr(self.__class__, varName, interpolator)
             
         except BaseException as err:
             self.fatalErrorInClass(self.createInterpolator, f"Failed creating interpolator for variable '{varName}'", err)
@@ -331,3 +357,6 @@ class EngineData(Utilities):
             
         except BaseException as err:
             self.fatalErrorInClass(self.write, f"Failed writing data to file '{fileName}'", err)
+
+#Store copy of default EngineData class. This is used to identify reserved methods for createInterpolator
+_reservedMethds = dir(EngineData)

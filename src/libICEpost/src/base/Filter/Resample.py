@@ -101,8 +101,7 @@ class Resample(Filter):
         Filter an array of x,y data with constant spacing
         """
         #Construct uniform grid from min(x) to max(x)
-        interval = np.arange(xp[0],xp[len(xp)-1], self.delta)
-        
+        interval = np.arange(xp[0],xp[len(xp)-1]+self.delta, self.delta)
         #Construct linear interpolator
         return interval, np.interp(interval, xp, yp, float("nan"), float("nan"))
     
