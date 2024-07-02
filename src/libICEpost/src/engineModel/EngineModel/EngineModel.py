@@ -17,6 +17,7 @@ from operator import attrgetter
 import os
 
 import numpy as np
+import pandas as pd
 
 from libICEpost.src.base.BaseClass import BaseClass, abstractmethod
 from libICEpost.src.base.dataStructures.EngineData.EngineData import EngineData
@@ -798,6 +799,7 @@ class EngineModel(BaseClass):
         This is split into two function calls, which may be overwritten in child classes to tailored processings:
         1) _process__pre__: Create the columns in self.data for the fields generted by post-processing
         2) _update: The state-updating procedure in the main time-loop
+        3) _process__post__: Final post-processing (e.g., computation of wall heat fluxes and rohr)
         
         Returns:
             EngineModel: self
@@ -819,6 +821,9 @@ class EngineModel(BaseClass):
                     self.info["time"] = t
                     self._update()
 
+            #Create fields
+            self._process__post__()
+            
             return self
         except BaseException as err:
             self.fatalErrorInClass(self.process, f"Failed processing data for engine model {self.__class__.__name__}", err)
@@ -835,17 +840,10 @@ class EngineModel(BaseClass):
                 ...
         """
         #Add fields to data:
-        fields = ["dpdCA", "V", "T", "gamma", "ahrr", "cumAhrr", "A"]
+        fields = ["dpdCA", "V", "T", "gamma", "ahrr", "rohr", "A"]
         for f in fields:
             if not f in self.data.columns:
                 self.data[f] = float("nan")
-        
-        #Areas
-        areas = self.geometry.areas(self.time.time)
-        for patch in areas.columns:
-            name = patch + "Area"
-            if not name in self.data.columns:
-                self.data[name] = float("nan")
         
         #Specie
         for specie in self._cylinder.mixture.mix:
@@ -862,28 +860,17 @@ class EngineModel(BaseClass):
             p = self.data.p(CA)
             T = self._cylinder.state.T
             gamma = self._cylinder.mixture.gamma(p,T)
-            self.data["V"][index] = V
-            self.data["T"][index] = T
-            self.data["gamma"][index] = gamma
+            self.data.loc[index, "V"] = V
+            self.data.loc[index, "T"] = T
+            self.data.loc[index, "gamma"] = gamma
             
             #Ahrr
-            self.data["ahrr"][index] = 0.0
-            self.data["cumAhrr"][index] = 0.0
+            self.data.loc[index, "ahrr"] = 0.0
             
             #Specie
             for specie in self._cylinder.mixture.mix:
-                self.data[specie.specie.name + "_x"][index] = specie.X
-                self.data[specie.specie.name + "_y"][index] = specie.Y
-            
-            #Patch areas
-            for patch in areas.columns:
-                name = patch + "Area"
-                if not name in self.data.columns:
-                    self.data[name][index] = areas[patch]
-            
-            #Total area
-            self.data["A"][index] = self.geometry.A(CA)
-    
+                self.data.loc[index, specie.specie.name + "_x"] = specie.X
+                self.data.loc[index, specie.specie.name + "_y"] = specie.Y
     
     ####################################
     def _update(self) -> None:
@@ -925,34 +912,84 @@ class EngineModel(BaseClass):
         index = self.data.data.index[self.data['CA'] == CA].tolist()[0]
         
         #Main parameters
-        self.data["dpdCA"][index] = dpdCA
-        self.data["V"][index] = V
-        self.data["T"][index] = T
-        self.data["gamma"][index] = gamma
-        self.data["ahrr"][index] = ahrr
-        
-        #Integrate
-        self.data["cumAhrr"][index] = self.data["cumAhrr"][index-1] + 0.5*(self.data["ahrr"][index-1] + ahrr)*self.time.deltaT
+        self.data.loc[index, "dpdCA"] = dpdCA
+        self.data.loc[index, "V"] = V
+        self.data.loc[index, "T"] = T
+        self.data.loc[index, "gamma"] = gamma
+        self.data.loc[index, "AHRR"] = ahrr
         
         #Mixture composition
         for specie in self._cylinder.mixture.mix:
-            if not specie.specie.name + "_x" in self.data.columns:
+            if not (specie.specie.name + "_x") in self.data.columns:
                 self.data[specie.specie.name + "_x"] = 0.0
                 self.data[specie.specie.name + "_y"] = 0.0
             else:
-                self.data[specie.specie.name + "_x"][index] = specie.X
-                self.data[specie.specie.name + "_y"][index] = specie.Y
-                
-        #Patch areas
-        areas = self.geometry.areas(CA)
-        for patch in areas.columns:
+                self.data.loc[index, specie.specie.name + "_x"] = specie.X
+                self.data.loc[index, specie.specie.name + "_y"] = specie.Y
+    
+    ####################################
+    def _process__post__(self) -> None:
+        """
+        Computing wall heat fluxes and rohr
+        
+        NOTE:
+            When overwriting, first call this method:
+            def _process__post__(self) -> None:
+                ...
+                super()._process__post__()
+        """
+        #WHF and ROHR
+        self._computeWallHeatFlux()
+        self.data["ROHR"] = self.data["AHRR"] + self.data["dQwalls"]
+        
+        #Cumulatives
+        self.data["cumHR"] = self.cumulativeIntegrale("ROHR")
+        self.data["cumAHR"] = self.cumulativeIntegrale("AHRR")
+    
+    ####################################
+    def _computeWallHeatFlux(self) -> None:
+        """
+        Compute wall heat fluxes for each patch and global value in each region. Might be overloaded in child.
+        """
+        areas = self.geometry.areas(self.data["CA"])
+        
+        #Compute wall heat transfer coefficient:
+        h = self.HeatTransferModel.h(engine=self, CA=self.data["CA"])
+        self.data["heatTransferCoeff"] = h
+        
+        #Total whf
+        self.data["dQwalls"] = 0.0
+        self.data["Qwalls"] = 0.0
+        self.data["wallsArea"] = 0.0
+        
+        for patch in [c for c in areas.columns if not (c == "CA")]:
+            #Search temperature as "T<patchName>":
+            if f"T{patch}" in self.data.columns:
+                Twall = self.data[f"T{patch}"]
+            #Fallback to default "Twalls": 
+            elif "Twalls" in self.data.columns:
+                Twall = self.data["Twalls"]
+            else:
+                raise ValueError("Cannot compute wall heat flux. Either load patch temperatures in the form t<patchName> or default temperature Twalls to compute wall heat fluxes.")
+
+            #Compute patch area:
+            A = areas[patch]
+            self.data["wallsArea"] += A
+            
             name = patch + "Area"
             if not name in self.data.columns:
-                self.data[name][index] = areas[patch]
-        
-        #Total area
-        self.data["A"][index] = self.geometry.A(CA)
-    
+                self.data[name] = A
+            
+            #Compute wall heat flux at patch [converted to J/CA]:
+            self.data[f"dQ{patch}"] = h * A * (self.data["T"] - Twall) / self.time.dCAdt
+            
+            #Compute cumulative
+            self.data[f"Q{patch}"] = self.cumulativeIntegrale(f"dQ{patch}")
+            
+            #Add to total
+            self.data["dQwalls"] += self.data[f"dQ{patch}"]
+            self.data["Qwalls"] += self.data[f"Q{patch}"]
+            
     ####################################
     def refresh(self, reset:bool=False) -> EngineModel:
         """
@@ -984,9 +1021,10 @@ class EngineModel(BaseClass):
         self.process()
         
     ####################################
-    def integrateVariable(self, y:str, *, x:str="CA", start:float=None, end:float=None) -> EngineModel:
+    def integrateVariable(self, y:str, *, x:str="CA", start:float=None, end:float=None) -> float:
         """
-        Integrate a variable over another. If inital or final CA are not given, are set to first/last in CA range.
+        Integrate a variable over another. 
+        If inital or final CA are not given, are set to first/last in CA range.
 
         Args:
             y (str): name of y variable.
@@ -995,7 +1033,7 @@ class EngineModel(BaseClass):
             end (float, optional): Final CA. Defaults to None.
         
         Returns:
-            EngineModel: self
+            float: Integrated value 
         """
         if not x in self.data.columns:
             raise ValueError(f"Variable '{x}' not present among data.")
@@ -1004,8 +1042,8 @@ class EngineModel(BaseClass):
         
         from scipy import integrate
         
-        start = self.data["CA"][0] if start is None else start
-        end = self.data["CA"][len(self.data)-1] if end is None else end
+        start = self.data.loc[0, "CA"] if start is None else start
+        end = self.data.loc[len(self.data)-1, "CA"] if end is None else end
         
         self.checkType(start,float,"start")
         self.checkType(end,float,"end")
@@ -1013,24 +1051,68 @@ class EngineModel(BaseClass):
         index = self.data.data.index[np.array(self.data.data["CA"] >= start) & np.array(self.data.data["CA"] <= end)]
         data = self.data.data.iloc[index]
         
-        return integrate.trapz(data[y], x=data[x])
+        #Filter out "nan"
+        Yarray = data[y].copy()
+        Yarray[np.isnan(Yarray)] = 0.0
+        
+        return integrate.trapz(Yarray, x=data[x])
     
     ####################################
-    def IMEP(self, start:float=None, end:float=None) -> EngineModel:
+    def cumulativeIntegrale(self, y:str, *, x:str="CA", start:float=None) -> np.ndarray:
         """
-        Compute indicated mean effective pressure. If inital or final CA are not given, are set to first/last in CA range.
+        Compute the cumulative integral of a variable over another. 
+        If start is not given, it is set to self.time.startOfCombustion.
+
+        Args:
+            y (str): name of y variable.
+            x (str, optional): Name of x variable. Defaults to "CA".
+            start (float, optional): Initial CA. Defaults to None.
+        
+        Returns:
+            pd.DataFrame: Cumulative integral function
+        """
+        if not x in self.data.columns:
+            raise ValueError(f"Variable '{x}' not present among data.")
+        if not y in self.data.columns:
+            raise ValueError(f"Variable '{y}' not present among data.")
+        
+        from scipy import integrate
+        
+        #Check for start
+        start = self.time.startOfCombustion() if start is None else start
+        #Check for motored
+        start = self.data["CA"][0] if start is None else start
+        #Check type
+        self.checkType(start,float,"start")
+        
+        #Filter out "nan"
+        Yarray = self.data[y].copy()
+        Yarray[np.isnan(Yarray)] = 0.0
+        
+        #Compute cumulative
+        out = integrate.cumulative_trapezoid(Yarray, x=self.data[x], initial=0.0)
+        
+        #Set zero at start
+        valAtStart = np.interp(start, self.data["CA"], out)
+        out -= valAtStart
+        
+        return out
+    
+    ####################################
+    def IMEP(self, start:float=None, end:float=None) -> float:
+        """
+        Compute indicated mean effective pressure. 
+        If inital or final CA are not given, are set to first/last in CA range.
 
         Args:
             start (float, optional): Initial CA. Defaults to None.
             end (float, optional): Final CA. Defaults to None.
         
         Returns:
-            EngineModel: self
+            float: IMEP [Pa]
         """
-        from scipy import integrate
-        
-        start = self.data["CA"][0] if start is None else start
-        end = self.data["CA"][len(self.data)-1] if end is None else end
+        start = self.data.loc[0, "CA"] if start is None else start
+        end = self.data.loc[len(self.data)-1, "CA"] if end is None else end
         
         self.checkType(start,float,"start")
         self.checkType(end,float,"end")
@@ -1039,7 +1121,34 @@ class EngineModel(BaseClass):
         data = self.data.data.iloc[index]
         data["V"] = self.geometry.V(data["CA"])
         
-        return integrate.trapz(data["p"], x=data["V"])/(max(data["V"]) - min(data["V"]))
+        return self.work(start=start, end=end)/(max(data["V"]) - min(data["V"]))
+    
+    ####################################
+    def work(self, start:float=None, end:float=None) -> float:
+        """
+        Compute indicated work (positive outgoing). 
+        If inital or final CA are not given, are set to first/last in CA range.
+
+        Args:
+            start (float, optional): Initial CA. Defaults to None.
+            end (float, optional): Final CA. Defaults to None.
+        
+        Returns:
+            float: Work [J]
+        """
+        from scipy import integrate
+        
+        start = self.data.loc[0, "CA"] if start is None else start
+        end = self.data.loc[len(self.data)-1, "CA"] if end is None else end
+        
+        self.checkType(start,float,"start")
+        self.checkType(end,float,"end")
+        
+        index = self.data.data.index[np.array(self.data.data["CA"] >= start) & np.array(self.data.data["CA"] <= end)]
+        data = self.data.data.iloc[index]
+        data["V"] = self.geometry.V(data["CA"])
+        
+        return integrate.trapz(data["p"], x=data["V"])
     
 #########################################################################
 #Create selection table

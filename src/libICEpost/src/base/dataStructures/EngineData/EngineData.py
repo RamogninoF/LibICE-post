@@ -45,6 +45,13 @@ class EngineData(Utilities):
     def columns(self, *args, **kwargs) -> None:
         self.data.columns(*args, **kwargs)
         
+    @property
+    def loc(self):
+        return self.data.loc
+    
+    @loc.setter
+    def loc(self, *args):
+        return self.data.loc[*args]
     
     #########################################################################
     #Constructor:
@@ -275,8 +282,8 @@ class EngineData(Utilities):
                     newData = pd.DataFrame(columns=self.data.columns, index=range(len(newIndex)))
                     self.data = pd.concat([self.data, newData], ignore_index=True)
                 
-                self.data["CA"][index] = CA
-                self.data[varName][index] = var
+                self.data.loc[index, "CA"] = CA
+                self.data.loc[index, varName] = var
                                 
             #If first time this entry is set, create the interpolator:
             if firstTime:

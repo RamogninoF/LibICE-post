@@ -11,7 +11,12 @@ Last update:        12/06/2023
 #                               IMPORT                              #
 #####################################################################
 
+from __future__ import annotations
+
 from typing import Self
+from collections.abc import Iterable
+
+from libICEpost.src.engineModel.EngineModel import EngineModel
 
 from libICEpost.src.base.BaseClass import BaseClass, abstractmethod
 
@@ -46,12 +51,16 @@ class HeatTransferModel(BaseClass):
     #########################################################################
     #Compute heat transfer coefficient:
     @abstractmethod
-    def h(self, *args, **kwargs) -> float:
+    def h(self, *, engine:EngineModel.EngineModel, CA:float|Iterable|None=None, **kwargs) -> float:
         """
         Compute wall heat transfer coefficient at walls. To be overwritten.
 
+        Args:
+            engine (EngineModel): The engine model from which taking data.
+            CA (float | Iterable | None, optional): Time for which computing heat transfer. If None, uses engine.time.time. Defaults to None.
+
         Returns:
-            float: convective wall heat transfer coefficient
+            float: convective wall heat transfer coefficient [W/(m^2 K)]
         """
         pass
     

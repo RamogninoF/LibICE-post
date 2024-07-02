@@ -225,7 +225,7 @@ class EngineTime(BaseClass):
             return False
     
     ###################################
-    def startOfCombustion(self):
+    def startOfCombustion(self) -> float|None:
         """
         Instant of start of combustion (overwritten in derived class depending on combustion mode). By default, returns None (motoring condition).
         """
