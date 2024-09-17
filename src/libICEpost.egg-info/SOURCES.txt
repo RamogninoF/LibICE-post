@@ -1,5 +1,5 @@
 LICENSE
-README
+README.md
 pyproject.toml
 setup.py
 src/libICEpost/__init__.py
@@ -52,6 +52,7 @@ src/libICEpost/src/base/dataStructures/Tabulation/OFTabulation.py
 src/libICEpost/src/base/dataStructures/Tabulation/Tabulation.py
 src/libICEpost/src/base/dataStructures/Tabulation/__init__.py
 src/libICEpost/src/engineModel/__init__.py
+src/libICEpost/src/engineModel/functions.py
 src/libICEpost/src/engineModel/EngineGeometry/ConRod.py
 src/libICEpost/src/engineModel/EngineGeometry/EngineGeometry.py
 src/libICEpost/src/engineModel/EngineGeometry/__init__.py
@@ -61,6 +62,9 @@ src/libICEpost/src/engineModel/EngineModel/__init__.py
 src/libICEpost/src/engineModel/EngineTime/EngineTime.py
 src/libICEpost/src/engineModel/EngineTime/SparkIgnitionTime.py
 src/libICEpost/src/engineModel/EngineTime/__init__.py
+src/libICEpost/src/engineModel/HeatTransferModel/HeatTransferModel.py
+src/libICEpost/src/engineModel/HeatTransferModel/Woschni.py
+src/libICEpost/src/engineModel/HeatTransferModel/__init__.py
 src/libICEpost/src/engineModel/heatTransferModel/Woschni.py
 src/libICEpost/src/engineModel/heatTransferModel/__init__.py
 src/libICEpost/src/engineModel/heatTransferModel/heatTransferModel.py
