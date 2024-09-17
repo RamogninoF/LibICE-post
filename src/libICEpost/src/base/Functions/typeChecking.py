@@ -17,7 +17,7 @@ import copy as cp
 import inspect
 from .runtimeWarning import fatalErrorInArgumentChecking
 
-from ... import GLOBALS
+from libICEpost.src import GLOBALS
 GLOBALS.DEBUG = True
 
 #############################################################################

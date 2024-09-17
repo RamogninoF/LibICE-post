@@ -19,13 +19,13 @@ import inspect
 import colorama
 colorama.init(autoreset=False)
 
-from ... import GLOBALS
+from libICEpost.src import GLOBALS
 
 if not "ERROR_RECURSION" in GLOBALS.__dict__:
     GLOBALS.ERROR_RECURSION = 0
 
 if not "CUSTOM_ERROR_MESSAGE" in GLOBALS.__dict__:
-    GLOBALS.CUSTOM_ERROR_MESSAGE = True
+    GLOBALS.CUSTOM_ERROR_MESSAGE = False
 
 if not "VERBOSITY_LEVEL" in GLOBALS.__dict__:
     GLOBALS.VERBOSITY_LEVEL=1

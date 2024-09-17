@@ -17,7 +17,10 @@ Content of the package
         Functions for management of dictionaries (DEPRECATED)
         
     runtimeWarning:
-        Functions for handling error/warning messages, printing stack, fatalError, etc. Defines one global variable:
-            GLOBALS.CUSTOM_ERROR_MESSAGE = True
-                If set to True, when a fatal error is handled within the code, the custom error message of the package is shown instead of the default python print-stack
+        Functions for handling error/warning messages, 
+        printing stack, fatalError, etc. Defines one global variable:
+            GLOBALS.CUSTOM_ERROR_MESSAGE = False
+                If set to True, when a fatal error is handled 
+                within the code, the custom error message of the 
+                package is shown instead of the default python print-stack
 """

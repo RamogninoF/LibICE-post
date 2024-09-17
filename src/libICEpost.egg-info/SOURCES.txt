@@ -94,12 +94,13 @@ src/libICEpost/src/thermophysicalModels/thermoModels/ThermoModel.py
 src/libICEpost/src/thermophysicalModels/thermoModels/ThermoState.py
 src/libICEpost/src/thermophysicalModels/thermoModels/__init__.py
 src/libICEpost/src/thermophysicalModels/thermoModels/CombustionModel/CombustionModel.py
+src/libICEpost/src/thermophysicalModels/thermoModels/CombustionModel/NoCombustion.py
 src/libICEpost/src/thermophysicalModels/thermoModels/CombustionModel/PremixedCombustion.py
 src/libICEpost/src/thermophysicalModels/thermoModels/CombustionModel/__init__.py
-src/libICEpost/src/thermophysicalModels/thermoModels/CombustionModel/EgrModel/EgrModel.py
-src/libICEpost/src/thermophysicalModels/thermoModels/CombustionModel/EgrModel/FixedCompositionExternalEGR.py
-src/libICEpost/src/thermophysicalModels/thermoModels/CombustionModel/EgrModel/StoichiometricMixtureEGR.py
-src/libICEpost/src/thermophysicalModels/thermoModels/CombustionModel/EgrModel/__init__.py
+src/libICEpost/src/thermophysicalModels/thermoModels/EgrModel/EgrModel.py
+src/libICEpost/src/thermophysicalModels/thermoModels/EgrModel/FixedCompositionExternalEGR.py
+src/libICEpost/src/thermophysicalModels/thermoModels/EgrModel/StoichiometricMixtureEGR.py
+src/libICEpost/src/thermophysicalModels/thermoModels/EgrModel/__init__.py
 src/libICEpost/src/thermophysicalModels/thermoModels/StateInitializer/StateInitializer.py
 src/libICEpost/src/thermophysicalModels/thermoModels/StateInitializer/__init__.py
 src/libICEpost/src/thermophysicalModels/thermoModels/StateInitializer/mpV.py
