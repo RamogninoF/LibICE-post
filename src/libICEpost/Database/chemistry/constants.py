@@ -21,7 +21,9 @@ database.chemistry.addFolder("constants")
 #                                   DATA                                    #
 #############################################################################
 
-database.chemistry.constants.Rgas = 8.314462*1e3
+#Universal gas constant
+database.chemistry.constants.Rgas = 8.314462*1e3 # [J/(kg K)]
 
+#Standard conditions (temperature and pressure)
 database.chemistry.constants.Tstd = 298.15      # [K]
 database.chemistry.constants.pstd = 101325      # [Pa]

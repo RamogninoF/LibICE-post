@@ -83,9 +83,9 @@ class EngineModel(BaseClass):
     
     Submodels:dict[str:type] = \
         {
-            "EgrModel":             EgrModel(),
-            "CombustionModel":      NoCombustion(reactants=Mixture.empty()),
-            "HeatTransferModel":    Woschni(),
+            "EgrModel":             EgrModel(), # 0% EGR
+            "CombustionModel":      NoCombustion(reactants=Mixture.empty()), #Inhert (motoring)
+            "HeatTransferModel":    Woschni(),  # Woschni model with default coeffs.
         }
     """The available sub-models and their default initializers"""
     
@@ -241,10 +241,11 @@ class EngineModel(BaseClass):
             subModels = {}
             smDict = dictionary.lookupOrDefault("submodels", Dictionary())
             for sm in cls.Submodels:
-                if sm in smDict:
-                    print(f"Construct {sm} sub-model")
-                    smTypeName = dictionary.lookup(sm)
-                    subModels[sm] = cls.Submodels[sm].selector(smTypeName, smDict.lookup(sm + "Dict"))
+                if sm + "Type" in smDict:
+                    print(f"Constructing {sm} sub-model")
+                    smTypeName = smDict.lookup(sm + "Type")
+                    print(f"\tType: {smTypeName}")
+                    subModels[sm] = cls.Types[sm].selector(smTypeName, smDict.lookup(smTypeName + "Dict"))
             
             out = cls(time=ET, geometry=EG, thermophysicalProperties=thermophysicalProperties, combustionProperties=combustionProperties, dataDict=dataDict, **subModels)
             return out
@@ -821,7 +822,7 @@ class EngineModel(BaseClass):
                     self.info["time"] = t
                     self._update()
 
-            #Create fields
+            #Final updates (heat transfer, cumulatives, etc...)
             self._process__post__()
             
             return self
@@ -943,8 +944,8 @@ class EngineModel(BaseClass):
         self.data["ROHR"] = self.data["AHRR"] + self.data["dQwalls"]
         
         #Cumulatives
-        self.data["cumHR"] = self.cumulativeIntegrale("ROHR")
-        self.data["cumAHR"] = self.cumulativeIntegrale("AHRR")
+        self.data["cumHR"] = self.cumulativeIntegral("ROHR")
+        self.data["cumAHR"] = self.cumulativeIntegral("AHRR")
     
     ####################################
     def _computeWallHeatFlux(self) -> None:
@@ -984,7 +985,7 @@ class EngineModel(BaseClass):
             self.data[f"dQ{patch}"] = h * A * (self.data["T"] - Twall) / self.time.dCAdt
             
             #Compute cumulative
-            self.data[f"Q{patch}"] = self.cumulativeIntegrale(f"dQ{patch}")
+            self.data[f"Q{patch}"] = self.cumulativeIntegral(f"dQ{patch}")
             
             #Add to total
             self.data["dQwalls"] += self.data[f"dQ{patch}"]
@@ -1058,7 +1059,7 @@ class EngineModel(BaseClass):
         return integrate.trapz(Yarray, x=data[x])
     
     ####################################
-    def cumulativeIntegrale(self, y:str, *, x:str="CA", start:float=None) -> np.ndarray:
+    def cumulativeIntegral(self, y:str, *, x:str="CA", start:float=None) -> np.ndarray:
         """
         Compute the cumulative integral of a variable over another. 
         If start is not given, it is set to self.time.startOfCombustion.

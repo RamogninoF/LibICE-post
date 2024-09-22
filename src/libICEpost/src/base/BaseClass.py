@@ -32,12 +32,6 @@ def _add_TypeName(cls:type):
     """
     cls.TypeName = cls.__name__
 
-def _getBaseClass(cls:type):
-    """
-    Get the base class of a class.
-    """
-    return inspect.getmro(cls)[1]
-
 #############################################################################
 #                               MAIN CLASSES                                #
 #############################################################################
@@ -61,6 +55,7 @@ class SelectionTable(Utilities):
     def db(self) -> dict[str:type]:
         """
         Database of available sub-classes in the selection table.
+        Classes are stored through [str->type] map.
         """
         return self.__db
     

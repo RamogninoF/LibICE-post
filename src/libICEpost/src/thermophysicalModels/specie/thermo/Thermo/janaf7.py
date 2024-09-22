@@ -13,17 +13,17 @@ Last update:        12/06/2023
 
 from .Thermo import Thermo
 
-from libICEpost.Database import database
 from numpy import math
 
-from libICEpost.Database.chemistry import constants
+from libICEpost.Database.chemistry.constants import database
 Tstd = database.chemistry.constants.Tstd
+
 #############################################################################
 #                               MAIN CLASSES                                #
 #############################################################################
 class janaf7(Thermo):
     """
-    Class for computation of thermophysical properties with janaf 7 coefficient polynomials.
+    Class for computation of thermophysical properties with NASA (janaf) 7-coefficient polynomials.
     
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     

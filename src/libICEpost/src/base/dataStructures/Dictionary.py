@@ -21,8 +21,6 @@ T = TypeVar("T")
 
 import os.path as path
 
-path.isabs
-
 #############################################################################
 #                               MAIN CLASSES                                #
 #############################################################################
@@ -71,6 +69,8 @@ class Dictionary(OrderedDict, Utilities):
         fileName:   str
             Path of the file
         Read the variables stored in a python file (Runs the code in the file and retrieves the local variables)
+        
+        NOTE: local variable 'this' for this file. You can access the local folder as 'this.path' within the dictionary.
         """
         try:
             cls.checkType(fileName, str, "fileName")

@@ -25,11 +25,11 @@ GLOBALS.DEBUG = True
 #############################################################################
 
 #Check type of an instance:
-def checkType(entry, Type, entryName=None, **argv):
+def checkType(entry:str, Type:type|tuple[type], entryName:str|None=None, *, intAsFloat:bool=True, checkForNone:bool=False, **kwargs):
     """
     entry:          Instance
         Instance to be checked
-    Type:           type
+    Type:           type|tuple[type]
         Type required
     entryName:      str  (None)
         Name of the entry to be checked (used as info when raising TypeError)
@@ -46,40 +46,37 @@ def checkType(entry, Type, entryName=None, **argv):
     if not(GLOBALS.DEBUG):
         return
     
-    inputs = \
-        {
-            "intAsFloat":True,
-            "checkForNone":False
-        }
-    
-    inputs.update(argv)
-    
     #Argument checking:
     try:
         if not(entryName is None):
             if not(isinstance(entryName, str)):
                 raise TypeError("Wrong type for entry '{}': '{}' expected but '{}' was found.".format("entryName", str.__name__, entryName.__class__.__name__))
         
-        if not(isinstance(inputs["intAsFloat"], bool)):
+        if not(isinstance(intAsFloat, bool)):
             raise TypeError("Wrong type for entry '{}': '{}' expected but '{}' was found.".format("intAsFloat", bool.__name__, inputs["intAsFloat"].__class__.__name__))
         
-        if not(isinstance(inputs["checkForNone"], bool)):
+        if not(isinstance(checkForNone, bool)):
             raise TypeError("Wrong type for entry '{}': '{}' expected but '{}' was found.".format("checkForNone", bool.__name__, inputs["checkForNone"].__class__.__name__))
         
-        if not(isinstance(Type, type)):
-            raise TypeError("Wrong type for entry '{}': '{}' expected but '{}' was found.".format("Type", type.__name__, Type.__class__.__name__))
+        #Check Type for type|tuple[type]
+        if not(isinstance(Type, (type, tuple))):
+            raise TypeError("Wrong type for entry 'Type': 'type' or 'tuple[type]' expected but '{}' was found.".format(Type.__class__.__name__))
+        #If Type is tuple, check all elements for type
+        if isinstance(Type, tuple):
+            if any([not(isinstance(t, type)) for t in Type]):
+                raise TypeError(f"Wrong type for entry {[isinstance(t, type) for t in Type].count(False)} items in 'Type': 'type|tuple[type]' expected for entry 'Type'.")
     except BaseException as err:
         fatalErrorInArgumentChecking(None, checkType, err)
         
-    if (Type == None.__class__) and not(inputs["checkForNone"]):
+    if (Type == None.__class__) and not(checkForNone):
         return
     
-    if (isinstance(entry, int) and (Type == float) and inputs["intAsFloat"]):
+    if (isinstance(entry, int) and (Type == float) and intAsFloat):
         return
     
     if not(isinstance(entry, Type)):
         if entryName is None:
-            raise TypeError("'{}' expected but '{}' was found.".format(Type.__name__, entry.__class__.__name__))
+            raise TypeError("'{}' expected but '{}' was found.".format([t.__name__ for t in Type] if isinstance(Type, tuple) else Type.__name__, entry.__class__.__name__))
         else:
             raise TypeError("Wrong type for entry '{}': '{}' expected but '{}' was found.".format(entryName, Type.__name__, entry.__class__.__name__))
 
