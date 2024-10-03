@@ -254,7 +254,7 @@ class ConRodGeometry(EngineGeometry):
         Returns the time (in CA) derivative of instantaneous in-cylinder volume at CA
         Args:
             CA (float | Iterable): Time in CA
-
+        
         Returns:
             float|np.ndarray[float]: dV/dCA [m^3/CA]
         """

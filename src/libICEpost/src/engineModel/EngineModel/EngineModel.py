@@ -842,7 +842,7 @@ class EngineModel(BaseClass):
                 ...
         """
         #Add fields to data:
-        fields = ["dpdCA", "V", "T", "gamma", "ahrr", "rohr", "A"]
+        fields = ["dpdCA", "V", "T", "gamma", "AHRR", "ROHR", "A"]
         for f in fields:
             if not f in self.data.columns:
                 self.data[f] = float("nan")
