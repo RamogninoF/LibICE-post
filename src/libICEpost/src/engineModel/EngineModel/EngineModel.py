@@ -739,7 +739,7 @@ class EngineModel(BaseClass):
         return outputDict
     
     ####################################
-    def preProcess(self, dataPath:str=None, *, data:dict|Dictionary, preProcessing:dict|Dictionary=None, initialConditions:dict|Dictionary) -> EngineModel:
+    def preProcess(self, dataPath:str=None, *, data:dict|Dictionary, preProcessing:dict|Dictionary=None, initialConditions:dict|Dictionary, **junk) -> EngineModel:
         """
         Pre-processing:
             1) Loading data (from files or arrays)
@@ -762,6 +762,7 @@ class EngineModel(BaseClass):
         Returns:
             EngineModel: self
         """
+        #NOTE: **junk used to have other miscellaneous during contruction from dictionary.
         
         print("Pre-processing")
         
