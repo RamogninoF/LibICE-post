@@ -1,0 +1,86 @@
+#####################################################################
+#                                 DOC                               #
+#####################################################################
+
+"""
+@author: <N. Surname>       <e-mail>
+Last update:        DD/MM/YYYY
+"""
+
+#####################################################################
+#                               IMPORT                              #
+#####################################################################
+
+#load the base class
+from .Filter import Filter
+from .LowPass import LowPass
+from .Resample import Resample
+
+#############################################################################
+#                               MAIN CLASSES                                #
+#############################################################################
+class LowPassAndResample(LowPass, Resample):
+    """
+    Apply low-pass filter and resampling
+    
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
+    Attributes:
+        cutoff (float): Cutoff frequency
+        order (int): Order of the filter
+        delta (float): Resampling time-step
+    """
+    
+    #########################################################################
+    #Class methods and static methods:
+    @classmethod
+    def fromDictionary(cls, dictionary):
+        """
+        Create from dictionary.
+
+        {
+            delta (float): Resampling time-step
+            cutoff (float): cutoff frequency
+            order (int): order of the filter
+        }
+        """
+        try:
+            out = cls\
+                (
+                    **dictionary
+                )
+            return out
+        
+        except BaseException as err:
+            cls.fatalErrorInClass(cls.fromDictionary, "Failed construction from dictionary", err)
+    
+    #########################################################################
+    def __init__(self, *, delta:float, cutoff:float, order=5):
+        """
+        delta (float): Resampling time-step
+        cutoff (float): The cur-off frequency
+        order (int): The order of the filter (default:5)
+        """
+        try:
+            Resample.__init__(self, delta)
+            LowPass.__init__(self, cutoff, order=order)
+            
+        except BaseException as err:
+            self.fatalErrorInClass(self.__init__, "Failed construction of filter", err)
+    
+    #########################################################################
+    #Dunder methods:
+    def __call__(self, xp:"list[float]", yp:"list[float]")-> "tuple[list[float],list[float]]":
+        """
+        Filter an array of x,y data with low-pass filter and resampling
+        """
+        
+        return Resample.__call__(self, *LowPass.__call__(self, xp, yp))
+    
+    ###################################
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(delta:{self.delta}, cutoff:{self.cutoff}, order:{self.order})"
+    
+#########################################################################
+#Add to selection table of Base
+Filter.addToRuntimeSelectionTable(LowPassAndResample)

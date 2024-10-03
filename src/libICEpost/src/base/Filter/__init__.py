@@ -20,4 +20,5 @@ Content of the package:
 from .Filter import Filter
 from .Resample import Resample
 from .LowPass import LowPass
+from .LowPassAndResample import LowPassAndResample
 from .UserDefinedFilter import UserDefinedFilter
