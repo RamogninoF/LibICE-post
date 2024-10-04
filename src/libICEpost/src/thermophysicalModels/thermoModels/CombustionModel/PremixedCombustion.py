@@ -142,6 +142,7 @@ class PremixedCombustion(CombustionModel):
     def __init__(self, /, *, 
                  air:Mixture,
                  fuel:Mixture,
+                 xb:float=0.0,
                  **kwargs):
         """
         Construct combustion model from fuel and reactants. 
@@ -169,8 +170,8 @@ class PremixedCombustion(CombustionModel):
             self._fuel = fuel.copy()
             
             #Initialize unburnt mixture
-            self._xb = -1
-            self.update(xb=0.0)
+            self._xb = -1   #Enforce first update
+            self.update(xb=xb)
 
         except BaseException as err:
             self.fatalErrorInClass(self.__init__, f"Failed construction of {self.__class__.__name__}", err)

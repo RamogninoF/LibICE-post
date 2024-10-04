@@ -174,7 +174,7 @@ class SparkIgnitionEngine(EngineModel):
                 air = self._air
                 phi:float = zoneDict.lookup("phi")
                 alphaSt = computeAlphaSt(air=air, fuel=fuel)
-                alpha = phi*alphaSt
+                alpha = alphaSt/phi
             elif ("alpha" in zoneDict) and not ("phi" in zoneDict):
                 alpha = zoneDict.lookup("alpha")
             else:
