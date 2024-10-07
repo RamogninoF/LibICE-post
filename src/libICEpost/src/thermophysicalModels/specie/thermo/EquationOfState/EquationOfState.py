@@ -56,7 +56,7 @@ class EquationOfState(BaseClass):
 
      #########################################################################
     @abstractmethod
-    def cp(self, p, T):
+    def cp(self, p:float, T:float) -> float:
         """
         Constant pressure heat capacity contribution [J/kg/K]
         """
@@ -68,7 +68,7 @@ class EquationOfState(BaseClass):
     
     #########################################################################
     @abstractmethod
-    def h(self, p, T):
+    def h(self, p:float, T:float) -> float:
         """
         Enthalpy contribution [J/kg]
         """
@@ -77,10 +77,22 @@ class EquationOfState(BaseClass):
             self.checkType(T, float, "T")
         except BaseException as err:
             self.fatalErrorInArgumentChecking(self.h, err)
+            
+    #########################################################################
+    @abstractmethod
+    def u(self, p:float, T:float) -> float:
+        """
+        Internal energy contribution [J/kg]
+        """
+        try:
+            self.checkType(p, float, "p")
+            self.checkType(T, float, "T")
+        except BaseException as err:
+            self.fatalErrorInArgumentChecking(self.u, err)
     
     #########################################################################
     @abstractmethod
-    def rho(self, p, T):
+    def rho(self, p:float , T:float) -> float:
         """
         Density [kg/m^3]
         """
@@ -92,7 +104,7 @@ class EquationOfState(BaseClass):
     
     #########################################################################
     @abstractmethod
-    def T(self, p, rho):
+    def T(self, p:float, rho:float) -> float:
         """
         Temperature [K]
         """
@@ -104,7 +116,7 @@ class EquationOfState(BaseClass):
             
     #########################################################################
     @abstractmethod
-    def p(self, T, rho):
+    def p(self, T:float, rho:float) -> float:
         """
         pressure [Pa]
         """
@@ -116,7 +128,7 @@ class EquationOfState(BaseClass):
     
     #########################################################################
     @abstractmethod
-    def Z(self, p, T):
+    def Z(self, p:float, T:float) -> float:
         """
         Compression factor [-]
         """
@@ -128,7 +140,7 @@ class EquationOfState(BaseClass):
     
     #########################################################################
     @abstractmethod
-    def cpMcv(self, p, T):
+    def cpMcv(self, p:float, T:float) -> float:
         """
         Difference cp - cv.
         """

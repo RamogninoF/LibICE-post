@@ -143,7 +143,7 @@ class constantCp(Thermo):
     #Member functions:
     
     ################################
-    def cp(self, p, T):
+    def cp(self, p:float, T:float) -> float:
         """
         Constant pressure heat capacity [J/kg/K]
         """
@@ -152,22 +152,23 @@ class constantCp(Thermo):
         return self._cp
     
     ################################
-    def ha(self, p, T):
+    def ha(self, p:float, T:float) -> float:
         """
         Absolute enthalpy [J/kg]
-        If the temperature is not within Tlow and Thigh, a
-        warning is displayed.
-        
                 
         ha(T) = cp * (T - Tstd) + hf
         """
-        
-        #Argument checking
-        super(self.__class__,self).ha(p,T)
+        #Check argument types
+        try:
+            self.checkType(p, float, "p")
+            self.checkType(T, float, "T")
+        except BaseException as err:
+            self.fatalErrorInArgumentChecking(self.ha, err)
+            
         return self._cp * (T - Tstd) + self._hf
     
     ##################################
-    def hf(self):
+    def hf(self) -> float:
         """
         Enthalpy of formation [J/kg]
         
@@ -176,7 +177,7 @@ class constantCp(Thermo):
         return self.ha(0.,Tstd)
     
     ################################
-    def dcpdT(self, p, T):
+    def dcpdT(self, p:float, T:float) -> float:
         """
         dcp/dT [J/kg/K^2]
         """

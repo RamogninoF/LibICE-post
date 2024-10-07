@@ -22,6 +22,10 @@ class Thermo(BaseClass):
     """
     Base class for computation of thermodynamic properties of chemical specie (cp, cv, ...)
     
+    NOTE:
+        -> For interal energy-based models, need to implement us (sensible)
+        -> For entalpy-based models, need to implement ha (absolute)
+    
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
     Attributes:
@@ -62,7 +66,7 @@ class Thermo(BaseClass):
 
      #########################################################################
     @abstractmethod
-    def cp(self, p, T):
+    def cp(self, p:float, T:float) -> float:
         """
         Constant pressure heat capacity [J/kg/K]
         """
@@ -71,29 +75,60 @@ class Thermo(BaseClass):
             self.checkType(T, float, "T")
         except BaseException as err:
             self.fatalErrorInArgumentChecking(self.cp, err)
-            
+    
     ################################
     @abstractmethod
-    def hf(self):
+    def hf(self) -> float:
         """
         Enthalpy of formation [J/kg]
         """
         pass
     
     ################################
-    @abstractmethod
-    def ha(self, p, T):
+    def ha(self, p:float, T:float) -> float:
         """
         Absolute enthalpy [J/kg]
         """
+        #Check argument types
         try:
             self.checkType(p, float, "p")
             self.checkType(T, float, "T")
         except BaseException as err:
             self.fatalErrorInArgumentChecking(self.ha, err)
+            
+        raise NotImplementedError(f"Absolute enthalpy not implemented for Thermo class {self.__class__.__name__}")
     
     ################################
-    def hs(self, p, T):
+    def ua(self, p:float, T:float) -> float:
+        """
+        Absolute internal energy [J/kg]
+        
+        us = ua + hf
+        """
+        try:
+            self.checkType(p, float, "p")
+            self.checkType(T, float, "T")
+        except BaseException as err:
+            self.fatalErrorInArgumentChecking(self.ua, err)
+        
+        return self.us(p,T) + self.hf()
+    
+    ################################
+    def us(self, p:float, T:float) -> float:
+        """
+        Sensible internal energy [J/kg]
+        """
+        #Check argument types
+        try:
+            self.checkType(p, float, "p")
+            self.checkType(T, float, "T")
+        except BaseException as err:
+            self.fatalErrorInArgumentChecking(self.us, err)
+            
+        raise NotImplementedError(f"Sensible internal energy not implemented for Thermo class {self.__class__.__name__}")
+    
+    ################################
+    def hs(self, p:float, T:float) -> float:
         """
         Sensible enthalpy [J/kg]
         
@@ -109,7 +144,7 @@ class Thermo(BaseClass):
     
     ################################
     @abstractmethod
-    def dcpdT(self, p, T):
+    def dcpdT(self, p:float, T:float) -> float:
         """
         dcp/dT [J/kg/K^2]
         """

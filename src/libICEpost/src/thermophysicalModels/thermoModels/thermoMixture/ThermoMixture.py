@@ -155,36 +155,72 @@ class ThermoMixture(Utilities):
         return self
     
     ################################
-    def dcpdT(self, p, T):
+    def dcpdT(self, p:float, T:float) -> float:
         """
         dcp/dT [J/kg/K^2]
         """
         return self.Thermo.dcpdT(p, T) + self.EoS.dcpdT(p, T)
         
-    
     ################################
-    def ha(self, p, T):
+    def ha(self, p:float, T:float) -> float:
         """
         Absolute enthalpy [J/kg]
         """
-        return self.Thermo.ha(p, T) + self.EoS.h(p, T)
+        try:
+            return self.Thermo.ha(p, T) + self.EoS.h(p, T)
+        except NotImplementedError:
+            #Internal energy-based Thermo
+            return self.Thermo.ua(p, T) + p/self.EoS.rho(p, T) + self.EoS.h(p, T)
     
     ################################
-    def cp(self, p, T):
+    def hs(self, p:float, T:float) -> float:
+        """
+        Sensible enthalpy [J/kg]
+        """
+        try:
+            return self.Thermo.hs(p, T) + self.EoS.h(p, T)
+        except NotImplementedError:
+            #Internal energy-based Thermo
+            return self.Thermo.us(p, T) + p/self.EoS.rho(p, T) + self.EoS.h(p, T)
+    
+    ################################
+    def ua(self, p:float, T:float) -> float:
+        """
+        Absolute internal energy [J/kg]
+        """
+        try:
+            return self.Thermo.ua(p, T) + self.EoS.u(p, T)
+        except NotImplementedError:
+            #Entalpy-based Thermo
+            return self.Thermo.ha(p, T) - p/self.EoS.rho(p, T) + self.EoS.u(p, T)
+    
+    ################################
+    def us(self, p:float, T:float) -> float:
+        """
+        Sensible internal energy [J/kg]
+        """
+        try:
+            return self.Thermo.us(p, T) + self.EoS.u(p, T)
+        except NotImplementedError:
+            #Entalpy-based Thermo
+            return self.Thermo.hs(p, T) - p/self.EoS.rho(p, T) + self.EoS.u(p, T)
+    
+    ################################
+    def cp(self, p:float, T:float) -> float:
         """
         Constant pressure heat capacity [J/kg/K]
         """
         return self.Thermo.cp(p, T) + self.EoS.cp(p, T)
     
     ################################
-    def cv(self, p, T):
+    def cv(self, p:float, T:float) -> float:
         """
         Constant volume heat capacity [J/kg/K]
         """
         return self.cp(p, T) - self.EoS.cpMcv(p, T)
     
     ################################
-    def gamma(self, p, T):
+    def gamma(self, p:float, T:float) -> float:
         """
         Heat capacity ratio cp/cv [-]
         """

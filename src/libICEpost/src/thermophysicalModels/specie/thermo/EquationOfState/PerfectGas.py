@@ -67,59 +67,67 @@ class PerfectGas(EquationOfState):
     #Operators:
 
     #########################################################################
-    def cp(self, p, T):
+    def cp(self, p:float, T:float) -> float:
         """
         Constant pressure heat capacity contribution [J/kg/K]
         """
-        super(self.__class__,self).cp(p,T)
+        super().cp(p,T)
         return 0.0
     
     #########################################################################
-    def h(self, p, T):
+    def h(self, p:float, T:float) -> float:
         """
         Enthalpy contribution [J/kg]
         """
-        super(self.__class__,self).h(p,T)
+        super().h(p,T)
         return 0.0
     
     #########################################################################
-    def rho(self, p, T):
+    def u(self, p:float, T:float) -> float:
+        """
+        Internal energy contribution [J/kg]
+        """
+        super().u(p,T)
+        return 0.0
+    
+    #########################################################################
+    def rho(self, p:float, T:float) -> float:
         """
         Density [kg/m^3]
         """
-        super(self.__class__,self).rho(p,T)
+        super().rho(p,T)
         return p/(T * self.Rgas)
     
     #########################################################################
-    def T(self, p, rho):
+    def T(self, p:float, rho:float) -> float:
         """
         Temperature [K]
         """
-        super(self.__class__,self).T(p,rho)
+        super().T(p,rho)
         return p/(rho * self.Rgas)
     
     #########################################################################
-    def p(self, T, rho):
+    def p(self, T:float, rho:float) -> float:
         """
         Pressure [Pa]
         """
-        super(self.__class__,self).p(T,rho)
+        super().p(T,rho)
         return rho * T * self.Rgas
     
     #########################################################################
-    def Z(self, p, T):
+    def Z(self, p:float, T:float) -> float:
         """
         Compression factor [-]
         """
-        super(self.__class__,self).Z(p,T)
+        super().Z(p,T)
         return 1.0
     
     #########################################################################
-    def cpMcv(self, p, T):
+    def cpMcv(self, p:float, T:float) -> float:
         """
         Difference cp - cv.
         """
-        super(self.__class__,self).cpMcv(p,T)
+        super().cpMcv(p,T)
         return self.Rgas
     
     #########################################################################
@@ -127,7 +135,7 @@ class PerfectGas(EquationOfState):
         """
         dcp/dT [J/kg/K^2]
         """
-        super(self.__class__,self).dcpdT(p,T)
+        super().dcpdT(p,T)
         return 0.0
     
     #########################################################################
@@ -135,7 +143,7 @@ class PerfectGas(EquationOfState):
         """
         dp/dT [Pa/K]
         """
-        super(self.__class__,self).dpdT(p,T)
+        super().dpdT(p,T)
         return self.rho(p,T)*self.Rgas
     
     #########################################################################
@@ -143,7 +151,7 @@ class PerfectGas(EquationOfState):
         """
         dT/dp [K/Pa]
         """
-        super(self.__class__,self).dTdp(p,T)
+        super().dTdp(p,T)
         return self.rho(p,T)*self.Rgas
     
     #########################################################################
@@ -151,7 +159,7 @@ class PerfectGas(EquationOfState):
         """
         drho/dp [kg/(m^3 Pa)]
         """
-        super(self.__class__,self).drhodp(p,T)
+        super().drhodp(p,T)
         return 1.0/(self.Rgas * T)
     
     #########################################################################
@@ -159,7 +167,7 @@ class PerfectGas(EquationOfState):
         """
         dp/drho [Pa * m^3 / kg]
         """
-        super(self.__class__,self).dpdrho(p,T)
+        super().dpdrho(p,T)
         return (self.Rgas * T)
     
     #########################################################################
@@ -167,7 +175,7 @@ class PerfectGas(EquationOfState):
         """
         drho/dT [kg/(m^3 K)]
         """
-        super(self.__class__,self).drhodT(p,T)
+        super().drhodT(p,T)
         return -p/(self.Rgas * (T ** 2.0))
     
     #########################################################################
@@ -175,7 +183,7 @@ class PerfectGas(EquationOfState):
         """
         dT/drho [K * m^3 / kg]
         """
-        super(self.__class__,self).dTdrho(p,T)
+        super().dTdrho(p,T)
         return -p/(self.Rgas * (self.rho(p,T) ** 2.0))
 
 #############################################################################

@@ -162,13 +162,12 @@ class janaf7(Thermo):
     
     #########################################################################
     #Member functions:
-    def coeffs(self, T):
+    def coeffs(self, T:float) -> float:
         """
         Get coefficients, depending on temperature range.
         """
-        if (T < self.Tlow) or (T > self.Thigh):
-            pass
-            self.__class__.runtimeWarning("Temperature outside of range ["+ "{:.3f}".format(self.Tlow) + ","+ "{:.3f}".format(self.Thigh) + "] (T = "+ "{:.3f}".format(T) + " [K])")
+        # if (T < self.Tlow) or (T > self.Thigh):
+        #     self.__class__.runtimeWarning("Temperature outside of range ["+ "{:.3f}".format(self.Tlow) + ","+ "{:.3f}".format(self.Thigh) + "] (T = "+ "{:.3f}".format(T) + " [K])")
         
         if T < self.Tth:
             return self.cpLow
@@ -176,7 +175,7 @@ class janaf7(Thermo):
             return self.cpHigh
     
     ################################
-    def cp(self, p, T):
+    def cp(self, p:float, T:float) -> float:
         """
         Constant pressure heat capacity [J/kg/K].
         If the temperature is not within Tlow and Thigh, a
@@ -184,7 +183,6 @@ class janaf7(Thermo):
             
         cp(T) = sum_{i=0,4} ( a_{i} * T^i )
         """
-        
         #Argument checking
         super(self.__class__,self).cp(p,T)
         
@@ -197,7 +195,7 @@ class janaf7(Thermo):
         return cp*self.Rgas
     
     ################################
-    def ha(self, p, T):
+    def ha(self, p:float, T:float) -> float:
         """
         Absolute enthalpy [J/kg]
         If the temperature is not within Tlow and Thigh, a
@@ -206,9 +204,11 @@ class janaf7(Thermo):
                 
         ha(T) = sum_{i=0,4} ( a_{i}/(i + 1) * T^i )*T + a_{5}
         """
-        
         #Argument checking
-        super(self.__class__,self).ha(p,T)
+        try:
+            super(self.__class__,self).ha(p,T)
+        except NotImplementedError:
+            pass
         
         coeffs= self.coeffs(T)
         
@@ -219,7 +219,7 @@ class janaf7(Thermo):
         return ha*self.Rgas
     
     ##################################
-    def hf(self):
+    def hf(self) -> float:
         """
         Enthalpy of formation [J/kg]
         
@@ -228,7 +228,7 @@ class janaf7(Thermo):
         return self.ha(0.,Tstd)
     
     ################################
-    def dcpdT(self, p, T):
+    def dcpdT(self, p:float, T:float) -> float:
         """
         dcp/dT [J/kg/K^2]
         If the temperature is not within Tlow and Thigh, a
@@ -236,6 +236,7 @@ class janaf7(Thermo):
             
         dcp/dT(T) = sum_{i=1,4}(i * a_{i} * T^(i - 1))
         """
+        #Check arguments
         super(self.__class__,self).dcpdT(p,T)
         
         coeffs = self.coeffs(T)

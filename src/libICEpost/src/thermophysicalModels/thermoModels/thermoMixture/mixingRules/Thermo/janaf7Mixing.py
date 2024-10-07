@@ -52,14 +52,23 @@ class janaf7Mixing(ThermoMixing):
             """
             Not to be used!
             """
-            return cls(dictionary["mixture"])
+            raise NotImplementedError
         
         ###################################
         def __init__(self, mix:Mixture):
             self._mix = mix
 
         ###################################
-        def _combineMethod(self, func, *fargs, **fkwargs):
+        def _combineMethod(self, func:str, *fargs, **fkwargs):
+            """
+            Method for macro-ization of combination of properties based on mixture composition
+            
+            Args:
+                func (str): the name of the method to combine
+
+            Returns:
+                Thermo.func@ReturnType: returns sum(y_i * thermo[specie_i].func(*fargs, **fkwargs))
+            """
             vals = []
             weigths = []
             for specie in self._mix:
@@ -73,32 +82,39 @@ class janaf7Mixing(ThermoMixing):
             return (sum([weigths[ii]*v for ii, v in enumerate(vals)]))
 
         ###################################
-        def cp(self, p, T):
+        def cp(self, p:float, T:float) -> float:
             super().cp(p, T)
             return self._combineMethod("cp", p, T)
         
         ###################################
-        def dcpdT(self, p, T):
+        def dcpdT(self, p:float, T:float) -> float:
             super().dcpdT(p, T)
             return self._combineMethod("dcpdT", p, T)
         
         ###################################
-        def hs(self, p, T):
-            super().hs(p, T)
+        def hs(self, p:float, T:float) -> float:
+            #Argument checking
+            try:
+                super(self.__class__,self).hs(p,T)
+            except NotImplementedError:
+                pass
             return self._combineMethod("hs", p, T)
         
         ###################################
-        def hf(self):
-            super().hf()
+        def hf(self) -> float:
             return self._combineMethod("hf")
         
         ###################################
-        def ha(self, p, T):
-            super().hs(p, T)
+        def ha(self, p:float, T:float) -> float:
+            #Argument checking
+            try:
+                super(self.__class__,self).ha(p,T)
+            except NotImplementedError:
+                pass
             return self._combineMethod("ha", p, T)
         
         ###################################
-        def update(self, mix:Mixture=None):
+        def update(self, mix:Mixture=None)-> None:
             if not mix is None:
                 self._mix = mix
 

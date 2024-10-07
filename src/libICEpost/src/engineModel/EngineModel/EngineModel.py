@@ -842,7 +842,7 @@ class EngineModel(BaseClass):
                 ...
         """
         #Add fields to data:
-        fields = ["dpdCA", "V", "T", "gamma", "AHRR", "ROHR", "A"]
+        fields = ["dpdCA", "V", "T", "m", "gamma", "AHRR", "ROHR", "A"]
         for f in fields:
             if not f in self.data.columns:
                 self.data[f] = float("nan")
@@ -861,9 +861,11 @@ class EngineModel(BaseClass):
             V = self.geometry.V(CA)
             p = self.data.p(CA)
             T = self._cylinder.state.T
+            m = self._cylinder.state.m
             gamma = self._cylinder.mixture.gamma(p,T)
             self.data.loc[index, "V"] = V
             self.data.loc[index, "T"] = T
+            self.data.loc[index, "Tm"] = m
             self.data.loc[index, "gamma"] = gamma
             
             #Ahrr
@@ -902,11 +904,16 @@ class EngineModel(BaseClass):
         #Gamma
         T = self._cylinder.state.T
         gamma = self._cylinder.mixture.gamma(p,T)
+        m = self._cylinder.state.m
         
         #Apparent heat release rate [J/CA]
-        t1 = gamma/(gamma - 1.0)*p*self.geometry.dVdCA(CA) 
-        t2 = 1.0/(gamma - 1.0)*self.geometry.V(CA)*dpdCA
-        ahrr = t1 + t2
+        #Generalization to allow other EoS
+        TOld = self.data.T(self.time.oldTime)
+        pOld = self.data.p(self.time.oldTime)
+        mOld = self.data.m(self.time.oldTime)
+        #Apporximating Us derivative backwards in time
+        dUsdCA = (self._cylinder.mixture.us(p,T)*m - self._cylinder.mixture.us(pOld,TOld)*mOld)/self.time.deltaT
+        ahrr = dUsdCA + p*self.geometry.dVdCA(CA) #- dmIndCA*mixtureIn.hs(p,T) + dmOutdCA*mixtureOut.hs(p,T)
         
         self._updateMixtures()
         
@@ -917,6 +924,7 @@ class EngineModel(BaseClass):
         self.data.loc[index, "dpdCA"] = dpdCA
         self.data.loc[index, "V"] = V
         self.data.loc[index, "T"] = T
+        self.data.loc[index, "m"] = m
         self.data.loc[index, "gamma"] = gamma
         self.data.loc[index, "AHRR"] = ahrr
         
