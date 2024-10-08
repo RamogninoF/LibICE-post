@@ -15,7 +15,7 @@ from collections.abc import Iterable
 import numpy as np
 import math
 
-from libICEpost.src.base.BaseClass import BaseClass
+from libICEpost.src.base.BaseClass import BaseClass, abstractmethod
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -108,6 +108,16 @@ class EngineTime(BaseClass):
             self.fatalErrorInClass(self.__init__, "Construction failed", err)
     
     ######################################
+    #NOTE: overwrite in child class if necessary
+    @property
+    def timings(self) -> dict[str:float]:
+        """
+        A dictionary with the relevant timings (IVC, EVO, etc...)
+
+        Returns:
+            dict[str:float]
+        """
+        return {"IVC":self.IVC, "EVO":self.EVO}
     
     #########################################################################
     @classmethod

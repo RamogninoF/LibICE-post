@@ -69,6 +69,19 @@ class SparkIgnitionTime(EngineTime):
         return STR
     
     #########################################################################
+    @property
+    def timings(self):
+        """
+        A dictionary with the relevant timings (IVC, EVO, etc...)
+
+        Returns:
+            dict[str:float]
+        """
+        out = super().timings
+        out["SA"] = self.SA
+        return out
+    
+    #########################################################################
     def startOfCombustion(self):
         """
         Instant of start of combustion (overwritten in derived class depending on combustion mode). By default, returns None (motoring condition).

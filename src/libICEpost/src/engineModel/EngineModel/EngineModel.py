@@ -1161,7 +1161,7 @@ class EngineModel(BaseClass):
         return integrate.trapz(data["p"], x=data["V"])
     
     ####################################
-    def plotPV(self, /,*,start:float=None, end:float=None, loglog:bool=True, **kwargs):
+    def plotPV(self, /,*,start:float=None, end:float=None, loglog:bool=True, timingsParams:dict=dict(), **kwargs):
         """
         Create the pressure-volume diagram of the thermodynamic cycle.
 
@@ -1169,12 +1169,23 @@ class EngineModel(BaseClass):
             start (float, optional): The beginning of the plot (CA). Defaults to None.
             end (float, optional): The end of the plot (CA). Defaults to None.
             loglog (bool, optional): log-log scale. Defaults to True.
+            timingsParams(dict, optional): The kwargs for the scatter for timings. Defaults to:
+            {
+                "edgecolor":"k"
+            }
         """
         #Get start and end
         if start is None:
             start = self.data.data.iloc[0]["CA"]
         if end is None:
             end = self.data.data.iloc[len(self.data)-1]["CA"]
+        
+        #Set default timingsParams
+        default = \
+        {
+            "edgecolor":"k"
+        }
+        [timingsParams.update({p:default[p]}) for p in default if not p in timingsParams]
         
         #Check arguments
         self.checkType(start,float,"start")
@@ -1191,8 +1202,18 @@ class EngineModel(BaseClass):
         #Compute pressure in bar
         self.data["pBar"] = self.data["p"]/1e5
         
+        #Plot
+        ax = self.data.data.plot(x="V", y="pBar", xlabel="V [$m^3$]", ylabel="p [bar]", loglog=loglog, **kwargs)
+        
+        #Timings
+        timings = self.time.timings
+        size = [timingsParams.pop("markersize")]*len(timings) if "markersize" in timingsParams else None #The size of the markers
+        if not "facecolor" in timingsParams: #Use same color of plot if not specified
+            timingsParams["facecolor"] = ax.lines[-1]. get_color()
+        ax.scatter([self.geometry.V(timings[t]) for t in timings], [self.data.pBar(timings[t]) for t in timings], s=size, **timingsParams)
+        
         #Return the Axes
-        return self.data.data.plot(x="V", y="pBar", xlabel="V [$m^3$]", ylabel="p [bar]", loglog=loglog, **kwargs)
+        return ax
     
 #########################################################################
 #Create selection table
