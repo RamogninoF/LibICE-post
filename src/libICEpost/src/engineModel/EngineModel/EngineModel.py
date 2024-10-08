@@ -1160,6 +1160,40 @@ class EngineModel(BaseClass):
         
         return integrate.trapz(data["p"], x=data["V"])
     
+    ####################################
+    def plotPV(self, /,*,start:float=None, end:float=None, loglog:bool=True, **kwargs):
+        """
+        Create the pressure-volume diagram of the thermodynamic cycle.
+
+        Args:
+            start (float, optional): The beginning of the plot (CA). Defaults to None.
+            end (float, optional): The end of the plot (CA). Defaults to None.
+            loglog (bool, optional): log-log scale. Defaults to True.
+        """
+        #Get start and end
+        if start is None:
+            start = self.data.data.iloc[0]["CA"]
+        if end is None:
+            end = self.data.data.iloc[len(self.data)-1]["CA"]
+        
+        #Check arguments
+        self.checkType(start,float,"start")
+        self.checkType(end,float,"end")
+        self.checkType(loglog,bool,"loglog")
+        
+        #Check if data were already processed:
+        if not "p" in self.data.columns:
+            raise ValueError("Data were not yet loaded/pre-processed (field p not present in self.data).")
+        
+        #Compute volume
+        self.data["V"] = self.geometry.V(self.data["CA"])
+        
+        #Compute pressure in bar
+        self.data["pBar"] = self.data["p"]/1e5
+        
+        #Return the Axes
+        return self.data.data.plot(x="V", y="pBar", xlabel="V [$m^3$]", ylabel="p [bar]", loglog=loglog, **kwargs)
+    
 #########################################################################
 #Create selection table
 EngineModel.createRuntimeSelectionTable()
