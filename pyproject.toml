@@ -1,6 +1,6 @@
 [project]
 name = "libICEpost"
-version = "0.0.2"
+version = "0.0.3"
 
 authors = [
   { name="Federico Ramognino", email="federico.ramognino@polimi.it" },
@@ -10,7 +10,8 @@ readme = "README.md"
 
 requires-python = ">=3.11"
 dependencies = [
-  'chempy >= 0.9.0'
+  'chempy >= 0.9.0',
+  'pyfoam'
 ]
 
 classifiers = [
