@@ -1,0 +1,140 @@
+libICEpost.src.base.Utilities
+=============================
+
+.. py:module:: libICEpost.src.base.Utilities
+
+.. autoapi-nested-parse::
+
+   @author: F. Ramognino       <federico.ramognino@polimi.it>
+   Last update:        12/06/2023
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   libICEpost.src.base.Utilities.Utilities
+
+
+Module Contents
+---------------
+
+.. py:class:: Utilities
+
+   Bases: :py:obj:`object`
+
+
+   Class wrapping useful methods (virtual).
+
+
+   .. py:method:: checkType(*args, **argv)
+      :staticmethod:
+
+
+
+   .. py:method:: checkTypes(*args, **argv)
+      :staticmethod:
+
+
+
+   .. py:method:: checkInstanceTemplate(*args, **argv)
+      :staticmethod:
+
+
+
+   .. py:method:: updateKeywordArguments(*args, **argv)
+      :staticmethod:
+
+
+
+   .. py:method:: checkContainer(*args, **argv)
+      :staticmethod:
+
+
+
+   .. py:method:: lookupOrDefault(*args, **argv)
+      :staticmethod:
+
+
+
+   .. py:method:: dictFromTemplate(*args, **argv)
+      :staticmethod:
+
+
+
+   .. py:method:: checkDictEntries(*args, **argv)
+      :staticmethod:
+
+
+
+   .. py:method:: checkDictTypes(*args, **argv)
+      :staticmethod:
+
+
+
+   .. py:method:: runtimeError(*args, **argv)
+      :staticmethod:
+
+
+
+   .. py:method:: runtimeWarning(*args, **argv)
+      :staticmethod:
+
+
+
+   .. py:method:: printStack(*args, **argv)
+      :staticmethod:
+
+
+
+   .. py:method:: fatalErrorInClass(*args, **argv)
+      :classmethod:
+
+
+
+   .. py:method:: fatalErrorInFunction(*args, **argv)
+      :staticmethod:
+
+
+
+   .. py:method:: fatalErrorInFunctionArgumentChecking(*args, **argv)
+      :staticmethod:
+
+
+
+   .. py:method:: fatalErrorInClassArgumentChecking(**argv)
+      :classmethod:
+
+
+
+   .. py:attribute:: fatalErrorIn
+
+
+   .. py:attribute:: fatalErrorInArgumentChecking
+
+
+   .. py:method:: copy() -> Self
+
+      Wrapper of copy.deepcopy function.
+
+
+
+   .. py:attribute:: np
+
+
+   .. py:attribute:: cp
+
+
+   .. py:attribute:: os
+
+
+   .. py:method:: empty()
+      :classmethod:
+
+
+      Return an empty instance of class.
+
+
+

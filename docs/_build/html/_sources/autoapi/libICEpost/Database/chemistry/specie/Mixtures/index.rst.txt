@@ -1,0 +1,43 @@
+libICEpost.Database.chemistry.specie.Mixtures
+=============================================
+
+.. py:module:: libICEpost.Database.chemistry.specie.Mixtures
+
+.. autoapi-nested-parse::
+
+   @author: F. Ramognino       <federico.ramognino@polimi.it>
+   Last update:        12/06/2023
+
+   Mixtures
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   libICEpost.Database.chemistry.specie.Mixtures.Mixtures
+   libICEpost.Database.chemistry.specie.Mixtures.fileName
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   libICEpost.Database.chemistry.specie.Mixtures.fromJson
+
+
+Module Contents
+---------------
+
+.. py:data:: Mixtures
+
+.. py:function:: fromJson(fileName: str) -> None
+
+   Add mixtures to the database from a json file.
+
+
+.. py:data:: fileName
+

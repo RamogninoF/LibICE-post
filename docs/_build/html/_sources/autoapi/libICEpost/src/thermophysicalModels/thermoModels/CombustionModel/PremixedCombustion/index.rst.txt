@@ -1,0 +1,136 @@
+libICEpost.src.thermophysicalModels.thermoModels.CombustionModel.PremixedCombustion
+===================================================================================
+
+.. py:module:: libICEpost.src.thermophysicalModels.thermoModels.CombustionModel.PremixedCombustion
+
+.. autoapi-nested-parse::
+
+   @author: <N. Surname>       <e-mail>
+   Last update:        DD/MM/YYYY
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   libICEpost.src.thermophysicalModels.thermoModels.CombustionModel.PremixedCombustion.PremixedCombustion
+
+
+Module Contents
+---------------
+
+.. py:class:: PremixedCombustion(/, *, air: libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture, fuel: libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture, xb: float = 0.0, **kwargs)
+
+   Bases: :py:obj:`libICEpost.src.thermophysicalModels.thermoModels.CombustionModel.CombustionModel.CombustionModel`
+
+
+   Premixted combustion model
+
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Attributes:
+
+
+   .. py:attribute:: _fuel
+      :type:  libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture
+
+
+   .. py:attribute:: _air
+      :type:  libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture
+
+
+   .. py:attribute:: _alphaSt
+      :type:  float
+
+
+   .. py:attribute:: _xb
+      :type:  float
+
+
+   .. py:property:: air
+      :type: libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture
+
+      The air mixture
+
+      :returns: Mixture
+
+
+   .. py:property:: fuel
+      :type: libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture
+
+      The current fuel mixture
+
+      :returns: Mixture
+
+
+   .. py:property:: alpha
+      :type: float
+
+      The current air-to fuel ratio.
+
+      :returns: float
+
+
+   .. py:property:: alphaSt
+      :type: float
+
+      The current stoichiometric air-to fuel ratio.
+
+      :returns: float
+
+
+   .. py:property:: phi
+      :type: float
+
+      The current fuel-to-air equivalence ratio.
+
+      :returns: float
+
+
+   .. py:property:: Lambda
+      :type: float
+
+      The current air-to-fuel equivalence ratio.
+
+      :returns: float
+
+
+   .. py:method:: fromDictionary(dictionary: dict | libICEpost.src.base.dataStructures.Dictionary.Dictionary)
+      :classmethod:
+
+
+      Create from dictionary.
+      {
+          air (Mixture): Air
+          fuel (Mixture): The fuel composition
+          reactants (Mixture): The reactants composition
+
+          reactionModel (str, optional): Model handling reactions. defaults to "Stoichiometry".
+          <ReactionModel>Dict (dict, optional): the dictionary for construction of the specific ReactionModel.
+
+          state (ThermoState, optional): Giving current state to manage state-dependend
+              combustion models(e.g. equilibrium). Defaults to empty state ThermoState().
+      }
+
+
+
+   .. py:method:: update(xb: float = None, *, air: libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture = None, fuel: libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture = None, **kwargs) -> bool
+
+      Update mixture composition based on progress variable, fuel, and reactants composition.
+
+      :param xb: the burned mass fraction. Defaults to None (no update).
+      :type xb: float, None
+      :param air: update air composition. Defaults to None.
+      :type air: Mixture, optional
+      :param fuel: update fuel composition. Defaults to None.
+      :type fuel: Mixture, optional
+      :param reactants: update reactants composition. Defaults to None.
+      :type reactants: Mixture, optional
+
+      :returns: if something changed
+      :rtype: bool
+
+
+

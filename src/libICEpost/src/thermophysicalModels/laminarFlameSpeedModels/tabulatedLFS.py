@@ -82,7 +82,7 @@ class tabulatedLFS(OFTabulation,laminarFlameSpeedModel):
             "EGRValues":"EGR"
         }
     
-    tableProperties: \
+    tableProperties = \
             {
                 "p": [],
                 "T": [],

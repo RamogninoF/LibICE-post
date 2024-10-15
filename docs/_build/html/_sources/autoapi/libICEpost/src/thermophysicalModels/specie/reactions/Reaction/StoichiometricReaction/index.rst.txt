@@ -1,0 +1,81 @@
+libICEpost.src.thermophysicalModels.specie.reactions.Reaction.StoichiometricReaction
+====================================================================================
+
+.. py:module:: libICEpost.src.thermophysicalModels.specie.reactions.Reaction.StoichiometricReaction
+
+.. autoapi-nested-parse::
+
+   @author: F. Ramognino       <federico.ramognino@polimi.it>
+   Last update:        12/06/2023
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   libICEpost.src.thermophysicalModels.specie.reactions.Reaction.StoichiometricReaction.StoichiometricReaction
+
+
+Module Contents
+---------------
+
+.. py:class:: StoichiometricReaction(reactants, products)
+
+   Bases: :py:obj:`libICEpost.src.thermophysicalModels.specie.reactions.Reaction.Reaction.Reaction`
+
+
+   Class handling chemical reactions (transformation of reactants into products) through
+   balancing of stoichiometry. Reaction happens infinitely fast with instantaneous
+   conversion of reactants into products.
+
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   .. attribute:: reactants
+
+      Mixture
+      The reactants
+
+   .. attribute:: products
+
+      Mixture
+      The products
+
+
+   .. py:method:: fromDictionary(dictionary)
+      :classmethod:
+
+
+      Create from dictionary.
+      {
+          "reactants": list<Molecules>
+              The molecules in the reactants
+          "products": list<Molecules>
+              The molecules in the products
+      }
+
+
+
+   .. py:method:: __str__()
+
+      Print the formula of the reaction (coefficient in mole fractions):
+          reactants => products
+
+
+
+   .. py:method:: _update(mix: libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture = None)
+
+      mix: Mixture (None)
+          The new mixture of reactants (if needs to be changed)
+
+      Computes the composition of reactants and products through mass
+      balance of each atomic specie.
+
+      If system is not solvable, raises ValueError.
+
+      If there are molecules that remain inhert across the reaction
+      raises a ValueError.
+
+
+

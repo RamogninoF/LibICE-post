@@ -1,0 +1,452 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>libICEpost.src.thermophysicalModels.specie.thermo.Thermo &mdash; libICEpost  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+      <link rel="stylesheet" type="text/css" href="../../../../../../../_static/graphviz.css?v=fd3f3429" />
+
+  
+      <script src="../../../../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../../../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../../../search.html" />
+    <link rel="next" title="libICEpost.src.thermophysicalModels.specie.thermo.Thermo.Thermo" href="Thermo/index.html" />
+    <link rel="prev" title="libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.PerfectGas" href="../EquationOfState/PerfectGas/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../../../index.html" class="icon icon-home">
+            libICEpost
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../../example.html">Example usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../../conduct.html">Code of Conduct</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../../../../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../../../../index.html">libICEpost</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../../../../../index.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../../../../../Database/index.html">libICEpost.Database</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../scripts/index.html">libICEpost.scripts</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="../../../../index.html">libICEpost.src</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../../../index.html">libICEpost</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../../../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="../../../../../index.html">libICEpost</a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">libICEpost.src</a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">libICEpost.src.thermophysicalModels</a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">libICEpost.src.thermophysicalModels.specie</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">libICEpost.src.thermophysicalModels.specie.thermo</a></li>
+      <li class="breadcrumb-item active">libICEpost.src.thermophysicalModels.specie.thermo.Thermo</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../../../../_sources/autoapi/libICEpost/src/thermophysicalModels/specie/thermo/Thermo/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-libICEpost.src.thermophysicalModels.specie.thermo.Thermo">
+<span id="libicepost-src-thermophysicalmodels-specie-thermo-thermo"></span><h1>libICEpost.src.thermophysicalModels.specie.thermo.Thermo<a class="headerlink" href="#module-libICEpost.src.thermophysicalModels.specie.thermo.Thermo" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Thermo/index.html">libICEpost.src.thermophysicalModels.specie.thermo.Thermo.Thermo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="constantCp/index.html">libICEpost.src.thermophysicalModels.specie.thermo.Thermo.constantCp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="janaf7/index.html">libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7</a></li>
+</ul>
+</div>
+</section>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#libICEpost.src.thermophysicalModels.specie.thermo.Thermo.Thermo" title="libICEpost.src.thermophysicalModels.specie.thermo.Thermo.Thermo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Thermo</span></code></a></p></td>
+<td><p>Base class for computation of thermodynamic properties of chemical specie (cp, cv, ...)</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="janaf7/index.html#module-libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7" title="libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7"><code class="xref py py-obj docutils literal notranslate"><span class="pre">janaf7</span></code></a></p></td>
+<td><p>Class for computation of thermophysical properties with NASA (janaf) 7-coefficient polynomials.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#libICEpost.src.thermophysicalModels.specie.thermo.Thermo.constantCp" title="libICEpost.src.thermophysicalModels.specie.thermo.Thermo.constantCp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">constantCp</span></code></a></p></td>
+<td><p>Class for computation of thermophysical properties with constant cp cv and gamma.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="package-contents">
+<h2>Package Contents<a class="headerlink" href="#package-contents" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.thermo.Thermo.Thermo">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">libICEpost.src.thermophysicalModels.specie.thermo.Thermo.</span></span><span class="sig-name descname"><span class="pre">Thermo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Rgas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/thermo/Thermo/Thermo.html#Thermo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.thermo.Thermo.Thermo" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="../../../../base/BaseClass/index.html#libICEpost.src.base.BaseClass.BaseClass" title="libICEpost.src.base.BaseClass.BaseClass"><code class="xref py py-obj docutils literal notranslate"><span class="pre">libICEpost.src.base.BaseClass.BaseClass</span></code></a></p>
+<p>Base class for computation of thermodynamic properties of chemical specie (cp, cv, …)</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>-&gt; For interal energy-based models, need to implement us (sensible)
+-&gt; For entalpy-based models, need to implement ha (absolute)</p>
+</div>
+<hr class="docutils" />
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.thermo.Thermo.Thermo.Rgas">
+<span class="sig-name descname"><span class="pre">Rgas</span></span><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.thermo.Thermo.Thermo.Rgas" title="Link to this definition"></a></dt>
+<dd><p>float
+The mass specific gas constant</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">Rgas</span></span><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.thermo.Thermo.Thermo.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/thermo/Thermo/Thermo.html#Thermo.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.thermo.Thermo.Thermo.__str__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.thermo.Thermo.Thermo.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/thermo/Thermo/Thermo.html#Thermo.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.thermo.Thermo.Thermo.__repr__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.thermo.Thermo.Thermo.cp">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/thermo/Thermo/Thermo.html#Thermo.cp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.thermo.Thermo.Thermo.cp" title="Link to this definition"></a></dt>
+<dd><p>Constant pressure heat capacity [J/kg/K]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.thermo.Thermo.Thermo.hf">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hf</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/thermo/Thermo/Thermo.html#Thermo.hf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.thermo.Thermo.Thermo.hf" title="Link to this definition"></a></dt>
+<dd><p>Enthalpy of formation [J/kg]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.thermo.Thermo.Thermo.ha">
+<span class="sig-name descname"><span class="pre">ha</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/thermo/Thermo/Thermo.html#Thermo.ha"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.thermo.Thermo.Thermo.ha" title="Link to this definition"></a></dt>
+<dd><p>Absolute enthalpy [J/kg]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.thermo.Thermo.Thermo.ua">
+<span class="sig-name descname"><span class="pre">ua</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/thermo/Thermo/Thermo.html#Thermo.ua"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.thermo.Thermo.Thermo.ua" title="Link to this definition"></a></dt>
+<dd><p>Absolute internal energy [J/kg]</p>
+<p>us = ua + hf</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.thermo.Thermo.Thermo.us">
+<span class="sig-name descname"><span class="pre">us</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/thermo/Thermo/Thermo.html#Thermo.us"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.thermo.Thermo.Thermo.us" title="Link to this definition"></a></dt>
+<dd><p>Sensible internal energy [J/kg]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.thermo.Thermo.Thermo.hs">
+<span class="sig-name descname"><span class="pre">hs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/thermo/Thermo/Thermo.html#Thermo.hs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.thermo.Thermo.Thermo.hs" title="Link to this definition"></a></dt>
+<dd><p>Sensible enthalpy [J/kg]</p>
+<p>hs = ha - hf</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.thermo.Thermo.Thermo.dcpdT">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dcpdT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/thermo/Thermo/Thermo.html#Thermo.dcpdT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.thermo.Thermo.Thermo.dcpdT" title="Link to this definition"></a></dt>
+<dd><p>dcp/dT [J/kg/K^2]</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">libICEpost.src.thermophysicalModels.specie.thermo.Thermo.</span></span><span class="sig-name descname"><span class="pre">janaf7</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Rgas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cpLow</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cpHigh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Tth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Tlow</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Thigh</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/thermo/Thermo/janaf7.html#janaf7"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="Thermo/index.html#libICEpost.src.thermophysicalModels.specie.thermo.Thermo.Thermo.Thermo" title="libICEpost.src.thermophysicalModels.specie.thermo.Thermo.Thermo.Thermo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">libICEpost.src.thermophysicalModels.specie.thermo.Thermo.Thermo.Thermo</span></code></a></p>
+<p>Class for computation of thermophysical properties with NASA (janaf) 7-coefficient polynomials.</p>
+<hr class="docutils" />
+<dl class="simple">
+<dt>Attibutes:</dt><dd><dl class="simple">
+<dt>Rgas: float</dt><dd><p>The mass specific gas constant</p>
+</dd>
+<dt>cpLow:  list&lt;float&gt;</dt><dd><p>List of polynomial coefficients to compute cp of the specie
+in the range of temperature below Tth</p>
+</dd>
+<dt>cpHigh: list&lt;float&gt;</dt><dd><p>List of polynomial coefficients to compute cp of the specie
+in the range of temperature above Tth</p>
+</dd>
+<dt>Tth:    float</dt><dd><p>Threshold temperature to change polynomial coefficient to
+be used to compute the cp of the specie</p>
+</dd>
+<dt>Tlow:   float</dt><dd><p>Lower limit of the range of valodity of the polynomial
+coefficients for computation of cp</p>
+</dd>
+<dt>Thigh:   float</dt><dd><p>Higher limit of the range of valodity of the polynomial
+coefficients for computation of cp</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7.numCoeffs">
+<span class="sig-name descname"><span class="pre">numCoeffs</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">7</span></em><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7.numCoeffs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7.cpLow">
+<span class="sig-name descname"><span class="pre">cpLow</span></span><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7.cpLow" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7.cpHigh">
+<span class="sig-name descname"><span class="pre">cpHigh</span></span><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7.cpHigh" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7.Tth">
+<span class="sig-name descname"><span class="pre">Tth</span></span><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7.Tth" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7.Tlow">
+<span class="sig-name descname"><span class="pre">Tlow</span></span><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7.Tlow" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7.Thigh">
+<span class="sig-name descname"><span class="pre">Thigh</span></span><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7.Thigh" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/thermo/Thermo/janaf7.html#janaf7.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7.__str__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/thermo/Thermo/janaf7.html#janaf7.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7.__repr__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7.coeffs">
+<span class="sig-name descname"><span class="pre">coeffs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/thermo/Thermo/janaf7.html#janaf7.coeffs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7.coeffs" title="Link to this definition"></a></dt>
+<dd><p>Get coefficients, depending on temperature range.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7.cp">
+<span class="sig-name descname"><span class="pre">cp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/thermo/Thermo/janaf7.html#janaf7.cp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7.cp" title="Link to this definition"></a></dt>
+<dd><p>Constant pressure heat capacity [J/kg/K].
+If the temperature is not within Tlow and Thigh, a
+warning is displayed.</p>
+<p>cp(T) = sum_{i=0,4} ( a_{i} * T^i )</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7.ha">
+<span class="sig-name descname"><span class="pre">ha</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/thermo/Thermo/janaf7.html#janaf7.ha"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7.ha" title="Link to this definition"></a></dt>
+<dd><p>Absolute enthalpy [J/kg]
+If the temperature is not within Tlow and Thigh, a
+warning is displayed.</p>
+<p>ha(T) = sum_{i=0,4} ( a_{i}/(i + 1) * T^i )*T + a_{5}</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7.hf">
+<span class="sig-name descname"><span class="pre">hf</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/thermo/Thermo/janaf7.html#janaf7.hf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7.hf" title="Link to this definition"></a></dt>
+<dd><p>Enthalpy of formation [J/kg]</p>
+<p>hf = ha(Tstd)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7.dcpdT">
+<span class="sig-name descname"><span class="pre">dcpdT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/thermo/Thermo/janaf7.html#janaf7.dcpdT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7.dcpdT" title="Link to this definition"></a></dt>
+<dd><p>dcp/dT [J/kg/K^2]
+If the temperature is not within Tlow and Thigh, a
+warning is displayed.</p>
+<p>dcp/dT(T) = sum_{i=1,4}(i * a_{i} * T^(i - 1))</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7.fromDictionary">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromDictionary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dictionary</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/thermo/Thermo/janaf7.html#janaf7.fromDictionary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7.fromDictionary" title="Link to this definition"></a></dt>
+<dd><p>Create from dictionary.</p>
+<dl class="simple">
+<dt>{</dt><dd><dl class="simple">
+<dt>Rgas: float</dt><dd><p>The mass specific gas constant</p>
+</dd>
+<dt>cpLow:  list&lt;float&gt;</dt><dd><p>List of polynomial coefficients to compute cp of the specie
+in the range of temperature below Tth</p>
+</dd>
+<dt>cpHigh: list&lt;float&gt;</dt><dd><p>List of polynomial coefficients to compute cp of the specie
+in the range of temperature above Tth</p>
+</dd>
+<dt>Tth:    float</dt><dd><p>Threshold temperature to change polynomial coefficient to
+be used to compute the cp of the specie</p>
+</dd>
+<dt>Tlow:   float</dt><dd><p>Lower limit of the range of valodity of the polynomial
+coefficients for computation of cp</p>
+</dd>
+<dt>Thigh:   float</dt><dd><p>Higher limit of the range of valodity of the polynomial
+coefficients for computation of cp</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>}</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.thermo.Thermo.constantCp">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">libICEpost.src.thermophysicalModels.specie.thermo.Thermo.</span></span><span class="sig-name descname"><span class="pre">constantCp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Rgas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">float('nan')</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/thermo/Thermo/constantCp.html#constantCp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.thermo.Thermo.constantCp" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="Thermo/index.html#libICEpost.src.thermophysicalModels.specie.thermo.Thermo.Thermo.Thermo" title="libICEpost.src.thermophysicalModels.specie.thermo.Thermo.Thermo.Thermo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">libICEpost.src.thermophysicalModels.specie.thermo.Thermo.Thermo.Thermo</span></code></a></p>
+<p>Class for computation of thermophysical properties with constant cp cv and gamma.</p>
+<hr class="docutils" />
+<dl class="simple">
+<dt>Attibutes:</dt><dd><dl class="simple">
+<dt>Rgas: float</dt><dd><p>The mass specific gas constant</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.thermo.Thermo.constantCp.fromDictionary">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromDictionary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dictionary</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/thermo/Thermo/constantCp.html#constantCp.fromDictionary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.thermo.Thermo.constantCp.fromDictionary" title="Link to this definition"></a></dt>
+<dd><p>Create from dictionary:
+{</p>
+<blockquote>
+<div><dl class="simple">
+<dt>Rgas:  float</dt><dd><p>Mass specific gas constant</p>
+</dd>
+<dt>cp:    float (None)</dt><dd><p>Mass-specific constant-pressure heat capacity</p>
+</dd>
+<dt>cv:    float (None)</dt><dd><p>Mass-specific constant-volume heat capacity</p>
+</dd>
+<dt>gamma: float (None)</dt><dd><p>cp/cv ratio</p>
+</dd>
+<dt>hf:    float (0.0)</dt><dd><p>Enthalpy of formation (optional)</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>}</p>
+<p>Give 1 out of three of (cp, cv, gamma)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.thermo.Thermo.constantCp.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/thermo/Thermo/constantCp.html#constantCp.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.thermo.Thermo.constantCp.__str__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.thermo.Thermo.constantCp.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/thermo/Thermo/constantCp.html#constantCp.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.thermo.Thermo.constantCp.__repr__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.thermo.Thermo.constantCp.cp">
+<span class="sig-name descname"><span class="pre">cp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/thermo/Thermo/constantCp.html#constantCp.cp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.thermo.Thermo.constantCp.cp" title="Link to this definition"></a></dt>
+<dd><p>Constant pressure heat capacity [J/kg/K]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.thermo.Thermo.constantCp.ha">
+<span class="sig-name descname"><span class="pre">ha</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/thermo/Thermo/constantCp.html#constantCp.ha"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.thermo.Thermo.constantCp.ha" title="Link to this definition"></a></dt>
+<dd><p>Absolute enthalpy [J/kg]</p>
+<p>ha(T) = cp * (T - Tstd) + hf</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.thermo.Thermo.constantCp.hf">
+<span class="sig-name descname"><span class="pre">hf</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/thermo/Thermo/constantCp.html#constantCp.hf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.thermo.Thermo.constantCp.hf" title="Link to this definition"></a></dt>
+<dd><p>Enthalpy of formation [J/kg]</p>
+<p>hf = ha(Tstd)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.thermo.Thermo.constantCp.dcpdT">
+<span class="sig-name descname"><span class="pre">dcpdT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/thermo/Thermo/constantCp.html#constantCp.dcpdT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.thermo.Thermo.constantCp.dcpdT" title="Link to this definition"></a></dt>
+<dd><p>dcp/dT [J/kg/K^2]</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../EquationOfState/PerfectGas/index.html" class="btn btn-neutral float-left" title="libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.PerfectGas" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Thermo/index.html" class="btn btn-neutral float-right" title="libICEpost.src.thermophysicalModels.specie.thermo.Thermo.Thermo" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, libICEpost.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

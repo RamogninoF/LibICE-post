@@ -1,0 +1,230 @@
+libICEpost.src.base.dataStructures.Tabulation.Tabulation
+========================================================
+
+.. py:module:: libICEpost.src.base.dataStructures.Tabulation.Tabulation
+
+.. autoapi-nested-parse::
+
+   @author: F. Ramognino       <federico.ramognino@polimi.it>
+   Last update:        12/06/2023
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   libICEpost.src.base.dataStructures.Tabulation.Tabulation.Tabulation
+
+
+Module Contents
+---------------
+
+.. py:class:: Tabulation(data, ranges, order, **argv)
+
+   Bases: :py:obj:`src.base.Utilities.Utilities`
+
+
+   Class used for storing and handling a generic tabulation.
+
+
+   .. py:attribute:: defaultOpts
+
+
+   .. py:attribute:: mpl
+
+
+   .. py:attribute:: plt
+
+
+   .. py:attribute:: ranges_
+
+
+   .. py:attribute:: fields_
+
+
+   .. py:attribute:: __dataOld
+      :value: None
+
+
+
+   .. py:method:: __createInterpolator()
+
+
+   .. py:method:: __reorderData()
+
+
+   .. py:method:: __IndexList(shape)
+
+
+   .. py:method:: __call__(*args, **argv)
+
+      args:   float
+
+      [keyword arguments]
+      Fatal:          bool
+          If set to 'True', raises a ValueError in case the input data is outside
+          of tabulation range. Otherwise a warning is displayed.
+
+      extrapolate:    bool
+          If set to 'True' the value is extrapolated in case accessing the table
+          outside of ranges. Otherwise, the value is set to 'nan'.
+
+      Multi-linear interpolation from the tabulation. The number of arguments to be given
+      must be the same of the dimensions of the table.
+
+
+
+   .. py:method:: __getitem__(slices)
+
+      slices:   tuple<slice/list<int>/int>
+
+      Extract a table with sliced dataset.
+
+
+
+   .. py:method:: __setitem__(slices, items)
+
+      slices:   tuple<slice/list<int>/int>
+      items:    float / np.ndarray<float/int>
+
+      Set the interpolation values at a slice of the table
+
+
+
+   .. py:method:: ranges()
+
+      Get a dict containing the data ranges in the tabulation (unmutable).
+
+
+
+   .. py:method:: fields()
+
+      Returnts a list with the fields used for accessing to the tabulation (in order)
+
+
+
+   .. py:method:: data()
+
+      Returns a copy of the stored data structure
+
+
+
+   .. py:method:: interpolator()
+
+      Returns a copy of the stored data structure
+
+
+
+   .. py:method:: ndim()
+
+      ndim():
+          Returns the number of dimentsions of the table (int)
+
+
+
+   .. py:method:: shape()
+
+      Returns a list with the dimentsions of the table
+
+
+
+   .. py:method:: size()
+
+      Returns the number of data-points stored in the table (int)
+
+
+
+   .. py:method:: update()
+
+      Update interpolator.
+
+
+
+   .. py:method:: setOpts(**argv)
+
+      [keyword arguments]
+      Fatal:          bool
+          If set to 'True', raises a ValueError in case the input data is outside
+          of tabulation range. Otherwise a warning is displayed.
+
+      extrapolate:    bool
+          If set to 'True' the value is extrapolated in case accessing the table
+          outside of ranges. Otherwise, the value is set to the one at range limit.
+
+      Set the options in 'opts' dictionary, either by giving dictionary or keyword
+      arguments.
+
+
+
+   .. py:method:: squeeze()
+
+      Remove dimensions with only 1 data-point.
+
+
+
+   .. py:method:: Slice(ranges={}, **argv)
+
+      ranges:   dict
+
+      Extract a table with sliced datase, according to the sub-set of interpolation
+      points given in 'ranges'. Keyworld arguments also accepred.
+
+
+
+   .. py:method:: mergeTable(fieldName, secondTable)
+
+      fieldName:  str
+          Field to use to append second table
+
+      secondTable: table
+          Tabulation containing the data to introduce
+
+      Introduce additional data to the tabulation.
+
+
+
+   .. py:method:: plot(xVar, yVar, isoSurf=None, **argv)
+
+      xVar:   str
+          Name of the field on x-axis
+
+      yVar:   str
+          Name of the field on the y-axis
+
+      isoSurf:    list<dict>
+          List of dictionaries used to sort which iso-surfaces to plot. Each
+          element of the list must be a dictionary containing a value for
+          each remaining field of the tabulation.
+          It can be optional in case there are three fields in the tabulation,
+          it will contain each element of the third field. Otherwise it is
+          mandatory.
+
+          Exaple:
+          [
+              {
+                  var_ii:value1.1
+                  var_jj:value2.1
+                  ...
+              }
+              {
+                  var_ii:value1.2
+                  var_jj:value2.2
+                  ...
+              }
+              ...
+          ]
+
+      [keyworld arguments]
+      xRange: list<float>
+          Sampling points of the x-axis field (if want a subset)
+
+      yRange: list<float>
+          Sampling points of the y-axis field (if want a subset)
+
+      Display the sampling points in the tabulation as iso-surfaces and
+      returns a tuple with handles to figure and axes.
+
+
+

@@ -1,0 +1,65 @@
+libICEpost.src.thermophysicalModels.thermoModels.EgrModel.EgrModel
+==================================================================
+
+.. py:module:: libICEpost.src.thermophysicalModels.thermoModels.EgrModel.EgrModel
+
+.. autoapi-nested-parse::
+
+   @author: <N. Surname>       <e-mail>
+   Last update:        DD/MM/YYYY
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   libICEpost.src.thermophysicalModels.thermoModels.EgrModel.EgrModel.EgrModel
+
+
+Module Contents
+---------------
+
+.. py:class:: EgrModel(**kwargs)
+
+   Bases: :py:obj:`libICEpost.src.base.BaseClass.BaseClass`
+
+
+   Class for computation of EGR mixture. Instantiation of this class imposes no EGR.
+
+   NOTE: egr mass fraction is referred to the full mixture!
+       y_egr = m_egr/(m_egr + m_air + m_fuel)
+
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Attributes:
+
+
+
+   .. py:property:: EgrMixture
+      :type: libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture
+
+      The EGR mixture composition
+
+      :returns: Mixture
+
+
+   .. py:property:: egr
+      :type: float
+
+      The egr mass fraction
+
+      :returns: float
+
+
+   .. py:method:: fromDictionary(dictionary: dict)
+      :classmethod:
+
+
+      Create from dictionary
+      {
+      }
+
+
+

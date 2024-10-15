@@ -1,0 +1,166 @@
+libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7
+===============================================================
+
+.. py:module:: libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7
+
+.. autoapi-nested-parse::
+
+   @author: F. Ramognino       <federico.ramognino@polimi.it>
+   Last update:        12/06/2023
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7.Tstd
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7.janaf7
+
+
+Module Contents
+---------------
+
+.. py:data:: Tstd
+
+.. py:class:: janaf7(Rgas, cpLow, cpHigh, Tth, Tlow, Thigh)
+
+   Bases: :py:obj:`libICEpost.src.thermophysicalModels.specie.thermo.Thermo.Thermo.Thermo`
+
+
+   Class for computation of thermophysical properties with NASA (janaf) 7-coefficient polynomials.
+
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Attibutes:
+       Rgas: float
+           The mass specific gas constant
+
+       cpLow:  list<float>
+           List of polynomial coefficients to compute cp of the specie
+           in the range of temperature below Tth
+
+       cpHigh: list<float>
+           List of polynomial coefficients to compute cp of the specie
+           in the range of temperature above Tth
+
+       Tth:    float
+           Threshold temperature to change polynomial coefficient to
+           be used to compute the cp of the specie
+
+       Tlow:   float
+           Lower limit of the range of valodity of the polynomial
+           coefficients for computation of cp
+
+       Thigh:   float
+           Higher limit of the range of valodity of the polynomial
+           coefficients for computation of cp
+
+
+   .. py:attribute:: numCoeffs
+      :value: 7
+
+
+
+   .. py:attribute:: cpLow
+
+
+   .. py:attribute:: cpHigh
+
+
+   .. py:attribute:: Tth
+
+
+   .. py:attribute:: Tlow
+
+
+   .. py:attribute:: Thigh
+
+
+   .. py:method:: __str__()
+
+
+   .. py:method:: __repr__()
+
+
+   .. py:method:: coeffs(T: float) -> float
+
+      Get coefficients, depending on temperature range.
+
+
+
+   .. py:method:: cp(p: float, T: float) -> float
+
+      Constant pressure heat capacity [J/kg/K].
+      If the temperature is not within Tlow and Thigh, a
+      warning is displayed.
+
+      cp(T) = sum_{i=0,4} ( a_{i} * T^i )
+
+
+
+   .. py:method:: ha(p: float, T: float) -> float
+
+      Absolute enthalpy [J/kg]
+      If the temperature is not within Tlow and Thigh, a
+      warning is displayed.
+
+
+      ha(T) = sum_{i=0,4} ( a_{i}/(i + 1) * T^i )*T + a_{5}
+
+
+
+   .. py:method:: hf() -> float
+
+      Enthalpy of formation [J/kg]
+
+      hf = ha(Tstd)
+
+
+
+   .. py:method:: dcpdT(p: float, T: float) -> float
+
+      dcp/dT [J/kg/K^2]
+      If the temperature is not within Tlow and Thigh, a
+      warning is displayed.
+
+      dcp/dT(T) = sum_{i=1,4}(i * a_{i} * T^(i - 1))
+
+
+
+   .. py:method:: fromDictionary(dictionary)
+      :classmethod:
+
+
+      Create from dictionary.
+
+      {
+          Rgas: float
+              The mass specific gas constant
+          cpLow:  list<float>
+              List of polynomial coefficients to compute cp of the specie
+              in the range of temperature below Tth
+          cpHigh: list<float>
+              List of polynomial coefficients to compute cp of the specie
+              in the range of temperature above Tth
+          Tth:    float
+              Threshold temperature to change polynomial coefficient to
+              be used to compute the cp of the specie
+          Tlow:   float
+              Lower limit of the range of valodity of the polynomial
+              coefficients for computation of cp
+          Thigh:   float
+              Higher limit of the range of valodity of the polynomial
+              coefficients for computation of cp
+      }
+
+
+

@@ -1,0 +1,74 @@
+libICEpost.src.base.Filter.LowPassAndResample
+=============================================
+
+.. py:module:: libICEpost.src.base.Filter.LowPassAndResample
+
+.. autoapi-nested-parse::
+
+   @author: <N. Surname>       <e-mail>
+   Last update:        DD/MM/YYYY
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   libICEpost.src.base.Filter.LowPassAndResample.LowPassAndResample
+
+
+Module Contents
+---------------
+
+.. py:class:: LowPassAndResample(*, delta: float, cutoff: float, order=5)
+
+   Bases: :py:obj:`libICEpost.src.base.Filter.LowPass.LowPass`, :py:obj:`libICEpost.src.base.Filter.Resample.Resample`
+
+
+   Apply low-pass filter and resampling
+
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   .. attribute:: cutoff
+
+      Cutoff frequency
+
+      :type: float
+
+   .. attribute:: order
+
+      Order of the filter
+
+      :type: int
+
+   .. attribute:: delta
+
+      Resampling time-step
+
+      :type: float
+
+
+   .. py:method:: fromDictionary(dictionary)
+      :classmethod:
+
+
+      Create from dictionary.
+
+      {
+          delta (float): Resampling time-step
+          cutoff (float): cutoff frequency
+          order (int): order of the filter
+      }
+
+
+
+   .. py:method:: __call__(xp: list[float], yp: list[float]) -> tuple[list[float],list[float]]
+
+      Filter an array of x,y data with low-pass filter and resampling
+
+
+
+   .. py:method:: __repr__() -> str
+
+

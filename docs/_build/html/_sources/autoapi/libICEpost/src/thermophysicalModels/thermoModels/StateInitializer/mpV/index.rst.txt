@@ -1,0 +1,57 @@
+libICEpost.src.thermophysicalModels.thermoModels.StateInitializer.mpV
+=====================================================================
+
+.. py:module:: libICEpost.src.thermophysicalModels.thermoModels.StateInitializer.mpV
+
+.. autoapi-nested-parse::
+
+   @author: <N. Surname>       <e-mail>
+   Last update:        DD/MM/YYYY
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   libICEpost.src.thermophysicalModels.thermoModels.StateInitializer.mpV.mpV
+
+
+Module Contents
+---------------
+
+.. py:class:: mpV(/, *, p: float, m: float, V: float, **kwargv)
+
+   Bases: :py:obj:`libICEpost.src.thermophysicalModels.thermoModels.StateInitializer.StateInitializer.StateInitializer`
+
+
+   Initialize from (mass,pressure,volume)
+
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   .. attribute:: mix
+
+      ThermoMixture
+      Reference to the thermodynamic mixture
+
+
+   .. py:attribute:: _state
+      :type:  libICEpost.src.thermophysicalModels.thermoModels.StateInitializer.StateInitializer.ThermoState
+
+
+   .. py:method:: fromDictionary(dictionary)
+      :classmethod:
+
+
+      Create from dictionary.
+
+      {
+          mix (ThermoMixture): the thermodynamic mixture
+          m (float): mass [kg]
+          p (float): pressure [Pa]
+          V (float): volume [m^3]
+      }
+
+
+

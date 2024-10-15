@@ -1,0 +1,105 @@
+libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.Stoichiometry
+================================================================================
+
+.. py:module:: libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.Stoichiometry
+
+.. autoapi-nested-parse::
+
+   @author: F. Ramognino       <federico.ramognino@polimi.it>
+   Last update:        12/06/2023
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.Stoichiometry.Stoichiometry
+
+
+Module Contents
+---------------
+
+.. py:class:: Stoichiometry(reactants: libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture, oxidizer: libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule = database.chemistry.specie.Molecules.O2)
+
+   Bases: :py:obj:`libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.ReactionModel.ReactionModel`
+
+
+   Reaction model of fuel combustion with infinitely fast chemistry
+
+   TODO:
+   Extend to handle a generic reaction set, where there might be more then one oxidizer
+
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   .. attribute:: oxidiser
+
+      Molecule
+      The oxidiser
+
+   .. attribute:: reactants
+
+      (Mixture)
+      The mixture of the reactants
+
+   .. attribute:: products
+
+      (Mixture)
+      The mixture of products of the reaction
+
+   .. attribute:: reactions
+
+      (_Database)
+      Database of oxidation reactions. Reference to database.chemistry.reactions
+
+
+   .. py:attribute:: _ReactionType
+      :type:  str
+      :value: 'StoichiometricReaction'
+
+
+
+   .. py:property:: fuel
+      The sub-mixture of reactants with the fuels
+
+
+   .. py:property:: oxidizer
+      The oxidizer
+
+
+   .. py:method:: fromDictionary(dictionary)
+      :classmethod:
+
+
+      :param dictionary: The dictionary from which constructing
+                         {
+                             "reactants" (Mixture): the mixture of reactants
+                             "oxidiser" (Molecule): the oxidizer
+                         }
+      :type dictionary: dict
+
+      Constructs from dictionary
+
+
+
+   .. py:attribute:: _oxidizer
+
+
+   .. py:method:: _updateFuels()
+
+      Update list of fuels
+
+
+
+   .. py:method:: _update(reactants: libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture = None, **state) -> bool
+
+      Method to update the products.
+
+      :param reactants: Update mixture of reactants. Defaults to None.
+      :type reactants: Mixture, optional
+
+      :returns: wether the system was updated
+      :rtype: bool
+
+
+

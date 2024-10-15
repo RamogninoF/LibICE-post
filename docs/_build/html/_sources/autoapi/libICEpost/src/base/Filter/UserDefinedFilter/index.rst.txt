@@ -1,0 +1,62 @@
+libICEpost.src.base.Filter.UserDefinedFilter
+============================================
+
+.. py:module:: libICEpost.src.base.Filter.UserDefinedFilter
+
+.. autoapi-nested-parse::
+
+   @author: <N. Surname>       <e-mail>
+   Last update:        DD/MM/YYYY
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   libICEpost.src.base.Filter.UserDefinedFilter.UserDefinedFilter
+
+
+Module Contents
+---------------
+
+.. py:class:: UserDefinedFilter(function: types.FunctionType)
+
+   Bases: :py:obj:`libICEpost.src.base.Filter.Filter.Filter`
+
+
+   User defined filter from body of "__call__(x,y)" method
+
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Attributes:
+
+
+   .. py:property:: code
+      the code of the __call__(x,y) method
+
+      :returns: str
+
+
+   .. py:method:: fromDictionary(dictionary)
+      :classmethod:
+
+
+      Create from dictionary.
+
+      {
+          code (str): the code of the __call__(x,y) method
+      }
+
+
+
+   .. py:method:: __call__(x: list[float], y: list[float]) -> tuple[list[float],list[float]]
+
+      Filter a set of (x,y) data executing the user-defined code
+
+
+
+   .. py:method:: __repr__() -> str
+
+

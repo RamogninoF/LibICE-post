@@ -1,0 +1,292 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>libICEpost.src.base.Functions.runtimeWarning &mdash; libICEpost  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+      <link rel="stylesheet" type="text/css" href="../../../../../../_static/graphviz.css?v=fd3f3429" />
+
+  
+      <script src="../../../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../../search.html" />
+    <link rel="next" title="libICEpost.src.base.Functions.typeChecking" href="../typeChecking/index.html" />
+    <link rel="prev" title="libICEpost.src.base.Functions.functionsForOF" href="../functionsForOF/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../../index.html" class="icon icon-home">
+            libICEpost
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../example.html">Example usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../conduct.html">Code of Conduct</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../../../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../../../index.html">libICEpost</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../../../../index.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../../../../Database/index.html">libICEpost.Database</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../scripts/index.html">libICEpost.scripts</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="../../../index.html">libICEpost.src</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../../index.html">libICEpost</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">libICEpost</a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">libICEpost.src</a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">libICEpost.src.base</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">libICEpost.src.base.Functions</a></li>
+      <li class="breadcrumb-item active">libICEpost.src.base.Functions.runtimeWarning</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../../../_sources/autoapi/libICEpost/src/base/Functions/runtimeWarning/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-libICEpost.src.base.Functions.runtimeWarning">
+<span id="libicepost-src-base-functions-runtimewarning"></span><h1>libICEpost.src.base.Functions.runtimeWarning<a class="headerlink" href="#module-libICEpost.src.base.Functions.runtimeWarning" title="Link to this heading"></a></h1>
+<p>&#64;author: F. Ramognino       &lt;<a class="reference external" href="mailto:federico&#46;ramognino&#37;&#52;&#48;polimi&#46;it">federico<span>&#46;</span>ramognino<span>&#64;</span>polimi<span>&#46;</span>it</a>&gt;
+Last update:        12/06/2023</p>
+<p>Functions for warnings and error messages.</p>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#libICEpost.src.base.Functions.runtimeWarning.bcolors" title="libICEpost.src.base.Functions.runtimeWarning.bcolors"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bcolors</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#libICEpost.src.base.Functions.runtimeWarning.enf" title="libICEpost.src.base.Functions.runtimeWarning.enf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">enf</span></code></a>(msg, style)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#libICEpost.src.base.Functions.runtimeWarning.printStack" title="libICEpost.src.base.Functions.runtimeWarning.printStack"><code class="xref py py-obj docutils literal notranslate"><span class="pre">printStack</span></code></a>([e])</p></td>
+<td><p>Print the current call-stack. If an error was raised,</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#libICEpost.src.base.Functions.runtimeWarning.baseRuntimeWarning" title="libICEpost.src.base.Functions.runtimeWarning.baseRuntimeWarning"><code class="xref py py-obj docutils literal notranslate"><span class="pre">baseRuntimeWarning</span></code></a>(WarningMSG, Msg[, verbosityLevel, ...])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#libICEpost.src.base.Functions.runtimeWarning.runtimeWarning" title="libICEpost.src.base.Functions.runtimeWarning.runtimeWarning"><code class="xref py py-obj docutils literal notranslate"><span class="pre">runtimeWarning</span></code></a>(Msg[, verbosityLevel, stack])</p></td>
+<td><p>Print a runtime warning message (Msg) and the call-stack.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#libICEpost.src.base.Functions.runtimeWarning.runtimeError" title="libICEpost.src.base.Functions.runtimeWarning.runtimeError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">runtimeError</span></code></a>(Msg[, verbosityLevel, stack])</p></td>
+<td><p>Print a runtime error message (Msg) and the call-stack.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#libICEpost.src.base.Functions.runtimeWarning.fatalErrorIn" title="libICEpost.src.base.Functions.runtimeWarning.fatalErrorIn"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fatalErrorIn</span></code></a>(self, func, msg[, err])</p></td>
+<td><p>Raise a RuntimeError.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#libICEpost.src.base.Functions.runtimeWarning.fatalErrorInClass" title="libICEpost.src.base.Functions.runtimeWarning.fatalErrorInClass"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fatalErrorInClass</span></code></a>(cls, func, msg[, err])</p></td>
+<td><p>Raise a RuntimeError.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#libICEpost.src.base.Functions.runtimeWarning.fatalErrorInFunction" title="libICEpost.src.base.Functions.runtimeWarning.fatalErrorInFunction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fatalErrorInFunction</span></code></a>(func, msg[, err])</p></td>
+<td><p>Raise a RuntimeError.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#libICEpost.src.base.Functions.runtimeWarning.fatalErrorInArgumentChecking" title="libICEpost.src.base.Functions.runtimeWarning.fatalErrorInArgumentChecking"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fatalErrorInArgumentChecking</span></code></a>(self, func[, err])</p></td>
+<td><p>Raise RuntimeError due to failing argument checking in function call.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#libICEpost.src.base.Functions.runtimeWarning.fatalError" title="libICEpost.src.base.Functions.runtimeWarning.fatalError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fatalError</span></code></a>(msg[, err])</p></td>
+<td><p>Raise a RuntimeError.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="libICEpost.src.base.Functions.runtimeWarning.bcolors">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">libICEpost.src.base.Functions.runtimeWarning.</span></span><span class="sig-name descname"><span class="pre">bcolors</span></span><a class="reference internal" href="../../../../../../_modules/libICEpost/src/base/Functions/runtimeWarning.html#bcolors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.base.Functions.runtimeWarning.bcolors" title="Link to this definition"></a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.base.Functions.runtimeWarning.bcolors.HEADER">
+<span class="sig-name descname"><span class="pre">HEADER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'\x1b[95m'</span></em><a class="headerlink" href="#libICEpost.src.base.Functions.runtimeWarning.bcolors.HEADER" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.base.Functions.runtimeWarning.bcolors.OKBLUE">
+<span class="sig-name descname"><span class="pre">OKBLUE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'\x1b[94m'</span></em><a class="headerlink" href="#libICEpost.src.base.Functions.runtimeWarning.bcolors.OKBLUE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.base.Functions.runtimeWarning.bcolors.OKCYAN">
+<span class="sig-name descname"><span class="pre">OKCYAN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'\x1b[96m'</span></em><a class="headerlink" href="#libICEpost.src.base.Functions.runtimeWarning.bcolors.OKCYAN" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.base.Functions.runtimeWarning.bcolors.OKGREEN">
+<span class="sig-name descname"><span class="pre">OKGREEN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'\x1b[92m'</span></em><a class="headerlink" href="#libICEpost.src.base.Functions.runtimeWarning.bcolors.OKGREEN" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.base.Functions.runtimeWarning.bcolors.WARNING">
+<span class="sig-name descname"><span class="pre">WARNING</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'\x1b[93m'</span></em><a class="headerlink" href="#libICEpost.src.base.Functions.runtimeWarning.bcolors.WARNING" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.base.Functions.runtimeWarning.bcolors.FAIL">
+<span class="sig-name descname"><span class="pre">FAIL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'\x1b[91m'</span></em><a class="headerlink" href="#libICEpost.src.base.Functions.runtimeWarning.bcolors.FAIL" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.base.Functions.runtimeWarning.bcolors.ENDC">
+<span class="sig-name descname"><span class="pre">ENDC</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'\x1b[0m'</span></em><a class="headerlink" href="#libICEpost.src.base.Functions.runtimeWarning.bcolors.ENDC" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.base.Functions.runtimeWarning.bcolors.BOLD">
+<span class="sig-name descname"><span class="pre">BOLD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'\x1b[1m'</span></em><a class="headerlink" href="#libICEpost.src.base.Functions.runtimeWarning.bcolors.BOLD" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.base.Functions.runtimeWarning.bcolors.UNDERLINE">
+<span class="sig-name descname"><span class="pre">UNDERLINE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'\x1b[4m'</span></em><a class="headerlink" href="#libICEpost.src.base.Functions.runtimeWarning.bcolors.UNDERLINE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="libICEpost.src.base.Functions.runtimeWarning.enf">
+<span class="sig-prename descclassname"><span class="pre">libICEpost.src.base.Functions.runtimeWarning.</span></span><span class="sig-name descname"><span class="pre">enf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../_modules/libICEpost/src/base/Functions/runtimeWarning.html#enf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.base.Functions.runtimeWarning.enf" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="libICEpost.src.base.Functions.runtimeWarning.printStack">
+<span class="sig-prename descclassname"><span class="pre">libICEpost.src.base.Functions.runtimeWarning.</span></span><span class="sig-name descname"><span class="pre">printStack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">e</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../_modules/libICEpost/src/base/Functions/runtimeWarning.html#printStack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.base.Functions.runtimeWarning.printStack" title="Link to this definition"></a></dt>
+<dd><p>Print the current call-stack. If an error was raised,
+print the traceback with the error message.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="libICEpost.src.base.Functions.runtimeWarning.baseRuntimeWarning">
+<span class="sig-prename descclassname"><span class="pre">libICEpost.src.base.Functions.runtimeWarning.</span></span><span class="sig-name descname"><span class="pre">baseRuntimeWarning</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">WarningMSG</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Msg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosityLevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stack</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../_modules/libICEpost/src/base/Functions/runtimeWarning.html#baseRuntimeWarning"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.base.Functions.runtimeWarning.baseRuntimeWarning" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="libICEpost.src.base.Functions.runtimeWarning.runtimeWarning">
+<span class="sig-prename descclassname"><span class="pre">libICEpost.src.base.Functions.runtimeWarning.</span></span><span class="sig-name descname"><span class="pre">runtimeWarning</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Msg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosityLevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stack</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../_modules/libICEpost/src/base/Functions/runtimeWarning.html#runtimeWarning"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.base.Functions.runtimeWarning.runtimeWarning" title="Link to this definition"></a></dt>
+<dd><p>Print a runtime warning message (Msg) and the call-stack.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="libICEpost.src.base.Functions.runtimeWarning.runtimeError">
+<span class="sig-prename descclassname"><span class="pre">libICEpost.src.base.Functions.runtimeWarning.</span></span><span class="sig-name descname"><span class="pre">runtimeError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Msg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosityLevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stack</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../_modules/libICEpost/src/base/Functions/runtimeWarning.html#runtimeError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.base.Functions.runtimeWarning.runtimeError" title="Link to this definition"></a></dt>
+<dd><p>Print a runtime error message (Msg) and the call-stack.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="libICEpost.src.base.Functions.runtimeWarning.fatalErrorIn">
+<span class="sig-prename descclassname"><span class="pre">libICEpost.src.base.Functions.runtimeWarning.</span></span><span class="sig-name descname"><span class="pre">fatalErrorIn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">err</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../_modules/libICEpost/src/base/Functions/runtimeWarning.html#fatalErrorIn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.base.Functions.runtimeWarning.fatalErrorIn" title="Link to this definition"></a></dt>
+<dd><p>Raise a RuntimeError.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="libICEpost.src.base.Functions.runtimeWarning.fatalErrorInClass">
+<span class="sig-prename descclassname"><span class="pre">libICEpost.src.base.Functions.runtimeWarning.</span></span><span class="sig-name descname"><span class="pre">fatalErrorInClass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">err</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../_modules/libICEpost/src/base/Functions/runtimeWarning.html#fatalErrorInClass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.base.Functions.runtimeWarning.fatalErrorInClass" title="Link to this definition"></a></dt>
+<dd><p>Raise a RuntimeError.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="libICEpost.src.base.Functions.runtimeWarning.fatalErrorInFunction">
+<span class="sig-prename descclassname"><span class="pre">libICEpost.src.base.Functions.runtimeWarning.</span></span><span class="sig-name descname"><span class="pre">fatalErrorInFunction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">err</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../_modules/libICEpost/src/base/Functions/runtimeWarning.html#fatalErrorInFunction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.base.Functions.runtimeWarning.fatalErrorInFunction" title="Link to this definition"></a></dt>
+<dd><p>Raise a RuntimeError.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="libICEpost.src.base.Functions.runtimeWarning.fatalErrorInArgumentChecking">
+<span class="sig-prename descclassname"><span class="pre">libICEpost.src.base.Functions.runtimeWarning.</span></span><span class="sig-name descname"><span class="pre">fatalErrorInArgumentChecking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">err</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../_modules/libICEpost/src/base/Functions/runtimeWarning.html#fatalErrorInArgumentChecking"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.base.Functions.runtimeWarning.fatalErrorInArgumentChecking" title="Link to this definition"></a></dt>
+<dd><p>Raise RuntimeError due to failing argument checking in function call.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="libICEpost.src.base.Functions.runtimeWarning.fatalError">
+<span class="sig-prename descclassname"><span class="pre">libICEpost.src.base.Functions.runtimeWarning.</span></span><span class="sig-name descname"><span class="pre">fatalError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">err</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../_modules/libICEpost/src/base/Functions/runtimeWarning.html#fatalError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.base.Functions.runtimeWarning.fatalError" title="Link to this definition"></a></dt>
+<dd><p>Raise a RuntimeError.</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../functionsForOF/index.html" class="btn btn-neutral float-left" title="libICEpost.src.base.Functions.functionsForOF" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../typeChecking/index.html" class="btn btn-neutral float-right" title="libICEpost.src.base.Functions.typeChecking" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, libICEpost.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

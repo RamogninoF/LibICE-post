@@ -1,0 +1,228 @@
+libICEpost.src.base.dataStructures.EngineData.EngineData
+========================================================
+
+.. py:module:: libICEpost.src.base.dataStructures.EngineData.EngineData
+
+.. autoapi-nested-parse::
+
+   @author: F. Ramognino       <federico.ramognino@polimi.it>
+   Last update:        12/06/2023
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   libICEpost.src.base.dataStructures.EngineData.EngineData._reservedMethds
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   libICEpost.src.base.dataStructures.EngineData.EngineData.EngineData
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   libICEpost.src.base.dataStructures.EngineData.EngineData.is_valid_variable_name
+   libICEpost.src.base.dataStructures.EngineData.EngineData.timing
+
+
+Module Contents
+---------------
+
+.. py:function:: is_valid_variable_name(name)
+
+.. py:function:: timing(f)
+
+.. py:class:: EngineData
+
+   Bases: :py:obj:`libICEpost.src.base.Utilities.Utilities`
+
+
+   Database for engine data. Wraps a pandas DataFrame class and adds
+   some useful I/O methods and defines interpolators of the varibles to
+   easily access data at generic instants.
+
+
+   .. py:property:: columns
+      :type: list[str]
+
+
+
+   .. py:property:: loc
+
+
+   .. py:property:: iloc
+
+
+   .. py:attribute:: data
+
+
+   .. py:method:: __len__()
+
+
+   .. py:method:: __str__()
+
+
+   .. py:method:: __repr__()
+
+
+   .. py:method:: __getitem__(item)
+
+
+   .. py:method:: __setitem__(key, item)
+
+
+   .. py:method:: __delitem__(item)
+
+
+   .. py:method:: loadFile(fileName: str, varName: str, /, *, CACol: int = 0, varCol: int = 1, CAOff: float = 0.0, varOff: float = 0.0, CAscale: float = 1.0, varScale: float = 1.0, skipRows: int = 0, maxRows: int = None, interpolate: bool = False, comments: str = '#', verbose: bool = True, delimiter: str = None, default: float = float('nan')) -> Self
+
+      [Variable] | [Type] | [Default] | [Description]
+      -----------|--------|-----------|---------------------------------------------
+      fileName   | str    | -         | Source file
+      varName    | str    | -         | Name of variable in data structure
+      CACol      | int    | 0         | Column of CA list
+      varCol     | int    | 1         | Column of data list
+      CAOff      | float  | 0.0       | Offset to sum to CA range
+      varOff     | float  | 0.0       | Offset to sum to variable range
+      CAscale    | float  | 1.0       | Scaling factor to apply to CA range
+      varScale   | float  | 1.0       | Scaling factor to apply to variable range
+      comments   | str    | '#'       | Character to use to detect comment lines
+      delimiter  | str    | None      | Delimiter for the columns (defaults to whitespace)
+      skipRows   | int    | 0         | Number of raws to skip at beginning of file
+      maxRows    | int    | None      | Maximum number of raws to use
+      interpolate| bool   | False     | Interpolate the data-set at existing CA range (used to load non-consistent data)
+      verbose    | bool   | True      | Print info/warnings
+      default    | float  | nan       | Default value to add in out-of-range values
+
+      Load a file containing the time-series of a variable. If
+      data were already loaded, the CA range must be consistent
+      (sub-arrays are also permitted; excess data will be truncated).
+      Note: use delimiter=',' to load CSV files. Automatically removes
+      duplicate times.
+
+
+
+   .. py:method:: loadArray(data: collections.abc.Iterable, varName: str, verbose: bool = True, default: float = float('nan'), interpolate: bool = False, dataFormat: Literal['column', 'row'] = 'column') -> Self
+
+      Load an array into the table. Automatically removes duplicate times.
+
+      :param data: Container of shape [N,2] (column) or [2,N] (row), depending
+                   on 'dataFormat' value, with first column/row the CA range and second the variable
+                   time-series to load.
+      :type data: collections.abc.Iterable
+      :param varName: Name of variable in data structure
+      :type varName: str
+      :param verbose: If need to print loading information. Defaults to True.
+      :type verbose: bool, optional
+      :param default: Default value for out-of-range elements. Defaults
+                      to float("nan").
+      :type default: float, optional
+      :param interpolate: Interpolate the data-set at existing CA
+                          range (used to load non-consistent data). Defaults to False.
+      :type interpolate: bool, optional
+      :param dataFormat: Format of data:
+                         column -> [N,2]
+                         row -> [2,N]
+      :type dataFormat: str, Literal[&quot;column&quot;, &quot;row&quot;], optional
+
+      :returns: self.
+      :rtype: Self
+
+      Examples:
+      >>> ed = EngineData()
+
+      #Loading from list containing two lists for CA and variable (by row)
+      >>> ed = EngineData()
+      >>> data = [[1, 2, 3, 4, 5], [11, 12, 13, 14, 15]]
+      >>> ed.loadArray(data, "var1", dataFormat="row")
+         CA  var1
+      0   1    11
+      1   2    12
+      2   3    13
+      3   4    14
+      4   5    15
+
+      #Loading second variable from list of (CA,var) pairs (order by column) without interpolation
+      >>> data = [(3, 3), (4, 3.5), (5, 2.4), (6, 5.2), (7, 3.14)]
+      >>> ed.loadArray(data, "var2", dataFormat="column")
+         CA  var1  var2
+      0   1  11.0   NaN
+      1   2  12.0   NaN
+      2   3  13.0  3.00
+      3   4  14.0  3.50
+      4   5  15.0  2.40
+      5   6   NaN  5.20
+      6   7   NaN  3.14
+
+      #Extend the interval of var2 from a pandas.DataFrame with data by column,
+      suppressing the warning for orverwriting.
+      >>> from pandas import DataFrame as df
+      >>> data = df({"CA":[8, 9, 10, 11], "var":[2, 1, 0, -1]})
+      >>> ed.loadArray(data, "var2", dataFormat="column", verbose=False)
+          CA  var1  var2
+      0    1  11.0   NaN
+      1    2  12.0   NaN
+      2    3  13.0  3.00
+      3    4  14.0  3.50
+      4    5  15.0  2.40
+      5    6   NaN  5.20
+      6    7   NaN  3.14
+      7    8   NaN  2.00
+      8    9   NaN  1.00
+      9   10   NaN  0.00
+      10  11   NaN -1.00
+
+      #Load a variable var3 from numpy ndarray and interpolate
+      >>> import numpy as np
+      >>> data = np.array([[-5.5, 5.5],[2.3, 5.4]])
+      >>> ed.loadArray(data, "var3", dataFormat="row", interpolate=True)
+          CA  var1  var2      var3
+      0   -5.5   NaN   NaN  2.300000
+      1    1.0  11.0   NaN  4.131818
+      2    2.0  12.0   NaN  4.413636
+      3    3.0  13.0  3.00  4.695455
+      4    4.0  14.0  3.50  4.977273
+      5    5.0  15.0  2.40  5.259091
+      6    5.5   NaN  3.80  5.400000
+      7    6.0   NaN  5.20       NaN
+      8    7.0   NaN  3.14       NaN
+      9    8.0   NaN  2.00       NaN
+      10   9.0   NaN  1.00       NaN
+      11  10.0   NaN  0.00       NaN
+      12  11.0   NaN -1.00       NaN
+
+
+
+   .. py:method:: createInterpolator(varName: str)
+
+      varName:    str
+
+      Create the interpolator for a variable and defines the method varName(CA) which returns the interpolated value of variable 'varName' at instant 'CA' from the data in self.data
+
+
+
+   .. py:method:: write(fileName: str, overwrite: bool = False, sep: str = ' ')
+
+      fileName:   str
+          Name of the file where to write the data structure
+      overwrite:  bool (False)
+          Allow to overwrite file if existing
+      sep:        str ('')
+          Separator
+
+      Write data to a file
+
+
+
+.. py:data:: _reservedMethds
+

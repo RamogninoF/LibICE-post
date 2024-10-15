@@ -1,0 +1,45 @@
+libICEpost.src.thermophysicalModels.thermoModels.EgrModel.FixedCompositionExternalEGR
+=====================================================================================
+
+.. py:module:: libICEpost.src.thermophysicalModels.thermoModels.EgrModel.FixedCompositionExternalEGR
+
+.. autoapi-nested-parse::
+
+   @author: <N. Surname>       <e-mail>
+   Last update:        DD/MM/YYYY
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   libICEpost.src.thermophysicalModels.thermoModels.EgrModel.FixedCompositionExternalEGR.FixedCompositionExternalEGR
+
+
+Module Contents
+---------------
+
+.. py:class:: FixedCompositionExternalEGR(*, egrMixture: libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture, egr: float, **kwargs)
+
+   Bases: :py:obj:`libICEpost.src.thermophysicalModels.thermoModels.EgrModel.EgrModel.EgrModel`
+
+
+   Imposed external EGR composition.
+
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+   .. py:method:: fromDictionary(dictionary: dict | libICEpost.src.base.dataStructures.Dictionary.Dictionary)
+      :classmethod:
+
+
+      Create from dictionary
+      {
+          egrComposition (Mixture): The EGR mixture.
+          egr (float): The egr mass fraction.
+      }
+
+
+

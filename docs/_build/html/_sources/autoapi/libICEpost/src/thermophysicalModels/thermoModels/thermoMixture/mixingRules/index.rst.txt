@@ -1,0 +1,24 @@
+libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.mixingRules
+==========================================================================
+
+.. py:module:: libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.mixingRules
+
+.. autoapi-nested-parse::
+
+   @author: F. Ramognino       <federico.ramognino@polimi.it>
+   Last update:        17/10/2023
+
+   Package for handling mixing rules for combining thermodynamic properties of specie into a multi-component mixture
+
+
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/libICEpost/src/thermophysicalModels/thermoModels/thermoMixture/mixingRules/EquationOfState/index
+   /autoapi/libICEpost/src/thermophysicalModels/thermoModels/thermoMixture/mixingRules/Thermo/index
+
+

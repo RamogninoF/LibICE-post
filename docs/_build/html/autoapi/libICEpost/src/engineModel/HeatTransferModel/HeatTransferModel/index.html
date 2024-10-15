@@ -1,0 +1,193 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>libICEpost.src.engineModel.HeatTransferModel.HeatTransferModel &mdash; libICEpost  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+      <link rel="stylesheet" type="text/css" href="../../../../../../_static/graphviz.css?v=fd3f3429" />
+
+  
+      <script src="../../../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../../search.html" />
+    <link rel="next" title="libICEpost.src.engineModel.HeatTransferModel.Woschni" href="../Woschni/index.html" />
+    <link rel="prev" title="libICEpost.src.engineModel.HeatTransferModel" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../../index.html" class="icon icon-home">
+            libICEpost
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../example.html">Example usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../conduct.html">Code of Conduct</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../../../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../../../index.html">libICEpost</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../../../../index.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../../../../Database/index.html">libICEpost.Database</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../scripts/index.html">libICEpost.scripts</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="../../../index.html">libICEpost.src</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../../index.html">libICEpost</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">libICEpost</a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">libICEpost.src</a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">libICEpost.src.engineModel</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">libICEpost.src.engineModel.HeatTransferModel</a></li>
+      <li class="breadcrumb-item active">libICEpost.src.engineModel.HeatTransferModel.HeatTransferModel</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../../../_sources/autoapi/libICEpost/src/engineModel/HeatTransferModel/HeatTransferModel/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-libICEpost.src.engineModel.HeatTransferModel.HeatTransferModel">
+<span id="libicepost-src-enginemodel-heattransfermodel-heattransfermodel"></span><h1>libICEpost.src.engineModel.HeatTransferModel.HeatTransferModel<a class="headerlink" href="#module-libICEpost.src.engineModel.HeatTransferModel.HeatTransferModel" title="Link to this heading"></a></h1>
+<p>&#64;author: F. Ramognino       &lt;<a class="reference external" href="mailto:federico&#46;ramognino&#37;&#52;&#48;polimi&#46;it">federico<span>&#46;</span>ramognino<span>&#64;</span>polimi<span>&#46;</span>it</a>&gt;
+Last update:        12/06/2023</p>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#libICEpost.src.engineModel.HeatTransferModel.HeatTransferModel.HeatTransferModel" title="libICEpost.src.engineModel.HeatTransferModel.HeatTransferModel.HeatTransferModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HeatTransferModel</span></code></a></p></td>
+<td><p>Base class for modeling of wall heat transfer.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="libICEpost.src.engineModel.HeatTransferModel.HeatTransferModel.HeatTransferModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">libICEpost.src.engineModel.HeatTransferModel.HeatTransferModel.</span></span><span class="sig-name descname"><span class="pre">HeatTransferModel</span></span><a class="reference internal" href="../../../../../../_modules/libICEpost/src/engineModel/HeatTransferModel/HeatTransferModel.html#HeatTransferModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.engineModel.HeatTransferModel.HeatTransferModel.HeatTransferModel" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="../../../base/BaseClass/index.html#libICEpost.src.base.BaseClass.BaseClass" title="libICEpost.src.base.BaseClass.BaseClass"><code class="xref py py-obj docutils literal notranslate"><span class="pre">libICEpost.src.base.BaseClass.BaseClass</span></code></a></p>
+<p>Base class for modeling of wall heat transfer.</p>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.engineModel.HeatTransferModel.HeatTransferModel.HeatTransferModel.fromDictionary">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromDictionary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dictionary</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Self</span></span></span><a class="reference internal" href="../../../../../../_modules/libICEpost/src/engineModel/HeatTransferModel/HeatTransferModel.html#HeatTransferModel.fromDictionary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.engineModel.HeatTransferModel.HeatTransferModel.HeatTransferModel.fromDictionary" title="Link to this definition"></a></dt>
+<dd><p>Construct from dictionary with heat transfer model parameters (to be overloaded for docstring)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>instance of selected heatTransferModel</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Self</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.engineModel.HeatTransferModel.HeatTransferModel.HeatTransferModel.h">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">h</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">engine</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../EngineModel/EngineModel/index.html#libICEpost.src.engineModel.EngineModel.EngineModel.EngineModel" title="libICEpost.src.engineModel.EngineModel.EngineModel.EngineModel"><span class="pre">libICEpost.src.engineModel.EngineModel.EngineModel.EngineModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">CA</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">collections.abc.Iterable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="../../../thermophysicalModels/specie/thermo/EquationOfState/EquationOfState/index.html#libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.EquationOfState.EquationOfState.None" title="libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.EquationOfState.EquationOfState.None"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../../../../../_modules/libICEpost/src/engineModel/HeatTransferModel/HeatTransferModel.html#HeatTransferModel.h"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.engineModel.HeatTransferModel.HeatTransferModel.HeatTransferModel.h" title="Link to this definition"></a></dt>
+<dd><p>Compute wall heat transfer coefficient at walls. To be overwritten.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>engine</strong> (<a class="reference internal" href="../../EngineModel/EngineModel/index.html#libICEpost.src.engineModel.EngineModel.EngineModel.EngineModel" title="libICEpost.src.engineModel.EngineModel.EngineModel.EngineModel"><em>EngineModel</em></a>) – The engine model from which taking data.</p></li>
+<li><p><strong>CA</strong> (<em>float</em><em> | </em><em>Iterable</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – Time for which computing heat transfer. If None, uses engine.time.time. Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>convective wall heat transfer coefficient [W/(m^2 K)]</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.engineModel.HeatTransferModel.HeatTransferModel.HeatTransferModel.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**args</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../../../thermophysicalModels/specie/thermo/EquationOfState/EquationOfState/index.html#libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.EquationOfState.EquationOfState.None" title="libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.EquationOfState.EquationOfState.None"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../../../../_modules/libICEpost/src/engineModel/HeatTransferModel/HeatTransferModel.html#HeatTransferModel.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.engineModel.HeatTransferModel.HeatTransferModel.HeatTransferModel.update" title="Link to this definition"></a></dt>
+<dd><p>Update coefficients of the model</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../index.html" class="btn btn-neutral float-left" title="libICEpost.src.engineModel.HeatTransferModel" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../Woschni/index.html" class="btn btn-neutral float-right" title="libICEpost.src.engineModel.HeatTransferModel.Woschni" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, libICEpost.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

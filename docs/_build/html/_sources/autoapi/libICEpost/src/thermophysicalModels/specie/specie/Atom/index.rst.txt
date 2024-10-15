@@ -1,0 +1,110 @@
+libICEpost.src.thermophysicalModels.specie.specie.Atom
+======================================================
+
+.. py:module:: libICEpost.src.thermophysicalModels.specie.specie.Atom
+
+.. autoapi-nested-parse::
+
+   @author: F. Ramognino       <federico.ramognino@polimi.it>
+   Last update:        12/06/2023
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   libICEpost.src.thermophysicalModels.specie.specie.Atom.Atom
+
+
+Module Contents
+---------------
+
+.. py:class:: Atom(name, mass)
+
+   Bases: :py:obj:`libICEpost.src.base.Utilities.Utilities`
+
+
+   Class handling an atomic specie.
+
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Attibutes:
+       name:   str
+           Name of the atomic specie
+
+       mass:   float
+           Atomic mass
+
+
+
+   .. py:attribute:: name
+      :type:  str
+
+
+   .. py:attribute:: mass
+      :type:  float
+
+
+   .. py:method:: __eq__(otherSpecie)
+
+      Two species are equal if have the same value for all attributes.
+
+
+
+   .. py:method:: __ne__(otherSpecie)
+
+      Negation of __eq__ operator
+
+
+
+   .. py:method:: __lt__(otherSpecie)
+
+      Ordering by molecular weight
+
+
+
+   .. py:method:: __gt__(otherSpecie)
+
+      Ordering by molecular weight
+
+
+
+   .. py:method:: __ge__(otherSpecie)
+
+      Ordering by molecular weight
+
+
+
+   .. py:method:: __le__(otherSpecie)
+
+      Ordering by molecular weight
+
+
+
+   .. py:method:: __add__(otherSpecie)
+
+      Possible additions:
+          Atom + Atom = Molecule
+          atomSpecie + Molecule = Molecule
+
+
+
+   .. py:method:: __mul__(num)
+
+      Possible additions:
+          Atom * float/int = Molecule
+
+
+
+   .. py:method:: __rmul__(num)
+
+      Possible additions:
+          Atom * float/int = Molecule
+
+
+
+   .. py:method:: __repr__()
+
+

@@ -1,0 +1,317 @@
+libICEpost.src.thermophysicalModels.specie.specie.Mixture
+=========================================================
+
+.. py:module:: libICEpost.src.thermophysicalModels.specie.specie.Mixture
+
+.. autoapi-nested-parse::
+
+   @author: F. Ramognino       <federico.ramognino@polimi.it>
+   Last update:        12/06/2023
+
+   .. todo::
+
+      Optimize the dilute method
+      The 'for item in self' could be non optimal with current implementation
+      Define a update(mix:Mixture) method to change the mixture composition. Then use it whenever a Mixture is changed in a class, so that its pointer is preserved.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   libICEpost.src.thermophysicalModels.specie.specie.Mixture.constants
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   libICEpost.src.thermophysicalModels.specie.specie.Mixture.MixtureItem
+   libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture
+   libICEpost.src.thermophysicalModels.specie.specie.Mixture.MixtureIter
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   libICEpost.src.thermophysicalModels.specie.specie.Mixture.mixtureBlend
+
+
+Module Contents
+---------------
+
+.. py:data:: constants
+
+.. py:class:: MixtureItem
+
+   Dataclass used as return value by Mixture.__getitem__ method
+
+
+   .. py:attribute:: specie
+      :type:  libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule
+
+
+   .. py:attribute:: X
+      :type:  float
+
+
+   .. py:attribute:: Y
+      :type:  float
+
+
+.. py:class:: Mixture(specieList: list[libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule], composition: list[float], fracType='mass')
+
+   Bases: :py:obj:`libICEpost.src.base.Utilities.Utilities`
+
+
+   Class handling a the mixture of a homogeneous mixture.
+
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   .. attribute:: _specie
+
+      list<Molecule>
+      Specie in the mixture
+
+   .. attribute:: _X
+
+      list<float>
+      Mole fractions of specie in the mixture
+
+   .. attribute:: _Y
+
+      list<float>
+      Mass fractions of specie in the mixture
+
+
+   .. py:attribute:: _decimalPlaces
+      :value: 10
+
+
+
+   .. py:attribute:: _X
+      :type:  list[float]
+
+
+   .. py:attribute:: _Y
+      :type:  list[float]
+
+
+   .. py:attribute:: _specie
+      :type:  list[libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule]
+
+
+   .. py:property:: Rgas
+      The mass-specific gas constant of the mixture.
+
+
+   .. py:property:: Y
+      The mass fractions.
+
+
+   .. py:property:: X
+      The mole fractions.
+
+
+   .. py:property:: specie
+      The specie in the mixture.
+
+
+   .. py:method:: empty()
+      :classmethod:
+
+
+      Overload empty initializer.
+
+
+
+   .. py:attribute:: _current_index
+      :value: 0
+
+
+
+   .. py:method:: __str__()
+
+
+   .. py:method:: __repr__()
+
+
+   .. py:method:: __getitem__(specie) -> MixtureItem
+
+      specie:     str / Molecule / int
+
+      Get the data relative to molecule in the mixture
+          -> If str: checking for molecule matching the name
+          -> If Molecule: checking for specie
+          -> If int:  checing for entry following the order
+
+      :returns: dataclass for data of specie in mixture.
+      :rtype: MixtureItem
+
+
+
+   .. py:method:: __delitem__(specie)
+
+      specie:     str / Molecule / int
+
+      Remove molecule from mixture
+          -> If str: checking for molecule matching the name
+          -> If Molecule: checking for specie
+          -> If int:  checing for entry following the order
+
+      :returns: dataclass for data of specie in mixture.
+      :rtype: MixtureItem
+
+
+
+   .. py:method:: __iter__()
+
+      Iteration over the specie in the mixture.
+
+
+
+   .. py:method:: __contains__(entry)
+
+      Checks if a Molecule is part of the mixture.
+
+
+
+   .. py:method:: __index__(entry)
+
+      Return the idex position of the Molecule in the Mixture.
+
+
+
+   .. py:method:: index(entry)
+
+      Return the idex position of the Molecule in the Mixture.
+
+
+
+   .. py:method:: __len__()
+
+      Return the number of chemical specie in the Mixture.
+
+
+
+   .. py:method:: __eq__(mix)
+
+
+   .. py:method:: updateMolFracts()
+
+      Update mole fractions of the specie from mass fractions.
+
+
+
+   .. py:method:: updateMassFracts()
+
+      Update mass fractions of the specie from mole fractions.
+
+
+
+   .. py:property:: MM
+      Return the average molecular mass of the mixture.
+
+
+   .. py:method:: Ysum()
+
+      Return the sum of mass fractions of specie in the composition (should add to 1).
+
+
+
+   .. py:method:: Xsum()
+
+      Return the sum of mole fractions of specie in the composition (should add to 1).
+
+
+
+   .. py:method:: dilute(dilutingMix: Mixture, dilutionFract: float, fracType: str = 'mass')
+
+      dilutingMix:        Mixture/Molecule
+          Diluting mixture
+      dilutionFract:      float
+          mass/mole fraction of the dilutant mixture with respect
+          to the overall mixture.
+      fracType:       str ("mass" or "mole")
+          Type of dilution, if mass fraction or mole fraction based.
+
+      Dilute the mixture with a second mixture, given the
+      mass/mole fraction of the dilutant mixture with respect
+      to the overall mixture.
+
+
+
+   .. py:method:: extract(specieList)
+
+      specieList:        list<Molecule>
+          List of specie to extract
+
+      Extract a submixture from a list of specie. Raises ValueError if a Molecule
+      is not found in mixture
+
+
+
+   .. py:method:: removeZeros() -> Mixture
+
+      Remove Molecules with too low mass and mole fraction (Mixture._decimalPlaces).
+
+      :returns: self
+      :rtype: Mixture
+
+
+
+   .. py:method:: subtractMixture(mix: Mixture) -> tuple[float, Mixture]
+
+      Finds the maximum sub-mixture with composition 'mix' in this. Then returns a tuple with (yMix, remainder)
+      which are the mass-fraction of mixture 'mix' in this and the remaining mixture once 'mix' is removed.
+
+      :param mix: Mixture to subtract from this
+      :type mix: Mixture
+
+      :returns: couple (yMix, remainder)
+      :rtype: tuple[float,Mixture]
+
+
+
+.. py:class:: MixtureIter(composition: Mixture)
+
+   Iterator for Mixture class.
+
+
+   .. py:attribute:: composition
+      :type:  Mixture
+
+
+   .. py:attribute:: specieList
+      :type:  list[libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule]
+
+
+   .. py:attribute:: current_index
+      :type:  int
+      :value: 0
+
+
+
+   .. py:method:: __iter__()
+
+
+   .. py:method:: __next__()
+
+
+.. py:function:: mixtureBlend(mixtures: list[Mixture], composition: list[float], fracType: str = 'mass') -> Mixture
+
+   mixture:    list<mixture>
+           List of mixtures to be blended
+   composition:          list<float>
+       List of mass/mole fractions for the blending
+   fracType:   str
+       Type of blending (mass/mole fraction-based)
+
+   Blends together a group of mixtures.
+
+

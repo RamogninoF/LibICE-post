@@ -1,0 +1,26 @@
+libICEpost.src.base.dataStructures.EngineData
+=============================================
+
+.. py:module:: libICEpost.src.base.dataStructures.EngineData
+
+.. autoapi-nested-parse::
+
+   @author: F. Ramognino       <federico.ramognino@polimi.it>
+   Last update:        19/06/2023
+
+   Tables used to store data from postprocessing of engine models.
+
+   Content of the package
+       ...
+
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/libICEpost/src/base/dataStructures/EngineData/EngineData/index
+
+

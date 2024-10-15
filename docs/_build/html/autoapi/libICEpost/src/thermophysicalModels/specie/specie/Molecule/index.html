@@ -1,0 +1,438 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>libICEpost.src.thermophysicalModels.specie.specie.Molecule &mdash; libICEpost  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+      <link rel="stylesheet" type="text/css" href="../../../../../../../_static/graphviz.css?v=fd3f3429" />
+
+  
+      <script src="../../../../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../../../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../../../search.html" />
+    <link rel="next" title="libICEpost.src.thermophysicalModels.specie.thermo" href="../../thermo/index.html" />
+    <link rel="prev" title="libICEpost.src.thermophysicalModels.specie.specie.Mixture" href="../Mixture/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../../../index.html" class="icon icon-home">
+            libICEpost
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../../example.html">Example usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../../conduct.html">Code of Conduct</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../../../../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../../../../index.html">libICEpost</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../../../../../index.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../../../../../Database/index.html">libICEpost.Database</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../scripts/index.html">libICEpost.scripts</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="../../../../index.html">libICEpost.src</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../../../index.html">libICEpost</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../../../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="../../../../../index.html">libICEpost</a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">libICEpost.src</a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">libICEpost.src.thermophysicalModels</a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">libICEpost.src.thermophysicalModels.specie</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">libICEpost.src.thermophysicalModels.specie.specie</a></li>
+      <li class="breadcrumb-item active">libICEpost.src.thermophysicalModels.specie.specie.Molecule</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../../../../_sources/autoapi/libICEpost/src/thermophysicalModels/specie/specie/Molecule/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-libICEpost.src.thermophysicalModels.specie.specie.Molecule">
+<span id="libicepost-src-thermophysicalmodels-specie-specie-molecule"></span><h1>libICEpost.src.thermophysicalModels.specie.specie.Molecule<a class="headerlink" href="#module-libICEpost.src.thermophysicalModels.specie.specie.Molecule" title="Link to this heading"></a></h1>
+<p>&#64;author: F. Ramognino       &lt;<a class="reference external" href="mailto:federico&#46;ramognino&#37;&#52;&#48;polimi&#46;it">federico<span>&#46;</span>ramognino<span>&#64;</span>polimi<span>&#46;</span>it</a>&gt;
+Last update:        12/06/2023</p>
+<section id="attributes">
+<h2>Attributes<a class="headerlink" href="#attributes" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.constants" title="libICEpost.src.thermophysicalModels.specie.specie.Molecule.constants"><code class="xref py py-obj docutils literal notranslate"><span class="pre">constants</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.MoleculeItem" title="libICEpost.src.thermophysicalModels.specie.specie.Molecule.MoleculeItem"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MoleculeItem</span></code></a></p></td>
+<td><p>Dataclass used as return value by Molecule.__getitem__ method</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule" title="libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Molecule</span></code></a></p></td>
+<td><p>Class containing information of a chemical specie.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.MoleculeIter" title="libICEpost.src.thermophysicalModels.specie.specie.Molecule.MoleculeIter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MoleculeIter</span></code></a></p></td>
+<td><p>Iterator for Molecule class.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Molecule.constants">
+<span class="sig-prename descclassname"><span class="pre">libICEpost.src.thermophysicalModels.specie.specie.Molecule.</span></span><span class="sig-name descname"><span class="pre">constants</span></span><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.constants" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Molecule.MoleculeItem">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">libICEpost.src.thermophysicalModels.specie.specie.Molecule.</span></span><span class="sig-name descname"><span class="pre">MoleculeItem</span></span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Molecule.html#MoleculeItem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.MoleculeItem" title="Link to this definition"></a></dt>
+<dd><p>Dataclass used as return value by Molecule.__getitem__ method</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Molecule.MoleculeItem.atom">
+<span class="sig-name descname"><span class="pre">atom</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../Atom/index.html#libICEpost.src.thermophysicalModels.specie.specie.Atom.Atom" title="libICEpost.src.thermophysicalModels.specie.specie.Atom.Atom"><span class="pre">libICEpost.src.thermophysicalModels.specie.specie.Atom.Atom</span></a></em><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.MoleculeItem.atom" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Molecule.MoleculeItem.n">
+<span class="sig-name descname"><span class="pre">n</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.MoleculeItem.n" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">libICEpost.src.thermophysicalModels.specie.specie.Molecule.</span></span><span class="sig-name descname"><span class="pre">Molecule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">specieName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atomicSpecie</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">numberOfAtoms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Molecule.html#Molecule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="../../../../base/Utilities/index.html#libICEpost.src.base.Utilities.Utilities" title="libICEpost.src.base.Utilities.Utilities"><code class="xref py py-obj docutils literal notranslate"><span class="pre">libICEpost.src.base.Utilities.Utilities</span></code></a></p>
+<p>Class containing information of a chemical specie.</p>
+<hr class="docutils" />
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.name" title="Link to this definition"></a></dt>
+<dd><p>str
+Name of the chemical specie</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.atoms">
+<span class="sig-name descname"><span class="pre">atoms</span></span><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.atoms" title="Link to this definition"></a></dt>
+<dd><p>list&lt;Atom&gt;
+Atomic composition of the chemical specie</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.numberOfAtoms">
+<span class="sig-name descname"><span class="pre">numberOfAtoms</span></span><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.numberOfAtoms" title="Link to this definition"></a></dt>
+<dd><p>list&lt;float&gt;
+Number of atoms of each specie</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id1">
+<span class="sig-name descname"><span class="pre">atoms</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../Atom/index.html#libICEpost.src.thermophysicalModels.specie.specie.Atom.Atom" title="libICEpost.src.thermophysicalModels.specie.specie.Atom.Atom"><span class="pre">libICEpost.src.thermophysicalModels.specie.specie.Atom.Atom</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id2">
+<span class="sig-name descname"><span class="pre">numberOfAtoms</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.Rgas">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Rgas</span></span><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.Rgas" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">Compute</span> <span class="pre">the</span> <span class="pre">mass-specific</span> <span class="pre">gas</span> <span class="pre">constant</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">molecule:</span></span></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">Rgas</span> <span class="pre">=</span> <span class="pre">R</span> <span class="pre">/</span> <span class="pre">MM</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.empty">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">empty</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Molecule.html#Molecule.empty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.empty" title="Link to this definition"></a></dt>
+<dd><p>Overload empty initializer.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.fromDictionary">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromDictionary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dictionary</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Molecule.html#Molecule.fromDictionary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.fromDictionary" title="Link to this definition"></a></dt>
+<dd><p>Construct from dictionary:
+{</p>
+<blockquote>
+<div><dl class="simple">
+<dt>name:           str</dt><dd><p>Name of the chemical specie</p>
+</dd>
+<dt>atoms:          list&lt;Atom&gt;</dt><dd><p>Atomic composition of the chemical specie</p>
+</dd>
+<dt>numberOfAtoms:  list&lt;float&gt;</dt><dd><p>Number of atoms of each specie</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>}</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.__eq__">
+<span class="sig-name descname"><span class="pre">__eq__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">otherSpecie</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Molecule.html#Molecule.__eq__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.__eq__" title="Link to this definition"></a></dt>
+<dd><p>Two chemical specie are equal if they have same name,
+the same atomic specie (with same names), and the same
+thermodynamic properties.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.__ne__">
+<span class="sig-name descname"><span class="pre">__ne__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Molecule.html#Molecule.__ne__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.__ne__" title="Link to this definition"></a></dt>
+<dd><p>Negation of __eq__ operator</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.__lt__">
+<span class="sig-name descname"><span class="pre">__lt__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">otherSpecie</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Molecule.html#Molecule.__lt__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.__lt__" title="Link to this definition"></a></dt>
+<dd><p>Ordering by molecular weight</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.__gt__">
+<span class="sig-name descname"><span class="pre">__gt__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">otherSpecie</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Molecule.html#Molecule.__gt__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.__gt__" title="Link to this definition"></a></dt>
+<dd><p>Ordering by molecular weight</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.__ge__">
+<span class="sig-name descname"><span class="pre">__ge__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">otherSpecie</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Molecule.html#Molecule.__ge__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.__ge__" title="Link to this definition"></a></dt>
+<dd><p>Ordering by molecular weight</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.__le__">
+<span class="sig-name descname"><span class="pre">__le__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">otherSpecie</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Molecule.html#Molecule.__le__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.__le__" title="Link to this definition"></a></dt>
+<dd><p>Ordering by molecular weight</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.__iadd__">
+<span class="sig-name descname"><span class="pre">__iadd__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">otherSpecie</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Molecule.html#Molecule.__iadd__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.__iadd__" title="Link to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>In place addition. Possible additions:</dt><dd><p>Molecule + Molecule = Molecule
+Molecule + Atom = Molecule</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.__add__">
+<span class="sig-name descname"><span class="pre">__add__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">otherSpecie</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Molecule.html#Molecule.__add__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.__add__" title="Link to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Possible additions:</dt><dd><p>Molecule + Molecule = Molecule
+Molecule + Atom = Molecule</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Molecule.html#Molecule.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.__str__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Molecule.html#Molecule.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.__repr__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.__contains__">
+<span class="sig-name descname"><span class="pre">__contains__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entry</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Molecule.html#Molecule.__contains__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.__contains__" title="Link to this definition"></a></dt>
+<dd><p>Checks if a Atom is part of the Molecule.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.__index__">
+<span class="sig-name descname"><span class="pre">__index__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entry</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Molecule.html#Molecule.__index__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.__index__" title="Link to this definition"></a></dt>
+<dd><p>Return the idex position of the Atom in the Molecule.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.index">
+<span class="sig-name descname"><span class="pre">index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entry</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Molecule.html#Molecule.index"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.index" title="Link to this definition"></a></dt>
+<dd><p>Return the idex position of the Atom in the Molecule.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.__len__">
+<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Molecule.html#Molecule.__len__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.__len__" title="Link to this definition"></a></dt>
+<dd><p>Return the number of Atomic specie in the molecule.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.__getitem__">
+<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atom</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Molecule.html#Molecule.__getitem__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.__getitem__" title="Link to this definition"></a></dt>
+<dd><p>atom:     str / Atom / int</p>
+<dl class="simple">
+<dt>Get the data relative to Atom in the Molecule</dt><dd><p>-&gt; If str: checking for atom matching the name
+-&gt; If Atom: checking for atomic specie
+-&gt; If int:  checing for entry following the order</p>
+</dd>
+</dl>
+<p>Return: MoleculeItem</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.__iter__">
+<span class="sig-name descname"><span class="pre">__iter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Molecule.html#Molecule.__iter__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.__iter__" title="Link to this definition"></a></dt>
+<dd><p>Iteration over the atoms in the molecule.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.MM">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MM</span></span><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.MM" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">Compute</span> <span class="pre">the</span> <span class="pre">molecular</span> <span class="pre">mass</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">chemical</span> <span class="pre">specie.</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.bruteFormula">
+<span class="sig-name descname"><span class="pre">bruteFormula</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Molecule.html#Molecule.bruteFormula"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.bruteFormula" title="Link to this definition"></a></dt>
+<dd><p>Returns the brute formula of the specie</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.atomList">
+<span class="sig-name descname"><span class="pre">atomList</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Molecule.html#Molecule.atomList"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.atomList" title="Link to this definition"></a></dt>
+<dd><p>Returns a list&lt;Atom&gt; containing a list of the atomic specie
+contained in the chemical specie.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.atomicCompositionMatrix">
+<span class="sig-name descname"><span class="pre">atomicCompositionMatrix</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Molecule.html#Molecule.atomicCompositionMatrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.atomicCompositionMatrix" title="Link to this definition"></a></dt>
+<dd><p>Return a 1xN numpy.ndarray with the atomic composition
+matrix of the molecule, where N is the number of atoms
+in the molecule. Each element of the matrix is the number
+of atoms of the atomic specie in the mixture, sorted
+according to their order in ‘atoms’ array.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.setName">
+<span class="sig-name descname"><span class="pre">setName</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Molecule.html#Molecule.setName"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule.setName" title="Link to this definition"></a></dt>
+<dd><p>Set the name of the specie.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Molecule.MoleculeIter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">libICEpost.src.thermophysicalModels.specie.specie.Molecule.</span></span><span class="sig-name descname"><span class="pre">MoleculeIter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">molecule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule" title="libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule"><span class="pre">Molecule</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Molecule.html#MoleculeIter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.MoleculeIter" title="Link to this definition"></a></dt>
+<dd><p>Iterator for Molecule class.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Molecule.MoleculeIter.molecule">
+<span class="sig-name descname"><span class="pre">molecule</span></span><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.MoleculeIter.molecule" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Molecule.MoleculeIter.atoms">
+<span class="sig-name descname"><span class="pre">atoms</span></span><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.MoleculeIter.atoms" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Molecule.MoleculeIter.current_index">
+<span class="sig-name descname"><span class="pre">current_index</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.MoleculeIter.current_index" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Molecule.MoleculeIter.__iter__">
+<span class="sig-name descname"><span class="pre">__iter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Molecule.html#MoleculeIter.__iter__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.MoleculeIter.__iter__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Molecule.MoleculeIter.__next__">
+<span class="sig-name descname"><span class="pre">__next__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Molecule.html#MoleculeIter.__next__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Molecule.MoleculeIter.__next__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../Mixture/index.html" class="btn btn-neutral float-left" title="libICEpost.src.thermophysicalModels.specie.specie.Mixture" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../thermo/index.html" class="btn btn-neutral float-right" title="libICEpost.src.thermophysicalModels.specie.thermo" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, libICEpost.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

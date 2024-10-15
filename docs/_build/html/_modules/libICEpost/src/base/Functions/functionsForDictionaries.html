@@ -1,0 +1,263 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>libICEpost.src.base.Functions.functionsForDictionaries &mdash; libICEpost  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=fd3f3429" />
+
+  
+      <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            libICEpost
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../example.html">Example usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../conduct.html">Code of Conduct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">libICEpost</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">libICEpost.src.base.Functions.functionsForDictionaries</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for libICEpost.src.base.Functions.functionsForDictionaries</h1><div class="highlight"><pre>
+<span></span><span class="c1">#####################################################################</span>
+<span class="c1">#                                  DOC                              #</span>
+<span class="c1">#####################################################################</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">@author: F. Ramognino       &lt;federico.ramognino@polimi.it&gt;</span>
+<span class="sd">Last update:        12/06/2023</span>
+
+<span class="sd">Functions for handling dictionaries.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1">#####################################################################</span>
+<span class="c1">#                               IMPORT                              #</span>
+<span class="c1">#####################################################################</span>
+
+<span class="kn">from</span> <span class="nn">.typeChecking</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="c1">#############################################################################</span>
+<span class="c1">#                               MAIN FUNCTIONS                              #</span>
+<span class="c1">#############################################################################</span>
+
+<span class="c1">#Lookup or default from dictionary:</span>
+<div class="viewcode-block" id="lookupOrDefault">
+<a class="viewcode-back" href="../../../../../autoapi/libICEpost/src/base/Functions/functionsForDictionaries/index.html#libICEpost.src.base.Functions.functionsForDictionaries.lookupOrDefault">[docs]</a>
+<span class="k">def</span> <span class="nf">lookupOrDefault</span><span class="p">(</span><span class="n">Dict</span><span class="p">,</span><span class="n">Entry</span><span class="p">,</span><span class="n">Default</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Dict:       dict</span>
+<span class="sd">    Entry:      -</span>
+<span class="sd">    Default:    -</span>
+<span class="sd">    </span>
+<span class="sd">    Look from &#39;Entry&#39; in &#39;Dict&#39;. If not found, return &#39;Default&#39;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#Argument checking:</span>
+    <span class="n">checkType</span><span class="p">(</span><span class="n">Dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">entryName</span><span class="o">=</span><span class="s2">&quot;Dict&quot;</span><span class="p">)</span>
+    
+    <span class="kn">import</span> <span class="nn">copy</span> <span class="k">as</span> <span class="nn">cp</span>
+    <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="n">Entry</span> <span class="ow">in</span> <span class="n">Dict</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">cp</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">Default</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">cp</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">Dict</span><span class="p">[</span><span class="n">Entry</span><span class="p">])</span></div>
+
+
+<span class="c1">#############################################################################</span>
+<span class="c1">#Set dictionary from template:</span>
+<div class="viewcode-block" id="dictFromTemplate">
+<a class="viewcode-back" href="../../../../../autoapi/libICEpost/src/base/Functions/functionsForDictionaries/index.html#libICEpost.src.base.Functions.functionsForDictionaries.dictFromTemplate">[docs]</a>
+<span class="k">def</span> <span class="nf">dictFromTemplate</span><span class="p">(</span><span class="n">Dict</span><span class="p">,</span><span class="n">TemplateDict</span><span class="p">,</span> <span class="o">**</span><span class="n">argv</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Dict:           dict</span>
+<span class="sd">    TemplateDict:   dict</span>
+<span class="sd">    </span>
+<span class="sd">    Keyword arguments:</span>
+<span class="sd">    intAsFloat:     bool (True)</span>
+<span class="sd">        Treat int as floats for type-checking</span>
+<span class="sd">    </span>
+<span class="sd">    Set the entries in a dictionaries from a template dictionary.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">inputs</span> <span class="o">=</span> \
+        <span class="p">{</span>
+            <span class="s2">&quot;intAsFloat&quot;</span><span class="p">:</span><span class="kc">True</span>
+        <span class="p">}</span>
+    
+    <span class="n">inputs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span>
+    <span class="n">intAsFloat</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;intAsFloat&quot;</span><span class="p">]</span>
+    
+    <span class="c1">#Argument checking:</span>
+    <span class="n">checkType</span><span class="p">(</span><span class="n">Dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">entryName</span><span class="o">=</span><span class="s2">&quot;Dict&quot;</span><span class="p">)</span>
+    <span class="n">checkType</span><span class="p">(</span><span class="n">TemplateDict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">entryName</span><span class="o">=</span><span class="s2">&quot;TemplateDict&quot;</span><span class="p">)</span>
+    <span class="n">checkType</span><span class="p">(</span><span class="n">intAsFloat</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">entryName</span><span class="o">=</span><span class="s2">&quot;intAsFloat&quot;</span><span class="p">)</span>
+    
+    <span class="n">outDict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">TemplateDict</span><span class="p">:</span>
+        <span class="n">outDict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">lookupOrDefault</span><span class="p">(</span><span class="n">Dict</span><span class="p">,</span><span class="n">key</span><span class="p">,</span><span class="n">TemplateDict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">checkType</span><span class="p">(</span><span class="n">outDict</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="nb">type</span><span class="p">(</span><span class="n">TemplateDict</span><span class="p">[</span><span class="n">key</span><span class="p">]),</span> <span class="n">intAsFloat</span><span class="o">=</span><span class="n">intAsFloat</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Type missmatch: entry &#39;</span><span class="si">{}</span><span class="s2">&#39; in source dictionary is of type &#39;</span><span class="si">{}</span><span class="s2">&#39; while type &#39;</span><span class="si">{}</span><span class="s2">&#39; is found in template dictionary.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">outDict</span><span class="p">[</span><span class="n">key</span><span class="p">]),</span> <span class="nb">type</span><span class="p">(</span><span class="n">TemplateDict</span><span class="p">[</span><span class="n">key</span><span class="p">])))</span>
+        
+    <span class="k">return</span> <span class="n">outDict</span></div>
+
+
+<span class="c1">#############################################################################</span>
+<span class="c1">#Check if entries are found in dictionary:</span>
+<div class="viewcode-block" id="checkDictEntries">
+<a class="viewcode-back" href="../../../../../autoapi/libICEpost/src/base/Functions/functionsForDictionaries/index.html#libICEpost.src.base.Functions.functionsForDictionaries.checkDictEntries">[docs]</a>
+<span class="k">def</span> <span class="nf">checkDictEntries</span><span class="p">(</span><span class="n">Dict</span><span class="p">,</span><span class="n">entryList</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Dict:           dict</span>
+<span class="sd">        Dictionary to be checked</span>
+<span class="sd">    entryList:      list</span>
+<span class="sd">        List of entries to assess if present in the dicitonary</span>
+<span class="sd">    </span>
+<span class="sd">    Keyword arguments:</span>
+<span class="sd">    intAsFloat:     bool (True)</span>
+<span class="sd">        Treat int as floats for type-checking</span>
+<span class="sd">    </span>
+<span class="sd">    Checks if all the keys in entryList are present in the dictionary.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#Argument checking:</span>
+    <span class="n">checkType</span><span class="p">(</span><span class="n">Dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">entryName</span><span class="o">=</span><span class="s2">&quot;Dict&quot;</span><span class="p">)</span>
+    <span class="n">checkType</span><span class="p">(</span><span class="n">entryList</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="n">entryName</span><span class="o">=</span><span class="s2">&quot;entryList&quot;</span><span class="p">)</span>
+    
+    <span class="n">notFound</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">entryList</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="n">entry</span> <span class="ow">in</span> <span class="n">Dict</span><span class="p">):</span>
+            <span class="n">notFound</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">notFound</span><span class="p">):</span>
+        <span class="n">missing</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">nf</span> <span class="ow">in</span> <span class="n">notFound</span><span class="p">:</span>
+            <span class="n">missing</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nf</span><span class="p">)</span>
+        
+        <span class="n">available</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">av</span> <span class="ow">in</span> <span class="n">Dict</span><span class="p">:</span>
+            <span class="n">available</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">av</span><span class="p">)</span>
+        
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Following entries are missing from the dictionary:</span><span class="se">\n</span><span class="si">{}</span><span class="se">\n</span><span class="s2">Available entries are:</span><span class="se">\n</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">missing</span><span class="p">,</span> <span class="n">available</span><span class="p">))</span></div>
+
+
+<span class="c1">#############################################################################</span>
+<span class="c1">#Check types of entries in dictionary:</span>
+<div class="viewcode-block" id="checkDictTypes">
+<a class="viewcode-back" href="../../../../../autoapi/libICEpost/src/base/Functions/functionsForDictionaries/index.html#libICEpost.src.base.Functions.functionsForDictionaries.checkDictTypes">[docs]</a>
+<span class="k">def</span> <span class="nf">checkDictTypes</span><span class="p">(</span><span class="n">Dict</span><span class="p">,</span><span class="n">entryTypes</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Dict:           dict</span>
+<span class="sd">        Dictionary to be checked</span>
+<span class="sd">    entryTypes:     dict</span>
+<span class="sd">        {</span>
+<span class="sd">            &#39;entry_ii&#39;:     tuple&lt;type&gt;</span>
+<span class="sd">        }</span>
+<span class="sd">        Dictionary containing the acceptable types for each entry to be</span>
+<span class="sd">        checked.</span>
+<span class="sd">    </span>
+<span class="sd">    Checks if all the keys of entryTypes are present in the dictionary and</span>
+<span class="sd">    of correct type.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1">#Argument checking:</span>
+    <span class="n">checkInstanceTemplate</span><span class="p">(</span> <span class="n">entryTypes</span><span class="p">,</span> <span class="p">{</span> <span class="mi">0</span><span class="p">:(</span><span class="nb">type</span><span class="p">,)</span> <span class="p">},</span> <span class="n">entryName</span><span class="o">=</span><span class="s2">&quot;entryTypes&quot;</span> <span class="p">)</span>
+    <span class="n">checkType</span><span class="p">(</span><span class="n">Dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">entryName</span><span class="o">=</span><span class="s2">&quot;Dict&quot;</span><span class="p">)</span>
+    <span class="n">checkDictEntries</span><span class="p">(</span><span class="n">Dict</span><span class="p">,</span><span class="nb">list</span><span class="p">(</span><span class="n">entryTypes</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+    
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">entryTypes</span><span class="p">:</span>
+        <span class="n">check</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">TT</span> <span class="ow">in</span> <span class="n">entryTypes</span><span class="p">[</span><span class="n">item</span><span class="p">]:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">checkType</span><span class="p">(</span><span class="n">Dict</span><span class="p">[</span><span class="n">item</span><span class="p">],</span> <span class="n">TT</span><span class="p">)</span>
+                <span class="n">check</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">break</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+        
+        <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="n">check</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Wrong type for entry &#39;</span><span class="si">{}</span><span class="s2">&#39;: &#39;</span><span class="si">{}</span><span class="s2">&#39; expected but &#39;</span><span class="si">{}</span><span class="s2">&#39; was found.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">for</span> <span class="n">T</span> <span class="ow">in</span> <span class="n">entryTypes</span><span class="p">[</span><span class="n">item</span><span class="p">]],</span> <span class="n">Dict</span><span class="p">[</span><span class="n">item</span><span class="p">]</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, libICEpost.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

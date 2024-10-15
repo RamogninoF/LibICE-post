@@ -1,0 +1,64 @@
+libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.mixingRules.EquationOfState.PerfectGasMixing
+===========================================================================================================
+
+.. py:module:: libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.mixingRules.EquationOfState.PerfectGasMixing
+
+.. autoapi-nested-parse::
+
+   @author: F. Ramognino       <federico.ramognino@polimi.it>
+   Last update:        17/10/2023
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.mixingRules.EquationOfState.PerfectGasMixing.PerfectGasMixing
+
+
+Module Contents
+---------------
+
+.. py:class:: PerfectGasMixing(mix: libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture)
+
+   Bases: :py:obj:`libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.mixingRules.EquationOfState.EquationOfStateMixing.EquationOfStateMixing`
+
+
+   Class handling mixing rule of multi-component mixture of perfect gasses.
+
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   .. attribute:: EoSType
+
+      str
+      Type of equation of state for which it is implemented
+
+   .. attribute:: EoS
+
+      EquationOfState
+      The eqation of state of the mixture
+
+
+   .. py:attribute:: EoSType
+      :value: 'PerfectGas'
+
+
+
+   .. py:method:: fromDictionary(dictionary)
+      :classmethod:
+
+
+      Create from dictionary.
+
+
+
+   .. py:method:: _update(mix: libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture = None)
+
+      Equation of state of perfect gas mixture depend only on R*, which needs to be updated.
+
+      Pv/R*T = 1
+
+
+

@@ -1,0 +1,54 @@
+libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.functions
+============================================================================
+
+.. py:module:: libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.functions
+
+.. autoapi-nested-parse::
+
+   @author: F. Ramognino       <federico.ramognino@polimi.it>
+   Last update:        10/06/2024
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.functions.computeAlphaSt
+   libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.functions.computeAlpha
+
+
+Module Contents
+---------------
+
+.. py:function:: computeAlphaSt(air: libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture, fuel: libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture, *, oxidizer: libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule = database.chemistry.specie.Molecules.O2) -> float
+
+   Compute the stoichiometric air-fuel ratio given air and fuel mixture compositions.
+
+   :param air: The air mixture composition
+   :type air: Mixture
+   :param fuel: The fuel mixture composition
+   :type fuel: Mixture
+   :param oxidizer: The oxidizing molecule. Defaults to database.chemistry.specie.Molecules.O2.
+   :type oxidizer: Molecule, optional
+
+   :returns: float
+
+
+.. py:function:: computeAlpha(air: libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture, fuel: libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture, reactants: libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture, *, oxidizer: libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule = database.chemistry.specie.Molecules.O2) -> float
+
+   Compute the air-fuel ratio given air, fuel, and reactants mixture compositions.
+
+   :param air: The air mixture composition
+   :type air: Mixture
+   :param fuel: The fuel mixture composition
+   :type fuel: Mixture
+   :param reactants: The reactants mixture composition
+   :type reactants: Mixture
+   :param oxidizer: The oxidizing molecule. Defaults to database.chemistry.specie.Molecules.O2.
+   :type oxidizer: Molecule, optional
+
+   :returns: float
+
+

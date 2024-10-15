@@ -1,0 +1,55 @@
+libICEpost.src.thermophysicalModels.thermoModels.StateInitializer.StateInitializer
+==================================================================================
+
+.. py:module:: libICEpost.src.thermophysicalModels.thermoModels.StateInitializer.StateInitializer
+
+.. autoapi-nested-parse::
+
+   @author: <N. Surname>       <e-mail>
+   Last update:        DD/MM/YYYY
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   libICEpost.src.thermophysicalModels.thermoModels.StateInitializer.StateInitializer.StateInitializer
+
+
+Module Contents
+---------------
+
+.. py:class:: StateInitializer(/, *, mix: libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.ThermoMixture.ThermoMixture)
+
+   Bases: :py:obj:`libICEpost.src.base.BaseClass.BaseClass`
+
+
+   Base class  for initialization of ThermoState (used for selection)
+
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   .. attribute:: mix
+
+      ThermoMixture
+      Reference to the thermodynamic mixture
+
+
+   .. py:attribute:: mix
+      :type:  libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.ThermoMixture.ThermoMixture
+
+
+   .. py:attribute:: _state
+      :type:  libICEpost.src.thermophysicalModels.thermoModels.ThermoState.ThermoState
+
+
+   .. py:method:: __call__() -> libICEpost.src.thermophysicalModels.thermoModels.ThermoState.ThermoState
+
+      Return the initialized thermodynamic state
+
+      :returns: the state
+      :rtype: ThermoState
+
+
+

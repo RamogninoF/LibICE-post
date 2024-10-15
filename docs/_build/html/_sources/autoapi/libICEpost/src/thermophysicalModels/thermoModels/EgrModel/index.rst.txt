@@ -1,0 +1,140 @@
+libICEpost.src.thermophysicalModels.thermoModels.EgrModel
+=========================================================
+
+.. py:module:: libICEpost.src.thermophysicalModels.thermoModels.EgrModel
+
+.. autoapi-nested-parse::
+
+   @author: <N. Surname>       <e-mail>
+   Last update:        DD/MM/YYYY
+
+   Models for computation of EGR mixture and fresh mxiture with EGR
+
+   Content of the package:
+       EgrModel (class)
+           #TODO
+
+       NoEGR (class)
+           #TODO
+
+       StoichiometricMixtureEGR (class)
+           #TODO
+
+       InternalExternalEGR (class)
+           #TODO
+
+
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/libICEpost/src/thermophysicalModels/thermoModels/EgrModel/EgrModel/index
+   /autoapi/libICEpost/src/thermophysicalModels/thermoModels/EgrModel/FixedCompositionExternalEGR/index
+   /autoapi/libICEpost/src/thermophysicalModels/thermoModels/EgrModel/StoichiometricMixtureEGR/index
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   libICEpost.src.thermophysicalModels.thermoModels.EgrModel.EgrModel
+   libICEpost.src.thermophysicalModels.thermoModels.EgrModel.StoichiometricMixtureEGR
+   libICEpost.src.thermophysicalModels.thermoModels.EgrModel.FixedCompositionExternalEGR
+
+
+Package Contents
+----------------
+
+.. py:class:: EgrModel(**kwargs)
+
+   Bases: :py:obj:`libICEpost.src.base.BaseClass.BaseClass`
+
+
+   Class for computation of EGR mixture. Instantiation of this class imposes no EGR.
+
+   NOTE: egr mass fraction is referred to the full mixture!
+       y_egr = m_egr/(m_egr + m_air + m_fuel)
+
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Attributes:
+
+
+
+   .. py:property:: EgrMixture
+      :type: libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture
+
+      The EGR mixture composition
+
+      :returns: Mixture
+
+
+   .. py:property:: egr
+      :type: float
+
+      The egr mass fraction
+
+      :returns: float
+
+
+   .. py:method:: fromDictionary(dictionary: dict)
+      :classmethod:
+
+
+      Create from dictionary
+      {
+      }
+
+
+
+.. py:class:: StoichiometricMixtureEGR(/, *, air: libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture, fuel: libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture, egr: float, combustionEfficiency=1.0, **kwargs)
+
+   Bases: :py:obj:`libICEpost.src.thermophysicalModels.thermoModels.EgrModel.EgrModel.EgrModel`
+
+
+   Egr composition from stoichiometric combustion.
+
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+   .. py:method:: fromDictionary(dictionary: dict | libICEpost.src.base.dataStructures.Dictionary.Dictionary)
+      :classmethod:
+
+
+      Create from dictionary
+      {
+          air (Mixture): The air mixture.
+          fuel (Mixture): The fuel mixture.
+          egr (float): The egr mass fraction.
+          combustionEfficiency (float, optional): Combustion efficiency. Defaults to 1.0.
+      }
+
+
+
+.. py:class:: FixedCompositionExternalEGR(*, egrMixture: libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture, egr: float, **kwargs)
+
+   Bases: :py:obj:`libICEpost.src.thermophysicalModels.thermoModels.EgrModel.EgrModel.EgrModel`
+
+
+   Imposed external EGR composition.
+
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+   .. py:method:: fromDictionary(dictionary: dict | libICEpost.src.base.dataStructures.Dictionary.Dictionary)
+      :classmethod:
+
+
+      Create from dictionary
+      {
+          egrComposition (Mixture): The EGR mixture.
+          egr (float): The egr mass fraction.
+      }
+
+
+

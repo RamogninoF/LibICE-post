@@ -1,0 +1,68 @@
+libICEpost.src.thermophysicalModels.thermoModels.ThermoState
+============================================================
+
+.. py:module:: libICEpost.src.thermophysicalModels.thermoModels.ThermoState
+
+.. autoapi-nested-parse::
+
+   @author: F. Ramognino       <federico.ramognino@polimi.it>
+   Last update:        12/06/2023
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   libICEpost.src.thermophysicalModels.thermoModels.ThermoState.__test_Dataclass
+   libICEpost.src.thermophysicalModels.thermoModels.ThermoState.ThermoState
+
+
+Module Contents
+---------------
+
+.. py:class:: __test_Dataclass
+
+.. py:class:: ThermoState
+
+   Bases: :py:obj:`collections.abc.Mapping`, :py:obj:`libICEpost.src.base.Utilities.Utilities`
+
+
+   DataClass storing the thermodynamic state of the system:
+       pressure (p) [Pa]
+       temperature (T) [T]
+       Volume (V) [m^3]
+       density (rho) [kg/m^3]
+       mass (m) [kg]
+
+
+   .. py:attribute:: p
+      :type:  float
+
+
+   .. py:attribute:: T
+      :type:  float
+
+
+   .. py:attribute:: m
+      :type:  float
+
+
+   .. py:attribute:: V
+      :type:  float
+
+
+   .. py:attribute:: rho
+      :type:  float
+
+
+   .. py:method:: __len__()
+
+
+   .. py:method:: __getitem__(ii)
+
+
+   .. py:method:: __iter__()
+
+

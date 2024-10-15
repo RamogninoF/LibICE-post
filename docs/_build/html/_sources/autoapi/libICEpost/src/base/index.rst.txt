@@ -1,0 +1,50 @@
+libICEpost.src.base
+===================
+
+.. py:module:: libICEpost.src.base
+
+.. autoapi-nested-parse::
+
+   @author: F. Ramognino       <federico.ramognino@polimi.it>
+   Last update:        9/03/2023
+
+   Basic functions and classes or data-structures that are useful for the overall package
+
+   Content of the package
+       Functions (package)
+           Package with useful functions for:
+               -> Type checking
+               -> Management of dictionaries
+               -> Error handling and displaying warnings
+               -> Handling OpenFOAM files and data-structures
+
+       Tables (package)
+           Table-like data structures (lookup tables, OpenFOAM tabulations)
+
+       Utilities
+           Defines class Utilities which wraps all usefull functions defined in 'Functions' pakage
+
+
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/libICEpost/src/base/Filter/index
+   /autoapi/libICEpost/src/base/Functions/index
+   /autoapi/libICEpost/src/base/Logging/index
+   /autoapi/libICEpost/src/base/dataStructures/index
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/libICEpost/src/base/BaseClass/index
+   /autoapi/libICEpost/src/base/Utilities/index
+
+

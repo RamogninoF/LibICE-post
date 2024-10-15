@@ -1,0 +1,319 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>libICEpost.src.base.BaseClass &mdash; libICEpost  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=fd3f3429" />
+
+  
+      <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" />
+    <link rel="next" title="libICEpost.src.base.Utilities" href="../Utilities/index.html" />
+    <link rel="prev" title="libICEpost.src.base.dataStructures.Dictionary" href="../dataStructures/Dictionary/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            libICEpost
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../../example.html">Example usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../conduct.html">Code of Conduct</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../../index.html">libICEpost</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../../../index.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../../../Database/index.html">libICEpost.Database</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../scripts/index.html">libICEpost.scripts</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="../../index.html">libICEpost.src</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">libICEpost</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">libICEpost</a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">libICEpost.src</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">libICEpost.src.base</a></li>
+      <li class="breadcrumb-item active">libICEpost.src.base.BaseClass</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../../_sources/autoapi/libICEpost/src/base/BaseClass/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-libICEpost.src.base.BaseClass">
+<span id="libicepost-src-base-baseclass"></span><h1>libICEpost.src.base.BaseClass<a class="headerlink" href="#module-libICEpost.src.base.BaseClass" title="Link to this heading"></a></h1>
+<p>&#64;author: F. Ramognino       &lt;<a class="reference external" href="mailto:federico&#46;ramognino&#37;&#52;&#48;polimi&#46;it">federico<span>&#46;</span>ramognino<span>&#64;</span>polimi<span>&#46;</span>it</a>&gt;
+Last update:        12/06/2023</p>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#libICEpost.src.base.BaseClass.SelectionTable" title="libICEpost.src.base.BaseClass.SelectionTable"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SelectionTable</span></code></a></p></td>
+<td><p>Table for storing classes for run-time selection.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#libICEpost.src.base.BaseClass.BaseClass" title="libICEpost.src.base.BaseClass.BaseClass"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseClass</span></code></a></p></td>
+<td><p>Class wrapping useful methods for base virtual classes (e.g. run-time selector)</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#libICEpost.src.base.BaseClass._add_TypeName" title="libICEpost.src.base.BaseClass._add_TypeName"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_add_TypeName</span></code></a>(cls)</p></td>
+<td><p>Function used to add the TypeName a class.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="libICEpost.src.base.BaseClass._add_TypeName">
+<span class="sig-prename descclassname"><span class="pre">libICEpost.src.base.BaseClass.</span></span><span class="sig-name descname"><span class="pre">_add_TypeName</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/libICEpost/src/base/BaseClass.html#_add_TypeName"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.base.BaseClass._add_TypeName" title="Link to this definition"></a></dt>
+<dd><p>Function used to add the TypeName a class.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="libICEpost.src.base.BaseClass.SelectionTable">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">libICEpost.src.base.BaseClass.</span></span><span class="sig-name descname"><span class="pre">SelectionTable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/libICEpost/src/base/BaseClass.html#SelectionTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.base.BaseClass.SelectionTable" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="../Utilities/index.html#libICEpost.src.base.Utilities.Utilities" title="libICEpost.src.base.Utilities.Utilities"><code class="xref py py-obj docutils literal notranslate"><span class="pre">libICEpost.src.base.Utilities.Utilities</span></code></a></p>
+<p>Table for storing classes for run-time selection.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.base.BaseClass.SelectionTable.__type">
+<span class="sig-name descname"><span class="pre">__type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">type</span></em><a class="headerlink" href="#libICEpost.src.base.BaseClass.SelectionTable.__type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.base.BaseClass.SelectionTable.__db">
+<span class="sig-name descname"><span class="pre">__db</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict[str:type]</span></em><a class="headerlink" href="#libICEpost.src.base.BaseClass.SelectionTable.__db" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="libICEpost.src.base.BaseClass.SelectionTable.type">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">type</span></em><a class="headerlink" href="#libICEpost.src.base.BaseClass.SelectionTable.type" title="Link to this definition"></a></dt>
+<dd><p>The base class to which the selection table is linked.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="libICEpost.src.base.BaseClass.SelectionTable.db">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">db</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict[str:type]</span></em><a class="headerlink" href="#libICEpost.src.base.BaseClass.SelectionTable.db" title="Link to this definition"></a></dt>
+<dd><p>Database of available sub-classes in the selection table.
+Classes are stored through [str-&gt;type] map.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.base.BaseClass.SelectionTable.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/libICEpost/src/base/BaseClass.html#SelectionTable.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.base.BaseClass.SelectionTable.__str__" title="Link to this definition"></a></dt>
+<dd><p>Printing selection table</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.base.BaseClass.SelectionTable.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/libICEpost/src/base/BaseClass.html#SelectionTable.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.base.BaseClass.SelectionTable.__repr__" title="Link to this definition"></a></dt>
+<dd><p>Representation of selection table</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.base.BaseClass.SelectionTable.__contains__">
+<span class="sig-name descname"><span class="pre">__contains__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typeName</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../../../../_modules/libICEpost/src/base/BaseClass.html#SelectionTable.__contains__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.base.BaseClass.SelectionTable.__contains__" title="Link to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>typeName: str</dt><dd><p>Name of the class to look-up</p>
+</dd>
+</dl>
+<p>Check if the selection table contains a selectable class called ‘typeName’.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.base.BaseClass.SelectionTable.__getitem__">
+<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typeName</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/libICEpost/src/base/BaseClass.html#SelectionTable.__getitem__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.base.BaseClass.SelectionTable.__getitem__" title="Link to this definition"></a></dt>
+<dd><p>Get from database</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.base.BaseClass.SelectionTable.add">
+<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../../thermophysicalModels/specie/thermo/EquationOfState/EquationOfState/index.html#libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.EquationOfState.EquationOfState.None" title="libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.EquationOfState.EquationOfState.None"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../../../_modules/libICEpost/src/base/BaseClass.html#SelectionTable.add"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.base.BaseClass.SelectionTable.add" title="Link to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>cls: type</dt><dd><p>Subclass to add to the selection table</p>
+</dd>
+<dt>overwrite: bool (True)</dt><dd><p>Overwrite?</p>
+</dd>
+</dl>
+<p>Add class to selection table</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.base.BaseClass.SelectionTable.check">
+<span class="sig-name descname"><span class="pre">check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typeName</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../../../../_modules/libICEpost/src/base/BaseClass.html#SelectionTable.check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.base.BaseClass.SelectionTable.check" title="Link to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>typeName: str</dt><dd><p>Name of class to be checked</p>
+</dd>
+</dl>
+<p>Checks if a class name is in the selection table, raises ValueError if false</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="libICEpost.src.base.BaseClass.BaseClass">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">libICEpost.src.base.BaseClass.</span></span><span class="sig-name descname"><span class="pre">BaseClass</span></span><a class="reference internal" href="../../../../../_modules/libICEpost/src/base/BaseClass.html#BaseClass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.base.BaseClass.BaseClass" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="../Utilities/index.html#libICEpost.src.base.Utilities.Utilities" title="libICEpost.src.base.Utilities.Utilities"><code class="xref py py-obj docutils literal notranslate"><span class="pre">libICEpost.src.base.Utilities.Utilities</span></code></a></p>
+<p>Class wrapping useful methods for base virtual classes (e.g. run-time selector)</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.base.BaseClass.BaseClass.selectionTable">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">selectionTable</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#libICEpost.src.base.BaseClass.SelectionTable" title="libICEpost.src.base.BaseClass.SelectionTable"><span class="pre">SelectionTable</span></a></span></span><a class="reference internal" href="../../../../../_modules/libICEpost/src/base/BaseClass.html#BaseClass.selectionTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.base.BaseClass.BaseClass.selectionTable" title="Link to this definition"></a></dt>
+<dd><p>The run-time selection table associated to this class.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.base.BaseClass.BaseClass.selector">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">selector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typeName</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dictionary</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Self</span></span></span><a class="reference internal" href="../../../../../_modules/libICEpost/src/base/BaseClass.html#BaseClass.selector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.base.BaseClass.BaseClass.selector" title="Link to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>typeName:  str</dt><dd><p>Name of the class to be constructed</p>
+</dd>
+<dt>dictionary: dict</dt><dd><p>Dictionary used for construction</p>
+</dd>
+</dl>
+<p>Construct an instance of a subclass of this that was added to the selection table.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.base.BaseClass.BaseClass.hasSelectionTable">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hasSelectionTable</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../../../../_modules/libICEpost/src/base/BaseClass.html#BaseClass.hasSelectionTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.base.BaseClass.BaseClass.hasSelectionTable" title="Link to this definition"></a></dt>
+<dd><p>Check if selection table was defined for this class.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.base.BaseClass.BaseClass.fromDictionary">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromDictionary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dictionary</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Self</span></span></span><a class="reference internal" href="../../../../../_modules/libICEpost/src/base/BaseClass.html#BaseClass.fromDictionary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.base.BaseClass.BaseClass.fromDictionary" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Abstractmethod<span class="colon">:</span></dt>
+<dd class="field-odd"><p></p></dd>
+</dl>
+<dl class="simple">
+<dt>dictionary: dict ({})</dt><dd><p>Dictionary used for construction</p>
+</dd>
+</dl>
+<p>Construct an instance of this class from a dictionary. To be overwritten by derived class.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.base.BaseClass.BaseClass.addToRuntimeSelectionTable">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">addToRuntimeSelectionTable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">childClass</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../../thermophysicalModels/specie/thermo/EquationOfState/EquationOfState/index.html#libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.EquationOfState.EquationOfState.None" title="libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.EquationOfState.EquationOfState.None"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../../../_modules/libICEpost/src/base/BaseClass.html#BaseClass.addToRuntimeSelectionTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.base.BaseClass.BaseClass.addToRuntimeSelectionTable" title="Link to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>childClass:  class</dt><dd><p>The class to be added to the selection table</p>
+</dd>
+<dt>overwrite: bool (True)</dt><dd><p>Overwrite if already present in selection table, otherwise rise error.</p>
+</dd>
+</dl>
+<p>Add the subclass to the database of available subclasses for runtime selection.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.base.BaseClass.BaseClass.createRuntimeSelectionTable">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">createRuntimeSelectionTable</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../../thermophysicalModels/specie/thermo/EquationOfState/EquationOfState/index.html#libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.EquationOfState.EquationOfState.None" title="libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.EquationOfState.EquationOfState.None"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../../../_modules/libICEpost/src/base/BaseClass.html#BaseClass.createRuntimeSelectionTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.base.BaseClass.BaseClass.createRuntimeSelectionTable" title="Link to this definition"></a></dt>
+<dd><p>Create the runtime selection table, initializing the property ‘selectionTable’ of the class.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.base.BaseClass.BaseClass.showRuntimeSelectionTable">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">showRuntimeSelectionTable</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../../thermophysicalModels/specie/thermo/EquationOfState/EquationOfState/index.html#libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.EquationOfState.EquationOfState.None" title="libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.EquationOfState.EquationOfState.None"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../../../_modules/libICEpost/src/base/BaseClass.html#BaseClass.showRuntimeSelectionTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.base.BaseClass.BaseClass.showRuntimeSelectionTable" title="Link to this definition"></a></dt>
+<dd><p>Prints a string containing a list of available classes in the selection table and if they are instantiable.</p>
+<p>E.g.:</p>
+<dl class="simple">
+<dt>Available classes in selection table:</dt><dd><p>ClassA       (Abstract class)
+ClassB
+ClassC</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../dataStructures/Dictionary/index.html" class="btn btn-neutral float-left" title="libICEpost.src.base.dataStructures.Dictionary" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../Utilities/index.html" class="btn btn-neutral float-right" title="libICEpost.src.base.Utilities" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, libICEpost.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

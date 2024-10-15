@@ -1,0 +1,100 @@
+libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.mixingRules.EquationOfState.EquationOfStateMixing
+================================================================================================================
+
+.. py:module:: libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.mixingRules.EquationOfState.EquationOfStateMixing
+
+.. autoapi-nested-parse::
+
+   @author: F. Ramognino       <federico.ramognino@polimi.it>
+   Last update:        17/10/2023
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.mixingRules.EquationOfState.EquationOfStateMixing.EoS_db
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.mixingRules.EquationOfState.EquationOfStateMixing.EquationOfStateMixing
+
+
+Module Contents
+---------------
+
+.. py:data:: EoS_db
+
+.. py:class:: EquationOfStateMixing(mix: libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture)
+
+   Bases: :py:obj:`libICEpost.src.base.BaseClass.BaseClass`
+
+
+   Class handling mixing rule to combine equation of states of specie into a multi-component mixture.
+
+   Defines a moethod to generate the equation of state of a mixture of gasses.
+
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   .. attribute:: EoSType
+
+      str
+      Type of equation of state for which it is implemented
+
+   .. attribute:: EoS
+
+      EquationOfState
+      The eqation of state of the mixture
+
+   .. attribute:: mix
+
+      The mixture
+
+   .. attribute:: thermos
+
+      _Database
+      Link to database of equations of state (database.chemistry.thermo.EquationOfState)
+
+
+   .. py:attribute:: _EoS
+      :type:  libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.EquationOfState.EquationOfState
+
+
+   .. py:attribute:: EoSType
+      :type:  str
+
+
+   .. py:attribute:: thermos
+
+
+   .. py:property:: EoS
+      :type: libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.EquationOfState.EquationOfState
+
+      The equation of state of the mixture.
+
+
+   .. py:property:: mix
+      :type: libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture
+
+
+
+   .. py:method:: update(mix: libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture = None)
+
+      Method to update the equation of state based on the mixture composition (interface).
+
+
+
+   .. py:method:: _update(mix: libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture = None)
+      :abstractmethod:
+
+
+      Method to update the equation of state based on the mixture composition (implementation).
+
+
+

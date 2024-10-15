@@ -1,0 +1,246 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.Stoichiometry &mdash; libICEpost  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../../../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+      <link rel="stylesheet" type="text/css" href="../../../../../../../../_static/graphviz.css?v=fd3f3429" />
+
+  
+      <script src="../../../../../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../../../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../../../../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../../../../search.html" />
+    <link rel="next" title="libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.functions" href="../functions/index.html" />
+    <link rel="prev" title="libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.ReactionModel" href="../ReactionModel/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../../../../index.html" class="icon icon-home">
+            libICEpost
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../../../example.html">Example usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../../../conduct.html">Code of Conduct</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../../../../../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../../../../../index.html">libICEpost</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../../../../../../index.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../Database/index.html">libICEpost.Database</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../scripts/index.html">libICEpost.scripts</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="../../../../../index.html">libICEpost.src</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../../../../index.html">libICEpost</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../../../../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="../../../../../../index.html">libICEpost</a></li>
+          <li class="breadcrumb-item"><a href="../../../../../index.html">libICEpost.src</a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">libICEpost.src.thermophysicalModels</a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">libICEpost.src.thermophysicalModels.specie</a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">libICEpost.src.thermophysicalModels.specie.reactions</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel</a></li>
+      <li class="breadcrumb-item active">libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.Stoichiometry</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../../../../../_sources/autoapi/libICEpost/src/thermophysicalModels/specie/reactions/ReactionModel/Stoichiometry/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.Stoichiometry">
+<span id="libicepost-src-thermophysicalmodels-specie-reactions-reactionmodel-stoichiometry"></span><h1>libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.Stoichiometry<a class="headerlink" href="#module-libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.Stoichiometry" title="Link to this heading"></a></h1>
+<p>&#64;author: F. Ramognino       &lt;<a class="reference external" href="mailto:federico&#46;ramognino&#37;&#52;&#48;polimi&#46;it">federico<span>&#46;</span>ramognino<span>&#64;</span>polimi<span>&#46;</span>it</a>&gt;
+Last update:        12/06/2023</p>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.Stoichiometry.Stoichiometry" title="libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.Stoichiometry.Stoichiometry"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Stoichiometry</span></code></a></p></td>
+<td><p>Reaction model of fuel combustion with infinitely fast chemistry</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.Stoichiometry.Stoichiometry">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.Stoichiometry.</span></span><span class="sig-name descname"><span class="pre">Stoichiometry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reactants</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../../specie/Mixture/index.html#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture" title="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture"><span class="pre">libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">oxidizer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../../specie/Molecule/index.html#libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule" title="libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule"><span class="pre">libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">database.chemistry.specie.Molecules.O2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/reactions/ReactionModel/Stoichiometry.html#Stoichiometry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.Stoichiometry.Stoichiometry" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="../ReactionModel/index.html#libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.ReactionModel.ReactionModel" title="libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.ReactionModel.ReactionModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.ReactionModel.ReactionModel</span></code></a></p>
+<p>Reaction model of fuel combustion with infinitely fast chemistry</p>
+<p>TODO:
+Extend to handle a generic reaction set, where there might be more then one oxidizer</p>
+<blockquote>
+<div><p>Molecule
+The oxidiser</p>
+</div></blockquote>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.Stoichiometry.Stoichiometry.reactants">
+<span class="sig-name descname"><span class="pre">reactants</span></span><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.Stoichiometry.Stoichiometry.reactants" title="Link to this definition"></a></dt>
+<dd><p>(Mixture)
+The mixture of the reactants</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.Stoichiometry.Stoichiometry.products">
+<span class="sig-name descname"><span class="pre">products</span></span><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.Stoichiometry.Stoichiometry.products" title="Link to this definition"></a></dt>
+<dd><p>(Mixture)
+The mixture of products of the reaction</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.Stoichiometry.Stoichiometry.reactions">
+<span class="sig-name descname"><span class="pre">reactions</span></span><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.Stoichiometry.Stoichiometry.reactions" title="Link to this definition"></a></dt>
+<dd><p>(_Database)
+Database of oxidation reactions. Reference to database.chemistry.reactions</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.Stoichiometry.Stoichiometry._ReactionType">
+<span class="sig-name descname"><span class="pre">_ReactionType</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'StoichiometricReaction'</span></em><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.Stoichiometry.Stoichiometry._ReactionType" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.Stoichiometry.Stoichiometry.fuel">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fuel</span></span><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.Stoichiometry.Stoichiometry.fuel" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">The</span> <span class="pre">sub-mixture</span> <span class="pre">of</span> <span class="pre">reactants</span> <span class="pre">with</span> <span class="pre">the</span> <span class="pre">fuels</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.Stoichiometry.Stoichiometry.oxidizer">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">oxidizer</span></span><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.Stoichiometry.Stoichiometry.oxidizer" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">The</span> <span class="pre">oxidizer</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.Stoichiometry.Stoichiometry.fromDictionary">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromDictionary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dictionary</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/reactions/ReactionModel/Stoichiometry.html#Stoichiometry.fromDictionary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.Stoichiometry.Stoichiometry.fromDictionary" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dictionary</strong> (<em>dict</em>) – <p>The dictionary from which constructing
+{</p>
+<blockquote>
+<div><p>”reactants” (Mixture): the mixture of reactants
+“oxidiser” (Molecule): the oxidizer</p>
+</div></blockquote>
+<p>}</p>
+</p>
+</dd>
+</dl>
+<p>Constructs from dictionary</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.Stoichiometry.Stoichiometry._oxidizer">
+<span class="sig-name descname"><span class="pre">_oxidizer</span></span><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.Stoichiometry.Stoichiometry._oxidizer" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.Stoichiometry.Stoichiometry._updateFuels">
+<span class="sig-name descname"><span class="pre">_updateFuels</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/reactions/ReactionModel/Stoichiometry.html#Stoichiometry._updateFuels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.Stoichiometry.Stoichiometry._updateFuels" title="Link to this definition"></a></dt>
+<dd><p>Update list of fuels</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.Stoichiometry.Stoichiometry._update">
+<span class="sig-name descname"><span class="pre">_update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reactants</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../../specie/Mixture/index.html#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture" title="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture"><span class="pre">libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/reactions/ReactionModel/Stoichiometry.html#Stoichiometry._update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.Stoichiometry.Stoichiometry._update" title="Link to this definition"></a></dt>
+<dd><p>Method to update the products.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>reactants</strong> (<a class="reference internal" href="../../../specie/Mixture/index.html#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture" title="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture"><em>Mixture</em></a><em>, </em><em>optional</em>) – Update mixture of reactants. Defaults to None.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>wether the system was updated</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../ReactionModel/index.html" class="btn btn-neutral float-left" title="libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.ReactionModel" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../functions/index.html" class="btn btn-neutral float-right" title="libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.functions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, libICEpost.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

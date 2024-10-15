@@ -1,0 +1,383 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>libICEpost.src.base.Logging.Logging &mdash; libICEpost  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+      <link rel="stylesheet" type="text/css" href="../../../../../../_static/graphviz.css?v=fd3f3429" />
+
+  
+      <script src="../../../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../../search.html" />
+    <link rel="next" title="libICEpost.src.base.dataStructures" href="../../dataStructures/index.html" />
+    <link rel="prev" title="libICEpost.src.base.Logging" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../../index.html" class="icon icon-home">
+            libICEpost
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../example.html">Example usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../conduct.html">Code of Conduct</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../../../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../../../index.html">libICEpost</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../../../../index.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../../../../Database/index.html">libICEpost.Database</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../scripts/index.html">libICEpost.scripts</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="../../../index.html">libICEpost.src</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../../index.html">libICEpost</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">libICEpost</a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">libICEpost.src</a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">libICEpost.src.base</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">libICEpost.src.base.Logging</a></li>
+      <li class="breadcrumb-item active">libICEpost.src.base.Logging.Logging</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../../../_sources/autoapi/libICEpost/src/base/Logging/Logging/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-libICEpost.src.base.Logging.Logging">
+<span id="libicepost-src-base-logging-logging"></span><h1>libICEpost.src.base.Logging.Logging<a class="headerlink" href="#module-libICEpost.src.base.Logging.Logging" title="Link to this heading"></a></h1>
+<section id="attributes">
+<h2>Attributes<a class="headerlink" href="#attributes" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#libICEpost.src.base.Logging.Logging.logConfigPath" title="libICEpost.src.base.Logging.Logging.logConfigPath"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logConfigPath</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#libICEpost.src.base.Logging.Logging.logger" title="libICEpost.src.base.Logging.Logging.logger"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logger</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#libICEpost.src.base.Logging.Logging.devLogger" title="libICEpost.src.base.Logging.Logging.devLogger"><code class="xref py py-obj docutils literal notranslate"><span class="pre">devLogger</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#libICEpost.src.base.Logging.Logging.usrLogger" title="libICEpost.src.base.Logging.Logging.usrLogger"><code class="xref py py-obj docutils literal notranslate"><span class="pre">usrLogger</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#libICEpost.src.base.Logging.Logging._DEBUG_FORMATTER_LIST" title="libICEpost.src.base.Logging.Logging._DEBUG_FORMATTER_LIST"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_DEBUG_FORMATTER_LIST</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#libICEpost.src.base.Logging.Logging.UsrFormatter" title="libICEpost.src.base.Logging.Logging.UsrFormatter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">UsrFormatter</span></code></a></p></td>
+<td><p>Formatter instances are used to convert a LogRecord to text.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#libICEpost.src.base.Logging.Logging.FilterSwitch" title="libICEpost.src.base.Logging.Logging.FilterSwitch"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FilterSwitch</span></code></a></p></td>
+<td><p>Filter instances are used to perform arbitrary filtering of LogRecords.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#libICEpost.src.base.Logging.Logging.LoggingClass" title="libICEpost.src.base.Logging.Logging.LoggingClass"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LoggingClass</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#libICEpost.src.base.Logging.Logging.setup_logging" title="libICEpost.src.base.Logging.Logging.setup_logging"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setup_logging</span></code></a>(→ None)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#libICEpost.src.base.Logging.Logging.set_debug_level" title="libICEpost.src.base.Logging.Logging.set_debug_level"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_debug_level</span></code></a>([level])</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="libICEpost.src.base.Logging.Logging.logConfigPath">
+<span class="sig-prename descclassname"><span class="pre">libICEpost.src.base.Logging.Logging.</span></span><span class="sig-name descname"><span class="pre">logConfigPath</span></span><a class="headerlink" href="#libICEpost.src.base.Logging.Logging.logConfigPath" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="libICEpost.src.base.Logging.Logging.setup_logging">
+<span class="sig-prename descclassname"><span class="pre">libICEpost.src.base.Logging.Logging.</span></span><span class="sig-name descname"><span class="pre">setup_logging</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../../../thermophysicalModels/specie/thermo/EquationOfState/EquationOfState/index.html#libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.EquationOfState.EquationOfState.None" title="libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.EquationOfState.EquationOfState.None"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../../../../_modules/libICEpost/src/base/Logging/Logging.html#setup_logging"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.base.Logging.Logging.setup_logging" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="libICEpost.src.base.Logging.Logging.UsrFormatter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">libICEpost.src.base.Logging.Logging.</span></span><span class="sig-name descname"><span class="pre">UsrFormatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fmt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datefmt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'%'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defaults</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../_modules/libICEpost/src/base/Logging/Logging.html#UsrFormatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.base.Logging.Logging.UsrFormatter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">logging.Formatter</span></code></p>
+<p>Formatter instances are used to convert a LogRecord to text.</p>
+<p>Formatters need to know how a LogRecord is constructed. They are
+responsible for converting a LogRecord to (usually) a string which can
+be interpreted by either a human or an external system. The base Formatter
+allows a formatting string to be specified. If none is supplied, the
+style-dependent default value, “%(message)s”, “{message}”, or
+“${message}”, is used.</p>
+<p>The Formatter can be initialized with a format string which makes use of
+knowledge of the LogRecord attributes - e.g. the default value mentioned
+above makes use of the fact that the user’s message and arguments are pre-
+formatted into a LogRecord’s message attribute. Currently, the useful
+attributes in a LogRecord are described by:</p>
+<p>%(name)s            Name of the logger (logging channel)
+%(levelno)s         Numeric logging level for the message (DEBUG, INFO,</p>
+<blockquote>
+<div><p>WARNING, ERROR, CRITICAL)</p>
+</div></blockquote>
+<dl class="simple">
+<dt>%(levelname)s       Text logging level for the message (“DEBUG”, “INFO”,</dt><dd><p>“WARNING”, “ERROR”, “CRITICAL”)</p>
+</dd>
+<dt>%(pathname)s        Full pathname of the source file where the logging</dt><dd><p>call was issued (if available)</p>
+</dd>
+</dl>
+<p>%(filename)s        Filename portion of pathname
+%(module)s          Module (name portion of filename)
+%(lineno)d          Source line number where the logging call was issued</p>
+<blockquote>
+<div><p>(if available)</p>
+</div></blockquote>
+<p>%(funcName)s        Function name
+%(created)f         Time when the LogRecord was created (time.time()</p>
+<blockquote>
+<div><p>return value)</p>
+</div></blockquote>
+<p>%(asctime)s         Textual time when the LogRecord was created
+%(msecs)d           Millisecond portion of the creation time
+%(relativeCreated)d Time in milliseconds when the LogRecord was created,</p>
+<blockquote>
+<div><p>relative to the time the logging module was loaded
+(typically at application startup time)</p>
+</div></blockquote>
+<p>%(thread)d          Thread ID (if available)
+%(threadName)s      Thread name (if available)
+%(process)d         Process ID (if available)
+%(message)s         The result of record.getMessage(), computed just as</p>
+<blockquote>
+<div><p>the record is emitted</p>
+</div></blockquote>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.base.Logging.Logging.UsrFormatter.info_fmt">
+<span class="sig-name descname"><span class="pre">info_fmt</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'%(msg)s'</span></em><a class="headerlink" href="#libICEpost.src.base.Logging.Logging.UsrFormatter.info_fmt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.base.Logging.Logging.UsrFormatter._update">
+<span class="sig-name descname"><span class="pre">_update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../_modules/libICEpost/src/base/Logging/Logging.html#UsrFormatter._update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.base.Logging.Logging.UsrFormatter._update" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.base.Logging.Logging.UsrFormatter.format">
+<span class="sig-name descname"><span class="pre">format</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../_modules/libICEpost/src/base/Logging/Logging.html#UsrFormatter.format"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.base.Logging.Logging.UsrFormatter.format" title="Link to this definition"></a></dt>
+<dd><p>Format the specified record as text.</p>
+<p>The record’s attribute dictionary is used as the operand to a
+string formatting operation which yields the returned string.
+Before formatting the dictionary, a couple of preparatory steps
+are carried out. The message attribute of the record is computed
+using LogRecord.getMessage(). If the formatting string uses the
+time (as determined by a call to usesTime(), formatTime() is
+called to format the event time. If there is exception information,
+it is formatted using formatException() and appended to the message.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="libICEpost.src.base.Logging.Logging.FilterSwitch">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">libICEpost.src.base.Logging.Logging.</span></span><span class="sig-name descname"><span class="pre">FilterSwitch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../_modules/libICEpost/src/base/Logging/Logging.html#FilterSwitch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.base.Logging.Logging.FilterSwitch" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">logging.Filter</span></code></p>
+<p>Filter instances are used to perform arbitrary filtering of LogRecords.</p>
+<p>Loggers and Handlers can optionally use Filter instances to filter
+records as desired. The base filter class only allows events which are
+below a certain point in the logger hierarchy. For example, a filter
+initialized with “A.B” will allow events logged by loggers “A.B”,
+“A.B.C”, “A.B.C.D”, “A.B.D” etc. but not “A.BB”, “B.A.B” etc. If
+initialized with the empty string, all events are passed.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.base.Logging.Logging.FilterSwitch._default">
+<span class="sig-name descname"><span class="pre">_default</span></span><a class="headerlink" href="#libICEpost.src.base.Logging.Logging.FilterSwitch._default" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.base.Logging.Logging.FilterSwitch._filters">
+<span class="sig-name descname"><span class="pre">_filters</span></span><a class="headerlink" href="#libICEpost.src.base.Logging.Logging.FilterSwitch._filters" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.base.Logging.Logging.FilterSwitch.add">
+<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../../../thermophysicalModels/specie/thermo/EquationOfState/EquationOfState/index.html#libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.EquationOfState.EquationOfState.None" title="libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.EquationOfState.EquationOfState.None"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../../../../_modules/libICEpost/src/base/Logging/Logging.html#FilterSwitch.add"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.base.Logging.Logging.FilterSwitch.add" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.base.Logging.Logging.FilterSwitch.remove">
+<span class="sig-name descname"><span class="pre">remove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../../../thermophysicalModels/specie/thermo/EquationOfState/EquationOfState/index.html#libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.EquationOfState.EquationOfState.None" title="libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.EquationOfState.EquationOfState.None"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../../../../_modules/libICEpost/src/base/Logging/Logging.html#FilterSwitch.remove"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.base.Logging.Logging.FilterSwitch.remove" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.base.Logging.Logging.FilterSwitch.filter">
+<span class="sig-name descname"><span class="pre">filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">logging.LogRecord</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../../../../../_modules/libICEpost/src/base/Logging/Logging.html#FilterSwitch.filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.base.Logging.Logging.FilterSwitch.filter" title="Link to this definition"></a></dt>
+<dd><p>Determine if the specified record is to be logged.</p>
+<p>Returns True if the record should be logged, or False otherwise.
+If deemed appropriate, the record may be modified in-place.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="libICEpost.src.base.Logging.Logging.LoggingClass">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">libICEpost.src.base.Logging.Logging.</span></span><span class="sig-name descname"><span class="pre">LoggingClass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#libICEpost.src.base.Logging.Logging.LoggingClass" title="libICEpost.src.base.Logging.Logging.LoggingClass"><span class="pre">LoggingClass</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'INFO'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">switch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addHandler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">formatter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">logging.Formatter</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../_modules/libICEpost/src/base/Logging/Logging.html#LoggingClass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.base.Logging.Logging.LoggingClass" title="Link to this definition"></a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.base.Logging.Logging.LoggingClass._loggers">
+<span class="sig-name descname"><span class="pre">_loggers</span></span><a class="headerlink" href="#libICEpost.src.base.Logging.Logging.LoggingClass._loggers" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.base.Logging.Logging.LoggingClass._handler">
+<span class="sig-name descname"><span class="pre">_handler</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#libICEpost.src.base.Logging.Logging.LoggingClass._handler" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.base.Logging.Logging.LoggingClass._parent">
+<span class="sig-name descname"><span class="pre">_parent</span></span><a class="headerlink" href="#libICEpost.src.base.Logging.Logging.LoggingClass._parent" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.base.Logging.Logging.LoggingClass._name">
+<span class="sig-name descname"><span class="pre">_name</span></span><a class="headerlink" href="#libICEpost.src.base.Logging.Logging.LoggingClass._name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.base.Logging.Logging.LoggingClass.logger">
+<span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#libICEpost.src.base.Logging.Logging.LoggingClass.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.base.Logging.Logging.LoggingClass.getLogger">
+<span class="sig-name descname"><span class="pre">getLogger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'INFO'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../_modules/libICEpost/src/base/Logging/Logging.html#LoggingClass.getLogger"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.base.Logging.Logging.LoggingClass.getLogger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.base.Logging.Logging.LoggingClass.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">logging.Logger</span></span></span><a class="reference internal" href="../../../../../../_modules/libICEpost/src/base/Logging/Logging.html#LoggingClass.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.base.Logging.Logging.LoggingClass.__call__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.base.Logging.Logging.LoggingClass.switch">
+<span class="sig-name descname"><span class="pre">switch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../_modules/libICEpost/src/base/Logging/Logging.html#LoggingClass.switch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.base.Logging.Logging.LoggingClass.switch" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="libICEpost.src.base.Logging.Logging.logger">
+<span class="sig-prename descclassname"><span class="pre">libICEpost.src.base.Logging.Logging.</span></span><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#libICEpost.src.base.Logging.Logging.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="libICEpost.src.base.Logging.Logging.devLogger">
+<span class="sig-prename descclassname"><span class="pre">libICEpost.src.base.Logging.Logging.</span></span><span class="sig-name descname"><span class="pre">devLogger</span></span><a class="headerlink" href="#libICEpost.src.base.Logging.Logging.devLogger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="libICEpost.src.base.Logging.Logging.usrLogger">
+<span class="sig-prename descclassname"><span class="pre">libICEpost.src.base.Logging.Logging.</span></span><span class="sig-name descname"><span class="pre">usrLogger</span></span><a class="headerlink" href="#libICEpost.src.base.Logging.Logging.usrLogger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="libICEpost.src.base.Logging.Logging._DEBUG_FORMATTER_LIST">
+<span class="sig-prename descclassname"><span class="pre">libICEpost.src.base.Logging.Logging.</span></span><span class="sig-name descname"><span class="pre">_DEBUG_FORMATTER_LIST</span></span><a class="headerlink" href="#libICEpost.src.base.Logging.Logging._DEBUG_FORMATTER_LIST" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="libICEpost.src.base.Logging.Logging.set_debug_level">
+<span class="sig-prename descclassname"><span class="pre">libICEpost.src.base.Logging.Logging.</span></span><span class="sig-name descname"><span class="pre">set_debug_level</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../_modules/libICEpost/src/base/Logging/Logging.html#set_debug_level"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.base.Logging.Logging.set_debug_level" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../index.html" class="btn btn-neutral float-left" title="libICEpost.src.base.Logging" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../dataStructures/index.html" class="btn btn-neutral float-right" title="libICEpost.src.base.dataStructures" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, libICEpost.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

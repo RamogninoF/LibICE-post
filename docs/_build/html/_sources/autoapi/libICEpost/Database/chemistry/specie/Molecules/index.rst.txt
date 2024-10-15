@@ -1,0 +1,49 @@
+libICEpost.Database.chemistry.specie.Molecules
+==============================================
+
+.. py:module:: libICEpost.Database.chemistry.specie.Molecules
+
+.. autoapi-nested-parse::
+
+   @author: F. Ramognino       <federico.ramognino@polimi.it>
+   Last update:        12/06/2023
+
+   Chemical specie
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   libICEpost.Database.chemistry.specie.Molecules.Molecules
+   libICEpost.Database.chemistry.specie.Molecules.Fuels
+   libICEpost.Database.chemistry.specie.Molecules.fileName
+   libICEpost.Database.chemistry.specie.Molecules.fileName
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   libICEpost.Database.chemistry.specie.Molecules.fromJson
+
+
+Module Contents
+---------------
+
+.. py:data:: Molecules
+
+.. py:data:: Fuels
+
+.. py:function:: fromJson(fileName, typeName='Molecules')
+
+   Add molecules to the database from a json file.
+
+
+.. py:data:: fileName
+
+.. py:data:: fileName
+

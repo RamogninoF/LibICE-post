@@ -1,0 +1,62 @@
+libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.mixingRules.Thermo.constantCpMixing
+==================================================================================================
+
+.. py:module:: libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.mixingRules.Thermo.constantCpMixing
+
+.. autoapi-nested-parse::
+
+   @author: F. Ramognino       <federico.ramognino@polimi.it>
+   Last update:        30/01/2024
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.mixingRules.Thermo.constantCpMixing.constantCpMixing
+
+
+Module Contents
+---------------
+
+.. py:class:: constantCpMixing(mix: libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture)
+
+   Bases: :py:obj:`libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.mixingRules.Thermo.ThermoMixing.ThermoMixing`
+
+
+   Class handling mixing of multi-component mixture: thermodynamic data in constantCp definition.
+
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   .. attribute:: ThermoType
+
+      str
+      Type of thermodynamic data for which it is implemented
+
+   .. attribute:: Thermo
+
+      Thermo
+      The Thermo of the mixture
+
+
+   .. py:attribute:: ThermoType
+      :value: 'constantCp'
+
+
+
+   .. py:method:: fromDictionary(dictionary)
+      :classmethod:
+
+
+      Create from dictionary.
+
+
+
+   .. py:method:: _update(mix: libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture = None)
+
+      Compute new properties as mass-weighted from individual specie in mixture.
+
+
+

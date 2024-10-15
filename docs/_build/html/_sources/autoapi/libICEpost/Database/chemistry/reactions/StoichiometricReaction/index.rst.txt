@@ -1,0 +1,55 @@
+libICEpost.Database.chemistry.reactions.StoichiometricReaction
+==============================================================
+
+.. py:module:: libICEpost.Database.chemistry.reactions.StoichiometricReaction
+
+.. autoapi-nested-parse::
+
+   @author: F. Ramognino       <federico.ramognino@polimi.it>
+   Last update:        12/06/2023
+
+   Chemical reactions
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   libICEpost.Database.chemistry.reactions.StoichiometricReaction.periodicTable
+   libICEpost.Database.chemistry.reactions.StoichiometricReaction.Molecules
+   libICEpost.Database.chemistry.reactions.StoichiometricReaction.StoichiometricReaction_db
+   libICEpost.Database.chemistry.reactions.StoichiometricReaction.fileName
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   libICEpost.Database.chemistry.reactions.StoichiometricReaction.fromJson
+   libICEpost.Database.chemistry.reactions.StoichiometricReaction.fromFuels
+
+
+Module Contents
+---------------
+
+.. py:data:: periodicTable
+
+.. py:data:: Molecules
+
+.. py:data:: StoichiometricReaction_db
+
+.. py:function:: fromJson(fileName)
+
+   Add reactions to the database from a json file.
+
+
+.. py:function:: fromFuels()
+
+   Create oxidation reactions for fuels in Database.chemistry.specie.Molecules.Fuels dictionary
+
+
+.. py:data:: fileName
+

@@ -1,0 +1,47 @@
+libICEpost.src.thermophysicalModels.thermoModels.EgrModel.StoichiometricMixtureEGR
+==================================================================================
+
+.. py:module:: libICEpost.src.thermophysicalModels.thermoModels.EgrModel.StoichiometricMixtureEGR
+
+.. autoapi-nested-parse::
+
+   @author: <N. Surname>       <e-mail>
+   Last update:        DD/MM/YYYY
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   libICEpost.src.thermophysicalModels.thermoModels.EgrModel.StoichiometricMixtureEGR.StoichiometricMixtureEGR
+
+
+Module Contents
+---------------
+
+.. py:class:: StoichiometricMixtureEGR(/, *, air: libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture, fuel: libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture, egr: float, combustionEfficiency=1.0, **kwargs)
+
+   Bases: :py:obj:`libICEpost.src.thermophysicalModels.thermoModels.EgrModel.EgrModel.EgrModel`
+
+
+   Egr composition from stoichiometric combustion.
+
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+   .. py:method:: fromDictionary(dictionary: dict | libICEpost.src.base.dataStructures.Dictionary.Dictionary)
+      :classmethod:
+
+
+      Create from dictionary
+      {
+          air (Mixture): The air mixture.
+          fuel (Mixture): The fuel mixture.
+          egr (float): The egr mass fraction.
+          combustionEfficiency (float, optional): Combustion efficiency. Defaults to 1.0.
+      }
+
+
+

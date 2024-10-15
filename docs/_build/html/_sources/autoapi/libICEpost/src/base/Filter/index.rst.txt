@@ -1,0 +1,286 @@
+libICEpost.src.base.Filter
+==========================
+
+.. py:module:: libICEpost.src.base.Filter
+
+.. autoapi-nested-parse::
+
+   @author: <N. Surname>       <e-mail>
+   Last update:        DD/MM/YYYY
+
+   Fliters for data pre-processing
+
+   Content of the package:
+       Filter (class)
+           Base class
+
+       Resample (class)
+           Resampling with constant discretization
+
+       LowPass (class)
+           Low-pass filter
+
+
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/libICEpost/src/base/Filter/Filter/index
+   /autoapi/libICEpost/src/base/Filter/LowPass/index
+   /autoapi/libICEpost/src/base/Filter/LowPassAndResample/index
+   /autoapi/libICEpost/src/base/Filter/Resample/index
+   /autoapi/libICEpost/src/base/Filter/UserDefinedFilter/index
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   libICEpost.src.base.Filter.Filter
+   libICEpost.src.base.Filter.Resample
+   libICEpost.src.base.Filter.LowPass
+   libICEpost.src.base.Filter.LowPassAndResample
+   libICEpost.src.base.Filter.UserDefinedFilter
+
+
+Package Contents
+----------------
+
+.. py:class:: Filter
+
+   Bases: :py:obj:`libICEpost.src.base.BaseClass.BaseClass`
+
+
+   Class for filtering raw data
+
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Attributes:
+
+
+   .. py:method:: __call__(x: list[float], y: list[float]) -> tuple[list[float],list[float]]
+      :abstractmethod:
+
+
+      Filter an array of x,y data. Returns x sampling points and y coordinates
+
+
+
+.. py:class:: Resample(delta: float)
+
+   Bases: :py:obj:`libICEpost.src.base.Filter.Filter.Filter`
+
+
+   Resampling with constant delta x
+
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   .. attribute:: delta
+
+      float
+      Resampling interval
+
+
+   .. py:property:: delta
+      :type: float
+
+      The discretization spacing
+
+      :returns: float
+
+
+   .. py:method:: fromDictionary(dictionary)
+      :classmethod:
+
+
+      Create from dictionary.
+
+      {
+          delta (float): the spacing
+      }
+
+
+
+   .. py:method:: __call__(xp: list[float], yp: list[float]) -> tuple[list[float],list[float]]
+
+      Filter an array of x,y data with constant spacing
+
+
+
+   .. py:method:: __repr__() -> str
+
+
+.. py:class:: LowPass(cutoff: float, *, order=5)
+
+   Bases: :py:obj:`libICEpost.src.base.Filter.Filter.Filter`
+
+
+   Apply low-pass filter
+
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   .. attribute:: cutoff
+
+      float
+      Cutoff frequency
+
+   .. attribute:: order
+
+      int
+      Order of the filter
+
+
+   .. py:property:: cutoff
+      :type: float
+
+      cutoff frequency
+
+      :returns: float
+
+
+   .. py:property:: order
+      :type: int
+
+      Order of the filter
+
+      :returns: int
+
+
+   .. py:method:: fromDictionary(dictionary)
+      :classmethod:
+
+
+      Create from dictionary.
+
+      {
+          cutoff (float): cutoff frequency
+          order (int): order of the filter
+      }
+
+
+
+   .. py:method:: __call__(xp: list[float], yp: list[float]) -> tuple[list[float],list[float]]
+
+      Filter an array of x,y data with low-pass filter
+
+
+
+   .. py:method:: __repr__() -> str
+
+
+   .. py:method:: _butter_lowpass(cutoff: float, fs: float, order: int = 5)
+
+
+   .. py:method:: _butter_lowpass_filter(data: list[float], cutoff: float, fs: float, order: int = 5)
+
+
+   .. py:method:: _preProcess(xp: list[float], yp: list[float]) -> tuple[list[float],list[float],float]
+
+      Pre-process data to uniform time-step (equal to minimum time-step found in list).
+
+      :returns: [resampled x, resampled y, delta]
+      :rtype: tuple[list[float],list[float],float]
+
+
+
+   .. py:method:: plot(xp: list[float], yp: list[float], *, xName: str|None = None, yName: str|None = None, freqUnits: str|None = None, c='b', **kwargs) -> tuple[mpl.Figure, np.ndarray[mpl.axes.Axes]]
+
+      TODO
+
+
+
+.. py:class:: LowPassAndResample(*, delta: float, cutoff: float, order=5)
+
+   Bases: :py:obj:`libICEpost.src.base.Filter.LowPass.LowPass`, :py:obj:`libICEpost.src.base.Filter.Resample.Resample`
+
+
+   Apply low-pass filter and resampling
+
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   .. attribute:: cutoff
+
+      Cutoff frequency
+
+      :type: float
+
+   .. attribute:: order
+
+      Order of the filter
+
+      :type: int
+
+   .. attribute:: delta
+
+      Resampling time-step
+
+      :type: float
+
+
+   .. py:method:: fromDictionary(dictionary)
+      :classmethod:
+
+
+      Create from dictionary.
+
+      {
+          delta (float): Resampling time-step
+          cutoff (float): cutoff frequency
+          order (int): order of the filter
+      }
+
+
+
+   .. py:method:: __call__(xp: list[float], yp: list[float]) -> tuple[list[float],list[float]]
+
+      Filter an array of x,y data with low-pass filter and resampling
+
+
+
+   .. py:method:: __repr__() -> str
+
+
+.. py:class:: UserDefinedFilter(function: types.FunctionType)
+
+   Bases: :py:obj:`libICEpost.src.base.Filter.Filter.Filter`
+
+
+   User defined filter from body of "__call__(x,y)" method
+
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Attributes:
+
+
+   .. py:property:: code
+      the code of the __call__(x,y) method
+
+      :returns: str
+
+
+   .. py:method:: fromDictionary(dictionary)
+      :classmethod:
+
+
+      Create from dictionary.
+
+      {
+          code (str): the code of the __call__(x,y) method
+      }
+
+
+
+   .. py:method:: __call__(x: list[float], y: list[float]) -> tuple[list[float],list[float]]
+
+      Filter a set of (x,y) data executing the user-defined code
+
+
+
+   .. py:method:: __repr__() -> str
+
+

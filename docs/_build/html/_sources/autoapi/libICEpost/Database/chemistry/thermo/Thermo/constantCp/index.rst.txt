@@ -1,0 +1,72 @@
+libICEpost.Database.chemistry.thermo.Thermo.constantCp
+======================================================
+
+.. py:module:: libICEpost.Database.chemistry.thermo.Thermo.constantCp
+
+.. autoapi-nested-parse::
+
+   @author: F. Ramognino       <federico.ramognino@polimi.it>
+   Last update:        12/06/2023
+
+   janaf7 thermodynamic propeties
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   libICEpost.Database.chemistry.thermo.Thermo.constantCp.Molecules
+   libICEpost.Database.chemistry.thermo.Thermo.constantCp.constantCp_db
+   libICEpost.Database.chemistry.thermo.Thermo.constantCp.fileName
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   libICEpost.Database.chemistry.thermo.Thermo.constantCp.fromJson
+
+
+Module Contents
+---------------
+
+.. py:data:: Molecules
+
+.. py:data:: constantCp_db
+
+.. py:function:: fromJson(fileName, typeName='Molecules')
+
+   Add constantCp type Thermo to the database from a json file.
+   Dictionaries containing either cp [J/kgK], cv [J/kgK], or
+   gamma of the mixture, and hf [J/kg] (optional).
+   The specie must be already present in the molecule database
+   (database.chemistry.specie.Molecules) and the name of its
+   dictionary consistent with it.
+
+   Eg:
+   {
+       "Ar":
+       {
+           "gamma":1.666,
+           "hf":0.0
+       },
+
+       "N2":
+       {
+           "cp":1036.8,
+           "hf":0.0
+       },
+
+       "H2O":
+       {
+           "gamma":1.33,
+           "hf":-13.42e6
+       }
+   }
+
+
+.. py:data:: fileName
+

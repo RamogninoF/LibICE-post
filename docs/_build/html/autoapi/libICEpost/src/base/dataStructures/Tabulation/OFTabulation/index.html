@@ -1,0 +1,425 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>libICEpost.src.base.dataStructures.Tabulation.OFTabulation &mdash; libICEpost  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+      <link rel="stylesheet" type="text/css" href="../../../../../../../_static/graphviz.css?v=fd3f3429" />
+
+  
+      <script src="../../../../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../../../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../../../search.html" />
+    <link rel="next" title="libICEpost.src.base.dataStructures.Tabulation.Tabulation" href="../Tabulation/index.html" />
+    <link rel="prev" title="libICEpost.src.base.dataStructures.Tabulation" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../../../index.html" class="icon icon-home">
+            libICEpost
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../../example.html">Example usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../../conduct.html">Code of Conduct</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../../../../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../../../../index.html">libICEpost</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../../../../../index.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../../../../../Database/index.html">libICEpost.Database</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../scripts/index.html">libICEpost.scripts</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="../../../../index.html">libICEpost.src</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../../../index.html">libICEpost</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../../../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="../../../../../index.html">libICEpost</a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">libICEpost.src</a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">libICEpost.src.base</a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">libICEpost.src.base.dataStructures</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">libICEpost.src.base.dataStructures.Tabulation</a></li>
+      <li class="breadcrumb-item active">libICEpost.src.base.dataStructures.Tabulation.OFTabulation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../../../../_sources/autoapi/libICEpost/src/base/dataStructures/Tabulation/OFTabulation/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-libICEpost.src.base.dataStructures.Tabulation.OFTabulation">
+<span id="libicepost-src-base-datastructures-tabulation-oftabulation"></span><h1>libICEpost.src.base.dataStructures.Tabulation.OFTabulation<a class="headerlink" href="#module-libICEpost.src.base.dataStructures.Tabulation.OFTabulation" title="Link to this heading"></a></h1>
+<p>&#64;author: F. Ramognino       &lt;<a class="reference external" href="mailto:federico&#46;ramognino&#37;&#52;&#48;polimi&#46;it">federico<span>&#46;</span>ramognino<span>&#64;</span>polimi<span>&#46;</span>it</a>&gt;
+Last update:        12/06/2023</p>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation" title="libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OFTabulation</span></code></a></p></td>
+<td><p>Class used to store and handle an OpenFOAM tabulation.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">libICEpost.src.base.dataStructures.Tabulation.OFTabulation.</span></span><span class="sig-name descname"><span class="pre">OFTabulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tablePath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noWrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">noWrite</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">argv</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">src.base.Utilities.Utilities</span></code></p>
+<p>Class used to store and handle an OpenFOAM tabulation.</p>
+<hr class="docutils" />
+<dl>
+<dt>Attibutes:</dt><dd><dl>
+<dt>path:               str</dt><dd><p>Path where the tabulation is stored</p>
+</dd>
+<dt>entryNames:     dict    [{}]</dt><dd><dl class="simple">
+<dt>{</dt><dd><dl class="simple">
+<dt>entri_ii:     str</dt><dd><p>Name to give at the generic entry ‘entry_ii’ found in the dictionay
+tableProperties.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>}
+Used to (optionally) change the names of the variables stored in the table.</p>
+</dd>
+<dt>tableProperties:    dict</dt><dd><dl class="simple">
+<dt>{</dt><dd><dl class="simple">
+<dt>var_ii:   list&lt;float&gt;</dt><dd><p>Contains the list of sampling points for variable ‘var_ii’</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>}
+Dictionary containing the information retrieved from tableProperties.</p>
+</dd>
+<dt>varOrder:           list&lt;str&gt;</dt><dd><p>Order in which the variables are red convert the scalarLists in tables.</p>
+</dd>
+<dt>noWrite:        bool</dt><dd><p>Label controlling if the class is allowed to write the files</p>
+</dd>
+<dt>tables:             dict</dt><dd><dl class="simple">
+<dt>{</dt><dd><p>‘tab_ii’:   Tabulation</p>
+</dd>
+</dl>
+<p>}
+Contains the tabulations.</p>
+</dd>
+<dt>tableFileNames:     dict</dt><dd><dl class="simple">
+<dt>{</dt><dd><p>‘tab_ii’:   str</p>
+</dd>
+</dl>
+<p>}
+Contains the names of files for the tabulations.</p>
+</dd>
+</dl>
+<p>opts:       dict
+{</p>
+<blockquote>
+<div><dl class="simple">
+<dt>Fatal:          bool</dt><dd><p>If set to ‘True’, raises a ValueError in case the input data is outside
+of tabulation range. Otherwise a warning is displayed.</p>
+</dd>
+<dt>extrapolate:    bool</dt><dd><p>If set to ‘True’ the value is extrapolated in case accessing the table
+outside of ranges. Otherwise, the value is set to ‘nan’.</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>}</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.defaultOpts">
+<span class="sig-name descname"><span class="pre">defaultOpts</span></span><a class="headerlink" href="#libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.defaultOpts" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.path">
+<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.entryNames">
+<span class="sig-name descname"><span class="pre">entryNames</span></span><a class="headerlink" href="#libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.entryNames" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.tableProperties">
+<span class="sig-name descname"><span class="pre">tableProperties</span></span><a class="headerlink" href="#libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.tableProperties" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.varOrder">
+<span class="sig-name descname"><span class="pre">varOrder</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.varOrder" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.tables">
+<span class="sig-name descname"><span class="pre">tables</span></span><a class="headerlink" href="#libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.tables" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.tableFileNames">
+<span class="sig-name descname"><span class="pre">tableFileNames</span></span><a class="headerlink" href="#libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.tableFileNames" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.noWrite">
+<span class="sig-name descname"><span class="pre">noWrite</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.noWrite" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.fromFile">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tablePath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">varOrder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tableFileNames</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entryNames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noWrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">noWrite</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noRead</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">argv</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.fromFile" title="Link to this definition"></a></dt>
+<dd><dl>
+<dt>tablePath:      str</dt><dd><p>The path where the tabulation is stored</p>
+</dd>
+<dt>varOrder:       list&lt;str&gt;</dt><dd><p>Order of the variables used to access the tabulation</p>
+</dd>
+<dt>tableFileNames: list&lt;str&gt;</dt><dd><p>Names of files in ‘tablePath/const’ where the tables are stored</p>
+</dd>
+<dt>entryNames:     dict    ({})</dt><dd><dl class="simple">
+<dt>{</dt><dd><dl class="simple">
+<dt>entri_ii:     str</dt><dd><p>Name to give at the generic entry ‘entry_ii’ found in the dictionary
+tableProperties.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>}
+Used to (optionally) change the names of the variables stored in the table.</p>
+</dd>
+<dt>noWrite:        bool (True)</dt><dd><p>Handle to prevent write access of this class to the tabulation</p>
+</dd>
+<dt>noRead:         list&lt;str&gt;   ([])</dt><dd><p>Tables that are not to be red from files</p>
+</dd>
+</dl>
+<p>[keyword arguments]
+Fatal:          bool (False)</p>
+<blockquote>
+<div><p>If set to ‘True’, raises a ValueError in case the input data is outside
+of tabulation range. Otherwise a warning is displayed.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>extrapolate:    bool (True)</dt><dd><p>If set to ‘True’ the value is extrapolated in case accessing the table
+outside of ranges. Otherwise, the value is set to the ‘nan’.</p>
+</dd>
+</dl>
+<p>Construct a table from files stored in ‘tablePath’.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.__getitem__">
+<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slices</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.__getitem__" title="Link to this definition"></a></dt>
+<dd><p>slices:   tuple&lt;slice/list&lt;int&gt;/int&gt;</p>
+<p>Extract a tabulation with sliced dataset. New table is
+initialized without associated directory (path = None) and
+in read-only mode (noWrite = True).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.readTableProperties">
+<span class="sig-name descname"><span class="pre">readTableProperties</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entryNames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">argv</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.readTableProperties" title="Link to this definition"></a></dt>
+<dd><dl>
+<dt>entryNames:     dict    [{}]</dt><dd><dl class="simple">
+<dt>{</dt><dd><dl class="simple">
+<dt>entri_ii:     str</dt><dd><p>Name to give at the generic entry ‘entry_ii’ found in the dictionay
+tableProperties.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>}
+Used to (optionally) change the names of the variables stored in the table.</p>
+</dd>
+</dl>
+<p>Read information stored in file ‘&lt;path&gt;/tableProperties’ related to the ranges
+in the table.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.setOrder">
+<span class="sig-name descname"><span class="pre">setOrder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">varOrder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.setOrder" title="Link to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>varOrder:     list&lt;str&gt;</dt><dd><p>Looping order (from outern-most to inner-most) in which the variables
+are to be red to convert the scalarList in table.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.readTable">
+<span class="sig-name descname"><span class="pre">readTable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tableName</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">argv</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.readTable" title="Link to this definition"></a></dt>
+<dd><p>fileName:   str
+tableName:  str</p>
+<p>[keyword arguments]
+Fatal:          bool (False)</p>
+<blockquote>
+<div><p>If set to ‘True’, raises a ValueError in case the input data is outside
+of tabulation range. Otherwise a warning is displayed.</p>
+</div></blockquote>
+<dl>
+<dt>extrapolate:    bool (True)</dt><dd><p>If set to ‘True’ the value is extrapolated in case accessing the table
+outside of ranges. Otherwise, the value is set to the ‘nan’.</p>
+<p>Loads a table stored at in file ‘&lt;path&gt;/constant/&lt;fileName&gt;’. Saves a ‘table’
+instance with the loaded data in self.tables[tableName].</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.ranges">
+<span class="sig-name descname"><span class="pre">ranges</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.ranges" title="Link to this definition"></a></dt>
+<dd><dl>
+<dt>Get a dict containing the data ranges in the tabulation (unmutable).</dt><dd><dl class="simple">
+<dt>{</dt><dd><dl class="simple">
+<dt>‘var_ii’:       list&lt;float&gt;[2]</dt><dd><p>Contains min and max of ‘var_ii’ sampling points.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>}</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.ndim">
+<span class="sig-name descname"><span class="pre">ndim</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.ndim" title="Link to this definition"></a></dt>
+<dd><p>Returns the dimentsions of the table (int)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.shape">
+<span class="sig-name descname"><span class="pre">shape</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.shape" title="Link to this definition"></a></dt>
+<dd><p>Returns the a tuple&lt;int&gt; containing the dimensions (dim1, dim2,…, dimn) of the tabulation.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.size">
+<span class="sig-name descname"><span class="pre">size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.size" title="Link to this definition"></a></dt>
+<dd><p>Returns the number of data-points stored in the table (int)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.checkDir">
+<span class="sig-name descname"><span class="pre">checkDir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.checkDir" title="Link to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Check if all information required to read the tabulation are consistent and present in ‘path’. Looking for:</dt><dd><p>path
+path/constant
+path/tableProperties</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.mergeTable">
+<span class="sig-name descname"><span class="pre">mergeTable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fieldName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">secondTable</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.mergeTable" title="Link to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>fieldName:  str</dt><dd><p>Field to use to append second table</p>
+</dd>
+<dt>secondTable: Tabulation</dt><dd><p>Tabulation containing the data to introduce</p>
+</dd>
+</dl>
+<p>Introduce additional data to the tabulation.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tableFolder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.write" title="Link to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>tableFolder:    str</dt><dd><p>Path where to save the table. In case not give, self.path is used.</p>
+</dd>
+</dl>
+<p>Write the tabulation.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.clear">
+<span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#libICEpost.src.base.dataStructures.Tabulation.OFTabulation.OFTabulation.clear" title="Link to this definition"></a></dt>
+<dd><p>Reset the tabulation arguments to default values.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../index.html" class="btn btn-neutral float-left" title="libICEpost.src.base.dataStructures.Tabulation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../Tabulation/index.html" class="btn btn-neutral float-right" title="libICEpost.src.base.dataStructures.Tabulation.Tabulation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, libICEpost.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

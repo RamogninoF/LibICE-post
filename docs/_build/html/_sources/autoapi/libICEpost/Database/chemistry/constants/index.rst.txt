@@ -1,0 +1,14 @@
+libICEpost.Database.chemistry.constants
+=======================================
+
+.. py:module:: libICEpost.Database.chemistry.constants
+
+.. autoapi-nested-parse::
+
+   @author: F. Ramognino       <federico.ramognino@polimi.it>
+   Last update:        12/06/2023
+
+   Chemical constants
+
+
+

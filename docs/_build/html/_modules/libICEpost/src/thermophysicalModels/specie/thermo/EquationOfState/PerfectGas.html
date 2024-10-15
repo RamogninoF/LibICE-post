@@ -1,0 +1,347 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.PerfectGas &mdash; libICEpost  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../../../../_static/graphviz.css?v=fd3f3429" />
+
+  
+      <script src="../../../../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../../../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../../../index.html" class="icon icon-home">
+            libICEpost
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../../example.html">Example usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../../conduct.html">Code of Conduct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../../../index.html">libICEpost</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.PerfectGas</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.PerfectGas</h1><div class="highlight"><pre>
+<span></span><span class="c1">#####################################################################</span>
+<span class="c1">#                                 DOC                               #</span>
+<span class="c1">#####################################################################</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">@author: F. Ramognino       &lt;federico.ramognino@polimi.it&gt;</span>
+<span class="sd">Last update:        12/06/2023</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1">#####################################################################</span>
+<span class="c1">#                               IMPORT                              #</span>
+<span class="c1">#####################################################################</span>
+
+<span class="kn">from</span> <span class="nn">libICEpost.src.base.BaseClass</span> <span class="kn">import</span> <span class="n">BaseClass</span>
+
+<span class="kn">from</span> <span class="nn">.EquationOfState</span> <span class="kn">import</span> <span class="n">EquationOfState</span>
+
+<span class="c1">#############################################################################</span>
+<span class="c1">#                               MAIN CLASSES                                #</span>
+<span class="c1">#############################################################################</span>
+<div class="viewcode-block" id="PerfectGas">
+<a class="viewcode-back" href="../../../../../../../autoapi/libICEpost/src/thermophysicalModels/specie/thermo/EquationOfState/index.html#libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.PerfectGas.PerfectGas">[docs]</a>
+<span class="k">class</span> <span class="nc">PerfectGas</span><span class="p">(</span><span class="n">EquationOfState</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Perfect gas equation of state</span>
+<span class="sd">    </span>
+<span class="sd">    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+<span class="sd">    </span>
+<span class="sd">    Attributes:</span>
+<span class="sd">        Rgas: float</span>
+<span class="sd">            The mass specific gas constant</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1">#########################################################################</span>
+<div class="viewcode-block" id="PerfectGas.fromDictionary">
+<a class="viewcode-back" href="../../../../../../../autoapi/libICEpost/src/thermophysicalModels/specie/thermo/EquationOfState/index.html#libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.PerfectGas.PerfectGas.fromDictionary">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">fromDictionary</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">dictionary</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create from dictionary.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">entryList</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Rgas&quot;</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">entryList</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">dictionary</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Mandatory entry &#39;</span><span class="si">{</span><span class="n">entry</span><span class="si">}</span><span class="s2">&#39; not found in dictionary.&quot;</span><span class="p">)</span>
+            
+            <span class="n">out</span> <span class="o">=</span> <span class="bp">cls</span>\
+                <span class="p">(</span>
+                    <span class="n">dictionary</span><span class="p">[</span><span class="s2">&quot;Rgas&quot;</span><span class="p">]</span>
+                <span class="p">)</span>
+            <span class="k">return</span> <span class="n">out</span>
+            
+        <span class="k">except</span> <span class="ne">BaseException</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">fatalErrorInClass</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">fromDictionary</span><span class="p">,</span> <span class="s2">&quot;Failed construction from dictionary&quot;</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span></div>
+
+    
+    <span class="c1">#########################################################################</span>
+    <span class="c1">#Constructor:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Rgas</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Rgas: float</span>
+<span class="sd">            The mass specific gas constant</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checkType</span><span class="p">(</span><span class="n">Rgas</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="s2">&quot;Rgas&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">BaseException</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fatalErrorInClass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="fm">__init__</span><span class="p">,</span> <span class="s2">&quot;Argument checking failed&quot;</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Rgas</span> <span class="o">=</span> <span class="n">Rgas</span>
+        
+    <span class="c1">#########################################################################</span>
+    <span class="c1">#Operators:</span>
+
+    <span class="c1">#########################################################################</span>
+<div class="viewcode-block" id="PerfectGas.cp">
+<a class="viewcode-back" href="../../../../../../../autoapi/libICEpost/src/thermophysicalModels/specie/thermo/EquationOfState/index.html#libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.PerfectGas.PerfectGas.cp">[docs]</a>
+    <span class="k">def</span> <span class="nf">cp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">T</span><span class="p">:</span><span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constant pressure heat capacity contribution [J/kg/K]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">cp</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">T</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mf">0.0</span></div>
+
+    
+    <span class="c1">#########################################################################</span>
+<div class="viewcode-block" id="PerfectGas.h">
+<a class="viewcode-back" href="../../../../../../../autoapi/libICEpost/src/thermophysicalModels/specie/thermo/EquationOfState/index.html#libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.PerfectGas.PerfectGas.h">[docs]</a>
+    <span class="k">def</span> <span class="nf">h</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">T</span><span class="p">:</span><span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Enthalpy contribution [J/kg]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">h</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">T</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mf">0.0</span></div>
+
+    
+    <span class="c1">#########################################################################</span>
+<div class="viewcode-block" id="PerfectGas.u">
+<a class="viewcode-back" href="../../../../../../../autoapi/libICEpost/src/thermophysicalModels/specie/thermo/EquationOfState/index.html#libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.PerfectGas.PerfectGas.u">[docs]</a>
+    <span class="k">def</span> <span class="nf">u</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">T</span><span class="p">:</span><span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Internal energy contribution [J/kg]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">u</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">T</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mf">0.0</span></div>
+
+    
+    <span class="c1">#########################################################################</span>
+<div class="viewcode-block" id="PerfectGas.rho">
+<a class="viewcode-back" href="../../../../../../../autoapi/libICEpost/src/thermophysicalModels/specie/thermo/EquationOfState/index.html#libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.PerfectGas.PerfectGas.rho">[docs]</a>
+    <span class="k">def</span> <span class="nf">rho</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">T</span><span class="p">:</span><span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Density [kg/m^3]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">rho</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">T</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">p</span><span class="o">/</span><span class="p">(</span><span class="n">T</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">Rgas</span><span class="p">)</span></div>
+
+    
+    <span class="c1">#########################################################################</span>
+<div class="viewcode-block" id="PerfectGas.T">
+<a class="viewcode-back" href="../../../../../../../autoapi/libICEpost/src/thermophysicalModels/specie/thermo/EquationOfState/index.html#libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.PerfectGas.PerfectGas.T">[docs]</a>
+    <span class="k">def</span> <span class="nf">T</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">rho</span><span class="p">:</span><span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Temperature [K]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">rho</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">p</span><span class="o">/</span><span class="p">(</span><span class="n">rho</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">Rgas</span><span class="p">)</span></div>
+
+    
+    <span class="c1">#########################################################################</span>
+<div class="viewcode-block" id="PerfectGas.p">
+<a class="viewcode-back" href="../../../../../../../autoapi/libICEpost/src/thermophysicalModels/specie/thermo/EquationOfState/index.html#libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.PerfectGas.PerfectGas.p">[docs]</a>
+    <span class="k">def</span> <span class="nf">p</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">rho</span><span class="p">:</span><span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Pressure [Pa]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">p</span><span class="p">(</span><span class="n">T</span><span class="p">,</span><span class="n">rho</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">rho</span> <span class="o">*</span> <span class="n">T</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">Rgas</span></div>
+
+    
+    <span class="c1">#########################################################################</span>
+<div class="viewcode-block" id="PerfectGas.Z">
+<a class="viewcode-back" href="../../../../../../../autoapi/libICEpost/src/thermophysicalModels/specie/thermo/EquationOfState/index.html#libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.PerfectGas.PerfectGas.Z">[docs]</a>
+    <span class="k">def</span> <span class="nf">Z</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">T</span><span class="p">:</span><span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compression factor [-]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">Z</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">T</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mf">1.0</span></div>
+
+    
+    <span class="c1">#########################################################################</span>
+<div class="viewcode-block" id="PerfectGas.cpMcv">
+<a class="viewcode-back" href="../../../../../../../autoapi/libICEpost/src/thermophysicalModels/specie/thermo/EquationOfState/index.html#libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.PerfectGas.PerfectGas.cpMcv">[docs]</a>
+    <span class="k">def</span> <span class="nf">cpMcv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">T</span><span class="p">:</span><span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Difference cp - cv.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">cpMcv</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">T</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Rgas</span></div>
+
+    
+    <span class="c1">#########################################################################</span>
+<div class="viewcode-block" id="PerfectGas.dcpdT">
+<a class="viewcode-back" href="../../../../../../../autoapi/libICEpost/src/thermophysicalModels/specie/thermo/EquationOfState/index.html#libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.PerfectGas.PerfectGas.dcpdT">[docs]</a>
+    <span class="k">def</span> <span class="nf">dcpdT</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        dcp/dT [J/kg/K^2]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">dcpdT</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">T</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mf">0.0</span></div>
+
+    
+    <span class="c1">#########################################################################</span>
+<div class="viewcode-block" id="PerfectGas.dpdT">
+<a class="viewcode-back" href="../../../../../../../autoapi/libICEpost/src/thermophysicalModels/specie/thermo/EquationOfState/index.html#libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.PerfectGas.PerfectGas.dpdT">[docs]</a>
+    <span class="k">def</span> <span class="nf">dpdT</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        dp/dT [Pa/K]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">dpdT</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">T</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rho</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">T</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">Rgas</span></div>
+
+    
+    <span class="c1">#########################################################################</span>
+<div class="viewcode-block" id="PerfectGas.dTdp">
+<a class="viewcode-back" href="../../../../../../../autoapi/libICEpost/src/thermophysicalModels/specie/thermo/EquationOfState/index.html#libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.PerfectGas.PerfectGas.dTdp">[docs]</a>
+    <span class="k">def</span> <span class="nf">dTdp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        dT/dp [K/Pa]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">dTdp</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">T</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rho</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">T</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">Rgas</span></div>
+
+    
+    <span class="c1">#########################################################################</span>
+<div class="viewcode-block" id="PerfectGas.drhodp">
+<a class="viewcode-back" href="../../../../../../../autoapi/libICEpost/src/thermophysicalModels/specie/thermo/EquationOfState/index.html#libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.PerfectGas.PerfectGas.drhodp">[docs]</a>
+    <span class="k">def</span> <span class="nf">drhodp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        drho/dp [kg/(m^3 Pa)]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">drhodp</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">T</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mf">1.0</span><span class="o">/</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Rgas</span> <span class="o">*</span> <span class="n">T</span><span class="p">)</span></div>
+
+    
+    <span class="c1">#########################################################################</span>
+<div class="viewcode-block" id="PerfectGas.dpdrho">
+<a class="viewcode-back" href="../../../../../../../autoapi/libICEpost/src/thermophysicalModels/specie/thermo/EquationOfState/index.html#libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.PerfectGas.PerfectGas.dpdrho">[docs]</a>
+    <span class="k">def</span> <span class="nf">dpdrho</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        dp/drho [Pa * m^3 / kg]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">dpdrho</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">T</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Rgas</span> <span class="o">*</span> <span class="n">T</span><span class="p">)</span></div>
+
+    
+    <span class="c1">#########################################################################</span>
+<div class="viewcode-block" id="PerfectGas.drhodT">
+<a class="viewcode-back" href="../../../../../../../autoapi/libICEpost/src/thermophysicalModels/specie/thermo/EquationOfState/index.html#libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.PerfectGas.PerfectGas.drhodT">[docs]</a>
+    <span class="k">def</span> <span class="nf">drhodT</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        drho/dT [kg/(m^3 K)]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">drhodT</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">T</span><span class="p">)</span>
+        <span class="k">return</span> <span class="o">-</span><span class="n">p</span><span class="o">/</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Rgas</span> <span class="o">*</span> <span class="p">(</span><span class="n">T</span> <span class="o">**</span> <span class="mf">2.0</span><span class="p">))</span></div>
+
+    
+    <span class="c1">#########################################################################</span>
+<div class="viewcode-block" id="PerfectGas.dTdrho">
+<a class="viewcode-back" href="../../../../../../../autoapi/libICEpost/src/thermophysicalModels/specie/thermo/EquationOfState/index.html#libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.PerfectGas.PerfectGas.dTdrho">[docs]</a>
+    <span class="k">def</span> <span class="nf">dTdrho</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        dT/drho [K * m^3 / kg]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">dTdrho</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">T</span><span class="p">)</span>
+        <span class="k">return</span> <span class="o">-</span><span class="n">p</span><span class="o">/</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Rgas</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rho</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">T</span><span class="p">)</span> <span class="o">**</span> <span class="mf">2.0</span><span class="p">))</span></div>
+</div>
+
+
+<span class="c1">#############################################################################</span>
+<span class="n">EquationOfState</span><span class="o">.</span><span class="n">addToRuntimeSelectionTable</span><span class="p">(</span><span class="n">PerfectGas</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, libICEpost.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

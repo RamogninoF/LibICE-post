@@ -1,0 +1,507 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>libICEpost.src.thermophysicalModels.specie.specie.Mixture &mdash; libICEpost  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+      <link rel="stylesheet" type="text/css" href="../../../../../../../_static/graphviz.css?v=fd3f3429" />
+
+  
+      <script src="../../../../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../../../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../../../search.html" />
+    <link rel="next" title="libICEpost.src.thermophysicalModels.specie.specie.Molecule" href="../Molecule/index.html" />
+    <link rel="prev" title="libICEpost.src.thermophysicalModels.specie.specie.Atom" href="../Atom/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../../../index.html" class="icon icon-home">
+            libICEpost
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../../example.html">Example usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../../conduct.html">Code of Conduct</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../../../../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../../../../index.html">libICEpost</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../../../../../index.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../../../../../Database/index.html">libICEpost.Database</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../scripts/index.html">libICEpost.scripts</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="../../../../index.html">libICEpost.src</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../../../index.html">libICEpost</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../../../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="../../../../../index.html">libICEpost</a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">libICEpost.src</a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">libICEpost.src.thermophysicalModels</a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">libICEpost.src.thermophysicalModels.specie</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">libICEpost.src.thermophysicalModels.specie.specie</a></li>
+      <li class="breadcrumb-item active">libICEpost.src.thermophysicalModels.specie.specie.Mixture</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../../../../_sources/autoapi/libICEpost/src/thermophysicalModels/specie/specie/Mixture/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-libICEpost.src.thermophysicalModels.specie.specie.Mixture">
+<span id="libicepost-src-thermophysicalmodels-specie-specie-mixture"></span><h1>libICEpost.src.thermophysicalModels.specie.specie.Mixture<a class="headerlink" href="#module-libICEpost.src.thermophysicalModels.specie.specie.Mixture" title="Link to this heading"></a></h1>
+<p>&#64;author: F. Ramognino       &lt;<a class="reference external" href="mailto:federico&#46;ramognino&#37;&#52;&#48;polimi&#46;it">federico<span>&#46;</span>ramognino<span>&#64;</span>polimi<span>&#46;</span>it</a>&gt;
+Last update:        12/06/2023</p>
+<section id="attributes">
+<h2>Attributes<a class="headerlink" href="#attributes" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.constants" title="libICEpost.src.thermophysicalModels.specie.specie.Mixture.constants"><code class="xref py py-obj docutils literal notranslate"><span class="pre">constants</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.MixtureItem" title="libICEpost.src.thermophysicalModels.specie.specie.Mixture.MixtureItem"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MixtureItem</span></code></a></p></td>
+<td><p>Dataclass used as return value by Mixture.__getitem__ method</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture" title="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Mixture</span></code></a></p></td>
+<td><p>Class handling a the mixture of a homogeneous mixture.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.MixtureIter" title="libICEpost.src.thermophysicalModels.specie.specie.Mixture.MixtureIter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MixtureIter</span></code></a></p></td>
+<td><p>Iterator for Mixture class.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.mixtureBlend" title="libICEpost.src.thermophysicalModels.specie.specie.Mixture.mixtureBlend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mixtureBlend</span></code></a>(→ Mixture)</p></td>
+<td><p>mixture:    list&lt;mixture&gt;</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.constants">
+<span class="sig-prename descclassname"><span class="pre">libICEpost.src.thermophysicalModels.specie.specie.Mixture.</span></span><span class="sig-name descname"><span class="pre">constants</span></span><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.constants" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.MixtureItem">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">libICEpost.src.thermophysicalModels.specie.specie.Mixture.</span></span><span class="sig-name descname"><span class="pre">MixtureItem</span></span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Mixture.html#MixtureItem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.MixtureItem" title="Link to this definition"></a></dt>
+<dd><p>Dataclass used as return value by Mixture.__getitem__ method</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.MixtureItem.specie">
+<span class="sig-name descname"><span class="pre">specie</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../Molecule/index.html#libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule" title="libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule"><span class="pre">libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule</span></a></em><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.MixtureItem.specie" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.MixtureItem.X">
+<span class="sig-name descname"><span class="pre">X</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.MixtureItem.X" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.MixtureItem.Y">
+<span class="sig-name descname"><span class="pre">Y</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.MixtureItem.Y" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">libICEpost.src.thermophysicalModels.specie.specie.Mixture.</span></span><span class="sig-name descname"><span class="pre">Mixture</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">specieList</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../Molecule/index.html#libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule" title="libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule"><span class="pre">libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">composition</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fracType</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mass'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Mixture.html#Mixture"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="../../../../base/Utilities/index.html#libICEpost.src.base.Utilities.Utilities" title="libICEpost.src.base.Utilities.Utilities"><code class="xref py py-obj docutils literal notranslate"><span class="pre">libICEpost.src.base.Utilities.Utilities</span></code></a></p>
+<p>Class handling a the mixture of a homogeneous mixture.</p>
+<hr class="docutils" />
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture._specie">
+<span class="sig-name descname"><span class="pre">_specie</span></span><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture._specie" title="Link to this definition"></a></dt>
+<dd><p>list&lt;Molecule&gt;
+Specie in the mixture</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture._X">
+<span class="sig-name descname"><span class="pre">_X</span></span><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture._X" title="Link to this definition"></a></dt>
+<dd><p>list&lt;float&gt;
+Mole fractions of specie in the mixture</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture._Y">
+<span class="sig-name descname"><span class="pre">_Y</span></span><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture._Y" title="Link to this definition"></a></dt>
+<dd><p>list&lt;float&gt;
+Mass fractions of specie in the mixture</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture._decimalPlaces">
+<span class="sig-name descname"><span class="pre">_decimalPlaces</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></em><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture._decimalPlaces" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">_X</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id1">
+<span class="sig-name descname"><span class="pre">_Y</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id2">
+<span class="sig-name descname"><span class="pre">_specie</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../Molecule/index.html#libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule" title="libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule"><span class="pre">libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.Rgas">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Rgas</span></span><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.Rgas" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">The</span> <span class="pre">mass-specific</span> <span class="pre">gas</span> <span class="pre">constant</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">mixture.</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.Y">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Y</span></span><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.Y" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">The</span> <span class="pre">mass</span> <span class="pre">fractions.</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.X">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">X</span></span><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.X" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">The</span> <span class="pre">mole</span> <span class="pre">fractions.</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.specie">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">specie</span></span><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.specie" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">The</span> <span class="pre">specie</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">mixture.</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.empty">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">empty</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Mixture.html#Mixture.empty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.empty" title="Link to this definition"></a></dt>
+<dd><p>Overload empty initializer.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture._current_index">
+<span class="sig-name descname"><span class="pre">_current_index</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture._current_index" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Mixture.html#Mixture.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.__str__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Mixture.html#Mixture.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.__repr__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.__getitem__">
+<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">specie</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.MixtureItem" title="libICEpost.src.thermophysicalModels.specie.specie.Mixture.MixtureItem"><span class="pre">MixtureItem</span></a></span></span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Mixture.html#Mixture.__getitem__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.__getitem__" title="Link to this definition"></a></dt>
+<dd><p>specie:     str / Molecule / int</p>
+<dl class="simple">
+<dt>Get the data relative to molecule in the mixture</dt><dd><p>-&gt; If str: checking for molecule matching the name
+-&gt; If Molecule: checking for specie
+-&gt; If int:  checing for entry following the order</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dataclass for data of specie in mixture.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.MixtureItem" title="libICEpost.src.thermophysicalModels.specie.specie.Mixture.MixtureItem">MixtureItem</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.__delitem__">
+<span class="sig-name descname"><span class="pre">__delitem__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">specie</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Mixture.html#Mixture.__delitem__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.__delitem__" title="Link to this definition"></a></dt>
+<dd><p>specie:     str / Molecule / int</p>
+<dl class="simple">
+<dt>Remove molecule from mixture</dt><dd><p>-&gt; If str: checking for molecule matching the name
+-&gt; If Molecule: checking for specie
+-&gt; If int:  checing for entry following the order</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dataclass for data of specie in mixture.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.MixtureItem" title="libICEpost.src.thermophysicalModels.specie.specie.Mixture.MixtureItem">MixtureItem</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.__iter__">
+<span class="sig-name descname"><span class="pre">__iter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Mixture.html#Mixture.__iter__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.__iter__" title="Link to this definition"></a></dt>
+<dd><p>Iteration over the specie in the mixture.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.__contains__">
+<span class="sig-name descname"><span class="pre">__contains__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entry</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Mixture.html#Mixture.__contains__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.__contains__" title="Link to this definition"></a></dt>
+<dd><p>Checks if a Molecule is part of the mixture.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.__index__">
+<span class="sig-name descname"><span class="pre">__index__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entry</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Mixture.html#Mixture.__index__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.__index__" title="Link to this definition"></a></dt>
+<dd><p>Return the idex position of the Molecule in the Mixture.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.index">
+<span class="sig-name descname"><span class="pre">index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entry</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Mixture.html#Mixture.index"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.index" title="Link to this definition"></a></dt>
+<dd><p>Return the idex position of the Molecule in the Mixture.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.__len__">
+<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Mixture.html#Mixture.__len__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.__len__" title="Link to this definition"></a></dt>
+<dd><p>Return the number of chemical specie in the Mixture.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.__eq__">
+<span class="sig-name descname"><span class="pre">__eq__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mix</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Mixture.html#Mixture.__eq__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.__eq__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.updateMolFracts">
+<span class="sig-name descname"><span class="pre">updateMolFracts</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Mixture.html#Mixture.updateMolFracts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.updateMolFracts" title="Link to this definition"></a></dt>
+<dd><p>Update mole fractions of the specie from mass fractions.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.updateMassFracts">
+<span class="sig-name descname"><span class="pre">updateMassFracts</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Mixture.html#Mixture.updateMassFracts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.updateMassFracts" title="Link to this definition"></a></dt>
+<dd><p>Update mass fractions of the specie from mole fractions.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.MM">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MM</span></span><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.MM" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">Return</span> <span class="pre">the</span> <span class="pre">average</span> <span class="pre">molecular</span> <span class="pre">mass</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">mixture.</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.Ysum">
+<span class="sig-name descname"><span class="pre">Ysum</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Mixture.html#Mixture.Ysum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.Ysum" title="Link to this definition"></a></dt>
+<dd><p>Return the sum of mass fractions of specie in the composition (should add to 1).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.Xsum">
+<span class="sig-name descname"><span class="pre">Xsum</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Mixture.html#Mixture.Xsum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.Xsum" title="Link to this definition"></a></dt>
+<dd><p>Return the sum of mole fractions of specie in the composition (should add to 1).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.dilute">
+<span class="sig-name descname"><span class="pre">dilute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dilutingMix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture" title="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture"><span class="pre">Mixture</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dilutionFract</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fracType</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'mass'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Mixture.html#Mixture.dilute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.dilute" title="Link to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>dilutingMix:        Mixture/Molecule</dt><dd><p>Diluting mixture</p>
+</dd>
+<dt>dilutionFract:      float</dt><dd><p>mass/mole fraction of the dilutant mixture with respect
+to the overall mixture.</p>
+</dd>
+<dt>fracType:       str (“mass” or “mole”)</dt><dd><p>Type of dilution, if mass fraction or mole fraction based.</p>
+</dd>
+</dl>
+<p>Dilute the mixture with a second mixture, given the
+mass/mole fraction of the dilutant mixture with respect
+to the overall mixture.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.extract">
+<span class="sig-name descname"><span class="pre">extract</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">specieList</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Mixture.html#Mixture.extract"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.extract" title="Link to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>specieList:        list&lt;Molecule&gt;</dt><dd><p>List of specie to extract</p>
+</dd>
+</dl>
+<p>Extract a submixture from a list of specie. Raises ValueError if a Molecule
+is not found in mixture</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.removeZeros">
+<span class="sig-name descname"><span class="pre">removeZeros</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture" title="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture"><span class="pre">Mixture</span></a></span></span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Mixture.html#Mixture.removeZeros"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.removeZeros" title="Link to this definition"></a></dt>
+<dd><p>Remove Molecules with too low mass and mole fraction (Mixture._decimalPlaces).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>self</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture" title="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture">Mixture</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.subtractMixture">
+<span class="sig-name descname"><span class="pre">subtractMixture</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture" title="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture"><span class="pre">Mixture</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture" title="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture"><span class="pre">Mixture</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Mixture.html#Mixture.subtractMixture"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture.subtractMixture" title="Link to this definition"></a></dt>
+<dd><p>Finds the maximum sub-mixture with composition ‘mix’ in this. Then returns a tuple with (yMix, remainder)
+which are the mass-fraction of mixture ‘mix’ in this and the remaining mixture once ‘mix’ is removed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mix</strong> (<a class="reference internal" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture" title="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture"><em>Mixture</em></a>) – Mixture to subtract from this</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>couple (yMix, remainder)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[float,<a class="reference internal" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture" title="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture">Mixture</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.MixtureIter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">libICEpost.src.thermophysicalModels.specie.specie.Mixture.</span></span><span class="sig-name descname"><span class="pre">MixtureIter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">composition</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture" title="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture"><span class="pre">Mixture</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Mixture.html#MixtureIter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.MixtureIter" title="Link to this definition"></a></dt>
+<dd><p>Iterator for Mixture class.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.MixtureIter.composition">
+<span class="sig-name descname"><span class="pre">composition</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture" title="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture"><span class="pre">Mixture</span></a></em><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.MixtureIter.composition" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.MixtureIter.specieList">
+<span class="sig-name descname"><span class="pre">specieList</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../Molecule/index.html#libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule" title="libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule"><span class="pre">libICEpost.src.thermophysicalModels.specie.specie.Molecule.Molecule</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.MixtureIter.specieList" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.MixtureIter.current_index">
+<span class="sig-name descname"><span class="pre">current_index</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.MixtureIter.current_index" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.MixtureIter.__iter__">
+<span class="sig-name descname"><span class="pre">__iter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Mixture.html#MixtureIter.__iter__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.MixtureIter.__iter__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.MixtureIter.__next__">
+<span class="sig-name descname"><span class="pre">__next__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Mixture.html#MixtureIter.__next__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.MixtureIter.__next__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.specie.specie.Mixture.mixtureBlend">
+<span class="sig-prename descclassname"><span class="pre">libICEpost.src.thermophysicalModels.specie.specie.Mixture.</span></span><span class="sig-name descname"><span class="pre">mixtureBlend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mixtures</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture" title="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture"><span class="pre">Mixture</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">composition</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fracType</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'mass'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture" title="libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture"><span class="pre">Mixture</span></a></span></span><a class="reference internal" href="../../../../../../../_modules/libICEpost/src/thermophysicalModels/specie/specie/Mixture.html#mixtureBlend"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#libICEpost.src.thermophysicalModels.specie.specie.Mixture.mixtureBlend" title="Link to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>mixture:    list&lt;mixture&gt;</dt><dd><p>List of mixtures to be blended</p>
+</dd>
+<dt>composition:          list&lt;float&gt;</dt><dd><p>List of mass/mole fractions for the blending</p>
+</dd>
+<dt>fracType:   str</dt><dd><p>Type of blending (mass/mole fraction-based)</p>
+</dd>
+</dl>
+<p>Blends together a group of mixtures.</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../Atom/index.html" class="btn btn-neutral float-left" title="libICEpost.src.thermophysicalModels.specie.specie.Atom" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../Molecule/index.html" class="btn btn-neutral float-right" title="libICEpost.src.thermophysicalModels.specie.specie.Molecule" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, libICEpost.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,212 @@
+libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFS
+========================================================================
+
+.. py:module:: libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFS
+
+.. autoapi-nested-parse::
+
+   @author: F. Ramognino       <federico.ramognino@polimi.it>
+   Last update:        12/06/2023
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFS.tabulatedLFS
+
+
+Module Contents
+---------------
+
+.. py:class:: tabulatedLFS(tablePath=OFTabulation.path, noWrite=OFTabulation.noWrite, **argv)
+
+   Bases: :py:obj:`src.base.dataStructures.Tabulation.OFTabulation.OFTabulation`, :py:obj:`libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.laminarFlameSpeedModel.laminarFlameSpeedModel`
+
+
+   Class for computation of unstained laminar flame speed from tabulation
+
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Attibutes:
+       path:               str
+           Path where the tabulation is stored
+
+       entryNames:     dict    [{}]
+           {
+               entri_ii:     str
+                   Name to give at the generic entry 'entry_ii' found in the dictionay
+                   tableProperties.
+           }
+           Used to (optionally) change the names of the variables stored in the table.
+
+       tableProperties:    dict
+           {
+               var_ii:   list<float>
+                   Contains the list of sampling points for variable 'var_ii'
+           }
+           Dictionary containing the information retrieved from tableProperties.
+
+       varOrder:           list<str>
+           Order in which the variables are red convert the scalarLists in tables.
+
+       noWrite:        bool
+           Label controlling if the class is allowed to write the files
+
+       tables:             dict
+           {
+               'tab_ii':   table
+           }
+           Contains the tabulations.
+
+       tableFileNames:     dict
+           {
+               'tab_ii':   str
+           }
+           Contains the names of files for the tabulations.
+
+       opts:       dict
+       {
+           Fatal:          bool
+               If set to 'True', raises a ValueError in case the input data is outside
+               of tabulation range. Otherwise a warning is displayed.
+
+           extrapolate:    bool
+               If set to 'True' the value is extrapolated in case accessing the table
+               outside of ranges. Otherwise, the value is set to 'nan'.
+       }
+
+
+   .. py:attribute:: entryNames
+
+
+   .. py:attribute:: tableProperties
+
+
+   .. py:attribute:: varOrder
+      :value: ['p', 'T', 'phi', 'EGR']
+
+
+
+   .. py:attribute:: tables
+
+
+   .. py:attribute:: tableFileNames
+
+
+   .. py:method:: fromFile(tablePath, isLaminarFlameThickness=True, noWrite=OFTabulation.noWrite, **argv)
+      :classmethod:
+
+
+      tablePath:                  str
+          The path where the tabulation is stored
+      isLaminarFlameThickness:    bool (True)
+          Is the laminar flame thickness to be loaded? (in case it was not tabulated)
+      noWrite:        bool (True)
+          Handle to prevent write access of this class to the tabulation
+
+      [keyword arguments]
+      Fatal:          bool (False)
+          If set to 'True', raises a ValueError in case the input data is outside
+          of tabulation range. Otherwise a warning is displayed.
+
+      extrapolate:    bool (True)
+          If set to 'True' the value is extrapolated in case accessing the table
+          outside of ranges. Otherwise, the value is set to the 'nan'.
+
+      Construct a table from files stored in 'tablePath'.
+
+
+
+   .. py:method:: fromDictionary(dictionary)
+      :classmethod:
+
+
+      Construct from dictionary containing:
+          tablePath:                  str
+              The path where the tabulation is stored
+
+          [Optional]
+          isLaminarFlameThickness:    bool (True)
+              Is the laminar flame thickness to be loaded? (in case it was not tabulated)
+          noWrite:        bool (True)
+              Handle to prevent write access of this class to the tabulation
+          Fatal:          bool (False)
+              If set to 'True', raises a ValueError in case the input data is outside
+              of tabulation range. Otherwise a warning is displayed.
+          extrapolate:    bool (True)
+              If set to 'True' the value is extrapolated in case accessing the table
+              outside of ranges. Otherwise, the value is set to the 'nan'.
+
+
+
+   .. py:method:: setCoeffs(*args, **argv)
+
+      coeffs:     dict ({})
+          Dictionary containing the parameters of the model (in laminarFlameSpeed.coeffs)
+          that need to be changed/set. Keyword arguments are also accepted.
+
+
+
+   .. py:method:: SuTable()
+
+      Returns a copy of the tabulation of laminar flame speed
+
+
+
+   .. py:method:: deltaLTable()
+
+      Returns a copy of the tabulation of laminar flame tickness
+
+
+
+   .. py:method:: Su(p, T, phi, EGR=None, **argv)
+
+      p:      float
+          Pressure [Pa]
+      T:      float
+          Temperature [K]
+      phi:    float
+          Equivalence ratio
+      EGR:    float (None)
+          Level of exhaust gas recirculation [%]
+
+      [keyword arguments]
+      Fatal:          bool (False)
+          If set to 'True', raises a ValueError in case the input data is outside
+          of tabulation range. Otherwise a warning is displayed.
+
+      extrapolate:    bool (True)
+          If set to 'True' the value is extrapolated in case accessing the table
+          outside of ranges. Otherwise, the value is set to 'nan'.
+
+      Used to compute laminar flame speed from tabulation.
+
+
+
+   .. py:method:: deltaL(p, T, phi, EGR=None, **argv)
+
+      p:      float
+          Pressure [Pa]
+      T:      float
+          Temperature [K]
+      phi:    float
+          Equivalence ratio
+      EGR:    float
+          Level of exhaust gas recirculation [%]
+
+      [keyword arguments]
+      Fatal:          bool (False)
+          If set to 'True', raises a ValueError in case the input data is outside
+          of tabulation range. Otherwise a warning is displayed.
+
+      extrapolate:    bool (True)
+          If set to 'True' the value is extrapolated in case accessing the table
+          outside of ranges. Otherwise, the value is set to the one at range limit.
+
+      Used to compute laminar flame tickness from tabulation.
+
+
+

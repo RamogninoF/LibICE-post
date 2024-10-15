@@ -1,0 +1,101 @@
+libICEpost.src.engineModel.HeatTransferModel.Woschni
+====================================================
+
+.. py:module:: libICEpost.src.engineModel.HeatTransferModel.Woschni
+
+.. autoapi-nested-parse::
+
+   @author: F. Ramognino       <federico.ramognino@polimi.it>
+   Last update:        12/06/2023
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   libICEpost.src.engineModel.HeatTransferModel.Woschni.Woschni
+
+
+Module Contents
+---------------
+
+.. py:class:: Woschni(/, nwos: float = 1.32, C1: float = 3.26, C2cv: float = 2.28, C2ge: float = 6.18, C3comp: float = 0.0, C3comb=0.00324)
+
+   Bases: :py:obj:`libICEpost.src.engineModel.HeatTransferModel.HeatTransferModel.HeatTransferModel`
+
+
+   Class for computation of wall heat transfer with Woschni model:
+
+   h = C1 * (p/1000.)^.8 * T^(-0.53) * D^(-0.2) * uwos^(0.8)
+   uwos = C2 * upMean + C3 * (p - p_mot) * Vs * T0 / (p0 * V0)
+   p_mot = p * ( V0 / V )**nwos
+   Vs : Displacement volume
+
+   Where:
+       1) C2 changes depending if at closed-valves (C2cv) or during gas-exchange (C2ge)
+       2) C3 changes depending if during compression (C3comp) or during combustion/expansion (C3comb)
+       3) Reference conditions (0) are at IVC or startTime if it is in closed-valve region.
+
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Attibutes:
+       coeffs:   dict
+           Container for model constants
+
+
+   .. py:method:: fromDictionary(dictionary) -> Self
+      :classmethod:
+
+
+      Construct from dictionary
+      {
+          nwos    (float, default 1.32)
+          C1      (float, default 3.26)
+          C2cv    (float, default 2.28)
+          C2ge    (float, default 6.18)
+          C3comp  (float, default 0.0)
+          C3comb  (float, default 3.24e-3)
+      }
+
+      :returns: Instance of this class
+      :rtype: Self
+
+
+
+   .. py:method:: h(*, engine: libICEpost.src.engineModel.EngineModel.EngineModel.EngineModel, CA: float | collections.abc.Iterable | None = None, **kwargs) -> float
+
+      Compute convective wall heat transfer with Woschni correlation:
+          h = C1 * (p/1000.)^.8 * T^(-0.53) * engine.geometry.D^(-0.2) * uwos^(0.8)
+          uwos = C2 * upMean(engine.time, engine.geometry) + C3 * (p - p_mot) * Vs * T0 / (p0 * V0)
+          p_mot = p * ( V0 / V )**nwos
+
+      :param engine: The engine model from which taking data.
+      :type engine: EngineModel
+      :param CA: Time for which computing heat transfer. If None, uses engine.time.time. Defaults to None.
+      :type CA: float | Iterable | None, optional
+
+      :returns: convective wall heat transfer coefficient [W/(m^2 K)]
+      :rtype: float
+
+
+
+   .. py:method:: uwos(engine: libICEpost.src.engineModel.EngineModel.EngineModel.EngineModel, *, CA: float | collections.abc.Iterable | None = None) -> float
+
+      uwos = C2 * upMean(engine.time, engine.geometry) + C3 * (p - p_mot) * Vs * T_ref / (p_ref * V_ref)
+      p_mot = p_ref * ( V_ref / V )**nwos
+
+      :param engine: The engine model from which taking data.
+      :type engine: EngineModel
+      :param CA: Time for which computing heat transfer. If None, uses engine.time.time. Defaults to None.
+      :type CA: float | Iterable | None, optional
+
+
+
+   .. py:method:: p_mot(*, p0: float | collections.abc.Iterable, V: float | collections.abc.Iterable, V0: float | collections.abc.Iterable)
+
+      p_mot = p0 * ( V0 / V )**nwos
+
+
+

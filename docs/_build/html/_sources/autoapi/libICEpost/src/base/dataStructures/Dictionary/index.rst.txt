@@ -1,0 +1,113 @@
+libICEpost.src.base.dataStructures.Dictionary
+=============================================
+
+.. py:module:: libICEpost.src.base.dataStructures.Dictionary
+
+.. autoapi-nested-parse::
+
+   @author: F. Ramognino       <federico.ramognino@polimi.it>
+   Last update:        12/06/2023
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   libICEpost.src.base.dataStructures.Dictionary.T
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   libICEpost.src.base.dataStructures.Dictionary.Dictionary
+
+
+Module Contents
+---------------
+
+.. py:data:: T
+
+.. py:class:: Dictionary(*args, _fileName: str = None, **argv)
+
+   Bases: :py:obj:`collections.OrderedDict`, :py:obj:`libICEpost.src.base.Utilities.Utilities`
+
+
+   Ordered dictionary embedding some useful OpenFOAM-like methods.
+
+
+   .. py:attribute:: path
+      :type:  str | None
+
+
+   .. py:attribute:: file
+      :type:  str | None
+
+
+   .. py:method:: fromFile(fileName: str)
+      :classmethod:
+
+
+      fileName:   str
+          Path of the file
+      Read the variables stored in a python file (Runs the code in the file and retrieves the local variables)
+
+      NOTE: local variable 'this' for this file. You can access the local folder as 'this.path' within the dictionary.
+
+
+
+   .. py:method:: lookup(entryName: str)
+
+      entryName:  str
+          Name of the entry to look for
+
+      Same as __getitem__ but embeds error handling
+
+
+
+   .. py:method:: pop(entryName: str)
+
+      entryName:  str
+          Name of the entry to look for
+
+      Same as dictionary.pop but embeds error handling
+
+
+
+   .. py:method:: lookupOrDefault(entryName: str, default: T, fatal: bool = True) -> T
+
+      entryName:  str
+          Name of the entry to look for
+      default:    instance
+          Instance to return in case the value is not found. It is also used for typeChecking
+      fatal:      bool (True)
+          If the type is not consistent rise a FatalError
+
+      Lookup of give a default value if not found
+
+
+
+   .. py:method:: _correctSubdicts()
+
+      Convert ricorsively every subdictionary into Dictionary classes.
+
+
+
+   .. py:method:: __setitem__(*args, **argv)
+
+      Set self[key] to value.
+
+
+
+   .. py:method:: update(**kwargs)
+
+      kwargs:    dict
+          Keyword-argumentrs to be updated in dictionary
+
+      Performs like dict.update() method but recursively updates sub-dictionaries
+
+
+

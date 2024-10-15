@@ -1,0 +1,112 @@
+libICEpost.Database
+===================
+
+.. py:module:: libICEpost.Database
+
+.. autoapi-nested-parse::
+
+   @author: F. Ramognino       <federico.ramognino@polimi.it>
+   Last update:        12/06/2023
+
+   database (variables are stored at sourcing of the packages)
+
+
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/libICEpost/Database/chemistry/index
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/libICEpost/Database/_DatabaseClass/index
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   libICEpost.Database.location
+   libICEpost.Database.database
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   libICEpost.Database._DatabaseClass
+
+
+Package Contents
+----------------
+
+.. py:class:: _DatabaseClass(name: str, **values)
+
+   Bases: :py:obj:`libICEpost.src.base.BaseClass.BaseClass`, :py:obj:`dict`
+
+
+   Class wrapping useful methods for base virtual classes (e.g. run-time selector)
+
+
+   .. py:method:: addFolder(name: str, **dict)
+
+      Add sub-database (folder)
+
+
+
+   .. py:method:: __getattribute__(__name: str) -> Any
+
+      Points to __getitem__ of dict class
+
+
+
+   .. py:method:: __setattr__(__name: str, __value: Any) -> None
+
+      Points to __setitem__ of dict class
+
+
+
+   .. py:method:: __repr__()
+
+      Return repr(self).
+
+
+
+   .. py:method:: __str__()
+
+      Return str(self).
+
+
+
+   .. py:method:: __contains__(item)
+
+      True if the dictionary has the specified key, else False.
+
+
+
+   .. py:method:: __setitem__(__key: Any, __value: Any) -> None
+
+      Set self[key] to value.
+
+
+
+   .. py:method:: __getitem__(__key: Any) -> Any
+
+      x.__getitem__(y) <==> x[y]
+
+
+
+.. py:data:: location
+
+.. py:data:: database
+

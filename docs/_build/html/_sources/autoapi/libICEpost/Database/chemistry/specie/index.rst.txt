@@ -1,0 +1,38 @@
+libICEpost.Database.chemistry.specie
+====================================
+
+.. py:module:: libICEpost.Database.chemistry.specie
+
+.. autoapi-nested-parse::
+
+   @author: F. Ramognino       <federico.ramognino@polimi.it>
+   Last update:        12/06/2023
+
+   Database for chemical specie (atom, molecule, mixture) (variables are stored at sourcing of the packages)
+
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/libICEpost/Database/chemistry/specie/Mixtures/index
+   /autoapi/libICEpost/Database/chemistry/specie/Molecules/index
+   /autoapi/libICEpost/Database/chemistry/specie/periodicTable/index
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   libICEpost.Database.chemistry.specie.database
+
+
+Package Contents
+----------------
+
+.. py:data:: database
+

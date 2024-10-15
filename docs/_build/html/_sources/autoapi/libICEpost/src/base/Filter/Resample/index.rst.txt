@@ -1,0 +1,67 @@
+libICEpost.src.base.Filter.Resample
+===================================
+
+.. py:module:: libICEpost.src.base.Filter.Resample
+
+.. autoapi-nested-parse::
+
+   @author: <N. Surname>       <e-mail>
+   Last update:        DD/MM/YYYY
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   libICEpost.src.base.Filter.Resample.Resample
+
+
+Module Contents
+---------------
+
+.. py:class:: Resample(delta: float)
+
+   Bases: :py:obj:`libICEpost.src.base.Filter.Filter.Filter`
+
+
+   Resampling with constant delta x
+
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   .. attribute:: delta
+
+      float
+      Resampling interval
+
+
+   .. py:property:: delta
+      :type: float
+
+      The discretization spacing
+
+      :returns: float
+
+
+   .. py:method:: fromDictionary(dictionary)
+      :classmethod:
+
+
+      Create from dictionary.
+
+      {
+          delta (float): the spacing
+      }
+
+
+
+   .. py:method:: __call__(xp: list[float], yp: list[float]) -> tuple[list[float],list[float]]
+
+      Filter an array of x,y data with constant spacing
+
+
+
+   .. py:method:: __repr__() -> str
+
+

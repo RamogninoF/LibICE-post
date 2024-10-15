@@ -1,0 +1,365 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFS &mdash; libICEpost  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+      <link rel="stylesheet" type="text/css" href="../../../../../../_static/graphviz.css?v=fd3f3429" />
+
+  
+      <script src="../../../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../../search.html" />
+    <link rel="next" title="libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFSmultiFuel" href="../tabulatedLFSmultiFuel/index.html" />
+    <link rel="prev" title="libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.laminarFlameSpeedModel" href="../laminarFlameSpeedModel/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../../index.html" class="icon icon-home">
+            libICEpost
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../example.html">Example usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../conduct.html">Code of Conduct</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../../../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../../../index.html">libICEpost</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../../../../index.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../../../../Database/index.html">libICEpost.Database</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../scripts/index.html">libICEpost.scripts</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="../../../index.html">libICEpost.src</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../../index.html">libICEpost</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">libICEpost</a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">libICEpost.src</a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">libICEpost.src.thermophysicalModels</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">libICEpost.src.thermophysicalModels.laminarFlameSpeedModels</a></li>
+      <li class="breadcrumb-item active">libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFS</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../../../_sources/autoapi/libICEpost/src/thermophysicalModels/laminarFlameSpeedModels/tabulatedLFS/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFS">
+<span id="libicepost-src-thermophysicalmodels-laminarflamespeedmodels-tabulatedlfs"></span><h1>libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFS<a class="headerlink" href="#module-libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFS" title="Link to this heading"></a></h1>
+<p>&#64;author: F. Ramognino       &lt;<a class="reference external" href="mailto:federico&#46;ramognino&#37;&#52;&#48;polimi&#46;it">federico<span>&#46;</span>ramognino<span>&#64;</span>polimi<span>&#46;</span>it</a>&gt;
+Last update:        12/06/2023</p>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFS.tabulatedLFS" title="libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFS.tabulatedLFS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tabulatedLFS</span></code></a></p></td>
+<td><p>Class for computation of unstained laminar flame speed from tabulation</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFS.tabulatedLFS">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFS.</span></span><span class="sig-name descname"><span class="pre">tabulatedLFS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tablePath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">OFTabulation.path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noWrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">OFTabulation.noWrite</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">argv</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFS.tabulatedLFS" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">src.base.dataStructures.Tabulation.OFTabulation.OFTabulation</span></code>, <a class="reference internal" href="../laminarFlameSpeedModel/index.html#libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.laminarFlameSpeedModel.laminarFlameSpeedModel" title="libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.laminarFlameSpeedModel.laminarFlameSpeedModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.laminarFlameSpeedModel.laminarFlameSpeedModel</span></code></a></p>
+<p>Class for computation of unstained laminar flame speed from tabulation</p>
+<hr class="docutils" />
+<dl>
+<dt>Attibutes:</dt><dd><dl>
+<dt>path:               str</dt><dd><p>Path where the tabulation is stored</p>
+</dd>
+<dt>entryNames:     dict    [{}]</dt><dd><dl class="simple">
+<dt>{</dt><dd><dl class="simple">
+<dt>entri_ii:     str</dt><dd><p>Name to give at the generic entry ‘entry_ii’ found in the dictionay
+tableProperties.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>}
+Used to (optionally) change the names of the variables stored in the table.</p>
+</dd>
+<dt>tableProperties:    dict</dt><dd><dl class="simple">
+<dt>{</dt><dd><dl class="simple">
+<dt>var_ii:   list&lt;float&gt;</dt><dd><p>Contains the list of sampling points for variable ‘var_ii’</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>}
+Dictionary containing the information retrieved from tableProperties.</p>
+</dd>
+<dt>varOrder:           list&lt;str&gt;</dt><dd><p>Order in which the variables are red convert the scalarLists in tables.</p>
+</dd>
+<dt>noWrite:        bool</dt><dd><p>Label controlling if the class is allowed to write the files</p>
+</dd>
+<dt>tables:             dict</dt><dd><dl class="simple">
+<dt>{</dt><dd><p>‘tab_ii’:   table</p>
+</dd>
+</dl>
+<p>}
+Contains the tabulations.</p>
+</dd>
+<dt>tableFileNames:     dict</dt><dd><dl class="simple">
+<dt>{</dt><dd><p>‘tab_ii’:   str</p>
+</dd>
+</dl>
+<p>}
+Contains the names of files for the tabulations.</p>
+</dd>
+</dl>
+<p>opts:       dict
+{</p>
+<blockquote>
+<div><dl class="simple">
+<dt>Fatal:          bool</dt><dd><p>If set to ‘True’, raises a ValueError in case the input data is outside
+of tabulation range. Otherwise a warning is displayed.</p>
+</dd>
+<dt>extrapolate:    bool</dt><dd><p>If set to ‘True’ the value is extrapolated in case accessing the table
+outside of ranges. Otherwise, the value is set to ‘nan’.</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>}</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFS.tabulatedLFS.entryNames">
+<span class="sig-name descname"><span class="pre">entryNames</span></span><a class="headerlink" href="#libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFS.tabulatedLFS.entryNames" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFS.tabulatedLFS.tableProperties">
+<span class="sig-name descname"><span class="pre">tableProperties</span></span><a class="headerlink" href="#libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFS.tabulatedLFS.tableProperties" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFS.tabulatedLFS.varOrder">
+<span class="sig-name descname"><span class="pre">varOrder</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['p',</span> <span class="pre">'T',</span> <span class="pre">'phi',</span> <span class="pre">'EGR']</span></em><a class="headerlink" href="#libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFS.tabulatedLFS.varOrder" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFS.tabulatedLFS.tables">
+<span class="sig-name descname"><span class="pre">tables</span></span><a class="headerlink" href="#libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFS.tabulatedLFS.tables" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFS.tabulatedLFS.tableFileNames">
+<span class="sig-name descname"><span class="pre">tableFileNames</span></span><a class="headerlink" href="#libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFS.tabulatedLFS.tableFileNames" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFS.tabulatedLFS.fromFile">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tablePath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isLaminarFlameThickness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noWrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">OFTabulation.noWrite</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">argv</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFS.tabulatedLFS.fromFile" title="Link to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>tablePath:                  str</dt><dd><p>The path where the tabulation is stored</p>
+</dd>
+<dt>isLaminarFlameThickness:    bool (True)</dt><dd><p>Is the laminar flame thickness to be loaded? (in case it was not tabulated)</p>
+</dd>
+<dt>noWrite:        bool (True)</dt><dd><p>Handle to prevent write access of this class to the tabulation</p>
+</dd>
+</dl>
+<p>[keyword arguments]
+Fatal:          bool (False)</p>
+<blockquote>
+<div><p>If set to ‘True’, raises a ValueError in case the input data is outside
+of tabulation range. Otherwise a warning is displayed.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>extrapolate:    bool (True)</dt><dd><p>If set to ‘True’ the value is extrapolated in case accessing the table
+outside of ranges. Otherwise, the value is set to the ‘nan’.</p>
+</dd>
+</dl>
+<p>Construct a table from files stored in ‘tablePath’.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFS.tabulatedLFS.fromDictionary">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromDictionary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dictionary</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFS.tabulatedLFS.fromDictionary" title="Link to this definition"></a></dt>
+<dd><dl>
+<dt>Construct from dictionary containing:</dt><dd><dl class="simple">
+<dt>tablePath:                  str</dt><dd><p>The path where the tabulation is stored</p>
+</dd>
+</dl>
+<p>[Optional]
+isLaminarFlameThickness:    bool (True)</p>
+<blockquote>
+<div><p>Is the laminar flame thickness to be loaded? (in case it was not tabulated)</p>
+</div></blockquote>
+<dl class="simple">
+<dt>noWrite:        bool (True)</dt><dd><p>Handle to prevent write access of this class to the tabulation</p>
+</dd>
+<dt>Fatal:          bool (False)</dt><dd><p>If set to ‘True’, raises a ValueError in case the input data is outside
+of tabulation range. Otherwise a warning is displayed.</p>
+</dd>
+<dt>extrapolate:    bool (True)</dt><dd><p>If set to ‘True’ the value is extrapolated in case accessing the table
+outside of ranges. Otherwise, the value is set to the ‘nan’.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFS.tabulatedLFS.setCoeffs">
+<span class="sig-name descname"><span class="pre">setCoeffs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">argv</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFS.tabulatedLFS.setCoeffs" title="Link to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>coeffs:     dict ({})</dt><dd><p>Dictionary containing the parameters of the model (in laminarFlameSpeed.coeffs)
+that need to be changed/set. Keyword arguments are also accepted.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFS.tabulatedLFS.SuTable">
+<span class="sig-name descname"><span class="pre">SuTable</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFS.tabulatedLFS.SuTable" title="Link to this definition"></a></dt>
+<dd><p>Returns a copy of the tabulation of laminar flame speed</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFS.tabulatedLFS.deltaLTable">
+<span class="sig-name descname"><span class="pre">deltaLTable</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFS.tabulatedLFS.deltaLTable" title="Link to this definition"></a></dt>
+<dd><p>Returns a copy of the tabulation of laminar flame tickness</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFS.tabulatedLFS.Su">
+<span class="sig-name descname"><span class="pre">Su</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EGR</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">argv</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFS.tabulatedLFS.Su" title="Link to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>p:      float</dt><dd><p>Pressure [Pa]</p>
+</dd>
+<dt>T:      float</dt><dd><p>Temperature [K]</p>
+</dd>
+<dt>phi:    float</dt><dd><p>Equivalence ratio</p>
+</dd>
+<dt>EGR:    float (None)</dt><dd><p>Level of exhaust gas recirculation [%]</p>
+</dd>
+</dl>
+<p>[keyword arguments]
+Fatal:          bool (False)</p>
+<blockquote>
+<div><p>If set to ‘True’, raises a ValueError in case the input data is outside
+of tabulation range. Otherwise a warning is displayed.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>extrapolate:    bool (True)</dt><dd><p>If set to ‘True’ the value is extrapolated in case accessing the table
+outside of ranges. Otherwise, the value is set to ‘nan’.</p>
+</dd>
+</dl>
+<p>Used to compute laminar flame speed from tabulation.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFS.tabulatedLFS.deltaL">
+<span class="sig-name descname"><span class="pre">deltaL</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EGR</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">argv</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFS.tabulatedLFS.deltaL" title="Link to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>p:      float</dt><dd><p>Pressure [Pa]</p>
+</dd>
+<dt>T:      float</dt><dd><p>Temperature [K]</p>
+</dd>
+<dt>phi:    float</dt><dd><p>Equivalence ratio</p>
+</dd>
+<dt>EGR:    float</dt><dd><p>Level of exhaust gas recirculation [%]</p>
+</dd>
+</dl>
+<p>[keyword arguments]
+Fatal:          bool (False)</p>
+<blockquote>
+<div><p>If set to ‘True’, raises a ValueError in case the input data is outside
+of tabulation range. Otherwise a warning is displayed.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>extrapolate:    bool (True)</dt><dd><p>If set to ‘True’ the value is extrapolated in case accessing the table
+outside of ranges. Otherwise, the value is set to the one at range limit.</p>
+</dd>
+</dl>
+<p>Used to compute laminar flame tickness from tabulation.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../laminarFlameSpeedModel/index.html" class="btn btn-neutral float-left" title="libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.laminarFlameSpeedModel" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../tabulatedLFSmultiFuel/index.html" class="btn btn-neutral float-right" title="libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFSmultiFuel" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, libICEpost.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

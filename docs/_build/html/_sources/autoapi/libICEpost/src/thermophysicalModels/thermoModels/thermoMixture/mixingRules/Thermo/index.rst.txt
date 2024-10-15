@@ -1,0 +1,204 @@
+libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.mixingRules.Thermo
+=================================================================================
+
+.. py:module:: libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.mixingRules.Thermo
+
+.. autoapi-nested-parse::
+
+   @author: F. Ramognino       <federico.ramognino@polimi.it>
+   Last update:        17/10/2023
+
+   Package for handling mixing rules for combining thermodynamic data of specie into a multi-component mixture
+
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/libICEpost/src/thermophysicalModels/thermoModels/thermoMixture/mixingRules/Thermo/ThermoMixing/index
+   /autoapi/libICEpost/src/thermophysicalModels/thermoModels/thermoMixture/mixingRules/Thermo/constantCpMixing/index
+   /autoapi/libICEpost/src/thermophysicalModels/thermoModels/thermoMixture/mixingRules/Thermo/janaf7Mixing/index
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.mixingRules.Thermo.ThermoMixing
+   libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.mixingRules.Thermo.janaf7Mixing
+
+
+Package Contents
+----------------
+
+.. py:class:: ThermoMixing(mix: libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture)
+
+   Bases: :py:obj:`libICEpost.src.base.BaseClass.BaseClass`
+
+
+   Class handling mixing rule to combine thermodynamic data of specie into a multi-component mixture.
+
+   Defines a moethod to generate the thermodynamic data of a mixture of gasses.
+
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   .. attribute:: ThermoType
+
+      str
+      Type of thermodynamic data for which it is implemented
+
+   .. attribute:: Thermo
+
+      EquationOfState
+      The thermodynamic data of the mixture
+
+   .. attribute:: thermos
+
+      _Database
+      Link to database of equations of state (database.chemistry.thermo.EquationOfState)
+
+
+   .. py:attribute:: ThermoType
+      :type:  str
+
+
+   .. py:attribute:: thermos
+
+
+   .. py:property:: mix
+      :type: libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture
+
+
+
+   .. py:property:: Thermo
+      :type: libICEpost.src.thermophysicalModels.specie.thermo.Thermo.Thermo
+
+      The thermodynamic data of the mixture.
+
+
+   .. py:method:: update(mix: libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture = None) -> ThermoMixing
+
+      Method to update the thermodynamic data based on the mixture composition (interface).
+
+
+
+   .. py:method:: _update(mix: libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture = None)
+      :abstractmethod:
+
+
+      Method to update the thermodynamic data based on the mixture composition (implementation).
+
+
+
+.. py:class:: janaf7Mixing(mix: libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture)
+
+   Bases: :py:obj:`libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.mixingRules.Thermo.ThermoMixing.ThermoMixing`
+
+
+   Class handling mixing of multi-component mixture: thermodynamic data in janaf7 definition.
+
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   .. attribute:: ThermoType
+
+      str
+      Type of thermodynamic data for which it is implemented
+
+   .. attribute:: Thermo
+
+      Thermo
+      The Thermo of the mixture
+
+
+   .. py:attribute:: ThermoType
+      :value: 'janaf7'
+
+
+
+   .. py:class:: _ThermoClass(mix: libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture)
+
+      Bases: :py:obj:`libICEpost.src.thermophysicalModels.specie.thermo.Thermo.Thermo`
+
+
+      Thermodynamic data of janaf7 mixture consistent with Thermo class.
+
+
+      .. py:method:: fromDictionary(dictionary: dict)
+         :classmethod:
+
+         :abstractmethod:
+
+
+         Not to be used!
+
+
+
+      .. py:attribute:: _mix
+
+
+      .. py:method:: _combineMethod(func: str, *fargs, **fkwargs)
+
+         Method for macro-ization of combination of properties based on mixture composition
+
+         :param func: the name of the method to combine
+         :type func: str
+
+         :returns: returns sum(y_i * thermo[specie_i].func(*fargs, **fkwargs))
+         :rtype: Thermo.func@ReturnType
+
+
+
+      .. py:method:: cp(p: float, T: float) -> float
+
+         Constant pressure heat capacity [J/kg/K]
+
+
+
+      .. py:method:: dcpdT(p: float, T: float) -> float
+
+         dcp/dT [J/kg/K^2]
+
+
+
+      .. py:method:: hs(p: float, T: float) -> float
+
+         Sensible enthalpy [J/kg]
+
+         hs = ha - hf
+
+
+
+      .. py:method:: hf() -> float
+
+         Enthalpy of formation [J/kg]
+
+
+
+      .. py:method:: ha(p: float, T: float) -> float
+
+         Absolute enthalpy [J/kg]
+
+
+
+      .. py:method:: update(mix: libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture = None) -> None
+
+
+
+   .. py:method:: fromDictionary(dictionary)
+      :classmethod:
+
+
+      Create from dictionary.
+
+
+
+   .. py:method:: _update(mix: libICEpost.src.thermophysicalModels.specie.specie.Mixture.Mixture = None)
+
+      Not class data to be updated
+
+
+

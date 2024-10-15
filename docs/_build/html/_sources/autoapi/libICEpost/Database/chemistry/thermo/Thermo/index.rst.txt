@@ -1,0 +1,37 @@
+libICEpost.Database.chemistry.thermo.Thermo
+===========================================
+
+.. py:module:: libICEpost.Database.chemistry.thermo.Thermo
+
+.. autoapi-nested-parse::
+
+   @author: F. Ramognino       <federico.ramognino@polimi.it>
+   Last update:        12/06/2023
+
+   Database for thermodynamic data (variables are stored at sourcing of the packages)
+
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/libICEpost/Database/chemistry/thermo/Thermo/constantCp/index
+   /autoapi/libICEpost/Database/chemistry/thermo/Thermo/janaf7/index
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   libICEpost.Database.chemistry.thermo.Thermo.database
+
+
+Package Contents
+----------------
+
+.. py:data:: database
+

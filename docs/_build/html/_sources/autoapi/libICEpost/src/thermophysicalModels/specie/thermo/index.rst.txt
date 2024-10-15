@@ -1,0 +1,30 @@
+libICEpost.src.thermophysicalModels.specie.thermo
+=================================================
+
+.. py:module:: libICEpost.src.thermophysicalModels.specie.thermo
+
+.. autoapi-nested-parse::
+
+   @author: F. Ramognino       <federico.ramognino@polimi.it>
+   Last update:        12/06/2023
+
+   Classes and packages for handling thermodynamic properties, reactions, thermodynamic/reaction models, etc.
+
+   Content of the package:
+       Thermo (package)
+           ...
+
+       thermoModel (package)
+
+
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/libICEpost/src/thermophysicalModels/specie/thermo/EquationOfState/index
+   /autoapi/libICEpost/src/thermophysicalModels/specie/thermo/Thermo/index
+
+

@@ -1,0 +1,462 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>libICEpost.src.engineModel.EngineGeometry.ConRod &mdash; libICEpost  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=fd3f3429" />
+
+  
+      <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            libICEpost
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../example.html">Example usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../conduct.html">Code of Conduct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">libICEpost</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">libICEpost.src.engineModel.EngineGeometry.ConRod</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for libICEpost.src.engineModel.EngineGeometry.ConRod</h1><div class="highlight"><pre>
+<span></span><span class="c1">#####################################################################</span>
+<span class="c1">#                                 DOC                               #</span>
+<span class="c1">#####################################################################</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">@author: F. Ramognino       &lt;federico.ramognino@polimi.it&gt;</span>
+<span class="sd">Last update:        12/06/2023</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1">#####################################################################</span>
+<span class="c1">#                               IMPORT                              #</span>
+<span class="c1">#####################################################################</span>
+
+<span class="kn">from</span> <span class="nn">.EngineGeometry</span> <span class="kn">import</span> <span class="n">EngineGeometry</span>
+
+<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Iterable</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">cos</span><span class="p">,</span> <span class="n">sin</span><span class="p">,</span> <span class="n">sqrt</span><span class="p">,</span> <span class="n">radians</span><span class="p">,</span> <span class="n">pi</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="c1">#############################################################################</span>
+<span class="c1">#                               MAIN CLASSES                                #</span>
+<span class="c1">#############################################################################</span>
+<div class="viewcode-block" id="ConRodGeometry">
+<a class="viewcode-back" href="../../../../../autoapi/libICEpost/src/engineModel/EngineGeometry/ConRod/index.html#libICEpost.src.engineModel.EngineGeometry.ConRod.ConRodGeometry">[docs]</a>
+<span class="k">class</span> <span class="nc">ConRodGeometry</span><span class="p">(</span><span class="n">EngineGeometry</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Geometry for simple engine piston.</span>
+<span class="sd">    </span>
+<span class="sd">    NOTE: Crank angles are defined with 0 CAD at TDC</span>
+<span class="sd">    </span>
+<span class="sd">    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+<span class="sd">    </span>
+<span class="sd">    Attibutes:</span>
+<span class="sd">        </span>
+<span class="sd">        Variable   | Type       | Unit   | Description</span>
+<span class="sd">        -----------|------------|--------|-------------------------</span>
+<span class="sd">        CR         | float      | -      | Compression ratio</span>
+<span class="sd">        lam        | float      | -      | conRodLen/crankRadius</span>
+<span class="sd">        -----------|------------|--------|-------------------------</span>
+<span class="sd">        D          | float      | m      | Bore</span>
+<span class="sd">        S          | float      | m      | Stroke</span>
+<span class="sd">        l          | float      | m      | connecting-rod length</span>
+<span class="sd">        -----------|------------|--------|-------------------------</span>
+<span class="sd">        cylArea    | float      | m^2    | cylinder cross section</span>
+<span class="sd">        pistonArea | float      | m^2    | piston surface area</span>
+<span class="sd">        headArea   | float      | m^2    | cylinder head area</span>
+<span class="sd">        -----------|------------|--------|-------------------------</span>
+<span class="sd">        Vs         | float      | m^3    | Displacement volume</span>
+<span class="sd">        Vmin       | float      | m^3    | Mimimum volume</span>
+<span class="sd">        Vmax       | float      | m^3    | Maximum volume</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1">#########################################################################</span>
+    <span class="c1">#Construct from dictionary</span>
+<div class="viewcode-block" id="ConRodGeometry.fromDictionary">
+<a class="viewcode-back" href="../../../../../autoapi/libICEpost/src/engineModel/EngineGeometry/ConRod/index.html#libICEpost.src.engineModel.EngineGeometry.ConRod.ConRodGeometry.fromDictionary">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">fromDictionary</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span><span class="n">inputDict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct from dictionary containing the following parameters:</span>
+<span class="sd">        </span>
+<span class="sd">        [Variable]        | [Type] | [Default] | [Unit] | [Description]</span>
+<span class="sd">        ------------------|--------|-----------|--------|----------------------------------</span>
+<span class="sd">        CR                | float  | -         | -      | Compression ratio</span>
+<span class="sd">        ------------------|--------|-----------|--------|----------------------------------</span>
+<span class="sd">        bore              | float  | -         | m      | Bore</span>
+<span class="sd">        stroke            | float  | -         | m      | Stroke</span>
+<span class="sd">        conRodLen         | float  | -         | m      | connecting-rod length</span>
+<span class="sd">        ------------------|--------|-----------|--------|----------------------------------</span>
+<span class="sd">        pistCylAreaRatio  | float  | 1         | -      | piston surf. area / cyl. section</span>
+<span class="sd">        headCylAreaRatio  | float  | 1         | -      | head surf. area / cyl. section</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">mandatoryEntries</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;CR&quot;</span><span class="p">,</span> <span class="s2">&quot;bore&quot;</span><span class="p">,</span> <span class="s2">&quot;stroke&quot;</span><span class="p">,</span> <span class="s2">&quot;conRodLen&quot;</span><span class="p">]</span>
+        <span class="n">defaultDict</span> <span class="o">=</span> \
+            <span class="p">{</span>
+                <span class="s2">&quot;CR&quot;</span>               <span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;nan&#39;</span><span class="p">),</span>
+                <span class="s2">&quot;bore&quot;</span>             <span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;nan&#39;</span><span class="p">),</span>
+                <span class="s2">&quot;stroke&quot;</span>           <span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;nan&#39;</span><span class="p">),</span>
+                <span class="s2">&quot;conRodLen&quot;</span>        <span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;nan&#39;</span><span class="p">),</span>
+                <span class="s2">&quot;pistCylAreaRatio&quot;</span> <span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+                <span class="s2">&quot;headCylAreaRatio&quot;</span> <span class="p">:</span> <span class="mf">1.0</span>
+            <span class="p">}</span>
+        
+        <span class="c1">#Argument checking:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">mandatoryEntries</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">inputDict</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Entry &#39;</span><span class="si">{</span><span class="n">entry</span><span class="si">}</span><span class="s2">&#39; not found in contruction dictionary.&quot;</span><span class="p">)</span>
+            
+            <span class="n">Dict</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">updateKeywordArguments</span><span class="p">(</span><span class="n">inputDict</span><span class="p">,</span> <span class="n">defaultDict</span><span class="p">)</span>
+            
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">Dict</span><span class="p">[</span><span class="s2">&quot;CR&quot;</span><span class="p">],</span> <span class="n">Dict</span><span class="p">[</span><span class="s2">&quot;bore&quot;</span><span class="p">],</span> <span class="n">Dict</span><span class="p">[</span><span class="s2">&quot;stroke&quot;</span><span class="p">],</span> <span class="n">Dict</span><span class="p">[</span><span class="s2">&quot;conRodLen&quot;</span><span class="p">],</span> <span class="n">Dict</span><span class="p">[</span><span class="s2">&quot;pistCylAreaRatio&quot;</span><span class="p">],</span> <span class="n">Dict</span><span class="p">[</span><span class="s2">&quot;headCylAreaRatio&quot;</span><span class="p">])</span>
+            
+        <span class="k">except</span> <span class="ne">BaseException</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">fatalErrorInClass</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span><span class="p">,</span> <span class="s2">&quot;Failed constructing from dictionary&quot;</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span></div>
+
+        
+    <span class="c1">#########################################################################</span>
+<div class="viewcode-block" id="ConRodGeometry.__str__">
+<a class="viewcode-back" href="../../../../../autoapi/libICEpost/src/engineModel/EngineGeometry/ConRod/index.html#libICEpost.src.engineModel.EngineGeometry.ConRod.ConRodGeometry.__str__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">STR</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
+        <span class="n">STR</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="si">{:15s}</span><span class="s2"> </span><span class="si">{:10.3f}</span><span class="s2"> </span><span class="si">{:15s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;CR&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">CR</span><span class="p">,</span><span class="s2">&quot;[-]&quot;</span><span class="p">)</span>
+        <span class="n">STR</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="si">{:15s}</span><span class="s2"> </span><span class="si">{:10.3f}</span><span class="s2"> </span><span class="si">{:15s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;delta = PO/R&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">delta</span><span class="p">,</span><span class="s2">&quot;[-]&quot;</span><span class="p">)</span>
+        <span class="n">STR</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="si">{:15s}</span><span class="s2"> </span><span class="si">{:10.3f}</span><span class="s2"> </span><span class="si">{:15s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;lambda = R/L&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span><span class="s2">&quot;[-]&quot;</span><span class="p">)</span>
+        <span class="n">STR</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="si">{:15s}</span><span class="s2"> </span><span class="si">{:10.3e}</span><span class="s2"> </span><span class="si">{:15s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;bore (2*R)&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">D</span><span class="p">,</span><span class="s2">&quot;[m]&quot;</span><span class="p">)</span>
+        <span class="n">STR</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="si">{:15s}</span><span class="s2"> </span><span class="si">{:10.3e}</span><span class="s2"> </span><span class="si">{:15s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;stroke (S)&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">S</span><span class="p">,</span><span class="s2">&quot;[m]&quot;</span><span class="p">)</span>
+        <span class="n">STR</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="si">{:15s}</span><span class="s2"> </span><span class="si">{:10.3e}</span><span class="s2"> </span><span class="si">{:15s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;conRodLen (L)&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">l</span><span class="p">,</span><span class="s2">&quot;[m]&quot;</span><span class="p">)</span>
+        <span class="n">STR</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="si">{:15s}</span><span class="s2"> </span><span class="si">{:10.3e}</span><span class="s2"> </span><span class="si">{:15s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;Pin-offset (PO)&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pinOffset</span><span class="p">,</span><span class="s2">&quot;[m]&quot;</span><span class="p">)</span>
+        <span class="n">STR</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="si">{:15s}</span><span class="s2"> </span><span class="si">{:10.3e}</span><span class="s2"> </span><span class="si">{:15s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;cylArea&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cylArea</span><span class="p">,</span><span class="s2">&quot;[m^2]&quot;</span><span class="p">)</span>
+        <span class="n">STR</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="si">{:15s}</span><span class="s2"> </span><span class="si">{:10.3e}</span><span class="s2"> </span><span class="si">{:15s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;pistonArea&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pistonArea</span><span class="p">,</span><span class="s2">&quot;[m^2]&quot;</span><span class="p">)</span>
+        <span class="n">STR</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="si">{:15s}</span><span class="s2"> </span><span class="si">{:10.3e}</span><span class="s2"> </span><span class="si">{:15s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;headArea&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">headArea</span><span class="p">,</span><span class="s2">&quot;[m^2]&quot;</span><span class="p">)</span>
+        <span class="n">STR</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="si">{:15s}</span><span class="s2"> </span><span class="si">{:10.3e}</span><span class="s2"> </span><span class="si">{:15s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;Vs&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Vs</span><span class="p">,</span><span class="s2">&quot;[m^3]&quot;</span><span class="p">)</span>
+        <span class="n">STR</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="si">{:15s}</span><span class="s2"> </span><span class="si">{:10.3e}</span><span class="s2"> </span><span class="si">{:15s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;Vmin&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Vmin</span><span class="p">,</span><span class="s2">&quot;[m^3]&quot;</span><span class="p">)</span>
+        <span class="n">STR</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="si">{:15s}</span><span class="s2"> </span><span class="si">{:10.3e}</span><span class="s2"> </span><span class="si">{:15s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;Vmax&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Vmax</span><span class="p">,</span><span class="s2">&quot;[m^3]&quot;</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">STR</span></div>
+
+    
+    <span class="c1">#########################################################################</span>
+    <span class="c1">#Constructor:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="n">CR</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">bore</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">stroke</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">conRodLen</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">pistonCylAreaRatio</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">headCylAreaRatio</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">pinOffset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        [Variable]        | [Type] | [Default] | [Unit] | [Description]</span>
+<span class="sd">        ------------------|--------|-----------|--------|----------------------------------</span>
+<span class="sd">        CR                | float  | -         | -      | Compression ratio</span>
+<span class="sd">        ------------------|--------|-----------|--------|----------------------------------</span>
+<span class="sd">        bore              | float  | -         | m      | Bore</span>
+<span class="sd">        stroke            | float  | -         | m      | Stroke</span>
+<span class="sd">        conRodLen         | float  | -         | m      | connecting-rod length</span>
+<span class="sd">        pinOffset         | float  | 0.0       | m      | Piston pin offset</span>
+<span class="sd">        ------------------|--------|-----------|--------|----------------------------------</span>
+<span class="sd">        pistCylAreaRatio  | float  | 1         | -      | piston surf. area / cyl. section</span>
+<span class="sd">        headCylAreaRatio  | float  | 1         | -      | head surf. area / cyl. section</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">inputDict</span> <span class="o">=</span> \
+            <span class="p">{</span>
+                <span class="s2">&quot;CR&quot;</span>               <span class="p">:</span> <span class="n">CR</span><span class="p">,</span>
+                <span class="s2">&quot;bore&quot;</span>             <span class="p">:</span> <span class="n">bore</span><span class="p">,</span>
+                <span class="s2">&quot;stroke&quot;</span>           <span class="p">:</span> <span class="n">stroke</span><span class="p">,</span>
+                <span class="s2">&quot;conRodLen&quot;</span>        <span class="p">:</span> <span class="n">conRodLen</span><span class="p">,</span>
+                <span class="s2">&quot;pistCylAreaRatio&quot;</span> <span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+                <span class="s2">&quot;headCylAreaRatio&quot;</span> <span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+                <span class="s2">&quot;pinOffset&quot;</span>        <span class="p">:</span> <span class="mf">0.0</span>
+            <span class="p">}</span>
+        
+        <span class="n">defaultDict</span> <span class="o">=</span> \
+            <span class="p">{</span>
+                <span class="s2">&quot;CR&quot;</span>               <span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;nan&#39;</span><span class="p">),</span>
+                <span class="s2">&quot;bore&quot;</span>             <span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;nan&#39;</span><span class="p">),</span>
+                <span class="s2">&quot;stroke&quot;</span>           <span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;nan&#39;</span><span class="p">),</span>
+                <span class="s2">&quot;conRodLen&quot;</span>        <span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;nan&#39;</span><span class="p">),</span>
+                <span class="s2">&quot;pistCylAreaRatio&quot;</span> <span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+                <span class="s2">&quot;headCylAreaRatio&quot;</span> <span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+                <span class="s2">&quot;pinOffset&quot;</span>        <span class="p">:</span> <span class="mf">0.0</span>
+            <span class="p">}</span>
+        
+        <span class="c1">#Argument checking:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">Dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">updateKeywordArguments</span><span class="p">(</span><span class="n">inputDict</span><span class="p">,</span> <span class="n">defaultDict</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">BaseException</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fatalErrorInArgumentChecking</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="fm">__init__</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1">#[-]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">CR</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">[</span><span class="s2">&quot;CR&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">Dict</span><span class="p">[</span><span class="s2">&quot;stroke&quot;</span><span class="p">]</span><span class="o">/</span><span class="n">Dict</span><span class="p">[</span><span class="s2">&quot;conRodLen&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">delta</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">[</span><span class="s2">&quot;pinOffset&quot;</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="mf">.5</span><span class="o">*</span><span class="n">Dict</span><span class="p">[</span><span class="s2">&quot;stroke&quot;</span><span class="p">])</span>
+            <span class="c1">#[m]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">D</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">[</span><span class="s2">&quot;bore&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">S</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">[</span><span class="s2">&quot;stroke&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">l</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">[</span><span class="s2">&quot;conRodLen&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pinOffset</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">[</span><span class="s2">&quot;pinOffset&quot;</span><span class="p">]</span>
+            <span class="c1">#[m^2]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cylArea</span> <span class="o">=</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">Dict</span><span class="p">[</span><span class="s2">&quot;bore&quot;</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="mf">4.0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pistonArea</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cylArea</span> <span class="o">*</span> <span class="n">Dict</span><span class="p">[</span><span class="s2">&quot;pistCylAreaRatio&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">headArea</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cylArea</span> <span class="o">*</span> <span class="n">Dict</span><span class="p">[</span><span class="s2">&quot;headCylAreaRatio&quot;</span><span class="p">]</span>
+            <span class="c1">#[m^3]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Vs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cylArea</span> <span class="o">*</span> <span class="n">Dict</span><span class="p">[</span><span class="s2">&quot;stroke&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Vmin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Vs</span><span class="o">/</span><span class="p">(</span><span class="n">Dict</span><span class="p">[</span><span class="s2">&quot;CR&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Vmax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Vs</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Vmin</span>
+            
+        <span class="k">except</span> <span class="ne">BaseException</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fatalErrorInClass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="fm">__init__</span><span class="p">,</span> <span class="s2">&quot;Construction failed&quot;</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span>
+    
+    <span class="c1">#########################################################################</span>
+    <span class="c1">#Piston position:</span>
+<div class="viewcode-block" id="ConRodGeometry.s">
+<a class="viewcode-back" href="../../../../../autoapi/libICEpost/src/engineModel/EngineGeometry/ConRod/index.html#libICEpost.src.engineModel.EngineGeometry.ConRod.ConRodGeometry.s">[docs]</a>
+    <span class="k">def</span> <span class="nf">s</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">CA</span><span class="p">:</span><span class="nb">float</span><span class="o">|</span><span class="n">Iterable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="o">|</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the piston position at CA (reference to TDC)</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            CA (float | Iterable): Time in CA</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float|np.ndarray[float]: Piston position [m]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">angle</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">S</span><span class="o">/</span><span class="mf">2.0</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">cos</span><span class="p">(</span><span class="mf">1.</span><span class="o">*</span><span class="n">angle</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1.0</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">*</span><span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arcsin</span><span class="p">((</span><span class="n">sin</span><span class="p">(</span><span class="mf">1.</span><span class="o">*</span><span class="n">angle</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">delta</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">))))</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">CA</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">f</span><span class="p">(</span><span class="n">radians</span><span class="p">(</span><span class="n">ca</span><span class="p">))</span> <span class="k">for</span> <span class="n">ca</span> <span class="ow">in</span> <span class="n">CA</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="n">radians</span><span class="p">(</span><span class="n">CA</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">BaseException</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fatalErrorInClass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">,</span> <span class="s2">&quot;Failed computing piston position&quot;</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span></div>
+
+    
+    <span class="c1">###################################</span>
+    <span class="c1">#Instant. cylinder volume:</span>
+<div class="viewcode-block" id="ConRodGeometry.V">
+<a class="viewcode-back" href="../../../../../autoapi/libICEpost/src/engineModel/EngineGeometry/ConRod/index.html#libICEpost.src.engineModel.EngineGeometry.ConRod.ConRodGeometry.V">[docs]</a>
+    <span class="k">def</span> <span class="nf">V</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">CA</span><span class="p">:</span><span class="nb">float</span><span class="o">|</span><span class="n">Iterable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="o">|</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the instantaneous in-cylinder volume at CA</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            CA (float | Iterable): Time in CA</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float|np.ndarray[float]: In-cylinder volume [m^3]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">ca</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Vmin</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">(</span><span class="n">ca</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">cylArea</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">CA</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">f</span><span class="p">(</span><span class="n">ca</span><span class="p">)</span> <span class="k">for</span> <span class="n">ca</span> <span class="ow">in</span> <span class="n">CA</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="n">CA</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">BaseException</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fatalErrorInClass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">V</span><span class="p">,</span> <span class="s2">&quot;Failed computing in-cylinder volume&quot;</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span></div>
+
+    
+    <span class="c1">###################################</span>
+    <span class="c1">#Time (in CA) derivative of cyl. position:</span>
+<div class="viewcode-block" id="ConRodGeometry.dsdCA">
+<a class="viewcode-back" href="../../../../../autoapi/libICEpost/src/engineModel/EngineGeometry/ConRod/index.html#libICEpost.src.engineModel.EngineGeometry.ConRod.ConRodGeometry.dsdCA">[docs]</a>
+    <span class="k">def</span> <span class="nf">dsdCA</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">CA</span><span class="p">:</span><span class="nb">float</span><span class="o">|</span><span class="n">Iterable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="o">|</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the time (in CA) derivative of instantaneous piston position at CA</span>
+<span class="sd">        Args:</span>
+<span class="sd">            CA (float | Iterable): Time in CA</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float|np.ndarray[float]: ds/dCA [m/CA]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">angle</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">S</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="mf">1.</span><span class="o">*</span><span class="n">angle</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">delta</span> <span class="o">+</span> <span class="n">sin</span><span class="p">(</span><span class="mf">1.</span><span class="o">*</span><span class="n">angle</span><span class="p">))</span><span class="o">/</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="o">**</span><span class="mf">2.</span><span class="p">)</span><span class="o">*</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">delta</span> <span class="o">+</span> <span class="n">sin</span><span class="p">(</span><span class="mf">1.</span><span class="o">*</span><span class="n">angle</span><span class="p">))</span><span class="o">**</span><span class="mf">2.</span><span class="p">))</span> <span class="o">+</span> <span class="n">sin</span><span class="p">(</span><span class="mf">1.</span><span class="o">*</span><span class="n">angle</span><span class="p">))</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">CA</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">f</span><span class="p">(</span><span class="n">radians</span><span class="p">(</span><span class="n">ca</span><span class="p">))</span><span class="o">*</span><span class="n">pi</span><span class="o">/</span><span class="mf">180.</span> <span class="k">for</span> <span class="n">ca</span> <span class="ow">in</span> <span class="n">CA</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="n">radians</span><span class="p">(</span><span class="n">CA</span><span class="p">))</span><span class="o">*</span><span class="n">pi</span><span class="o">/</span><span class="mf">180.</span>
+        <span class="k">except</span> <span class="ne">BaseException</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fatalErrorInClass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dsdCA</span><span class="p">,</span> <span class="s2">&quot;Failed computing ds/dCA&quot;</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span></div>
+
+    
+    <span class="c1">###################################</span>
+    <span class="c1">#Time (in CA) derivative of cyl. volume:</span>
+<div class="viewcode-block" id="ConRodGeometry.dVdCA">
+<a class="viewcode-back" href="../../../../../autoapi/libICEpost/src/engineModel/EngineGeometry/ConRod/index.html#libICEpost.src.engineModel.EngineGeometry.ConRod.ConRodGeometry.dVdCA">[docs]</a>
+    <span class="k">def</span> <span class="nf">dVdCA</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">CA</span><span class="p">:</span><span class="nb">float</span><span class="o">|</span><span class="n">Iterable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="o">|</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the time (in CA) derivative of instantaneous in-cylinder volume at CA</span>
+<span class="sd">        Args:</span>
+<span class="sd">            CA (float | Iterable): Time in CA</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            float|np.ndarray[float]: dV/dCA [m^3/CA]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dsdCA</span><span class="p">(</span><span class="n">CA</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">cylArea</span></div>
+
+    
+    <span class="c1">###################################</span>
+    <span class="c1">#Instant. liner area:</span>
+<div class="viewcode-block" id="ConRodGeometry.linerArea">
+<a class="viewcode-back" href="../../../../../autoapi/libICEpost/src/engineModel/EngineGeometry/ConRod/index.html#libICEpost.src.engineModel.EngineGeometry.ConRod.ConRodGeometry.linerArea">[docs]</a>
+    <span class="k">def</span> <span class="nf">linerArea</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">CA</span><span class="p">:</span><span class="nb">float</span><span class="o">|</span><span class="n">Iterable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="o">|</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the liner area at CA</span>
+<span class="sd">        Args:</span>
+<span class="sd">            CA (float | Iterable): Time in CA</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float|np.ndarray[float]: [m^2]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">CA</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">s</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">D</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">(</span><span class="n">CA</span><span class="p">)])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">(</span><span class="n">CA</span><span class="p">)</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">D</span>
+        <span class="k">except</span> <span class="ne">BaseException</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fatalErrorInClass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">linerArea</span><span class="p">,</span> <span class="s2">&quot;Failed computing liner area&quot;</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span></div>
+
+    
+    <span class="c1">###################################</span>
+<div class="viewcode-block" id="ConRodGeometry.A">
+<a class="viewcode-back" href="../../../../../autoapi/libICEpost/src/engineModel/EngineGeometry/ConRod/index.html#libICEpost.src.engineModel.EngineGeometry.ConRod.ConRodGeometry.A">[docs]</a>
+    <span class="k">def</span> <span class="nf">A</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">CA</span><span class="p">:</span><span class="nb">float</span><span class="o">|</span><span class="n">Iterable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="o">|</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the chamber area at CA</span>
+<span class="sd">        Args:</span>
+<span class="sd">            CA (float | Iterable): Time in CA</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float|np.ndarray[float]: [m^2]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">linerArea</span><span class="p">(</span><span class="n">CA</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">pistonArea</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">headArea</span>
+        <span class="k">except</span> <span class="ne">BaseException</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fatalErrorInClass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">linerArea</span><span class="p">,</span> <span class="s2">&quot;Failed computing chamber area&quot;</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span></div>
+
+
+    <span class="c1">###################################</span>
+<div class="viewcode-block" id="ConRodGeometry.areas">
+<a class="viewcode-back" href="../../../../../autoapi/libICEpost/src/engineModel/EngineGeometry/ConRod/index.html#libICEpost.src.engineModel.EngineGeometry.ConRod.ConRodGeometry.areas">[docs]</a>
+    <span class="k">def</span> <span class="nf">areas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">CA</span><span class="p">:</span><span class="nb">float</span><span class="o">|</span><span class="n">Iterable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        CA:     float / list&lt;float/int&gt;</span>
+<span class="sd">            Crank angle</span>
+<span class="sd">        </span>
+<span class="sd">        Returns a pandas.Dataframe with area of all patches at CA</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            CA (float | Iterable): Time in CA</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pandas.Dataframe: DataFrame of areas [m^2] at CA. Columns are patch names and CA.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> \
+            <span class="p">{</span>
+                <span class="s2">&quot;CA&quot;</span><span class="p">:</span><span class="n">CA</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">CA</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">)</span> <span class="k">else</span> <span class="p">[</span><span class="n">CA</span><span class="p">],</span> 
+                <span class="s2">&quot;liner&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">linerArea</span><span class="p">(</span><span class="n">CA</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">CA</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">)</span> <span class="k">else</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">linerArea</span><span class="p">(</span><span class="n">CA</span><span class="p">)],</span>
+                <span class="s2">&quot;piston&quot;</span><span class="p">:[</span><span class="bp">self</span><span class="o">.</span><span class="n">pistonArea</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">CA</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">CA</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">)</span> <span class="k">else</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pistonArea</span><span class="p">],</span>
+                <span class="s2">&quot;head&quot;</span><span class="p">:[</span><span class="bp">self</span><span class="o">.</span><span class="n">headArea</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">CA</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">CA</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">)</span> <span class="k">else</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">headArea</span><span class="p">],</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s2">&quot;columns&quot;</span><span class="p">)</span>
+            
+        <span class="k">except</span> <span class="ne">BaseException</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fatalErrorInClass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">linerArea</span><span class="p">,</span> <span class="s2">&quot;Failed computing patch areas&quot;</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span></div>
+</div>
+
+    
+<span class="c1">#########################################################################</span>
+<span class="c1">#Add to selection table:</span>
+<span class="n">EngineGeometry</span><span class="o">.</span><span class="n">addToRuntimeSelectionTable</span><span class="p">(</span><span class="n">ConRodGeometry</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, libICEpost.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
