@@ -11,10 +11,6 @@ build:
   tools:
     python: "3.11"
   jobs:
-    post_create_environment:
-      # Install poetry
-      # https://python-poetry.org/docs/#installing-manually
-      #- pip install poetry
     post_install:
       - VIRTUAL_ENV=$READTHEDOCS_VIRTUALENV_PATH pip install .
 
