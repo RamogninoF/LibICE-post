@@ -12,6 +12,7 @@ Last update:        12/06/2023
 #####################################################################
 
 from __future__ import annotations
+from typing import Self, Literal
 import os
 
 from libICEpost.src.base.Utilities import Utilities
@@ -24,6 +25,20 @@ import collections.abc
 from keyword import iskeyword
 def is_valid_variable_name(name):
     return name.isidentifier() and not iskeyword(name)
+
+from functools import wraps
+from time import time
+
+def timing(f):
+    @wraps(f)
+    def wrap(*args, **kw):
+        ts = time()
+        result = f(*args, **kw)
+        te = time()
+        print('func:%r took: %2.4f sec' % \
+          (f.__name__, te-ts))
+        return result
+    return wrap
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -52,6 +67,13 @@ class EngineData(Utilities):
     @loc.setter
     def loc(self, *args):
         return self.data.loc[*args]
+    @property
+    def iloc(self):
+        return self.data.iloc
+    
+    @iloc.setter
+    def iloc(self, *args):
+        return self.data.iloc[*args]
     
     #########################################################################
     #Constructor:
@@ -59,7 +81,7 @@ class EngineData(Utilities):
         """
         Create the table.
         """
-        self.data = pd.DataFrame()
+        self.data = pd.DataFrame(columns=["CA"])
     
     #########################################################################
     #Dunder methods:
@@ -86,6 +108,9 @@ class EngineData(Utilities):
         if new:
             self.createInterpolator(key)
     
+    def __delitem__(self, item):
+        return self.data.__delitem__(item)
+    
     #########################################################################
     #Methods:
     def loadFile(
@@ -105,7 +130,7 @@ class EngineData(Utilities):
             verbose:bool=True, 
             delimiter:str=None,
             default:float=float("nan")
-            ) -> EngineData:
+            ) -> Self:
         """
         [Variable] | [Type] | [Default] | [Description]
         -----------|--------|-----------|---------------------------------------------
@@ -172,30 +197,96 @@ class EngineData(Utilities):
         return self
     
     #######################################
+    @timing
     def loadArray(
         self,
         data:collections.abc.Iterable,
         varName:str,
         verbose:bool=True,
         default:float=float("nan"),
-        interpolate:bool=False) -> EngineData:
+        interpolate:bool=False,
+        dataFormat:Literal["column", "row"]="column") -> Self:
         """
-        Load an ndarray of shape (N,2) with first column the CA range and 
-        second the variable time-series to load. Automatically removes duplicate times.
-            
+        Load an array into the table. Automatically removes duplicate times.
+
         Args:
-            data (collections.abc.Iterable): Container of shape (N,2) with first 
-                column the CA range and second the variable time-series to load.
+            data (collections.abc.Iterable): Container of shape [N,2] (column) or [2,N] (row), depending 
+                on 'dataFormat' value, with first column/row the CA range and second the variable 
+                time-series to load.
             varName (str): Name of variable in data structure
-            verbose (bool, optional): If need to print loading information. 
-                Defaults to True.
-            default (float, optional): Default value for out-of-range elements. 
-                Defaults to float("nan").
+            verbose (bool, optional): If need to print loading information. Defaults to True.
+            default (float, optional): Default value for out-of-range elements. Defaults 
+                to float("nan").
             interpolate (bool, optional): Interpolate the data-set at existing CA 
                 range (used to load non-consistent data). Defaults to False.
-
+            dataFormat (str, Literal[&quot;column&quot;, &quot;row&quot;], optional): Format of data:
+                column -> [N,2]
+                row -> [2,N]
         Returns:
-            EngineData: self
+            Self: self.
+            
+        Examples:
+        >>> ed = EngineData()
+        
+        #Loading from list containing two lists for CA and variable (by row)
+        >>> ed = EngineData()
+        >>> data = [[1, 2, 3, 4, 5], [11, 12, 13, 14, 15]]
+        >>> ed.loadArray(data, "var1", dataFormat="row")
+           CA  var1
+        0   1    11
+        1   2    12
+        2   3    13
+        3   4    14
+        4   5    15
+        
+        #Loading second variable from list of (CA,var) pairs (order by column) without interpolation
+        >>> data = [(3, 3), (4, 3.5), (5, 2.4), (6, 5.2), (7, 3.14)]
+        >>> ed.loadArray(data, "var2", dataFormat="column")
+           CA  var1  var2
+        0   1  11.0   NaN
+        1   2  12.0   NaN
+        2   3  13.0  3.00
+        3   4  14.0  3.50
+        4   5  15.0  2.40
+        5   6   NaN  5.20
+        6   7   NaN  3.14
+        
+        #Extend the interval of var2 from a pandas.DataFrame with data by column,
+        suppressing the warning for orverwriting.
+        >>> from pandas import DataFrame as df
+        >>> data = df({"CA":[8, 9, 10, 11], "var":[2, 1, 0, -1]})
+        >>> ed.loadArray(data, "var2", dataFormat="column", verbose=False)
+            CA  var1  var2
+        0    1  11.0   NaN
+        1    2  12.0   NaN
+        2    3  13.0  3.00
+        3    4  14.0  3.50
+        4    5  15.0  2.40
+        5    6   NaN  5.20
+        6    7   NaN  3.14
+        7    8   NaN  2.00
+        8    9   NaN  1.00
+        9   10   NaN  0.00
+        10  11   NaN -1.00
+        
+        #Load a variable var3 from numpy ndarray and interpolate
+        >>> import numpy as np
+        >>> data = np.array([[-5.5, 5.5],[2.3, 5.4]])
+        >>> ed.loadArray(data, "var3", dataFormat="row", interpolate=True)
+            CA  var1  var2      var3
+        0   -5.5   NaN   NaN  2.300000
+        1    1.0  11.0   NaN  4.131818
+        2    2.0  12.0   NaN  4.413636
+        3    3.0  13.0  3.00  4.695455
+        4    4.0  14.0  3.50  4.977273
+        5    5.0  15.0  2.40  5.259091
+        6    5.5   NaN  3.80  5.400000
+        7    6.0   NaN  5.20       NaN
+        8    7.0   NaN  3.14       NaN
+        9    8.0   NaN  2.00       NaN
+        10   9.0   NaN  1.00       NaN
+        11  10.0   NaN  0.00       NaN
+        12  11.0   NaN -1.00       NaN
         """
         try:
             self.checkType(varName  , str   , "varName" )
@@ -203,88 +294,77 @@ class EngineData(Utilities):
             self.checkType(verbose  , bool  , "verbose")
             self.checkType(default  , float  , "default")
             
-            #Cast to numpy array
-            data:np.ndarray = self.np.array(data)
+            #Cast to pandas.DataFrame
+            df:pd.DataFrame = pd.DataFrame(data=data)
+            if (dataFormat == "column") and (len(df.columns) != 2):
+                raise ValueError(f"Array must be of shape (N,2) while dataFormat='column', while ({len(df.columns)},{len(df)}) was found.")
+            elif (dataFormat == "row") and (len(df) != 2):
+                raise ValueError(f"Array must be of shape (2,N) while dataFormat='row', while ({len(df.columns)},{len(df)}) was found.")
+            elif (dataFormat == "row"):
+                df = df.transpose()
+            elif (dataFormat != "column"):
+                raise ValueError(f"Unknown dataFormat '{dataFormat}'. Avaliable formats are 'row' and 'column'.")
+                
+            #Set column names
+            df.columns = ["CA", varName]
             
-            #Check for type
-            if not ((data.dtype == float) or (data.dtype == int)):
+            #Remove duplicates
+            df.drop_duplicates(subset="CA", keep="first", inplace=True)
+            
+            #Index with CA (useful for merging)
+            self.data.set_index("CA", inplace=True)
+            df.set_index("CA", inplace=True)
+            
+            #Check types
+            if any([t not in [float, int] for t in df.dtypes]):
                 raise TypeError("Data must be numeric (float or int).")
             
-            if not len(data.shape) == 2:
-                raise ValueError(f"Data must be with shape (N,2), {data.shape} found.")
-            else:
-                if not data.shape[1] == 2:
-                    raise ValueError(f"Data must be with shape (N,2), {data.shape} found.")
-            
-            #Check if data are already present
-            firstTime = False
-            if not varName in self.data:
-                self.data[varName] = default
-                firstTime = True
-            else:
-                if verbose:
-                    self.runtimeWarning(f"Overwriting existing data for field '{varName}'", stack=False)
-            
-            #Remove duplicate CAs:
-            _, idx = np.unique(data[:,0], return_index=True)
-            data = data[idx,:]
-            
-            #Remove nan:
-            if np.isnan(data[:,0]).any():
-                data = data[np.array([not np.isnan(v) for v in data[:,0]])]
-            if np.isnan(data[:,1]).any():
-                data = data[np.array([not np.isnan(v) for v in data[:,1]])]
+            #Check if data were already loaded
+            firstTime = not (varName in self.columns)
+            if (not firstTime) and verbose:
+                self.runtimeWarning(f"Overwriting existing data for field '{varName}'", stack=False)
             
             #If data were not stored yet, just load this
-            if len(self.data) == 0:
+            if len(self.data) < 1:
                 #Cannot use interpolate here
                 if interpolate:
                     raise ValueError("Cannot load first with 'interpolate' method")
                 
-                self.data["CA"] = data[:,0]
-                self.data[varName] = data[:,1]
-                
-            elif interpolate:
-                #Interpolate data at CA range
-                CA = self.data["CA"]
-                var  = np.interp(CA, data[:,0], data[:,1])
-                self.data[varName] = var
-                
+                #Update based on CA of right
+                self.data = self.data.join(df, how="right")
+            
             else:
-                CA = data[:,0]
-                var = data[:,1]
-                
-                #NOTE: can only extend range on right (higher CA)
-                if CA[0] < self["CA"][0]:
-                    raise ValueError("CA not consistent: can only extend range to the right (higher CA)")
-                
-                #Check indicies of already present data:
-                index = self.data.index[[ca in CA for ca in self["CA"]]]
-                
-                #Overwritten data must be contiguous
-                if not (len(index) == (index[-1] - index[0] + 1)):
-                    #Missing data in between
-                    raise ValueError("CA not consistent: overwrited data must be contiguous (0)")
-                elif not (index.to_numpy() == np.array(range(index[0], index[-1]+1))).all():
-                    # Already loaded data to overwrite are not contiguous
-                    raise ValueError("CA not consistent: overwrited data must be contiguous (1)")
-                elif (index[-1] < (len(self) - 1)) and (CA[-1] > self["CA"][index[-1]]):
-                    #Last index not at end, but there are other data left
-                    raise ValueError("CA not consistent: overwrited data must be contiguous (2)")
-                
-                #Identify extended elements:
-                if CA[-1] > self["CA"][len(self.data)-1]:
-                    numNewCA = len(CA) - len(index)
-                    newIndex = list(range(len(self.data),len(self.data)+numNewCA))
-                    index = index.to_list() + newIndex
+                #Check if index are not consistent, to perform interpolation later
+                consistentCA = False if (len(self.data.index) != len(df.index)) else all(self.data.index == df.index)
+                if (not consistentCA) and interpolate:
+                    CAold = self.data.index
                     
-                    #Add new indicies:
-                    newData = pd.DataFrame(columns=self.data.columns, index=range(len(newIndex)))
-                    self.data = pd.concat([self.data, newData], ignore_index=True)
+                #Update based on CA of self
+                self.data = self.data.join(df, how="outer", rsuffix="_new")
                 
-                self.data.loc[index, "CA"] = CA
-                self.data.loc[index, varName] = var
-                                
+                #Merge data if overwriting
+                if not firstTime:
+                    self.data.update(pd.DataFrame(self.data[varName + "_new"].rename(varName)))
+                    self.data.drop(varName + "_new", axis="columns", inplace=True)
+                
+                #Perform interpolation
+                if (not consistentCA) and interpolate:
+                    #Interpolate original dataset
+                    missingCA = self.data.index[pd.DataFrame(self.data.index).apply((lambda x:not CAold.__contains__(x),))["CA"]["<lambda>"]]
+                    if len(missingCA > 0):
+                        #Interpolate everything but the loaded variable:
+                        for var in [v for v in self.columns if not v == varName]:
+                            self[var].loc[missingCA] = self.np.interp(missingCA, CAold, self.data.loc[CAold,var], float("nan"), float("nan"))
+                    
+                    #Interpolate loaded dataset (needed if new variable):
+                    if firstTime:
+                        missingCA = self.data.index[pd.DataFrame(self.data.index).apply((lambda x:not df.index.__contains__(x),))["CA"]["<lambda>"]]
+                        if len(missingCA > 0):
+                            self[varName].loc[missingCA] = self.np.interp(missingCA, df.index, df[varName], float("nan"), float("nan"))
+                    
+                #Return to normal indexing
+                self.data.reset_index(inplace=True)
+                
             #If first time this entry is set, create the interpolator:
             if firstTime:
                 self.createInterpolator(varName)
