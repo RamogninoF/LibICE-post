@@ -12,7 +12,7 @@ $ pip install libICEpost
 
 - TODO
 
-Interactive documentation avaliable at [index.html](docs/_build/html/index.html)
+Interactive documentation avaliable at [this page](https://libice-post.readthedocs.io/en/latest/).
 
 ## Contributing
 
