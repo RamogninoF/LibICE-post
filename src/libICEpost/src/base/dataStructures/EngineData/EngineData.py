@@ -163,7 +163,6 @@ class EngineData(Utilities):
         duplicate times.
 
         Args:
-
             fileName (str): Source file
             varName (str): Name of variable in data structure
             CACol (int, optional): Column of CA list. Defaults to 0.
@@ -172,12 +171,12 @@ class EngineData(Utilities):
             varOff (float, optional): Offset to sum to variable range. Defaults to 0.0.
             CAscale (float, optional): Scaling factor to apply to CA range. Defaults to 1.0.
             varScale (float, optional): Scaling factor to apply to variable range. Defaults to 1.0.
-            skipRows (int, optional): Character to use to detect comment lines. Defaults to 0.
-            maxRows (int, optional): Delimiter for the columns (defaults to whitespace). Defaults to None.
-            interpolate (bool, optional): Number of raws to skip at beginning of file. Defaults to False.
-            comments (str, optional): Maximum number of raws to use. Defaults to '#'.
-            verbose (bool, optional): Interpolate the data-set at existing CA range (used to load non-consistent data). Defaults to True.
-            delimiter (str, optional): Print info/warnings. Defaults to None.
+            skipRows (int, optional): Number of raws to skip at beginning of file. Defaults to 0.
+            maxRows (int, optional): Maximum number of raws to use. Defaults to None.
+            interpolate (bool, optional): Interpolate the data-set at existing CA range (used to load non-consistent data). Defaults to False.
+            comments (str, optional): Character to use to detect comment lines. Defaults to '#'.
+            verbose (bool, optional): Print info/warnings. Defaults to True.
+            delimiter (str, optional): Delimiter for the columns (defaults to whitespace). Defaults to None.
             default (float, optional): Default value to add in out-of-range values. Defaults to float("nan").
             
         Returns:
@@ -185,7 +184,7 @@ class EngineData(Utilities):
         """
         if verbose:
             print(f"{self.__class__.__name__}: Loading... '{fileName}' -> '{varName}'")
-
+        
         try:
             self.checkType(fileName , str   , "fileName")
             self.checkType(varName  , str   , "varName" )

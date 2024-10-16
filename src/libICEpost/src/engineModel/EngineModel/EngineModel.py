@@ -19,6 +19,8 @@ import os
 import numpy as np
 import pandas as pd
 
+from tqdm import tqdm
+
 from libICEpost.src.base.BaseClass import BaseClass, abstractmethod
 from libICEpost.src.base.dataStructures.EngineData.EngineData import EngineData
 from libICEpost.src.base.Filter.Filter import Filter
@@ -811,17 +813,14 @@ class EngineModel(BaseClass):
             print("Processing")
             print("startTime:",self.time.startTime)
             print("endTime:",self.time.endTime)
-            print("current time:",self.info["time"])
             
             #Create fields
             self._process__pre__()
             
             #Process cylinder data
-            for t in self.time(self.data["CA"]):
-                #Restart from last time
-                if t > self.info["time"]:
-                    self.info["time"] = t
-                    self._update()
+            for t in tqdm(self.time(self.data["CA"]), "Progress: ", initial=0, total=(self.time.endTime-self.time.startTime), unit="CAD"):  #With progress bar :)
+                self.info["time"] = t
+                self._update()
 
             #Final updates (heat transfer, cumulatives, etc...)
             self._process__post__()
