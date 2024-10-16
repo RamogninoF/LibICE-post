@@ -460,8 +460,8 @@ class EngineModel(BaseClass):
         """
         #TODO: Update the reactants mixture based on injection models (may have already injected some mass)
         
-        index = self.data.data.index[self.data['CA'] == self.time.time].tolist()[0]
-        data = self.data.data.loc()[index].to_dict()
+        index = self.data.index[self.data['CA'] == self.time.time].tolist()[0]
+        data = self.data.loc[index].to_dict()
         self.CombustionModel.update(**data) #NOTE: update also fuel when implementing injection models
     
     #########################################################################
@@ -617,7 +617,7 @@ class EngineModel(BaseClass):
             #Clone if no filter is given
             if filter is None:
                 for field in self._raw.columns:
-                    self._data.loadArray(np.array((self._raw.data["CA"],self._raw.data[field])).T, field)
+                    self._data.loadArray(np.array((self._raw["CA"],self._raw[field])).T, field)
                 return self
             
             #Apply filter
@@ -625,7 +625,7 @@ class EngineModel(BaseClass):
             for var in self._raw.columns:
                 #Filter data
                 if var != "CA":
-                    self._data.loadArray(np.array(filter(self._raw.data["CA"], self._raw.data[var])).T, var)
+                    self._data.loadArray(np.array(filter(self._raw["CA"], self._raw[var])).T, var)
             
         except BaseException as err:
             self.fatalErrorInClass(self.filterData, f"Failed filtering data", err)
@@ -855,7 +855,7 @@ class EngineModel(BaseClass):
         #Set initial values as start-time:
         CA = self.time.time
         if CA == self.time.startTime:
-            index = self.data.data.index[self.data['CA'] == CA].tolist()
+            index = self.data.index[self.data['CA'] == CA].tolist()
             
             #In-cylinder data
             V = self.geometry.V(CA)
@@ -918,7 +918,7 @@ class EngineModel(BaseClass):
         self._updateMixtures()
         
         #Store
-        index = self.data.data.index[self.data['CA'] == CA].tolist()[0]
+        index = self.data.index[self.data['CA'] == CA].tolist()[0]
         
         #Main parameters
         self.data.loc[index, "dpdCA"] = dpdCA
@@ -1058,8 +1058,8 @@ class EngineModel(BaseClass):
         self.checkType(start,float,"start")
         self.checkType(end,float,"end")
         
-        index = self.data.data.index[np.array(self.data.data["CA"] >= start) & np.array(self.data.data["CA"] <= end)]
-        data = self.data.data.iloc[index]
+        index = self.data.index[np.array(self.data["CA"] >= start) & np.array(self.data["CA"] <= end)]
+        data = self.data.iloc[index]
         
         #Filter out "nan"
         Yarray = data[y].copy()
@@ -1127,8 +1127,8 @@ class EngineModel(BaseClass):
         self.checkType(start,float,"start")
         self.checkType(end,float,"end")
         
-        index = self.data.data.index[np.array(self.data.data["CA"] >= start) & np.array(self.data.data["CA"] <= end)]
-        data = self.data.data.iloc[index]
+        index = self.data.index[np.array(self.data["CA"] >= start) & np.array(self.data["CA"] <= end)]
+        data = self.data.iloc[index]
         data["V"] = self.geometry.V(data["CA"])
         
         return self.work(start=start, end=end)/(max(data["V"]) - min(data["V"]))
@@ -1154,8 +1154,8 @@ class EngineModel(BaseClass):
         self.checkType(start,float,"start")
         self.checkType(end,float,"end")
         
-        index = self.data.data.index[np.array(self.data.data["CA"] >= start) & np.array(self.data.data["CA"] <= end)]
-        data = self.data.data.iloc[index]
+        index = self.data.index[np.array(self.data["CA"] >= start) & np.array(self.data["CA"] <= end)]
+        data = self.data.iloc[index]
         data["V"] = self.geometry.V(data["CA"])
         
         return integrate.trapz(data["p"], x=data["V"])
@@ -1177,9 +1177,9 @@ class EngineModel(BaseClass):
         """
         #Get start and end
         if start is None:
-            start = self.data.data.iloc[0]["CA"]
+            start = self.data.iloc[0]["CA"]
         if end is None:
-            end = self.data.data.iloc[len(self.data)-1]["CA"]
+            end = self.data.iloc[len(self.data)-1]["CA"]
         
         #Set default timingsParams
         default = \
@@ -1205,7 +1205,7 @@ class EngineModel(BaseClass):
         self.data["pBar"] = self.data["p"]/1e5
         
         #Plot
-        ax = self.data.data.plot(x="V", y="pBar", xlabel="V [$m^3$]", ylabel="p [bar]", loglog=loglog, **kwargs)
+        ax = self.data.plot(x="V", y="pBar", xlabel="V [$m^3$]", ylabel="p [bar]", loglog=loglog, **kwargs)
         
         #Timings
         timings = self.time.timings

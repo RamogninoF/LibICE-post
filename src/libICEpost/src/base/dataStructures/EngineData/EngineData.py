@@ -20,25 +20,12 @@ from libICEpost.src.base.Utilities import Utilities
 import pandas as pd
 import numpy as np
 import collections.abc
+import matplotlib
 
 #Auxiliary functions
 from keyword import iskeyword
 def is_valid_variable_name(name):
     return name.isidentifier() and not iskeyword(name)
-
-from functools import wraps
-from time import time
-
-def timing(f):
-    @wraps(f)
-    def wrap(*args, **kw):
-        ts = time()
-        result = f(*args, **kw)
-        te = time()
-        print('func:%r took: %2.4f sec' % \
-          (f.__name__, te-ts))
-        return result
-    return wrap
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -53,27 +40,56 @@ class EngineData(Utilities):
     #########################################################################
     #properties:
     @property
-    def columns(self) -> list[str]:
-        return self.data.columns
+    def columns(self):
+        """
+        The columns in the DataFrame.
+
+        Returns:
+            Index[str]
+        """
+        return self._data.columns
 
     @columns.setter
     def columns(self, *args, **kwargs) -> None:
-        self.data.columns(*args, **kwargs)
+        self._data.columns(*args, **kwargs)
 
+    ##############################
+    @property
+    def index(self):
+        """
+        The index list of the DataFrame.
+
+        Returns:
+            Index
+        """
+        return self._data.index
+
+    ##############################
+    #Auxiliary access methods
     @property
     def loc(self):
-        return self.data.loc
+        """
+        Access a group of rows and columns by label(s) or a boolean array.
+        Calls 'loc' propertie of the DataFrame.
+        """
+        return self._data.loc
 
     @loc.setter
     def loc(self, *args):
-        return self.data.loc[*args]
+        self._data.loc[args[0]] = args[1:]
+    
+    ##############################
     @property
     def iloc(self):
-        return self.data.iloc
+        """
+        Purely integer-location based indexing for selection by position.
+        Calls 'iloc' propertie of the DataFrame.
+        """
+        return self._data.iloc
 
     @iloc.setter
     def iloc(self, *args):
-        return self.data.iloc[*args]
+        self._data.iloc[args[0]] = args[1:]
 
     #########################################################################
     #Constructor:
@@ -81,36 +97,44 @@ class EngineData(Utilities):
         """
         Create the table.
         """
-        self.data = pd.DataFrame(columns=["CA"])
+        self._data = pd.DataFrame(columns={"CA":[]})
 
     #########################################################################
     #Dunder methods:
     def __len__(self):
-        return len(self.data)
+        return self._data.__len__()
 
     def __str__(self):
-        return str(self.data)
+        return self._data.__str__()
 
     def __repr__(self):
-        return repr(self.data)
+        return self._data.__repr__()
 
-    def __getitem__(self, item):
-        return self.data.__getitem__(item)
+    def __getitem__(self, *item) -> pd.Series|pd.DataFrame:
+        return self._data.__getitem__(*item)
 
-    def __setitem__(self, key, item):
+    def __setitem__(self, key, item) -> None:
         new = False
         if not key in self.columns:
             new = True
 
-        self.data.__setitem__(key, item)
+        self._data.__setitem__(key, item)
 
         #Create interpolator if not present
         if new:
             self.createInterpolator(key)
 
     def __delitem__(self, item):
-        return self.data.__delitem__(item)
+        return self._data.__delitem__(item)
 
+    def __call__(self) -> pd.DataFrame:
+        """
+        Access the DataFrame instance that stores the data.
+        Returns:
+            pd.DataFrame: The DataFrame instance that stores the data.
+        """
+        return self._data
+    
     #########################################################################
     #Methods:
     def loadFile(
@@ -139,24 +163,23 @@ class EngineData(Utilities):
         duplicate times.
 
         Args:
-            | Variable  |  Type  |  Default  |  Description                                                                          |
-            |*---------*|*------*|*---------*|*-------------------------------------------------------------------------------------*|
-            |fileName   | str    | -         | Source file                                                                           |
-            |varName    | str    | -         | Name of variable in data structure                                                    |
-            |CACol      | int    | 0         | Column of CA list                                                                     |
-            |varCol     | int    | 1         | Column of data list                                                                   |
-            |CAOff      | float  | 0.0       | Offset to sum to CA range                                                             |
-            |varOff     | float  | 0.0       | Offset to sum to variable range                                                       |
-            |CAscale    | float  | 1.0       | Scaling factor to apply to CA range                                                   |
-            |varScale   | float  | 1.0       | Scaling factor to apply to variable range                                             |
-            |comments   | str    | '#'       | Character to use to detect comment lines                                              |
-            |delimiter  | str    | None      | Delimiter for the columns (defaults to whitespace)                                    |
-            |skipRows   | int    | 0         | Number of raws to skip at beginning of file                                           |
-            |maxRows    | int    | None      | Maximum number of raws to use                                                         |
-            |interpolate| bool   | False     | Interpolate the data-set at existing CA range (used to load non-consistent data)      |
-            |verbose    | bool   | True      | Print info/warnings                                                                   |
-            |default    | float  | nan       | Default value to add in out-of-range values                                           |
 
+            fileName (str): Source file
+            varName (str): Name of variable in data structure
+            CACol (int, optional): Column of CA list. Defaults to 0.
+            varCol (int, optional): Column of data list. Defaults to 1.
+            CAOff (float, optional): Offset to sum to CA range. Defaults to 0.0.
+            varOff (float, optional): Offset to sum to variable range. Defaults to 0.0.
+            CAscale (float, optional): Scaling factor to apply to CA range. Defaults to 1.0.
+            varScale (float, optional): Scaling factor to apply to variable range. Defaults to 1.0.
+            skipRows (int, optional): Character to use to detect comment lines. Defaults to 0.
+            maxRows (int, optional): Delimiter for the columns (defaults to whitespace). Defaults to None.
+            interpolate (bool, optional): Number of raws to skip at beginning of file. Defaults to False.
+            comments (str, optional): Maximum number of raws to use. Defaults to '#'.
+            verbose (bool, optional): Interpolate the data-set at existing CA range (used to load non-consistent data). Defaults to True.
+            delimiter (str, optional): Print info/warnings. Defaults to None.
+            default (float, optional): Default value to add in out-of-range values. Defaults to float("nan").
+            
         Returns:
             Self: self.
         """
@@ -201,7 +224,6 @@ class EngineData(Utilities):
         return self
 
     #######################################
-    @timing
     def loadArray(
         self,
         data:collections.abc.Iterable,
@@ -214,23 +236,21 @@ class EngineData(Utilities):
         Load an array into the table. Automatically removes duplicate times.
 
         Args:
-            data (collections.abc.Iterable): Container of shape [N,2] (column) or [2,N] (row), depending
-                on 'dataFormat' value, with first column/row the CA range and second the variable
+            data (collections.abc.Iterable): Container of shape [N,2] (column) or [2,N] (row), depending \
+                on 'dataFormat' value, with first column/row the CA range and second the variable \
                 time-series to load.
             varName (str): Name of variable in data structure
             verbose (bool, optional): If need to print loading information. Defaults to True.
-            default (float, optional): Default value for out-of-range elements. Defaults
-                to float("nan").
-            interpolate (bool, optional): Interpolate the data-set at existing CA
-                range (used to load non-consistent data). Defaults to False.
-            dataFormat (str, Literal[&quot;column&quot;, &quot;row&quot;], optional): Format of data:
-                column -> [N,2]
-                row -> [2,N]
+            default (float, optional): Default value for out-of-range elements. Defaults to float("nan").
+            interpolate (bool, optional): Interpolate the data-set at existing CA range (used to load \
+                non-consistent data). Defaults to False.
+            dataFormat (str, Literal[&quot;column&quot;, &quot;row&quot;], optional): Format of data: \
+                'column' -> [N,2] \
+                'row' -> [2,N]
         Returns:
             Self: self.
 
         Examples:
-
             Creating a 'EngineData' instance
             >>> ed = EngineData()
 
@@ -318,7 +338,7 @@ class EngineData(Utilities):
             df.drop_duplicates(subset="CA", keep="first", inplace=True)
 
             #Index with CA (useful for merging)
-            self.data.set_index("CA", inplace=True)
+            self._data.set_index("CA", inplace=True)
             df.set_index("CA", inplace=True)
 
             #Check types
@@ -331,45 +351,45 @@ class EngineData(Utilities):
                 self.runtimeWarning(f"Overwriting existing data for field '{varName}'", stack=False)
 
             #If data were not stored yet, just load this
-            if len(self.data) < 1:
+            if len(self._data) < 1:
                 #Cannot use interpolate here
                 if interpolate:
                     raise ValueError("Cannot load first with 'interpolate' method")
 
                 #Update based on CA of right
-                self.data = self.data.join(df, how="right")
+                self._data = self._data.join(df, how="right")
 
             else:
                 #Check if index are not consistent, to perform interpolation later
-                consistentCA = False if (len(self.data.index) != len(df.index)) else all(self.data.index == df.index)
+                consistentCA = False if (len(self._data.index) != len(df.index)) else all(self._data.index == df.index)
                 if (not consistentCA) and interpolate:
-                    CAold = self.data.index
+                    CAold = self._data.index
 
                 #Update based on CA of self
-                self.data = self.data.join(df, how="outer", rsuffix="_new")
+                self._data = self._data.join(df, how="outer", rsuffix="_new")
 
                 #Merge data if overwriting
                 if not firstTime:
-                    self.data.update(pd.DataFrame(self.data[varName + "_new"].rename(varName)))
-                    self.data.drop(varName + "_new", axis="columns", inplace=True)
+                    self._data.update(pd.DataFrame(self._data[varName + "_new"].rename(varName)))
+                    self._data.drop(varName + "_new", axis="columns", inplace=True)
 
                 #Perform interpolation
                 if (not consistentCA) and interpolate:
                     #Interpolate original dataset
-                    missingCA = self.data.index[pd.DataFrame(self.data.index).apply((lambda x:not CAold.__contains__(x),))["CA"]["<lambda>"]]
+                    missingCA = self._data.index[pd.DataFrame(self._data.index).apply((lambda x:not CAold.__contains__(x),))["CA"]["<lambda>"]]
                     if len(missingCA > 0):
                         #Interpolate everything but the loaded variable:
                         for var in [v for v in self.columns if not v == varName]:
-                            self[var].loc[missingCA] = self.np.interp(missingCA, CAold, self.data.loc[CAold,var], float("nan"), float("nan"))
+                            self[var].loc[missingCA] = self.np.interp(missingCA, CAold, self._data.loc[CAold,var], float("nan"), float("nan"))
 
                     #Interpolate loaded dataset (needed if new variable):
                     if firstTime:
-                        missingCA = self.data.index[pd.DataFrame(self.data.index).apply((lambda x:not df.index.__contains__(x),))["CA"]["<lambda>"]]
+                        missingCA = self._data.index[pd.DataFrame(self._data.index).apply((lambda x:not df.index.__contains__(x),))["CA"]["<lambda>"]]
                         if len(missingCA > 0):
-                            self[varName].loc[missingCA] = self.np.interp(missingCA, df.index, df[varName], float("nan"), float("nan"))
+                            self[varName].loc[missingCA] = self.np.interp(missingCA, df.index, df[varName], default, default)
 
-                #Return to normal indexing
-                self.data.reset_index(inplace=True)
+            #Return to normal indexing
+            self._data.reset_index(inplace=True)
 
             #If first time this entry is set, create the interpolator:
             if firstTime:
@@ -385,7 +405,7 @@ class EngineData(Utilities):
         """
         varName:    str
 
-        Create the interpolator for a variable and defines the method varName(CA) which returns the interpolated value of variable 'varName' at instant 'CA' from the data in self.data
+        Create the interpolator for a variable and defines the method varName(CA) which returns the interpolated value of variable 'varName' at instant 'CA' from the data in self._data
         """
         try:
             #Check if varName is an allowed variable name, as so that it can be used to access by . operator
@@ -396,13 +416,13 @@ class EngineData(Utilities):
             if varName in _reservedMethds:
                 raise ValueError(f"Name '{varName}' is reserved.")
 
-            if not varName in self.data.columns:
-                raise ValueError(f"Variable '{varName}' not found. Available fields are:" + "\t" + "\n\t".join(self.data.columns))
+            if not varName in self._data.columns:
+                raise ValueError(f"Variable '{varName}' not found. Available fields are:" + "\t" + "\n\t".join(self._data.columns))
 
             def interpolator(self, CA:float|collections.abc.Iterable) -> float|collections.abc.Iterable:
                 try:
                     self.checkTypes(CA, (float,collections.abc.Iterable), "CA")
-                    return self.np.interp(CA, self.data["CA"], self.data[varName], float("nan"), float("nan"))
+                    return self.np.interp(CA, self._data["CA"], self._data[varName], float("nan"), float("nan"))
                 except BaseException as err:
                     self.fatalErrorInClass(getattr(self,varName), "Failed interpolation", err)
 
@@ -436,7 +456,7 @@ class EngineData(Utilities):
             if os.path.exists(fileName) and not overwrite:
                 self.fatalErrorInClass(self.write, "File {fileName} exists. Use overwrite=True keyword to force overwriting data.")
 
-            self.data.to_csv\
+            self._data.to_csv\
                 (
                     path_or_buf=fileName,
                     sep=sep,
@@ -451,5 +471,18 @@ class EngineData(Utilities):
         except BaseException as err:
             self.fatalErrorInClass(self.write, f"Failed writing data to file '{fileName}'", err)
 
+    #########################################################################
+    #Auxiliary plotting methods
+    def plot(self, *args, **kwargs):
+        """
+        Plotting the data stored in the table. It refers to the the 
+        'plot' method of the DataFrame storing the data
+
+        Returns:
+            matplotlib.Axes|numpy.ndarray[matplotlib.Axes]: The axes of the plot(s).
+        """
+        return self().plot(*args, **kwargs)
+    
+#########################################################################
 #Store copy of default EngineData class. This is used to identify reserved methods for createInterpolator
 _reservedMethds = dir(EngineData)
