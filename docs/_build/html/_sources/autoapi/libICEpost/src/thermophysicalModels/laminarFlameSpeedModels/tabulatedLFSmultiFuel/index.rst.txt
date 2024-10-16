@@ -1,6 +1,0 @@
-libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFSmultiFuel
-=================================================================================
-
-.. py:module:: libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFSmultiFuel
-
-

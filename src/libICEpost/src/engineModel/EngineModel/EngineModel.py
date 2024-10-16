@@ -1171,7 +1171,8 @@ class EngineModel(BaseClass):
             loglog (bool, optional): log-log scale. Defaults to True.
             timingsParams(dict, optional): The kwargs for the scatter for timings. Defaults to:
             {
-                "edgecolor":"k"
+                "edgecolor":"k",
+                "zorder":2,
             }
         """
         #Get start and end
@@ -1183,7 +1184,8 @@ class EngineModel(BaseClass):
         #Set default timingsParams
         default = \
         {
-            "edgecolor":"k"
+            "edgecolor":"k",
+            "zorder":2,
         }
         [timingsParams.update({p:default[p]}) for p in default if not p in timingsParams]
         
