@@ -71,7 +71,6 @@ class constantCpMixing(ThermoMixing):
                     {
                         "Rgas":float('nan'),
                         "cp":float('nan'),
-                        "cv":float('nan')
                     }
                 )
             super().__init__(mix)
@@ -91,7 +90,6 @@ class constantCpMixing(ThermoMixing):
 
         #Update
         cp = []
-        cv = []
         hf = []
         weigths = []
         for specie in self.mix:
@@ -101,11 +99,9 @@ class constantCpMixing(ThermoMixing):
             
             weigths.append(self._mix.Y[self.mix.index(specie.specie)])
             cp.append(th._cp)
-            cv.append(th._cv)
             hf.append(th._hf)
         
         self._Thermo._cp = (sum([weigths[ii]*v for ii, v in enumerate(cp)]))
-        self._Thermo._cv = (sum([weigths[ii]*v for ii, v in enumerate(cv)]))
         self._Thermo._hf = (sum([weigths[ii]*v for ii, v in enumerate(hf)]))
 
         return False

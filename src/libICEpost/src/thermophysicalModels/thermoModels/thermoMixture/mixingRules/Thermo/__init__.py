@@ -7,3 +7,4 @@ Package for handling mixing rules for combining thermodynamic data of specie int
 
 from .ThermoMixing import ThermoMixing
 from .janaf7Mixing import janaf7Mixing
+from .constantCpMixing import constantCpMixing

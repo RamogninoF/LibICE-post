@@ -38,24 +38,12 @@ def fromJson(fileName, typeName="Molecules"):
     (database.chemistry.specie.Molecules) and the name of its 
     dictionary consistent with it.
 
-    Eg:
+    Example:
     {
-        "Ar":
-        {
-            "gamma":1.666,
-            "hf":0.0
-        },
-
         "N2":
         {
             "cp":1036.8,
             "hf":0.0
-        },
-
-        "H2O":
-        {
-            "gamma":1.33,
-            "hf":-13.42e6
         }
     }
     """
@@ -71,19 +59,17 @@ def fromJson(fileName, typeName="Molecules"):
             data = json.load(f)
             for mol in data:
                 Dict = {}
-                for var in ["cp", "cv", "gamma", "hf"]:
+                for var in ["cp", "hf"]:
                     if var in data[mol]:
                         Dict[var] = data[mol][var]
                     else:
-                        Dict[var] = None
+                        raise ValueError(f"Missing input key {var} for entry {mol}")
 
                 constantCp_db[mol] = \
                     constantCp\
                         (
                             Molecules[mol].Rgas,
                             Dict["cp"],
-                            Dict["cv"],
-                            Dict["gamma"],
                             Dict["hf"]
                         )
                 

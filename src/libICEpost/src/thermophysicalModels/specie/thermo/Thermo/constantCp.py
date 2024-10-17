@@ -78,16 +78,12 @@ class constantCp(Thermo):
     
     #########################################################################
     #Constructor:
-    def __init__(self, Rgas, cp=None, cv=None, gamma=None, hf=float('nan')):
+    def __init__(self, Rgas, cp, hf=float('nan')):
         """
         Rgas: float
             The mass specific gas constant
         cp:     float (None)
             Constant pressure heat capacity [J/kgK]
-        cv:     float (None)
-            Constant volume heat capacity [J/kgK]
-        gamma:  float (None)
-            cp/cv ratio [-]
             
         hf:     float (0.0)
             Enthalpy of formation (Optional)
@@ -97,22 +93,10 @@ class constantCp(Thermo):
         #Argument checking:
         super(self.__class__, self).__init__(Rgas)
         try:
-            if len([0 for i in [cp, cv, gamma] if not (i is None)]) != 1:
-                raise ValueError("Trying to construct from more then one input (cp, cv, gamma).")
+            self.checkType(cp, float, entryName="cp")
+            self.checkType(hf, float, entryName="hf")
             
-            if not cp is None:
-                self.checkType(cp, float, entryName="cp")
-                self._cp = cp
-            
-            if not cv is None:
-                self.checkType(cv, float, entryName="cv")
-                self._cp = cv + self.Rgas
-            
-            if not gamma is None:
-                self.checkType(gamma, float, entryName="gamma")
-                self._cv = self.Rgas/(gamma - 1.0)
-                self._cp = self._cv + self.Rgas
-            
+            self._cp = cp
             self._hf = hf
         except BaseException as err:
             self.fatalErrorInArgumentChecking(self.__init__, err)
