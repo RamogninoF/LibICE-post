@@ -13,6 +13,8 @@ dependencies = [
   'chempy >= 0.9.0',
   'pyfoam',
   'tqdm',
+  'colorama',
+  'pandas'
 ]
 
 classifiers = [

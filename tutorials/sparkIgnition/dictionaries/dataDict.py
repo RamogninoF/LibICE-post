@@ -81,7 +81,7 @@ data = \
             "format":"file",
             "data":
             {
-                "fileName":"uPrime.Cyl",
+                "fileName":"uprime.Cyl",
                 "opts":{}
             }
         },
