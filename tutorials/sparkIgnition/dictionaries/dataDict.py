@@ -20,7 +20,13 @@ data = \
                 "fileName":"p.Cyl",
                 
                 #Options to apply (scaling, shifting, etc.)
-                "opts":{}
+                "opts":\
+                    {
+                        # "varScale":1.0,   #Scaling variable
+                        # "varOff":0.0,     #Offset to variable
+                        # "CAscale":1.0,    #Scaling CA
+                        # "CAoff":0.0,      #Offset to CA
+                    }
             }
         },
         
@@ -70,12 +76,12 @@ data = \
         },
         
         #Turbulent velocity fluctuation
-        "m_CFD":\
+        "uPrime":\
         {
             "format":"file",
             "data":
             {
-                "fileName":"massBal.Cyl",
+                "fileName":"uPrime.Cyl",
                 "opts":{}
             }
         },
@@ -115,7 +121,7 @@ initialConditions = \
     "cylinder": \
     {
         "pressure":"p",         #Interpolation from field 'p'
-        "mass":"m_CFD",          #Value
+        "mass":"m_CFD",         #Interpolation from field 'm_CFD'
         "volume":"@geometry.V", #Computation from the method self.geometry.V(CA)
         "xb":0.0,               #Value
     }

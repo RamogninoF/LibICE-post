@@ -47,35 +47,18 @@ plt.rcParams.update({
     'figure.figsize':(6,12),
     # 'figure.dpi':10
 })
+#Plotting pressure-ROHR
+axP, axRohr = model.plotP_ROHR(label="CFD", legend=True, c="k", figsize=(6,8))
 
-#Create figure and combined axes (pressure lefr, ROHR right)
-fig, axP = plt.subplots(1,1, figsize=(6,8))
-axRohr = axP.twinx()
-
-#Processed data are stored in the entry 'model.data' of type EngineData.
-#This is a wrapper around a pandas.DataFrame data-structure, which is 
-#the entry EngineModel.data. Hence we use the method DataFrame.plot, which 
-#is a convenient interface for plotting of the data inside the DataFrame instance 
-
-#Pressure
-model.data.data.plot(\
-    x="CA", y="pBar",                           #x and y variables 
-    c="k", ylabel="p [bar]", xlabel="[CAD]",    #Formatting
-    ax=axP,                                     #Axes
-    legend=False)                               #No legend
-
-#Rate of heat release (ROHR)
-model.data.data.plot(\
-    x="CA", y="ROHR",                           #x and y variables
-    c="k", ls="--", ylabel="ROHR [J/CA]",       #Formatting
-    ax=axRohr,                                  #Axes
-    legend=False)                               #No legend
-
-#Adjust axes and limits
+#Adjust axes, limits, legend
 plt.tight_layout()
 axP.set_xlim((-30,30))  #x axis
 axP.set_ylim((-10,40))  #pressure
 axRohr.set_ylim((0,100)) #ROHR
+axP.legend(loc="upper left")
 
-#Show the figure
+#Plotting p-V diagram
+ax = model.plotPV(label="CFD", timingsParams={"markersize":120, "linewidth":2})
+
+#Show the figures
 plt.show()

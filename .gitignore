@@ -6,3 +6,4 @@ TODO/
 .conda/
 dist/
 src/libICEpost.egg-info
+upload.sh
