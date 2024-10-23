@@ -44,7 +44,7 @@ plt.rcParams.update({
     "legend.fontsize":20,
     'lines.linewidth': 3,
     'axes.linewidth': 2,
-    'figure.figsize':(6,12),
+    'figure.figsize':(6,6),
     # 'figure.dpi':10
 })
 #Plotting pressure-ROHR
