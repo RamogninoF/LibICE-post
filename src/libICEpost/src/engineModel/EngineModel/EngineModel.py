@@ -11,35 +11,39 @@ Last update:        12/06/2023
 #                               IMPORT                              #
 #####################################################################
 
+#Typing
 from __future__ import annotations
 from types import FunctionType
+from matplotlib.axes import Axes
+
+#Other
 from operator import attrgetter
 import os
-
-import numpy as np
-import pandas as pd
-
 from tqdm import tqdm
 
-from libICEpost.src.base.BaseClass import BaseClass, abstractmethod
+#Plotting
+import numpy as np
+
+#Base class
+from libICEpost.src.base.BaseClass import BaseClass
 from libICEpost.src.base.dataStructures.EngineData.EngineData import EngineData
+
+#I/O and pre-processing
+from libICEpost.src.base.dataStructures.Dictionary import Dictionary
 from libICEpost.src.base.Filter.Filter import Filter
 
-from libICEpost.src.base.dataStructures.Dictionary import Dictionary
-
+#Submodels
 from ..EngineTime.EngineTime import EngineTime
 from ..EngineGeometry.EngineGeometry import EngineGeometry
-
 from libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.ThermoMixture import ThermoMixture
 from libICEpost.src.thermophysicalModels.thermoModels.ThermoModel import ThermoModel
-
 from libICEpost.src.thermophysicalModels.thermoModels.CombustionModel.CombustionModel import CombustionModel
 from libICEpost.src.thermophysicalModels.thermoModels.EgrModel.EgrModel import EgrModel
 from libICEpost.src.engineModel.HeatTransferModel.HeatTransferModel import HeatTransferModel
-
 from libICEpost.src.thermophysicalModels.thermoModels.CombustionModel.NoCombustion import NoCombustion
 from libICEpost.src.engineModel.HeatTransferModel.Woschni import Woschni
 
+#Database
 from libICEpost.Database.chemistry.specie.Mixtures import Mixtures, Mixture
 
 #############################################################################
@@ -1215,6 +1219,111 @@ class EngineModel(BaseClass):
         
         #Return the Axes
         return ax
+    
+    ####################################
+    
+    def plotP_ROHR(self, *, label="_noLabel", legend=False, apparent=False, pkwargs:dict=dict(), rohrkwargs:dict=dict(), axes:tuple[Axes,Axes]=None, **kwargs):
+        """
+        Plot pressure (left axis) and ROHR (right axis).
+        Automatically adjust limits of y axes to minimize overlapping between 
+        left and right curves. X axis limits are set to [IVC,EVO].
+
+        Args:
+        label (str, optional): the label to use in the legend. Defaults to "_noLabel".
+        legend (bool, optional): wether to make the legend. Defaults to False.
+        apparent (bool, optional): plot apparent heat release instead of ROHR. Defaults to False.
+        axes (tuple[matplotlib.axes.Axes,matplotlib.axes.Axes]): tuple with pressure and ROHR axes to use. Defaults to None.
+            pkwargs(dict, optional): The kwargs for the pressure plot. Defaults to:
+            {
+                "linestyle":"-"
+            }
+            
+            rohrkwargs(dict, optional): The kwargs for the pressure plot. Defaults to:
+            {
+                "linestyle":"--"
+            }
+            
+            
+        **kwargs: Keyword arguments common to both plots (for example, figsize)
+        """
+        
+        #Check if data were already processed:
+        if not all(var in self.data.columns for var in ["p", "ROHR"]):
+            raise ValueError("Data were not yet processed (fields p and ROHR not present in self.data).")
+        
+        #Compute pressure in bar
+        self.data["pBar"] = self.data["p"]/1e5
+        
+        #Check axes:
+        if not axes is None:
+            self.checkType(axes, tuple, "axes")
+            if not len(axes) == 2:
+                raise ValueError("Entry 'axes' must be of length 2.")
+            self.checkType(axes[0], Axes, "axes[0]")
+            self.checkType(axes[1], Axes, "axes[1]")
+
+            axp = axes[0]
+            axrohr = axes[1]
+        else:
+            axp = None
+            axrohr = None
+        
+        
+        #Set default kwargs
+        default_p = \
+        {
+            "linestyle":"-",
+        }
+        [pkwargs.update({p:default_p[p]}) for p in default_p if not p in pkwargs]
+        [pkwargs.update({p:kwargs[p]}) for p in kwargs]
+        default_rohr = \
+        {
+            "linestyle":"--",
+        }
+        [rohrkwargs.update({p:default_rohr[p]}) for p in default_rohr if not p in rohrkwargs]
+        [rohrkwargs.update({p:kwargs[p]}) for p in kwargs]
+        
+        #Plot pressure:
+        axp = self.data.plot(x="CA", y="pBar", xlabel="CA [°]", ylabel="p [bar]", ax = axp, label=label, legend=legend, **pkwargs)
+        
+        #Plot rohr
+        if axrohr is None:
+            axrohr = axp.twinx()
+
+        #Color
+        if not any(var in rohrkwargs for var in ["c", "color"]): #Use same color of pressure plot if not specified
+            rohrkwargs["color"] = axp.lines[-1]. get_color()
+
+        if apparent:
+            self.data.plot(x="CA", y="AHRR", xlabel="CA [°]", ylabel="AHRR [J/CA]", legend=False, label="_no", ax=axrohr, **rohrkwargs)
+        else:
+            self.data.plot(x="CA", y="ROHR", xlabel="CA [°]", ylabel="ROHR [J/CA]", legend=False, label="_no", ax=axrohr, **rohrkwargs)
+        
+        #x limits
+        axp.set_xlim([self.time.IVC, self.time.EVO])
+        where = np.array(self.data["CA"] >= self.time.IVC) & np.array(self.data["CA"] <= self.time.EVO)
+        
+        #Limits
+        a = 0.02
+        b = 0.2
+        c = 0.7
+        
+        #pressure limits
+        lim = [np.nanmin(self.data["pBar"][where]), np.nanmax(self.data["pBar"][where])]
+        lim = [lim[0] - (lim[1] - lim[0])*b, lim[1] + (lim[1] - lim[0])*a]
+        axp.set_ylim(lim)
+        
+        #ROHR limits
+        if apparent:
+            data = self.data["AHRR"]
+        else:
+            data = self.data["ROHR"]
+        lim = [np.nanmin(data[where]), np.nanmax(data[where])]
+        lim = [lim[0] - (lim[1] - lim[0])*a, lim[1] + (lim[1] - lim[0])*c]
+        axrohr.set_ylim(lim)
+        
+        #Return the Axes
+        return (axp, axrohr)
     
 #########################################################################
 #Create selection table
