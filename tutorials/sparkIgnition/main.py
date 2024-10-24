@@ -5,23 +5,47 @@ Testing solver for post-processing of CFD results from spark-ignition simulation
 
 #Importing
 import os
+import traceback
 from libICEpost.src.engineModel.EngineModel.EngineModel import EngineModel
 from libICEpost.src.base.dataStructures.Dictionary import Dictionary
+
+#Define function for simpify loading:
+def loadModel(path:str, controlDictName:str="controlDict.py") -> EngineModel|None:
+    """
+    Convenient function for loading the engineModel from the constrolDict.py file at specific 'path'.
+
+    Args:
+        path (str): The path where to find the controlDict.py file
+
+    Returns:
+        EngineModel: The engine model.
+    """
+    
+    try:
+        # Load the constrol dictionary
+        print(f"Loading engine model from {path}/{controlDictName}")
+        controlDict = Dictionary.fromFile(f"{path}/{controlDictName}")
+        
+        # Lookup engine model type and its dictionary
+        engineModelType:str = controlDict.lookup("engineModelType")
+        engineModelDict:Dictionary = controlDict.lookup(engineModelType + "Dict")
+        
+        #Construct from run-time selector
+        model:EngineModel = EngineModel.selector(engineModelType, engineModelDict)
+        return model
+    
+    except BaseException as err:
+        print(f"Failed loading model from {path}:\n\t{err}")
+        print(traceback.format_exc())
+    
 
 #Getting the current path (needed when running in debug mode)
 thisPath, _ = os.path.split(__file__)
 print(f"thisPath = {thisPath}")
 os.chdir(thisPath)  #Move here if in debug
 
-# Load the constrol dictionary
-controlDict = Dictionary.fromFile("./dictionaries/controlDict.py")
-
-# Lookup engine model type and its dictionary
-engineModelType:str = controlDict.lookup("engineModelType")
-engineModelDict:Dictionary = controlDict.lookup(engineModelType + "Dict")
-
-#Construct from run-time selector
-model:EngineModel = EngineModel.selector(engineModelType, engineModelDict)
+#Load the model
+model = loadModel("./dictionaries/")
 
 #Process the data in the engine model
 model.process()
