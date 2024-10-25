@@ -584,7 +584,7 @@ class EngineModel(BaseClass):
                     self.checkType(function, FunctionType, f"{zone}[{entry}][function]")
                     
                     #Function arguments
-                    argNames:list[str] = function.__code__.co_varnames
+                    argNames:list[str] = function.__code__.co_varnames[:function.__code__.co_argcount]
                     
                     #Check if are present:
                     for arg in argNames:
