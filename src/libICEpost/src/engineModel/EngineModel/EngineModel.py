@@ -1132,9 +1132,9 @@ class EngineModel(BaseClass):
         
         index = self.data.index[np.array(self.data["CA"] >= start) & np.array(self.data["CA"] <= end)]
         data = self.data.iloc[index]
-        data["V"] = self.geometry.V(data["CA"])
+        data.loc[index,"V"] = self.geometry.V(data["CA"])
         
-        return self.work(start=start, end=end)/(max(data["V"]) - min(data["V"]))
+        return self.work(start=start, end=end)/(np.nanmax(data["V"]) - np.nanmin(data["V"]))
     
     ####################################
     def work(self, start:float=None, end:float=None) -> float:
@@ -1158,8 +1158,11 @@ class EngineModel(BaseClass):
         self.checkType(end,float,"end")
         
         index = self.data.index[np.array(self.data["CA"] >= start) & np.array(self.data["CA"] <= end)]
+        #Remove nan
+        index = index[np.invert(np.isnan(self.data.loc[index, "p"]))]
+        
         data = self.data.iloc[index]
-        data["V"] = self.geometry.V(data["CA"])
+        data.loc[index,"V"] = self.geometry.V(data["CA"])
         
         return integrate.trapz(data["p"], x=data["V"])
     
