@@ -16,7 +16,7 @@ from ..Utilities import Utilities
 from collections import OrderedDict
 
 from types import ModuleType
-from typing import TypeVar
+from typing import TypeVar, Iterable, Any, _SpecialGenericAlias
 T = TypeVar("T")
 
 import os.path as path
@@ -97,20 +97,35 @@ class Dictionary(OrderedDict, Utilities):
         return this
         
     #############################################################################
-    def lookup(self, entryName:str):
+    def lookup(self, entryName:str, *, varType:T|Iterable[type]=None) -> T|Any:
         """
-        entryName:  str
-            Name of the entry to look for
-        
-        Same as __getitem__ but embeds error handling
+        Same as __getitem__ but embeds error handling and type checking.
+
+        Args:
+            entryName (str): Name of the entry to look for
+            varType (type, optional): Type of the variable to lookup for. 
+                Performes type-checking if it is given. Defaults to None.
+
+        Returns:
+            varType|Any: self[entryName]
         """
         try:
             self.checkType(entryName, str, "entryName")
+            if varType is None:
+                pass
+            elif isinstance(varType, Iterable):
+                [self.checkType(t, (type, _SpecialGenericAlias), f"varType[{ii}]") for ii,t in enumerate(varType)]
+            else:
+                self.checkType(varType, (type, _SpecialGenericAlias), f"varType")
         except BaseException as err:
             self.fatalErrorInClass(self.lookup,f"Argument checking failed", err)
             
         if not entryName in self:
             self.fatalErrorInClass(self.lookup, f"Entry '{entryName}' not found in Dictionary. Available entries are:\n\t" + "\n\t".join([str(k) for k in self.keys()]))
+        elif (not varType is None) and (not isinstance(self[entryName], varType)):
+            self.fatalErrorInClass(\
+                self.lookup, 
+                f"Entry '{entryName}' of wrong type. {varType.__name__ if not isinstance(varType, Iterable) else [v.__name__ for v in varType]} expected but {self[entryName].__class__.__name__} was found.")
         else:
             return self[entryName]
     
