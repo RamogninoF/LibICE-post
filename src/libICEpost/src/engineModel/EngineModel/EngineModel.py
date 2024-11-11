@@ -1167,7 +1167,7 @@ class EngineModel(BaseClass):
         return integrate.trapz(data["p"], x=data["V"])
     
     ####################################
-    def plotPV(self, /,*,start:float=None, end:float=None, loglog:bool=True, timingsParams:dict=dict(), **kwargs):
+    def plotPV(self, /,*,start:float=None, end:float=None, loglog:bool=True, timingsParams:dict=dict(), showTimings:bool=True, ax:Axes=None, **kwargs):
         """
         Create the pressure-volume diagram of the thermodynamic cycle.
 
@@ -1180,6 +1180,8 @@ class EngineModel(BaseClass):
                 "edgecolor":"k",
                 "zorder":2,
             }
+            showTimings (bool, optional): Show the timings through markers? Defaults to True.
+            ax (Axes, optional): The axes to use. Defaults to None (create new figure).
         """
         #Get start and end
         if start is None:
@@ -1211,14 +1213,15 @@ class EngineModel(BaseClass):
         self.data["pBar"] = self.data["p"]/1e5
         
         #Plot
-        ax = self.data.plot(x="V", y="pBar", xlabel="V [$m^3$]", ylabel="p [bar]", loglog=loglog, **kwargs)
+        ax = self.data.plot(x="V", y="pBar", xlabel="V [$m^3$]", ylabel="p [bar]", loglog=loglog, ax=ax, **kwargs)
         
         #Timings
-        timings = self.time.timings
-        size = [timingsParams.pop("markersize")]*len(timings) if "markersize" in timingsParams else None #The size of the markers
-        if not "facecolor" in timingsParams: #Use same color of plot if not specified
-            timingsParams["facecolor"] = ax.lines[-1]. get_color()
-        ax.scatter([self.geometry.V(timings[t]) for t in timings], [self.data.pBar(timings[t]) for t in timings], s=size, **timingsParams)
+        if showTimings:
+            timings = self.time.timings
+            size = [timingsParams.pop("markersize")]*len(timings) if "markersize" in timingsParams else None #The size of the markers
+            if not "facecolor" in timingsParams: #Use same color of plot if not specified
+                timingsParams["facecolor"] = ax.lines[-1]. get_color()
+            ax.scatter([self.geometry.V(timings[t]) for t in timings], [self.data.pBar(timings[t]) for t in timings], s=size, ax=ax, **timingsParams)
         
         #Return the Axes
         return ax
