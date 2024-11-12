@@ -20,16 +20,19 @@ from .runtimeWarning import fatalErrorInArgumentChecking
 from libICEpost.src import GLOBALS
 GLOBALS.DEBUG = True
 
+import numpy as np
+from typing import _SpecialGenericAlias
+
 #############################################################################
 #                               MAIN FUNCTIONS                              #
 #############################################################################
 
 #Check type of an instance:
-def checkType(entry:str, Type:type|tuple[type], entryName:str|None=None, *, intAsFloat:bool=True, checkForNone:bool=False, **kwargs):
+def checkType(entry:str, Type:type|tuple[type|_SpecialGenericAlias], entryName:str|None=None, *, intAsFloat:bool=True, checkForNone:bool=False, **kwargs):
     """
     entry:          Instance
         Instance to be checked
-    Type:           type|tuple[type]
+    Type:           type|_SpecialGenericAlias|tuple[type|_SpecialGenericAlias]
         Type required
     entryName:      str  (None)
         Name of the entry to be checked (used as info when raising TypeError)
@@ -59,11 +62,11 @@ def checkType(entry:str, Type:type|tuple[type], entryName:str|None=None, *, intA
             raise TypeError("Wrong type for entry '{}': '{}' expected but '{}' was found.".format("checkForNone", bool.__name__, inputs["checkForNone"].__class__.__name__))
         
         #Check Type for type|tuple[type]
-        if not(isinstance(Type, (type, tuple))):
+        if not(isinstance(Type, (type, tuple,_SpecialGenericAlias))):
             raise TypeError("Wrong type for entry 'Type': 'type' or 'tuple[type]' expected but '{}' was found.".format(Type.__class__.__name__))
         #If Type is tuple, check all elements for type
         if isinstance(Type, tuple):
-            if any([not(isinstance(t, type)) for t in Type]):
+            if any([not(isinstance(t, (type,_SpecialGenericAlias))) for t in Type]):
                 raise TypeError(f"Wrong type for entry {[isinstance(t, type) for t in Type].count(False)} items in 'Type': 'type|tuple[type]' expected for entry 'Type'.")
     except BaseException as err:
         fatalErrorInArgumentChecking(None, checkType, err)
@@ -71,7 +74,7 @@ def checkType(entry:str, Type:type|tuple[type], entryName:str|None=None, *, intA
     if (Type == None.__class__) and not(checkForNone):
         return
     
-    if (isinstance(entry, int) and (Type == float) and intAsFloat):
+    if (isinstance(entry, (int,np.int64)) and (Type == float) and intAsFloat):
         return
     
     if not(isinstance(entry, Type)):
