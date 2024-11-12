@@ -14,7 +14,8 @@ dependencies = [
   'pyfoam',
   'tqdm',
   'colorama',
-  'pandas'
+  'pandas',
+  'bidict'
 ]
 
 classifiers = [
@@ -25,6 +26,7 @@ classifiers = [
 ]
 
 [project.scripts]
+createLaminarFlameSpeedTable = "libICEpost.scripts.createLaminarFlameSpeedTable:main"
 
 [project.urls]
 Homepage = "https://github.com/RamogninoF/LibICE-post"

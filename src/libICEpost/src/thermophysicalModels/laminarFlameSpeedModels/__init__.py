@@ -5,5 +5,5 @@ Last update:        9/03/2023
 ...
 """
 
-from .laminarFlameSpeedModel import laminarFlameSpeedModel
-from .tabulatedLFS import tabulatedLFS
+from .laminarFlameSpeedModel import LaminarFlameSpeedModel
+from .tabulatedLFS import TabulatedLFS
