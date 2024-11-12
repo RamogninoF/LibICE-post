@@ -16,7 +16,7 @@ from __future__ import annotations
 from typing import Iterable
 
 from libICEpost.src.base.dataStructures.Tabulation.OFTabulation import OFTabulation
-from .laminarFlameSpeedModel import LaminarFlameSpeedModel
+from .LaminarFlameSpeedModel import LaminarFlameSpeedModel
 
 from libICEpost.src.base.dataStructures.Dictionary import Dictionary
 

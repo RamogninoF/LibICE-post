@@ -127,7 +127,7 @@ from libICEpost.Database.chemistry.specie.Molecules import Molecules
 from libICEpost.src.base.Functions.runtimeWarning import enf
 from libICEpost.src.base.Functions.typeChecking import checkType
 
-from libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.tabulatedLFS import TabulatedLFS
+from libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.TabulatedLFS import TabulatedLFS
 
 #--------------------------------------------#
 #              Argument parsing              #
