@@ -25,13 +25,13 @@ from ..Utilities import Utilities
 #############################################################################
 #                               MAIN FUNCTIONS                              #
 #############################################################################
-#Read a OpenFOAM file with a tabulation:
-def readOFscalarList(fileName):
+#Read a OpenFOAM file with a scalar list:
+def readOFscalarList(fileName:str):
     """
-    fileName:        str
-        Name of the OpenFOAM file
-    
     Reads an OpenFOAM file storing a scalarList. 
+
+    Args:
+        fileName (str): Name of the OpenFOAM file
     """
     #Argument checking:
     checkType(fileName, str, entryName="fileName")
@@ -50,7 +50,7 @@ def readOFscalarList(fileName):
         binary = True
         
     #Load table:
-    File = ParsedParameterFile(fileName, listDictWithHeader=True, binaryMode=True)
+    File = ParsedParameterFile(fileName, listDictWithHeader=True, binaryMode=binary)
     tab = File.content
     #Load data:
     if isinstance(tab, BinaryList):
@@ -68,116 +68,58 @@ def readOFscalarList(fileName):
         return tab
 
 #############################################################################
-#                               MAIN FUNCTIONS                              #
-#############################################################################
-#TODO:
-#Make it general: define the classes for each base OF type (scalar, vector, tensor, label) and this class a template
-class scalarList(list, Utilities):
-    
+#Write OF file with scalar list
+def writeOFscalarList(values:Iterable[float], path:str, *, overwrite:bool=False, binary:bool=False) -> None:
     """
-    Class for OpenFOAM scalarList
-    
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    
-    Attributes:
-        none
+    Write an OpenFOAM file storing a scalarList. 
+
+    Args:
+        values (Iterable[float]): The data to store.
+        path (str): The location where to file the scalarList.
+        overwrite (bool, optional): Overwrite if found? Defaults to False.
+        binary (bool, optional): Write in binary? Defaults to False.
     """
+    #Argument checking:
+    checkType(values, Iterable, entryName="values")
+    [checkType(val, float, entryName=f"values[{ii}]")for ii,val in enumerate(values)]
+    checkType(overwrite, bool, entryName="overwrite")
+    checkType(binary, bool, entryName="binary")
+    checkType(path, str, entryName="path")
     
-    _header = \
+    #Check path:
+    if os.path.isfile(path) and not overwrite:
+        raise IOError("File '{}' exists. Run with overwrite=True.".format(path))
+    
+    #Create the file object
+    File = ParsedParameterFile(path, noBody=True, binaryMode=True, dontRead=True, createZipped=False)
+    
+    #Header
+    path = os.path.abspath(path)
+    root, file = os.path.split(path)
+    File.header = \
         {
-        "version"   :   2.0,
-        "class"     :   "scalarList",
-        "object"    :   "",
-        "format"    :   "ASCII"
+            "class":"scalarList",
+            "version":2.0,
+            "object":file,
+            "location":os.path.split(root)[1],
+            "format": "binary" if binary else "ascii"
         }
     
-    #########################################################################
-    #Class methods and static methods:
-    @classmethod
-    def from_file(cls, fileName:str):
-        """
-        fileName (str): Name of the OpenFOAM file
-        
-        Reads an OpenFOAM file storing a scalarList. 
-        """
-        try:
-            #Argument checking:
-            checkType(fileName, str, entryName="fileName")
-            
-            #Check path:
-            import os
-            if not(os.path.isfile(fileName)):
-                raise IOError("File '{}' not found.".format(fileName))
-            
-            #Check header:
-            header = ParsedFileHeader(fileName).header
-            if not(header["class"] == "scalarList"):
-                raise IOError("File '{}' does not store a scalarList, instead '{}' was found.".format(fileName, header["class"]))
-            binary = False
-            if header["format"] == "binary":
-                binary = True
-        except BaseException as err:
-            cls.fatalErrorInClass(cls.from_file, "Argument checking failed", err)
-            
-        try:
-            #Load table:
-            File = ParsedParameterFile(fileName, listDictWithHeader=True, binaryMode=True)
-            tab = File.content
-            #Load data:
-            if isinstance(tab, BinaryList):
-                numel = tab.length
-                
-                import struct
-                with open(fileName, "rb") as f:
-                    while True:
-                        ch = f.read(1)
-                        if ch == b'(':
-                            break
-                    data = f.read(8*tab.length)
-                out = list(struct.unpack("d" * numel, data))
-                return cls(out)
-                
-            else:
-                return cls(tab.data)
-            
-        except BaseException as err:
-            cls.fatalErrorInClass(cls.from_file, "Failed loading scalarList", err)
-        
-    #########################################################################
-    #Properties:
+    #Empty at first
+    File.writeFile(content={})
     
-    #########################################################################
-    #Constructor
-    def __init__(self, *data:tuple[float], **kwargs):
-        """
-        data (tuple[float]): the data to fill the list
-        """
-        return super().__init__(data, **kwargs)
+    #Data
+    with open(path, "ba") as file:
+        file.write(f"{len(values)}".encode())
+        file.write(f"\n(".encode())
     
-    #########################################################################
-    #Dunder methods:
-    def __repr__(self):
-        """
-        The representation of the scalarList
-        """
-        return super().__repr__()
+    from array import array
+    if binary:
+        with open(path, "a+b") as file:
+            file.write(struct.pack('d' * len(values), *tuple([float(v) for v in values])))
+    else:
+        with open(path, "a") as file:
+            file.write(" ".join(values))
     
-    #########################################################################
-    #Methods:
-    def write(self, fileName:str):
-        """
-        fileName (str): Name of the OpenFOAM file
-        
-        Write the scalarList to a file
-        """
-        #TODO: add possibility to write in binary
-        
-        file = ParsedParameterFile(fileName, listDictWithHeader=True, dontRead=True, createZipped=False)
-        file.header = self._header.copy()
-        
-        name = fileName.split("/")[-1]
-        file.header["object"] = name
-        
-        file.content = list(self)
-        file.writeFile()
-
+    with open(path, "ba") as file:
+        file.write(f")\n\n".encode())

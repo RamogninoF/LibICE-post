@@ -23,9 +23,9 @@ from bidict import bidict
 
 from libICEpost.src.base.Utilities import Utilities
 from .Tabulation import Tabulation
-from libICEpost.src.base.Functions.functionsForOF import readOFscalarList
+from libICEpost.src.base.Functions.functionsForOF import readOFscalarList, writeOFscalarList
 
-from typing import Iterable, Any, Literal
+from typing import Iterable, Any, Literal, OrderedDict
 
 from dataclasses import dataclass
 
@@ -120,7 +120,7 @@ class OFTabulation(Utilities):
         #Additional data
         tabProp = cp.deepcopy(self._baseTableProperties)
         #Sampling points
-        tabProp.update({self._inputVariables[iv].name:self._inputVariables[iv].data for iv in self.order})
+        tabProp.update(**{self._inputVariables[iv].name:self._inputVariables[iv].data for iv in self.order})
         
         #Cast Iterables to lists so that PyFoam can write them
         for var in tabProp:
@@ -524,7 +524,7 @@ class OFTabulation(Utilities):
         #Additional parameters
         self._path = path
         self._noWrite = noWrite
-        self._baseTableProperties = dict() if tablePropertiesParameters is None else cp.deepcopy(tablePropertiesParameters)
+        self._baseTableProperties = OrderedDict() if tablePropertiesParameters is None else OrderedDict(**tablePropertiesParameters)
         
     #########################################################################
     # Dunder methods:   
@@ -821,7 +821,7 @@ class OFTabulation(Utilities):
     
     #####################################
     #Write the table:
-    def write(self, path:str=None):
+    def write(self, path:str=None, binary:bool=False):
         """
         Write the tabulation.
         Directory structure as follows: \\
@@ -838,6 +838,7 @@ class OFTabulation(Utilities):
         
         Args:
             path (str, optional): Path where to save the table. In case not give, self.path is used. Defaults to None.
+            binary (bool, optional): Writing in binary? Defaults to False.
         """
         if not path is None:
             self.checkType(path, str, "path")
@@ -867,22 +868,11 @@ class OFTabulation(Utilities):
         #Tables:
         for table in self.tables:
             if not(self.tables[table] is None): #Check if the table was defined
-                tabulation = ParsedParameterFile(path + "/constant/" + self.files[table], listDictWithHeader=True, dontRead=True, createZipped=False)
-                tabulation.content = list(self.tables[table].data.flatten())
-                
-                #Header
-                header = \
-                    {
-                        "version":2.0,
-                        "format":"ascii",
-                        "class":"scalarList",
-                        "location":"constant",
-                        "object":self.files[table]
-                    }
-                tabulation.header = header
-                
-                #Write
-                tabulation.writeFile()
+                writeOFscalarList(
+                    self.tables[table].data.flatten(), 
+                    path=path + "/constant/" + self.files[table], 
+                    overwrite, 
+                    binary=binary)
         
     #####################################
     #Clear the table:
