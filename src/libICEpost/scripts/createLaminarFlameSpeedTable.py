@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
-Generator for tabulation of laminar flame speed 
-from CANTERA or OpenSMOKE for LibICE-OpenFOAM code.
+Generator for tabulation of laminar flame speed from CANTERA or OpenSMOKE for LibICE-OpenFOAM code.
 
 Tabulation stores values of laminar flame speed and thickness with respect to variables:
     p:      Pressure
@@ -12,15 +11,13 @@ Which are stored as a list.
 
 Compatible with LibICE-8.
 
-
-The code is parallelizable, according to the following parallelization strategy:
-    The computation of LFS is strongly sensitive to inital 
-    conditions, so the operating points already computed are 
-    used to initialize new reactors in similar conditions
+The computation of LFS is strongly sensitive to inital conditions, so the 
+operating points already computed are used to initialize new reactors in 
+similar conditions. Therefore, the following computation procedure is used:
     1) The process starts computing the LFS for a set of initial conditions
     2) All adjacent nodes in the (p,Tu,phi,egr) space are identified
     3) List of adjacents are added to the pool of simulations to execute 
-       (childs), with solution of the current reactor as initial conditions
+       with solution of the current reactor as initial conditions
     4) The procedure iterates until the full data-set is covered
 
 #Sample of input dictionary: 
@@ -210,13 +207,17 @@ class MeshType(StrEnum):
 #Flame description
 def describe(input, flame):
     """Print a short description of the input conditions and flame, with a few properties."""
-    log.debug(f"Pressure             = {input['p']*1e-5} bar")
-    log.debug(f"Temperature          = {input['Tu']} K")
-    log.debug(f"Equivalence ratio    = {input['phi']}")
-    log.debug(f"Flame speed          = {flame.velocity[0] * 100 :.2f} cm/s")
-    log.debug(f"Flame thickness      = {(flame.T[-1] - flame.T[0])/max(np.gradient(flame.T, flame.grid))*1e3 :.3f} mm")
-    log.debug(f"Maximum temperature  = {flame.T.max() :.0f} K")
-    log.debug(f"Solved with {flame.grid.size} grid points\n")
+    # Using single string to prevent mixing of output in parallel computation
+    s = ""
+    s += f"Pressure             = {input['p']*1e-5} bar\n"
+    s += f"Temperature          = {input['Tu']} K\n"
+    s += f"Equivalence ratio    = {input['phi']}\n"
+    s += f"Exhaust gas          = {input['egr']*100.:.2f}%\n"
+    s += f"Flame speed          = {flame.velocity[0] * 100 :.2f} cm/s\n"
+    s += f"Flame thickness      = {(flame.T[-1] - flame.T[0])/max(np.gradient(flame.T, flame.grid))*1e3 :.3f} mm\n"
+    s += f"Maximum temperature  = {flame.T.max() :.0f} K\n"
+    s += f"Solved with {flame.grid.size} grid points\n"
+    log.debug(s)
 
 #--------------------------------------------#
 #                Computing LFS               #
@@ -296,16 +297,19 @@ def asyncRun(input, *, firstGuess=None, alphaSt, air, fuel, mechanism, meshType,
     results["completed"] = False
     
     #Create the initial mixture
-    egrModel = StoichiometricMixtureEGR(air=air, fuel=fuel, egr=input["egr"])
     alpha = alphaSt/input["phi"]
     yf = 1./(alpha + 1.)
-    
-    mixture = air.copy()    #Start from air
-    mixture.dilute(egrModel.EgrMixture, egrModel.egr, fracType="mass")    #Dilute air with egr
-    mixture.dilute(fuel, yf*(1 - input["egr"]), fracType="mass")    #Dilute with fuel
-    
     log.debug(f"alpha: {alpha}")
     log.debug(f"yf: {yf}")
+    
+    mixture = air.copy()    #Start from air
+    mixture.dilute(fuel, yf, fracType="mass")    #Dilute with fuel
+    if input["egr"] > 0:
+        egrModel = StoichiometricMixtureEGR(air=air, fuel=fuel, egr=input["egr"])
+        mixture.dilute(egrModel.EgrMixture, egrModel.egr, fracType="mass")    #Dilute air with egr
+        log.debug(f"EGR: {egrModel.egr}")
+        log.debug(f"EGR mixture: {[(s.specie.name, s.Y) for s in egrModel.EgrMixture]}")
+    
     log.debug(f"mixture: {[(s.specie.name, s.Y) for s in mixture]}")
     
     try:
@@ -536,7 +540,7 @@ def run(dictName:str, *, overwrite=False, restart=False) -> None:
             loglevel=loglevel)
     
     #Progress bar
-    progressBar = tqdm(initial=completed,total=numEl,unit="conditions",file=sys.stdout)
+    progressBar = tqdm(initial=completed,total=numEl,unit="condition",file=sys.stdout)
     
     processorPool:dict[int,ApplyResult] = {}
     with Pool(processes=numProc) as pool:
@@ -641,89 +645,6 @@ def run(dictName:str, *, overwrite=False, restart=False) -> None:
                 else:
                     failed += 1
     
-    # with Pool(processes=numProc) as pool:
-    #     #Loop over childs untill there are no more 'child' processes to be evaluated (end of nodes)
-    #     while len(childs) > 0:
-    #         newChilds = {}
-    #         log.debug(f"Processing {list(childs.keys())}")
-            
-    #         #Common kwargs
-    #         kwargs = dict(alphaSt=alphaSt,
-    #                 air=air,
-    #                 fuel=fuel,
-    #                 mechanism=mechanism,
-    #                 meshType=meshType,
-    #                 meshParams=meshParams,
-    #                 gridRefinementParams=gridRefinementParams,
-    #                 loglevel=loglevel)
-            
-    #         #Send to the pool of processes, while creating a progress bar
-    #         outputs = {}
-    #         for r in tqdm(
-    #             pool.imap_unordered(
-    #                 worker_wrapper, 
-    #                 [(c, (inputList[c],), {**kwargs, "firstGuess":childs[c]})  for c in childs]),
-    #             initial=completed, 
-    #             total=numEl, 
-    #             unit="conditions", 
-    #             file=sys.stdout):
-    #             outputs[r[0]] = r[1]    #Store the output
-            
-    #         #Add completed to restore the progress bar
-    #         completed += len(outputs)
-            
-    #         #Merge results
-    #         for ii in outputs:
-    #             results.iloc[ii] = outputs[ii][0]
-                
-    #             ## Compute adjacent operating conditions that were not processed
-    #             #This point
-    #             pID = [p for p in pList].index(inputList[ii]["p"])
-    #             tID = [t for t in TuList].index(inputList[ii]["Tu"])
-    #             phiID = [phi for phi in phiList].index(inputList[ii]["phi"])
-    #             egrID = [egr for egr in egrList].index(inputList[ii]["egr"])
-    #             #Adjacents
-    #             adjacents = results[
-    #                 (results["p"] >= pList[max(pID-1,0)])
-    #                 &
-    #                 (results["p"] <= pList[min(pID+1,len(pList)-1)])
-    #                 &
-    #                 (results["Tu"] >= TuList[max(tID-1,0)])
-    #                 &
-    #                 (results["Tu"] <= TuList[min(tID+1,len(TuList)-1)])
-    #                 &
-    #                 (results["phi"] >= phiList[max(phiID-1,0)])
-    #                 &
-    #                 (results["phi"] <= phiList[min(phiID+1,len(phiList)-1)])
-    #                 &
-    #                 (results["egr"] >= egrList[max(egrID-1,0)])
-    #                 &
-    #                 (results["egr"] <= egrList[min(egrID+1,len(egrList)-1)])
-    #             ]
-    #             #Remove completed and this point
-    #             adjacents = adjacents[
-    #                 (adjacents["completed"] == False) 
-    #                 &
-    #                 np.invert(
-    #                     (adjacents["Tu"] == inputList[ii]["p"])
-    #                     &
-    #                     (adjacents["p"] == inputList[ii]["p"])
-    #                     &
-    #                     (adjacents["phi"] == inputList[ii]["p"])
-    #                     &
-    #                     (adjacents["egr"] == inputList[ii]["egr"])
-    #                 )
-    #                 ]
-                
-    #             #Add those that were completed as new child conditions to be computed
-    #             if not outputs[ii][1] is None:
-    #                 newChilds.update({adj:outputs[ii][1] for adj in adjacents.index})
-    #                 successful += 1
-    #             else:
-    #                 failed += 1
-                
-    #         childs = newChilds
-    
     #Stop progress bar
     progressBar.close()
     
@@ -757,6 +678,7 @@ def run(dictName:str, *, overwrite=False, restart=False) -> None:
     minutes, seconds = divmod(rem, 60)
     log.info(f"\tTime per condition:          {hours:0>2}h {minutes:0>2}min {seconds:05.2f}s")
     log.info("".center(nFill,"="))
+    log.info("")
     
     log.info(" Results ".center(nFill,"="))
     log.info(f"\n{results}")
@@ -775,7 +697,7 @@ def run(dictName:str, *, overwrite=False, restart=False) -> None:
     pRange=pList,
     TuRange=TuList,
     phiRange=phiList,
-    egrRange=egrList if (len(egrList) > 1) else None,
+    egrRange=egrList if tabulatedEgr else None,
     path=tableName,
     noWrite=False
     )
