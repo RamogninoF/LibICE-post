@@ -40,7 +40,7 @@ If you are proposing a feature:
 
 ## Get Started!
 
-Ready to contribute? Here's how to set up `test` for local development.
+Ready to contribute? Here's how to set up `libICEpost` for local development.
 
 1. Download a copy of `libICEpost` locally.
 2. Install `libICEpost` using `pip`:
