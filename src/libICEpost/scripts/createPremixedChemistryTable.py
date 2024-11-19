@@ -17,7 +17,20 @@ unburnt-gas temperature (Y<specie>Adf)
 
 Compatible with LibICE-8.
 
-#Sample of input dictionary: 
+NOTE: Computation of equilibrium does not require the reactions in the 
+mechanism but only the thermophysical properties of the specie. Moreover, 
+at equilibrium the intermediate specie are ofthen in negligible amounts. 
+Therefore, it is sugersted to use an input mechanism with only a limited 
+set of specie to minimize the size of the table in terms of chemical specie 
+tabulated. One may perform a tabulation with the following procedure:
+    1) Tabulate with the full mechanism
+    2) Identify the intermediate specie that are present not in negligible amounts
+    3) Generate a new table with a mechanism that has only a limited set of specie
+    
+Tipical sets:
+    hydrocarbons: [fuel, O2, N2, CO2, CO, H2O] + [H, OH, C2H2]
+
+Sample of input dictionary: 
     p = [1e5, 2e5, 3e5]   #Pressure points in [Pa]
     Tu = [300, 400, 500]  #Unburnt gas temperature in [K]
     phi = [0.5, 1.0, 2.0] #Equivalence ratios
