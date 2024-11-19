@@ -133,6 +133,6 @@ numberOfProcessors = 36 #Number of cores for parallelization
 
 #Outputs
 tableName = "outputTable"           #The name of the table to create
-debugFile = "./tempTable.csv"     #Debug csv file used for restart
+debugFile = "./tempTable.csv"       #Debug csv file used for restart
 restartFile = "./tempTable.csv"     #File for reloading
-
+fileFormat = "ascii" #"binary"      #Want to write in binary or ascii?

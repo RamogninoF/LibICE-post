@@ -77,6 +77,7 @@ fuel = {"H2": 1.0}  #Fuel mixture
 air = {s.specie.name: s.Y for s in Mixtures.dryAir}  #Air
 
 #Miscellaneous
-numberOfProcessors = 16     #Number of cores for parallelization
-tableName = "outputTable"   #The name of the table to create
+numberOfProcessors = 16             #Number of cores for parallelization
+tableName = "outputTable"           #The name of the table to create
+fileFormat = "ascii" #"binary"      #Want to write in binary or ascii?
 

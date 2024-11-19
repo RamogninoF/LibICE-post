@@ -31,6 +31,7 @@ Compatible with LibICE-8.
     #Miscellaneous
     numberOfProcessors = 6 #Number of cores for parallelization
     tableName = "tableGasoline"          #The name of the table to create
+    fileFormat = "ascii" #"binary"      #Want to write in binary or ascii?
 """
 
 #--------------------------------------------#
@@ -45,6 +46,7 @@ import logging
 log = logging.getLogger("createPremixedChemistryTable")
 
 from typing import Iterable
+from enum import StrEnum
 
 from multiprocessing import Pool
 
@@ -134,6 +136,11 @@ class MyFormatter(logging.Formatter):
 #--------------------------------------------#
 #                  Aux func                  #
 #--------------------------------------------#
+
+#File format
+class FileFormat(StrEnum):
+    binary = "binary"
+    ascii = "ascii"
 
 #Flame description
 def describe(ipt:dict[str,float], reactor, condition:str):
@@ -253,6 +260,9 @@ def run(dictName:str, *, overwrite=False) -> None:
     else:
         log.warning("Running in '-overwrite' mode.")
         time.sleep(1)
+    
+    #File format
+    format = FileFormat(inputDict.lookupOrDefault("fileFormat", default="ascii").lower())
     
     #Load data
     pList = np.array(inputDict.lookup("p", varType=Iterable))
@@ -393,7 +403,7 @@ def run(dictName:str, *, overwrite=False) -> None:
     
     #Write the table
     log.info(f"Saving tabulation to {tableName}")
-    tableOF.write()
+    tableOF.write(binary=format)
     
 #--------------------------------------------#
 #                     Main                   #

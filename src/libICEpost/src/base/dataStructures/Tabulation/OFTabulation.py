@@ -845,7 +845,7 @@ class OFTabulation(Utilities):
         
         path = self.path if path is None else path
         if path is None:
-            raise ValueError("Cannot save tabulation: path was not defined (self.path and path are None)")
+            raise ValueError("Cannot save tabulation: path was not defined ('self.path' and 'path' are None)")
         
         if self.noWrite:
             raise IOError("Trying to write tabulation when opered in read-only mode. Set 'noWrite' to False to write files.")
@@ -870,8 +870,7 @@ class OFTabulation(Utilities):
             if not(self.tables[table] is None): #Check if the table was defined
                 writeOFscalarList(
                     self.tables[table].data.flatten(), 
-                    path=path + "/constant/" + self.files[table], 
-                    overwrite, 
+                    path=path + "/constant/" + self.files[table],
                     binary=binary)
         
     #####################################

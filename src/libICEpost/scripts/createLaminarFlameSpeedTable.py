@@ -83,10 +83,11 @@ similar conditions. Therefore, the following computation procedure is used:
 
     #Restart from an old tabulation
     tableName = "tableGasoline"          #The name of the table to create
-    debugFile = "./tempTable.csv"       #File for saving a debug '.csv' file. Useful for restart.
-    restartFile = "./tempTable.csv"     #Restart file used if '-restart' option is used
+    debugFile = "./tempTable.csv"       #File for saving a debug '.csv' file (optional). Useful for restart.
+    restartFile = "./tempTable.csv"     #Restart file used if '-restart' flag is used
+    fileFormat = "ascii" #"binary"      #Want to write in binary or ascii?
     
-    debugLogFile = "debug.log"           #Debug log file
+    #debugLogFile = "debug.log"           #Debug log file (needed if running with -redirect_debug flag)
 """
 
 #--------------------------------------------#
@@ -203,6 +204,11 @@ class MeshType(StrEnum):
     pressureTemperatureAdaptive = "pressureTemperatureAdaptive"
     userDefined = "userDefined"
     constantWidth = "constantWidth"
+
+#File format
+class FileFormat(StrEnum):
+    binary = "binary"
+    ascii = "ascii"
 
 #Flame description
 def describe(input, flame):
@@ -380,6 +386,9 @@ def run(dictName:str, *, overwrite=False, restart=False) -> None:
     else:
         log.warning("Running in '-overwrite' mode.")
         time.sleep(1)
+    
+    #File format
+    format = FileFormat(inputDict.lookupOrDefault("fileFormat", default="ascii").lower())
     
     #Load data
     pList = np.array(inputDict.lookup("p", varType=Iterable))
@@ -704,7 +713,7 @@ def run(dictName:str, *, overwrite=False, restart=False) -> None:
     
     #Write the table
     log.info(f"Saving tabulation to {tableName}")
-    tableOF.write()
+    tableOF.write(binary=format)
     
 #--------------------------------------------#
 #                     Main                   #
