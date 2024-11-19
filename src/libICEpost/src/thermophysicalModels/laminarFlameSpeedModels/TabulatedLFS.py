@@ -13,7 +13,7 @@ Last update:        12/06/2023
 
 from __future__ import annotations
 
-from typing import Iterable
+from typing import Iterable, Any
 
 from libICEpost.src.base.dataStructures.Tabulation.OFTabulation import OFTabulation, FoamStringParser
 from .LaminarFlameSpeedModel import LaminarFlameSpeedModel
@@ -37,7 +37,7 @@ class TabulatedLFS(OFTabulation,LaminarFlameSpeedModel):
     #Class data:
     __inputNames:list[str] = ["pValues", "TuValues", "eqvrValues", "egrValues"]
     __order:list[str] = ["p", "Tu", "phi", "egr"]
-    __files:dict[str,str] = {"Su":"Su", "deltaL":"deltaL"}
+    __files:dict[str,str] = {"Su":"laminarFlameSpeedTable", "deltaL":"deltaLTable"}
     
     #########################################################################
     #Class methods:
@@ -130,6 +130,7 @@ class TabulatedLFS(OFTabulation,LaminarFlameSpeedModel):
         egrRange:Iterable[float]=None,
         path:str=None, 
         noWrite:bool=True,
+        tablePropertiesParameters:dict[str,Any]=None, 
         **kwargs):
         """Construct a tabulation from sampling points and unwrapped list of data-points for each variable to tabulate.
         
@@ -142,6 +143,7 @@ class TabulatedLFS(OFTabulation,LaminarFlameSpeedModel):
             egrRange (Iterable[float], optional): The sampling points of mass fraction of recirculated exhaust-gasses (if tabulated). Defaults to None.
             path (str, optional): The path where to save the tabulation. Defaults to None.
             noWrite (bool, optional): Forbid writing (prevent overwrite). Defaults to True.
+            tablePropertiesParameters (dict[str,Any], optional): Additional parameters to store in the tableProperties. Defaults to None.
             **kwargs: Optional keyword arguments of Tabulation.__init__ method of each Tabulation object.
         """
         #LFS and LFT
@@ -185,6 +187,7 @@ class TabulatedLFS(OFTabulation,LaminarFlameSpeedModel):
             path=path,
             files=files,
             noWrite=noWrite,
+            tablePropertiesParameters=tablePropertiesParameters,
             **kwargs
         )
     

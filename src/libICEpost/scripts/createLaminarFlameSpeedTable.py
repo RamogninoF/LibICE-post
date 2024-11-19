@@ -698,7 +698,15 @@ def run(dictName:str, *, overwrite=False, restart=False) -> None:
         debugFileName = inputDict["debugFile"]
         log.info(f"Saving to csv state {debugFileName}")
         results.to_csv(debugFileName, index=False)
-        
+    
+    #Additional information for the user
+    tabProp = Dictionary(
+            alphaSt=alphaSt,
+            air=[s.specie.name for s in air],
+            airY=[s.Y for s in air],
+            fuel=[s.specie.name for s in fuel],
+            fuelY=[s.Y for s in fuel])
+    
     #Create OpenFOAM table
     tableOF = TabulatedLFS(
     Su=results["Su"].to_numpy(),
@@ -708,7 +716,8 @@ def run(dictName:str, *, overwrite=False, restart=False) -> None:
     phiRange=phiList,
     egrRange=egrList if tabulatedEgr else None,
     path=tableName,
-    noWrite=False
+    noWrite=False,
+    tablePropertiesParameters=tabProp,
     )
     
     #Write the table
