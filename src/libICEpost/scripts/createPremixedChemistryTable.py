@@ -382,7 +382,7 @@ def run(dictName:str, *, overwrite=False) -> None:
         {
             "p":pList,
             "tu":TuList,
-            "phi":phiList,
+            "eqvr":phiList,
             "egr":egrList,
             "c":[0.0, 1.0],
         }
@@ -395,7 +395,7 @@ def run(dictName:str, *, overwrite=False) -> None:
             alphaSt=alphaSt,
             stoichiometricMixtureFraction=(1. - egrList)/(1. + alphaSt), #Stoichiometric mixture fraction
             species=specie,
-            specieW=specieW,
+            speciesW=specieW,
             air=[s.specie.name for s in air],
             airY=[s.Y for s in air],
             fuel=[s.specie.name for s in fuel],
@@ -416,7 +416,7 @@ def run(dictName:str, *, overwrite=False) -> None:
     
     #Write the table
     log.info(f"Saving tabulation to {tableName}")
-    tableOF.write(binary=format)
+    tableOF.write(binary=(format==FileFormat.binary))
     
 #--------------------------------------------#
 #                     Main                   #

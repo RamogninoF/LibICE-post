@@ -15,6 +15,10 @@ Functions used to handle OpenFOAM files
 
 #Type checking
 from .typeChecking import checkType
+
+import struct
+import os
+from typing import Iterable
     
 # Import functions to read OF files:
 from PyFoam.RunDictionary.ParsedParameterFile import ParsedFileHeader,ParsedParameterFile
@@ -119,7 +123,7 @@ def writeOFscalarList(values:Iterable[float], path:str, *, overwrite:bool=False,
             file.write(struct.pack('d' * len(values), *tuple([float(v) for v in values])))
     else:
         with open(path, "a") as file:
-            file.write(" ".join(values))
+            file.write(" ".join([str(v) for v in values]))
     
     with open(path, "ba") as file:
         file.write(f")\n\n".encode())

@@ -1221,7 +1221,7 @@ class EngineModel(BaseClass):
             size = [timingsParams.pop("markersize")]*len(timings) if "markersize" in timingsParams else None #The size of the markers
             if not "facecolor" in timingsParams: #Use same color of plot if not specified
                 timingsParams["facecolor"] = ax.lines[-1]. get_color()
-            ax.scatter([self.geometry.V(timings[t]) for t in timings], [self.data.pBar(timings[t]) for t in timings], s=size, ax=ax, **timingsParams)
+            ax.scatter([self.geometry.V(timings[t]) for t in timings], [self.data.pBar(timings[t]) for t in timings], s=size, **timingsParams)
         
         #Return the Axes
         return ax
