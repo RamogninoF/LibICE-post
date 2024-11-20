@@ -15,7 +15,8 @@ dependencies = [
   'tqdm',
   'colorama',
   'pandas',
-  'bidict'
+  'bidict',
+  'numpy < 2.0.0'
 ]
 
 classifiers = [
