@@ -3,7 +3,7 @@ from dash import Output, Input, Dash, dcc, html
 import numpy as np
 import plotly.graph_objects as go
 
-data = pd.read_csv("tempTable.csv")
+data = pd.read_csv("../../../tempTable.csv")
 data["lambda"] = 1. / data["phi"]
 app = Dash(__name__)
 
