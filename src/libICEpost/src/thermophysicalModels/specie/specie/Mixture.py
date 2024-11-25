@@ -77,7 +77,7 @@ class Mixture(Utilities):
 
     #########################################################################
     @property
-    def Y(self):
+    def Y(self) -> list[float]:
         """
         The mass fractions.
         """
@@ -94,7 +94,7 @@ class Mixture(Utilities):
         
     #################################
     @property
-    def X(self):
+    def X(self) -> list[float]:
         """
         The mole fractions.
         """
@@ -111,11 +111,27 @@ class Mixture(Utilities):
     
     #################################
     @property
-    def specie(self):
+    def specie(self) -> list[Molecule]:
         """
         The specie in the mixture.
         """
         return self._specie[:]
+    
+    #################################
+    @property
+    def specieNames(self) -> list[str]:
+        """
+        The names of the specie in the mixture.
+        """
+        return [s.name for s in self._specie]
+    
+    #################################
+    @property
+    def specieWeights(self) -> list[float]:
+        """
+        The names of the specie in the mixture.
+        """
+        return [s.MM for s in self._specie]
     
     #########################################################################
     @classmethod
