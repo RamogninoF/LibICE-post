@@ -163,14 +163,14 @@ def describe(ipt:dict[str,float], reactor, condition:str):
     s += f"{'Condition':<30s} = {condition}\n"
     s += f"{'Pressure':<30s} = {ipt['p']*1e-5} bar\n"
     s += f"{'Temperature':<30s} = {ipt['tu']} K\n"
-    s += f"{'Equivalence ratio':<30s} = {ipt['phi']}\n"
+    s += f"{'Equivalence ratio':<30s} = {ipt['eqvr']}\n"
     s += f"{'Exhaust gas':<30s} = {ipt['egr']*100.:.2f}%\n"
     
     relevantSpecie = ["CO", "CO2", "OH"]
     for specie in relevantSpecie:
         #Check if found:
         try:
-            s += f"{'y(' + specie + ')':<30s} = {reactor.species_index(specie)*100:.2f}%\n"
+            s += f"{'y(' + specie + ')':<30s} = {reactor.Y[reactor.species_index(specie)]*100:.2f}%\n"
         except ValueError:
             pass
         
@@ -184,7 +184,7 @@ def describe(ipt:dict[str,float], reactor, condition:str):
 def computeChemistry(ipt:dict[str,float], *, alphaSt:float, air:Mixture, fuel:Mixture, mechanism:str):
     #Create the initial mixture
     egrModel = StoichiometricMixtureEGR(air=air, fuel=fuel, egr=ipt["egr"])
-    alpha = alphaSt/ipt["phi"]
+    alpha = alphaSt/ipt["eqvr"]
     yf = 1./(alpha + 1.)
     
     mixture = air.copy()    #Start from air
@@ -193,6 +193,8 @@ def computeChemistry(ipt:dict[str,float], *, alphaSt:float, air:Mixture, fuel:Mi
     
     log.debug(f"alpha: {alpha}")
     log.debug(f"yf: {yf}")
+    log.debug(f"Z: {yf*(1. - egrModel.egr)}")
+    log.debug(f"egr: {egrModel.egr}")
     log.debug(f"mixture: {[(s.specie.name, s.Y) for s in mixture]}")
     
     #Reference conditions
@@ -319,14 +321,14 @@ def run(dictName:str, *, overwrite=False) -> None:
         for t in TuList:
             for phi in phiList:
                 for egr in egrList:
-                    inputList.append({"p":p, "tu":t, "phi":phi, "egr":egr, "c":0.0})
+                    inputList.append({"p":p, "tu":t, "eqvr":phi, "egr":egr, "c":0.0})
     
     #Dataframe for results
     results = DataFrame(
         {
             "p":[float("nan")]*numEl*2, 
             "tu":[float("nan")]*numEl*2, 
-            "phi":[float("nan")]*numEl*2, 
+            "eqvr":[float("nan")]*numEl*2, 
             "egr":[float("nan")]*numEl*2,
             "c":[float("nan")]*numEl*2,
             **{f"Y{s}Eq":[float("nan")]*numEl*2 for s in specie}, 
@@ -376,7 +378,7 @@ def run(dictName:str, *, overwrite=False) -> None:
     # results.to_csv("results.csv")
     
     #Construct the tables
-    order = ["p", "tu", "phi", "egr", "c"]
+    order = ["p", "tu", "eqvr", "egr", "c"]
     fields = [c for c in results.columns if not c in order]
     ranges = \
         {

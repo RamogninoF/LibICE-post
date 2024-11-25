@@ -363,10 +363,11 @@ class OFTabulation(Utilities):
     def fromFile(cls, 
                  path:str, 
                  order:Iterable[str], 
-                 files:Iterable[str], 
                  *, 
+                 files:Iterable[str]=None, 
                  outputNames:dict[str,str]=None, 
                  inputNames:dict[str,str]=None, 
+                 inputVariables:Iterable[str]=None,
                  noWrite:bool=True, 
                  noRead:Iterable[str]=None, 
                  **kwargs) -> OFTabulation:
@@ -387,9 +388,10 @@ class OFTabulation(Utilities):
         Args:
             path (str): The master path where the tabulation is stored.
             order (Iterable[str]): Nesting order of the input-variables used to access the tabulation
-            files (Iterable[str]): Names of files in 'path/constant' where the tables are stored.
+            files (Iterable[str], optional): Names of files in 'path/constant' where the tables are stored. By default try to load everything.
             outputNames (dict[str,str], optional): Used to (optionally) change the names of the variables stored. Defaults to None.
             inputNames (dict[str,str], optional): Used to (optionally) change the names of the input-variables found in the 'tableProperties'. Defaults to None.
+            inputVariables (Iterable[str], optional): Used to retrieve fields in the 'tableProperties' file that give the ranges of the input variables. By default, lookup for all the entries with pattern '<variableName>Values', and associate them with input-variable <variableName>. Defaults to None.
             noWrite (bool, optional): Handle to prevent write access of this class to the tabulation (avoid overwrite). Defaults to True.
             noRead (Iterable[str], optional): Tables that are not to be red from files (set to float('nan')). Defaults to None.
             **kwargs: Optional keyword arguments of Tabulation.__init__ method of each Tabulation object.
@@ -407,8 +409,11 @@ class OFTabulation(Utilities):
         [cls.checkType(var, Iterable, f"order[{ii}]") for ii,var in enumerate(order)]
         
         #Files
-        cls.checkType(files, Iterable, "files")
-        [cls.checkType(var, str, f"files[{ii}]") for ii,var in enumerate(files)]
+        if not files is None:
+            cls.checkType(files, Iterable, "files")
+            [cls.checkType(var, str, f"files[{ii}]") for ii,var in enumerate(files)]
+        else:
+            files = os.listdir(f"{path}/constant/")
         
         #No-write option
         cls.checkType(noWrite, bool, "noWrite")
@@ -427,7 +432,7 @@ class OFTabulation(Utilities):
         tab = cls(ranges=dict(), data=dict(), path=path, order=[], noWrite=noWrite, **kwargs)
         
         #Read ranges from tableProperties
-        tab._readTableProperties(entryNames=inputNames, order=order)
+        tab._readTableProperties(entryNames=inputNames, order=order, inputVariables=inputVariables)
         
         #Renaming fields
         if not outputNames is None:
@@ -644,7 +649,7 @@ class OFTabulation(Utilities):
     
     #########################################################################
     #Provate methods:
-    def _readTableProperties(self, *, entryNames:dict[str,str]=None, order:Iterable[str]):
+    def _readTableProperties(self, *, entryNames:dict[str,str]=None, order:Iterable[str], inputVariables:Iterable[str]=None):
         """
         Read information stored in file 'path/tableProperties'. By convention, 
         the ranges variables are those ending with 'Values'. Use 'entryNames' to
@@ -654,6 +659,7 @@ class OFTabulation(Utilities):
             entryNames (dict[str,str], optional): Used to (optionally) change the names 
                 of input-variables in the tabulation. Defaults to None.
             order (Iterable[str]): Set the order in which the input-variables are looped.
+            inputVariables (Iterable[str], optional): Used to retrieve fields in the 'tableProperties' file that give the ranges of the input variables. By default, lookup for all the entries with pattern '<variableName>Values', and associate them with input-variable <variableName>. Defaults to None.
         """
         #Cast entryNames to bi-direction map
         if not entryNames is None:
@@ -662,6 +668,10 @@ class OFTabulation(Utilities):
         else:
             entryNames = bidict()
         
+        if not inputVariables is None:
+            self.checkType(inputVariables, Iterable, "inputVariables")
+            [self.checkType(iptVar, str, f"inputVariables[{ii}]") for ii,iptVar in enumerate(inputVariables)]
+        
         #Check directory:
         self.checkDir()
         
@@ -669,24 +679,31 @@ class OFTabulation(Utilities):
         with open(self.path + "/tableProperties", "r") as file:
             tabProps = FoamStringParser(file.read(), noVectorOrTensor=True).getData()
         
+        #Check that all inputs are present if inputVariables is given
+        if not inputVariables is None:
+            for ii, var in enumerate(inputVariables):
+                if not var in tabProps:
+                    raise ValueError(f"Entry {var} (inputVariables[{ii}]) not found in tableProperties file. Avaliable entries are:" + "\n\t".join(tabProps.keys()))
+        else:
+            #Extract fields enging with "Values"
+            inputVariables = [var for var in tabProps if var.endswith("Values")]
+            
+            #Update entryNames
+            entryNames.update(**{var:var.replace("Values", "") for var in inputVariables if not var in entryNames})
+        
         #Identify the ranges
         variables:dict[str,str] = dict()
         ranges:dict[str,list[float]] = dict()
         otherData = dict()
         for var in tabProps:
             varName:str
-            
             if var in entryNames:
                 #Rename
                 varName = entryNames[var]
-            elif isinstance(var,str):
-                #Check if ends with Values
-                if var.endswith("Values"):
-                    varName = entryNames[var]
-                else:
-                    #Not a range entry
-                    otherData[var] = tabProps[var]
-                    pass
+            else:
+                #Not a range entry
+                otherData[var] = tabProps[var]
+                continue
           
             #Append range
             variables[varName] = var
@@ -833,8 +850,6 @@ class OFTabulation(Utilities):
            |   |-...                    \\
            |---system                   \\
                |-controlDict            \\
-               |-fvSchemes              \\
-               |-fvSolutions
         
         Args:
             path (str, optional): Path where to save the table. In case not give, self.path is used. Defaults to None.
@@ -872,6 +887,39 @@ class OFTabulation(Utilities):
                     self.tables[table].data.flatten(), 
                     path=path + "/constant/" + self.files[table],
                     binary=binary)
+        
+        #Control dict
+        controlDict = ParsedParameterFile(path + "/system/controlDict", dontRead=True, createZipped=False)
+        controlDict.header = \
+            {
+                "class":"dictionary",
+                "version":2.0,
+                "object":"controlDict",
+                "location":path + "/system/",
+                "format": "ascii"
+            }
+        controlDict.content = \
+            {
+                "startTime"        :    0,
+                "endTime"          :    1,
+                "deltaT"           :    1,
+                "application"      :    "dummy",
+                "startFrom"        :    "startTime",
+                "stopAt"           :    "endTime",
+                "writeControl"     :    "adjustableRunTime",
+                "writeInterval"    :    1,
+                "purgeWrite"       :    0,
+                "writeFormat"      :    "binary" if binary else "ascii",
+                "writePrecision"   :    6,
+                "writeCompression" :    "uncompressed",
+                "timeFormat"       :    "general",
+                "timePrecision"    :    6,
+                "adjustTimeStep"   :    "no",
+                "maxCo"            :    1,
+                "runTimeModifiable":    "no",
+            }
+        controlDict.writeFile()
+        
         
     #####################################
     #Clear the table:
