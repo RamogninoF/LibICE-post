@@ -7,3 +7,10 @@ TODO/
 dist/
 src/libICEpost.egg-info
 upload.sh
+/.idea/.gitignore
+/.idea/LibICE-post.iml
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/inspectionProfiles/profiles_settings.xml
+/.idea/inspectionProfiles/Project_Default.xml
+/.idea/vcs.xml
