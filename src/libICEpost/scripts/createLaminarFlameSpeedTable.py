@@ -9,7 +9,10 @@ Tabulation stores values of laminar flame speed and thickness with respect to va
     egr:    EGR mass fraction (optional)
 Which are stored as a list.
 
-Compatible with LibICE-8.
+DEFINITIONS:
+    alpha = m_air/m_fuel
+    phi = alpha_st/alpha
+    egr = m_air/(m_air + m_egr + m_f)
 
 The computation of LFS is strongly sensitive to inital conditions, so the 
 operating points already computed are used to initialize new reactors in 
@@ -19,6 +22,8 @@ similar conditions. Therefore, the following computation procedure is used:
     3) List of adjacents are added to the pool of simulations to execute 
        with solution of the current reactor as initial conditions
     4) The procedure iterates until the full data-set is covered
+
+Compatible with LibICE-8.
 
 #Sample of input dictionary: 
     p = [1e5, 2e5, 3e5]   #Pressure points in [Pa]
