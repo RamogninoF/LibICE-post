@@ -16,7 +16,10 @@ dependencies = [
   'colorama',
   'pandas',
   'bidict',
-  'numpy < 2.0.0'
+  'numpy < 2.0.0',
+  'plotly',
+  'dash',
+  'waitress'
 ]
 
 classifiers = [
@@ -29,6 +32,7 @@ classifiers = [
 [project.scripts]
 createLaminarFlameSpeedTable = "libICEpost.scripts.createLaminarFlameSpeedTable:main"
 createPremixedChemistryTable = "libICEpost.scripts.createPremixedChemistryTable:main"
+visualizeOFTable = "libICEpost.scripts.visualize_nd_table:main"
 
 [project.urls]
 Homepage = "https://github.com/RamogninoF/LibICE-post"
