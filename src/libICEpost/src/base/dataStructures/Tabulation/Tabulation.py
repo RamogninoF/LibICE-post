@@ -37,6 +37,35 @@ class _OoBMethod(StrEnum):
     fatal = "fatal"
 
 #############################################################################
+#                           AUXILIARY FUNCTIONS                             #
+#############################################################################
+def toPandas(table:Tabulation) -> DataFrame:
+    """
+    Convert an instance of Tabulation to a pandas.DataFrame with all the points stored in the tabulation.
+    The columns are the input variables plus "output", which stores the sampling points.
+    
+    Args:
+        table (Tabulation): The table to convert to a dataframe.
+
+    Returns:
+        DataFrame
+    """
+    Utilities.checkType(table, Tabulation, "table")
+    
+    # Create the dataframe
+    df = DataFrame({"output":[0.0]*table.size, **{f:[0.0]*table.size for f in table.inputVariables}})
+    
+    #Sort the columns to have first the input variables in order
+    df = df[table.order + ["output"]]
+    
+    #Populate
+    for ii, item in enumerate(table):
+        df.loc[ii, list(item[0].keys())] = [item[0][it] for it in item[0].keys()]
+        df.loc[ii, "output"] = item[1]
+
+    return df
+
+#############################################################################
 #                               MAIN CLASSES                                #
 #############################################################################
 #Class used for storing and handling a generic tabulation:
@@ -321,6 +350,35 @@ class Tabulation(Utilities):
         
         return indexList
     
+    #######################################
+    def _computeIndex(self, index:int) -> tuple[int]:
+        """
+        Compute the location of an index inside the table. Getting the index, returns a list of the indices of each input-variable.
+        
+        Args:
+            index (int): The index to access in the flattened dataset.
+        
+        Returns:
+            list[int]
+
+        Returns:
+            list[int]: The corresponding index in the nested dataset.
+            
+        Example:
+            >>> self.shape
+            (2, 3, 4)
+            >>> self._computeIndex(12)
+            (0, 0, 1)
+        """
+        id = [0]*self.ndim
+        for ii in range(self.ndim-1):
+            size = np.prod(self.shape[ii+1:])
+            while index >= size:
+                id[ii] += 1
+                index -= size
+        id[-1] = index
+        return tuple(id)
+    
     #########################################################################
     #Dunder methods
     
@@ -370,54 +428,34 @@ class Tabulation(Utilities):
             return returnValue
     
     #######################################
-    def __getitem__(self, slices:tuple[slice|Iterable[int]|int]) -> Tabulation:
-        """ Extract a sub-table with sliced dataset.
+    def __getitem__(self, index:int|Iterable[int]) -> tuple[dict[str,float],float]:
+        """
+        Get an element in the table.
 
         Args:
-            slices (tuple[slice|Iterable[int]|int]): The slicers for each input-variable.
-
+            index (int | Iterable[int]): The index to access.
+            
         Returns:
-            Tabulation: The sliced tabulation.
+            tuple[dict[str:float],float]: A tuple with a dictionary mapping the names of input-variables to corresponding values, and a float with the value of the sampling point.
         """
-        #Argument checking:
-        self.checkType(slices, tuple, "slices")
-        if not(len(slices) == len(self.order)):
-            raise IndexError("Given {} ranges, while table has {} fields ({}).".format(len(slices), len(self.order), self.order))
+        ranges = self.ranges
         
-        newSlices = []
-        for ii in range(len(self.order)):
-            ss = slices[ii]
-            indList = range(len(self.ranges()[self.order[ii]]))
+        if isinstance(index, (int, np.integer)):
+            # Convert to access by list
+            return self[self._computeIndex(index)]
+        elif isinstance(index, Iterable):
+            output = {}
+            for ii,id in enumerate(index):
+                self.checkType(id, (int, np.integer), f"index[{ii}]")
+                if id >= len(ranges[self.order[ii]]):
+                    raise IndexError(f"index[{ii}] {id} out of range for variable {self.order[ii]} ({id} >= {len(ranges[self.order[ii]])})")
+
+                # Input variables
+                output[self.order[ii]] = ranges[self.order[ii]][id]
             
-            if isinstance(ss, slice):
-                newSlices.append(indList[ss])
-                
-            elif isinstance(ss,int):
-                if not(ss in indList):
-                    raise IndexError("Index out of range for field '{}'.".format(self.order[ii]))
-                newSlices.append([ss])
-            
-            elif isinstance(ss,Iterable):
-                for ind in ss:
-                    if not(ind in indList):
-                        raise IndexError("Index out of range for field '{}'.".format(self.order[ii]))
-                
-                newSlices.append(ss)
-                
-            else:
-                raise TypeError("Type missmatch. Attempting to slice with entry of type '{}'.".format(ss.__class__.__name__))
-        
-        #Create ranges:
-        order = self.order
-        ranges =  dict()
-        for ii,  Slice in enumerate(newSlices):
-            ranges[order[ii]] = [self.ranges[order[ii]][ss] for ss in Slice]
-        
-        #Create slicing table:
-        slTab = np.ix_(*tuple(newSlices))
-        data = cp.deepcopy(self.data[slTab])
-        
-        return self.__class__(data, ranges, order)
+            return output,self._data[index]
+        else:
+            raise TypeError(f"Cannot access with index of type {index.__class__.__name__}")
     
     #######################################
     def __setitem__(self, slices:tuple[slice|Iterable[int]|int], items:float|np.ndarray[float]):
@@ -471,7 +509,7 @@ class Tabulation(Utilities):
         #Update interpolator
         self._createInterpolator()
     
-    #########################################################################
+    #######################################
     def __eq__(self, value:Tabulation) -> bool:
         if not isinstance(value, Tabulation):
             return False
@@ -488,6 +526,18 @@ class Tabulation(Utilities):
             return False
         
         return True
+    
+    #####################################
+    #Allow iteration
+    def __iter__(self):
+        """
+        Iterator
+
+        Returns:
+            Self
+        """
+        for ii in range(self.size):
+            yield self[ii]
     
     #########################################################################
     #Public member functions:
@@ -510,40 +560,88 @@ class Tabulation(Utilities):
         self._createInterpolator()
     
     #######################################
-    def slice(self, ranges:dict[str,Iterable[float]]=dict(), **argv) -> Tabulation:
+    def slice(self, slices:Iterable[slice|Iterable[int]|int]=None, ranges:dict[str,Iterable[float]]=None, **argv) -> Tabulation:
         """
-        Extract a table with sliced datase, according to the sub-set of interpolation 
-        points given in 'ranges'. Keyworld arguments also accepred.
+        Extract a table with sliced datase. Can access in two ways:
+            1) by slicer
+            2) sub-set of interpolation points. Keyworld arguments also accepred.
 
         Args:
-            ranges (dict[str,Iterable[float]], optional): Ranges of sliced table. Defaults to dict().
+            ranges (dict[str,Iterable[float]], optional): Ranges of sliced table. Defaults to None.
+            slices (Iterable[slice|Iterable[int]|int]): The slicers for each input-variable.
 
         Returns:
             Tabulation: The sliced table.
         """
-        #Start from the original ranges
-        newRanges = self.ranges
+        #Swith access
+        if not slices is None:
+            #By slices
+            
+            #Check other args
+            if (not ranges is None) or (len(argv) > 0):
+                raise ValueError("Cannot access both by slices and ranges")
+            
+            #Check types
+            self.checkType(slices, Iterable, "slices")
+            if not(len(slices) == len(self.order)):
+                raise IndexError("Given {} ranges, while table has {} fields ({}).".format(len(slices), len(self.order), self.order))
+            
+            for ii, ss in enumerate(slices):
+                if isinstance(ss, slice):
+                    # Ok
+                    pass
+                    
+                elif isinstance(ss,int):
+                    if ss >= self.size:
+                        raise IndexError(f"Index out of range for slices[{ii}] ({ss} >= {self.size})")
+                
+                elif isinstance(ss,Iterable):
+                    for jj,ind in enumerate(ss):
+                        if ind >= len(self.ranges[self.order[ii]]):
+                            self.checkType(ind, int, f"slices[{ii}][{jj}]")
+                            raise IndexError(f"Index out of range for variable {ii}:{self.order[ii]} ({ind} >= {len(self.ranges[self.order[ii]])})")
+                else:
+                    raise TypeError("Type mismatch. Attempting to slice with entry of type '{}'.".format(ss.__class__.__name__))
+            
+            #Create ranges:
+            order = self.order
+            ranges =  dict()
+            for ii,  Slice in enumerate(slices):
+                ranges[order[ii]] = [self.ranges[order[ii]][ss] for ss in Slice]
+            
+            #Create slicing table:
+            slTab = np.ix_(*tuple(slices))
+            data = cp.deepcopy(self.data[slTab])
+            
+            return self.__class__(data, ranges, order)
         
-        #Check arguments:
-        ranges = ranges.update(argv)
-        self.checkType(ranges, dict, entryName="ranges")
-        [self.checkType(ranges[var], Iterable, entryName=f"ranges[{var}]") for var in ranges]
-        
-        for rr in ranges:
-            for ii in ranges[rr]:
-                if not(ii in self.ranges[rr]):
-                    raise ValueError("Sampling value '{}' not found in range for field '{}'.".format(ii,rr))
-        
-        #Update ranges
-        newRanges.update(**ranges)
-        
-        #Create slicers to access __getitem__ method
-        slices = []
-        for ii, item in enumerate(self.order):
-            slices.append([self._ranges[item].index(vv) for vv in ranges[item]])
-        
-        #Return through __getitem__
-        return self.__getitem__(tuple(slices))
+        else:
+            #By ranges
+            ranges = dict() if ranges is None else ranges
+            
+            #Start from the original ranges
+            newRanges = self.ranges
+            
+            #Check arguments:
+            ranges = ranges.update(argv)
+            self.checkType(ranges, dict, entryName="ranges")
+            [self.checkType(ranges[var], Iterable, entryName=f"ranges[{var}]") for var in ranges]
+            
+            for rr in ranges:
+                for ii in ranges[rr]:
+                    if not(ii in self.ranges[rr]):
+                        raise ValueError("Sampling value '{}' not found in range for field '{}'.".format(ii,rr))
+            
+            #Update ranges
+            newRanges.update(**ranges)
+            
+            #Create slicers to access by index
+            slices = []
+            for ii, item in enumerate(self.order):
+                slices.append([self._ranges[item].index(vv) for vv in ranges[item]])
+            
+            #Slice by index
+            return self.slice(tuple(slices))
     
     #######################################
     def concat(self, table:Tabulation, fieldName:str, *, inplace:bool=False) -> Tabulation|None:
