@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Testing solver for post-processing of CFD results from spark-ignition simulations
