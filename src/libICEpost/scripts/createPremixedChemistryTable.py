@@ -11,6 +11,11 @@ combustion (0 and 1 progress variable respectively) with respect to variables:
     egr:    EGR mass fraction (optional)
 Which are stored as a list.
 
+DEFINITIONS:
+    alpha = m_air/m_fuel
+    phi = alpha_st/alpha
+    egr = m_air/(m_air + m_egr)
+
 Chemical compositions are computed both under assumption of chemical 
 equilibrium (Y<specie>Eq)and at the adiabatic flame temperature from 
 unburnt-gas temperature (Y<specie>Adf)
@@ -183,17 +188,24 @@ def describe(ipt:dict[str,float], reactor, condition:str):
 #Running asyncronous
 def computeChemistry(ipt:dict[str,float], *, alphaSt:float, air:Mixture, fuel:Mixture, mechanism:str):
     #Create the initial mixture
-    egrModel = StoichiometricMixtureEGR(air=air, fuel=fuel, egr=ipt["egr"])
-    alpha = alphaSt/ipt["eqvr"]
-    yf = 1./(alpha + 1.)
+    eqvr = ipt["eqvr"]
+    alpha = alphaSt/eqvr if eqvr > 0 else float("inf")
+    
+    zStar = 1./(alpha + 1.)
+    egrStar = ipt["egr"]
+    
+    Z = zStar*(1. - egrStar)/(1. - egrStar*zStar)  if (1. - egrStar*zStar) > 0 else 0.0
+    egr = egrStar*(1. - zStar)/(1. - egrStar*zStar)  if (1. - egrStar*zStar) > 0 else 0.0
+    egrModel = StoichiometricMixtureEGR(air=air, fuel=fuel, egr=egr)
     
     mixture = air.copy()    #Start from air
-    mixture.dilute(fuel, yf, fracType="mass")    #Dilute with fuel
+    mixture.dilute(fuel, zStar, fracType="mass")    #Dilute with fuel
     mixture.dilute(egrModel.EgrMixture, egrModel.egr, fracType="mass")    #Dilute with egr
     
     log.debug(f"alpha: {alpha}")
-    log.debug(f"yf: {yf}")
-    log.debug(f"Z: {yf*(1. - egrModel.egr)}")
+    log.debug(f"Z*: {zStar}")
+    log.debug(f"Z: {Z}")
+    log.debug(f"egr*: {egrStar}")
     log.debug(f"egr: {egrModel.egr}")
     log.debug(f"mixture: {[(s.specie.name, s.Y) for s in mixture]}")
     
@@ -280,11 +292,10 @@ def run(dictName:str, *, overwrite=False) -> None:
     format = FileFormat(inputDict.lookupOrDefault("fileFormat", default="ascii").lower())
     
     #Load data
-    pList = np.array(inputDict.lookup("p", varType=Iterable))
-    TuList = np.array(inputDict.lookup("Tu", varType=Iterable))
-    phiList = np.array(inputDict.lookup("phi", varType=Iterable))
-    egrList = np.array(inputDict.lookupOrDefault("egr", default=np.array([0.0])))
-    tabulatedEgr = "egr" in inputDict #Check if EGR is tabulated
+    pList = np.array(sorted(inputDict.lookup("p", varType=Iterable)))
+    TuList = np.array(sorted(inputDict.lookup("Tu", varType=Iterable)))
+    phiList = np.array(sorted(inputDict.lookup("phi", varType=Iterable)))
+    egrList = np.array(sorted(inputDict.lookupOrDefault("egr", default=np.array([0.0]))))
     
     #Total number of conditions
     numEl = len(pList)*len(TuList)*len(phiList)*len(egrList)
