@@ -466,7 +466,7 @@ class EngineModel(BaseClass):
         """
         #TODO: Update the reactants mixture based on injection models (may have already injected some mass)
         
-        index = self.data.index[self.data['CA'] == self.time.time].tolist()[0]
+        index = self.data.index[self.data.loc[:,'CA'] == self.time.time].tolist()[0]
         data = self.data.loc[index].to_dict()
         self.CombustionModel.update(**data) #NOTE: update also fuel when implementing injection models
     
@@ -567,7 +567,7 @@ class EngineModel(BaseClass):
                     function:FunctionType = currData.lookup("function")
                     self.checkType(function, FunctionType, f"{zone}[{entry}][function]")
                     
-                    CA = self.raw["CA"]
+                    CA = self.raw.loc[:,"CA"]
                     f = CA.apply(function)
                     
                     self._loadArray(np.array((CA,f)).T, entryName, **opts)
@@ -576,7 +576,7 @@ class EngineModel(BaseClass):
                     #Uniform value
                     value:float = currData.lookup("value")
                     self.checkType(value, float, f"{zone}[{entry}][value]")
-                    self.raw[entryName] = value
+                    self.raw.loc[:,entryName] = value
                 
                 elif (dataFormat == "calc"):
                     #Apply operation between alredy loaded data
@@ -592,9 +592,9 @@ class EngineModel(BaseClass):
                             raise ValueError(f"Field '{arg}' was not loaded.")
                     
                     #Extract corresponding columns from data-frame:
-                    cols = {c:self.raw[c] for c in argNames}
+                    cols = {c:self.raw.loc[:,c] for c in argNames}
                     
-                    CA = self.raw["CA"]
+                    CA = self.raw.loc[:,"CA"]
                     f = function(**cols)
                     
                     self._loadArray(np.array((CA,f)).T, entryName, **opts)
@@ -623,7 +623,7 @@ class EngineModel(BaseClass):
             #Clone if no filter is given
             if filter is None:
                 for field in self._raw.columns:
-                    self._data.loadArray(np.array((self._raw["CA"],self._raw[field])).T, field)
+                    self._data.loadArray(np.array((self._raw.loc[:,"CA"],self._raw.loc[:,field])).T, field)
                 return self
             
             #Apply filter
@@ -631,7 +631,7 @@ class EngineModel(BaseClass):
             for var in self._raw.columns:
                 #Filter data
                 if var != "CA":
-                    self._data.loadArray(np.array(filter(self._raw["CA"], self._raw[var])).T, var)
+                    self._data.loadArray(np.array(filter(self._raw.loc[:,"CA"], self._raw.loc[:,var])).T, var)
             
         except BaseException as err:
             self.fatalErrorInClass(self.filterData, f"Failed filtering data", err)
@@ -668,7 +668,7 @@ class EngineModel(BaseClass):
                 raise ValueError("No data loaded yet.")
             
             #Set start-time
-            self.time.updateStartTime(self.data["CA"])
+            self.time.updateStartTime(self.data.loc[:,"CA"])
             self.info["time"] = self.time.time
             
             #Update the mixtures at start-time (combustion models, injection models, etc.)
@@ -822,7 +822,7 @@ class EngineModel(BaseClass):
             self._process__pre__()
             
             #Process cylinder data
-            for t in tqdm(self.time(self.data["CA"]), "Progress: ", initial=0, total=(self.time.endTime-self.time.startTime), unit="CAD"):  #With progress bar :)
+            for t in tqdm(self.time(self.data.loc[:,"CA"]), "Progress: ", initial=0, total=(self.time.endTime-self.time.startTime), unit="CAD"):  #With progress bar :)
                 self.info["time"] = t
                 self._update()
 
@@ -848,17 +848,17 @@ class EngineModel(BaseClass):
         fields = ["dpdCA", "V", "T", "m", "gamma", "AHRR", "ROHR", "A"]
         for f in fields:
             if not f in self.data.columns:
-                self.data[f] = float("nan")
+                self.data.loc[:,f] = float("nan")
         
         #Specie
         for specie in self._cylinder.mixture.mix:
-            self.data[specie.specie.name + "_x"] = 0.0
-            self.data[specie.specie.name + "_y"] = 0.0
+            self.data.loc[:,specie.specie.name + "_x"] = 0.0
+            self.data.loc[:,specie.specie.name + "_y"] = 0.0
         
         #Set initial values as start-time:
         CA = self.time.time
         if CA == self.time.startTime:
-            index = self.data.index[self.data['CA'] == CA].tolist()
+            index = self.data.index[self.data.loc[:,'CA'] == CA].tolist()
             
             #In-cylinder data
             V = self.geometry.V(CA)
@@ -921,7 +921,7 @@ class EngineModel(BaseClass):
         self._updateMixtures()
         
         #Store
-        index = self.data.index[self.data['CA'] == CA].tolist()[0]
+        index = self.data.index[self.data.loc[:,'CA'] == CA].tolist()[0]
         
         #Main parameters
         self.data.loc[index, "dpdCA"] = dpdCA
@@ -934,8 +934,8 @@ class EngineModel(BaseClass):
         #Mixture composition
         for specie in self._cylinder.mixture.mix:
             if not (specie.specie.name + "_x") in self.data.columns:
-                self.data[specie.specie.name + "_x"] = 0.0
-                self.data[specie.specie.name + "_y"] = 0.0
+                self.data.loc[:,specie.specie.name + "_x"] = 0.0
+                self.data.loc[:,specie.specie.name + "_y"] = 0.0
             else:
                 self.data.loc[index, specie.specie.name + "_x"] = specie.X
                 self.data.loc[index, specie.specie.name + "_y"] = specie.Y
@@ -953,55 +953,55 @@ class EngineModel(BaseClass):
         """
         #WHF and ROHR
         self._computeWallHeatFlux()
-        self.data["ROHR"] = self.data["AHRR"] + self.data["dQwalls"]
+        self.data.loc[:,"ROHR"] = self.data.loc[:,"AHRR"] + self.data.loc[:,"dQwalls"]
         
         #Cumulatives
-        self.data["cumHR"] = self.cumulativeIntegral("ROHR")
-        self.data["cumAHR"] = self.cumulativeIntegral("AHRR")
+        self.data.loc[:,"cumHR"] = self.cumulativeIntegral("ROHR")
+        self.data.loc[:,"cumAHR"] = self.cumulativeIntegral("AHRR")
     
     ####################################
     def _computeWallHeatFlux(self) -> None:
         """
         Compute wall heat fluxes for each patch and global value in each region. Might be overloaded in child.
         """
-        areas = self.geometry.areas(self.data["CA"])
+        areas = self.geometry.areas(self.data.loc[:,"CA"])
         
         #Compute wall heat transfer coefficient:
-        h = self.HeatTransferModel.h(engine=self, CA=self.data["CA"])
-        self.data["heatTransferCoeff"] = h
+        h = self.HeatTransferModel.h(engine=self, CA=self.data.loc[:,"CA"])
+        self.data.loc[:,"heatTransferCoeff"] = h
         
         #Total whf
-        self.data["dQwalls"] = 0.0
-        self.data["Qwalls"] = 0.0
-        self.data["wallsArea"] = 0.0
+        self.data.loc[:,"dQwalls"] = 0.0
+        self.data.loc[:,"Qwalls"] = 0.0
+        self.data.loc[:,"wallsArea"] = 0.0
         
         for patch in [c for c in areas.columns if not (c == "CA")]:
             #Search temperature as "T<patchName>":
             if f"T{patch}" in self.data.columns:
-                Twall = self.data[f"T{patch}"]
+                Twall = self.data.loc[:,f"T{patch}"]
             #Fallback to default "Twalls": 
             elif "Twalls" in self.data.columns:
-                Twall = self.data["Twalls"]
+                Twall = self.data.loc[:,"Twalls"]
             else:
                 raise ValueError("Cannot compute wall heat flux. Either load patch temperatures in the form t<patchName> or default temperature Twalls to compute wall heat fluxes.")
 
             #Compute patch area:
             A = areas[patch]
-            self.data["wallsArea"] += A
+            self.data.loc[:,"wallsArea"] += A
             
             name = patch + "Area"
             if not name in self.data.columns:
-                self.data[name] = A
+                self.data.loc[:,name] = A
             
             #Compute wall heat flux at patch [converted to J/CA]:
-            self.data[f"dQ{patch}"] = h * A * (self.data["T"] - Twall) / self.time.dCAdt
+            self.data.loc[:,f"dQ{patch}"] = h * A * (self.data.loc[:,"T"] - Twall) / self.time.dCAdt
             
             #Compute cumulative
-            self.data[f"Q{patch}"] = self.cumulativeIntegral(f"dQ{patch}")
+            self.data.loc[:,f"Q{patch}"] = self.cumulativeIntegral(f"dQ{patch}")
             
             #Add to total
-            self.data["dQwalls"] += self.data[f"dQ{patch}"]
-            self.data["Qwalls"] += self.data[f"Q{patch}"]
+            self.data.loc[:,"dQwalls"] += self.data.loc[:,f"dQ{patch}"]
+            self.data.loc[:,"Qwalls"] += self.data.loc[:,f"Q{patch}"]
             
     ####################################
     def refresh(self, reset:bool=False) -> EngineModel:
@@ -1061,14 +1061,14 @@ class EngineModel(BaseClass):
         self.checkType(start,float,"start")
         self.checkType(end,float,"end")
         
-        index = self.data.index[np.array(self.data["CA"] >= start) & np.array(self.data["CA"] <= end)]
+        index = self.data.index[np.array(self.data.loc[:,"CA"] >= start) & np.array(self.data.loc[:,"CA"] <= end)]
         data = self.data.iloc[index]
         
         #Filter out "nan"
-        Yarray = data[y].copy()
+        Yarray = data.loc[:,y].copy()
         Yarray[np.isnan(Yarray)] = 0.0
         
-        return integrate.trapz(Yarray, x=data[x])
+        return integrate.trapz(Yarray, x=data.loc[:,x])
     
     ####################################
     def cumulativeIntegral(self, y:str, *, x:str="CA", start:float=None) -> np.ndarray:
@@ -1094,19 +1094,19 @@ class EngineModel(BaseClass):
         #Check for start
         start = self.time.startOfCombustion() if start is None else start
         #Check for motored
-        start = self.data["CA"][0] if start is None else start
+        start = self.data.loc[:,"CA"][0] if start is None else start
         #Check type
         self.checkType(start,float,"start")
         
         #Filter out "nan"
-        Yarray = self.data[y].copy()
+        Yarray = self.data.loc[:,y].copy()
         Yarray[np.isnan(Yarray)] = 0.0
         
         #Compute cumulative
-        out = integrate.cumulative_trapezoid(Yarray, x=self.data[x], initial=0.0)
+        out = integrate.cumulative_trapezoid(Yarray, x=self.data.loc[:,x], initial=0.0)
         
         #Set zero at start
-        valAtStart = np.interp(start, self.data["CA"], out)
+        valAtStart = np.interp(start, self.data.loc[:,"CA"], out)
         out -= valAtStart
         
         return out
@@ -1130,11 +1130,11 @@ class EngineModel(BaseClass):
         self.checkType(start,float,"start")
         self.checkType(end,float,"end")
         
-        index = self.data.index[np.array(self.data["CA"] >= start) & np.array(self.data["CA"] <= end)]
+        index = self.data.index[np.array(self.data.loc[:,"CA"] >= start) & np.array(self.data.loc[:,"CA"] <= end)]
         data = self.data.iloc[index]
-        data.loc[index,"V"] = self.geometry.V(data["CA"])
+        data.loc[index,"V"] = self.geometry.V(data.loc[:,"CA"])
         
-        return self.work(start=start, end=end)/(np.nanmax(data["V"]) - np.nanmin(data["V"]))
+        return self.work(start=start, end=end)/(np.nanmax(data.loc[:,"V"]) - np.nanmin(data.loc[:,"V"]))
     
     ####################################
     def work(self, start:float=None, end:float=None) -> float:
@@ -1157,14 +1157,14 @@ class EngineModel(BaseClass):
         self.checkType(start,float,"start")
         self.checkType(end,float,"end")
         
-        index = self.data.index[np.array(self.data["CA"] >= start) & np.array(self.data["CA"] <= end)]
+        index = self.data.index[np.array(self.data.loc[:,"CA"] >= start) & np.array(self.data.loc[:,"CA"] <= end)]
         #Remove nan
         index = index[np.invert(np.isnan(self.data.loc[index, "p"]))]
         
         data = self.data.iloc[index]
-        data.loc[index,"V"] = self.geometry.V(data["CA"])
+        data.loc[index,"V"] = self.geometry.V(data.loc[:,"CA"])
         
-        return integrate.trapz(data["p"], x=data["V"])
+        return integrate.trapz(data.loc[:,"p"], x=data.loc[:,"V"])
     
     ####################################
     def plotPV(self, /,*,start:float=None, end:float=None, loglog:bool=True, timingsParams:dict=dict(), showTimings:bool=True, ax:Axes=None, **kwargs):
@@ -1207,10 +1207,10 @@ class EngineModel(BaseClass):
             raise ValueError("Data were not yet loaded/pre-processed (field p not present in self.data).")
         
         #Compute volume
-        self.data["V"] = self.geometry.V(self.data["CA"])
+        self.data.loc[:,"V"] = self.geometry.V(self.data.loc[:,"CA"])
         
         #Compute pressure in bar
-        self.data["pBar"] = self.data["p"]/1e5
+        self.data.loc[:,"pBar"] = self.data.loc[:,"p"]/1e5
         
         #Plot
         ax = self.data.plot(x="V", y="pBar", xlabel="V [$m^3$]", ylabel="p [bar]", loglog=loglog, ax=ax, **kwargs)
@@ -1258,7 +1258,7 @@ class EngineModel(BaseClass):
             raise ValueError("Data were not yet processed (fields p and ROHR not present in self.data).")
         
         #Compute pressure in bar
-        self.data["pBar"] = self.data["p"]/1e5
+        self.data.loc[:,"pBar"] = self.data.loc[:,"p"]/1e5
         
         #Check axes:
         if not axes is None:
@@ -1307,7 +1307,7 @@ class EngineModel(BaseClass):
         
         #x limits
         axp.set_xlim([self.time.IVC, self.time.EVO])
-        where = np.array(self.data["CA"] >= self.time.IVC) & np.array(self.data["CA"] <= self.time.EVO)
+        where = np.array(self.data.loc[:,"CA"] >= self.time.IVC) & np.array(self.data.loc[:,"CA"] <= self.time.EVO)
         
         #Limits
         a = 0.02
@@ -1315,15 +1315,15 @@ class EngineModel(BaseClass):
         c = 0.7
         
         #pressure limits
-        lim = [np.nanmin(self.data["pBar"][where]), np.nanmax(self.data["pBar"][where])]
+        lim = [np.nanmin(self.data.loc[:,"pBar"][where]), np.nanmax(self.data.loc[:,"pBar"][where])]
         lim = [lim[0] - (lim[1] - lim[0])*b, lim[1] + (lim[1] - lim[0])*a]
         axp.set_ylim(lim)
         
         #ROHR limits
         if apparent:
-            data = self.data["AHRR"]
+            data = self.data.loc[:,"AHRR"]
         else:
-            data = self.data["ROHR"]
+            data = self.data.loc[:,"ROHR"]
         lim = [np.nanmin(data[where]), np.nanmax(data[where])]
         lim = [lim[0] - (lim[1] - lim[0])*a, lim[1] + (lim[1] - lim[0])*c]
         axrohr.set_ylim(lim)

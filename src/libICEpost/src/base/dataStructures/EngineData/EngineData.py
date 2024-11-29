@@ -37,6 +37,10 @@ class EngineData(Utilities):
     some useful I/O methods and defines interpolators of the varibles to
     easily access data at generic instants.
     """
+    
+    _interpolators:set[str]
+    """Names of all the interpolators avaliable"""
+    
     #########################################################################
     #properties:
     @property
@@ -73,10 +77,6 @@ class EngineData(Utilities):
         Calls 'loc' propertie of the DataFrame.
         """
         return self._data.loc
-
-    @loc.setter
-    def loc(self, *args):
-        self._data.loc[args[0]] = args[1:]
     
     ##############################
     @property
@@ -87,16 +87,13 @@ class EngineData(Utilities):
         """
         return self._data.iloc
 
-    @iloc.setter
-    def iloc(self, *args):
-        self._data.iloc[args[0]] = args[1:]
-
     #########################################################################
     #Constructor:
     def __init__(self):
         """
         Create the table.
         """
+        self._interpolators = set()
         self._data = pd.DataFrame(columns={"CA":[]})
 
     #########################################################################
@@ -114,15 +111,13 @@ class EngineData(Utilities):
         return self._data.__getitem__(*item)
 
     def __setitem__(self, key, item) -> None:
-        new = False
-        if not key in self.columns:
-            new = True
-
         self._data.__setitem__(key, item)
 
-        #Create interpolator if not present
-        if new:
-            self.createInterpolator(key)
+    def __getattribute__(self, name: str) -> os.Any:
+        #Check if the interpolator is missing and construct it
+        if (name in super().__getattribute__("_data").columns):
+            super().__getattribute__("_createInterpolator")(name)
+        return super().__getattribute__(name)
 
     def __delitem__(self, item):
         return self._data.__delitem__(item)
@@ -390,51 +385,46 @@ class EngineData(Utilities):
             #Return to normal indexing
             self._data.reset_index(inplace=True)
 
-            #If first time this entry is set, create the interpolator:
-            if firstTime:
-                self.createInterpolator(varName)
-
         except BaseException as err:
             self.fatalErrorInClass(self.loadArray, f"Failed loading array", err)
 
         return self
 
     #######################################
-    def createInterpolator(self, varName:str):
+    def _createInterpolator(self, varName:str):
         """
         varName:    str
 
         Create the interpolator for a variable and defines the method varName(CA) which returns the interpolated value of variable 'varName' at instant 'CA' from the data in self._data
         """
-        try:
-            #Check if varName is an allowed variable name, as so that it can be used to access by . operator
-            if not is_valid_variable_name(varName):
-                raise ValueError(f"Field name '{varName}' is not a valid variable name.")
+        #Check if varName is an allowed variable name, as so that it can be used to access by . operator
+        if not is_valid_variable_name(varName):
+            raise ValueError(f"Field name '{varName}' is not a valid variable name.")
 
-            #Check if attribute already exists, to prevent overloading existing attribustes.
-            if varName in _reservedMethds:
-                raise ValueError(f"Name '{varName}' is reserved.")
+        #Check if attribute already exists, to prevent overloading existing attribustes.
+        if varName in _reservedMethds:
+            raise ValueError(f"Name '{varName}' is reserved.")
+        
+        if not varName in self._data.columns:
+            raise ValueError(f"Variable '{varName}' not found. Available fields are:" + "\t" + "\n\t".join(self._data.columns))
 
-            if not varName in self._data.columns:
-                raise ValueError(f"Variable '{varName}' not found. Available fields are:" + "\t" + "\n\t".join(self._data.columns))
+        def interpolator(self, CA:float|collections.abc.Iterable) -> float|collections.abc.Iterable:
+            try:
+                self.checkTypes(CA, (float,collections.abc.Iterable), "CA")
+                return self.np.interp(CA, self._data["CA"], self._data[varName], float("nan"), float("nan"))
+            except BaseException as err:
+                self.fatalErrorInClass(getattr(self,varName), "Failed interpolation", err)
 
-            def interpolator(self, CA:float|collections.abc.Iterable) -> float|collections.abc.Iterable:
-                try:
-                    self.checkTypes(CA, (float,collections.abc.Iterable), "CA")
-                    return self.np.interp(CA, self._data["CA"], self._data[varName], float("nan"), float("nan"))
-                except BaseException as err:
-                    self.fatalErrorInClass(getattr(self,varName), "Failed interpolation", err)
+        interpolator.__doc__  = f"Linear interpolation of {varName} at CA."
+        interpolator.__doc__ += f"\n\Args:"
+        interpolator.__doc__ += f"\n\t\tCA (float | collections.abc.Iterable): CA at which iterpolating data."
+        interpolator.__doc__ += f"\n\tReturns:"
+        interpolator.__doc__ += f"\n\t\tCA at which iterpolating data."
 
-            interpolator.__doc__  = f"Linear interpolation of {varName} at CA."
-            interpolator.__doc__ += f"\n\Args:"
-            interpolator.__doc__ += f"\n\t\tCA (float | collections.abc.Iterable): CA at which iterpolating data."
-            interpolator.__doc__ += f"\n\tReturns:"
-            interpolator.__doc__ += f"\n\t\tCA at which iterpolating data."
-
-            setattr(self.__class__, varName, interpolator)
-
-        except BaseException as err:
-            self.fatalErrorInClass(self.createInterpolator, f"Failed creating interpolator for variable '{varName}'", err)
+        setattr(self.__class__, varName, interpolator)
+        
+        #Add to the set of interpolators
+        self._interpolators.add(varName)
 
     #######################################
     def write(self, fileName:str, overwrite:bool=False, sep:str=' '):
@@ -483,5 +473,5 @@ class EngineData(Utilities):
         return self().plot(*args, **kwargs)
     
 #########################################################################
-#Store copy of default EngineData class. This is used to identify reserved methods for createInterpolator
+#Store copy of default EngineData class. This is used to identify reserved methods for _createInterpolator
 _reservedMethds = dir(EngineData)
