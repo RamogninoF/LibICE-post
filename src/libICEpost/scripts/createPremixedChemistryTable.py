@@ -219,8 +219,8 @@ def computeChemistry(ipt:dict[str,float], *, alphaSt:float, air:Mixture, fuel:Mi
     adf = ct.Solution(mechanism)
     ref = ct.Solution(mechanism)
     
+    specie = reactants.species_names
     Tmax = 1500. #NOTE: Limit the temperature for adf computation to prevent numerical problems 
-    ref.TPY = Tref, Pref, {s.specie.name:s.Y for s in mixture}
     reactants.TPY = min(ipt["tu"], Tmax), ipt["p"], {s.specie.name:s.Y for s in mixture}
     equilibrium.TPY = ipt["tu"], ipt["p"], {s.specie.name:s.Y for s in mixture}
     adf.TPY = min(ipt["tu"], Tmax), ipt["p"], {s.specie.name:s.Y for s in mixture}
@@ -237,11 +237,12 @@ def computeChemistry(ipt:dict[str,float], *, alphaSt:float, air:Mixture, fuel:Mi
     adf.equilibrate("HP")
     
     #Progress variable
+    ref.TPY = Tref, Pref, {s.specie.name:s.Y for s in mixture} #Reactants
     c0 = reactants.h - ref.h
+    ref.TPY = Tref, Pref, {s:adf.Y[reactants.species_index(s)] for s in specie} #Products
     cMax = adf.h - ref.h
     
     #Dataframe of results
-    specie = reactants.species_names
     results = DataFrame({**{v:([ipt[v], ipt[v]] if v != "c" else [ipt[v], 1.0]) for v in ipt}, **{f"Y{s}Eq":[0., 0.] for s in specie}, **{f"Y{s}Adf":[0., 0.] for s in specie} , "c0":[0., 0.], "cMax":[0., 0.]})
     results.iloc[0] = [ipt[v] for v in ipt] + [reactants.Y[reactants.species_index(s)] for s in specie] + [reactants.Y[reactants.species_index(s)] for s in specie] + [c0, cMax]
     ipt.update(c=1.) #Cange c = 1
