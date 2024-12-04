@@ -74,6 +74,14 @@ class Atom(Utilities):
             return False
     
     ##############################
+    #Hashing:
+    def __hash__(self):
+        """
+        Hashing of the representation.
+        """
+        return hash(self.__repr__()) 
+    
+    ##############################
     #Disequality:
     def __ne__(self,otherSpecie):
         """

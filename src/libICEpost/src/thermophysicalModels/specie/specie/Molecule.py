@@ -167,6 +167,14 @@ class Molecule(Utilities):
             raise ValueError("Cannot to compare elements of type '{}' and '{}'.".format(otherSpecie.__class__.__name__, self.__class__.__name__))
     
     ##############################
+    #Hashing:
+    def __hash__(self):
+        """
+        Hashing of the representation.
+        """
+        return hash(self.__repr__())
+    
+    ##############################
     #Disequality:
     def __ne__(self,other):
         """
@@ -302,8 +310,7 @@ class Molecule(Utilities):
             {
                 "name": self.name,
                 "mass": self.MM,
-                "atoms": self.atoms,
-                "numbers":self.numberOfAtoms
+                "bruteFormula": self.bruteFormula()
             }
         
         return R.__repr__()
