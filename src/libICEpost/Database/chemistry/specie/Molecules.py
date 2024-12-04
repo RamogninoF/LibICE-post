@@ -22,8 +22,8 @@ import json
 import libICEpost.Database as Database
 from libICEpost.Database import database
 
-Molecules = database.chemistry.specie.addFolder("Molecules")
-Fuels = database.chemistry.specie.addFolder("Fuels")
+Molecules:dict[str,Molecule] = database.chemistry.specie.addFolder("Molecules")
+Fuels:dict[str,Molecule] = database.chemistry.specie.addFolder("Fuels")
 
 #############################################################################
 #                                   DATA                                    #

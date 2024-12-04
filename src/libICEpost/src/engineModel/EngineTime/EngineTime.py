@@ -41,20 +41,20 @@ class EngineTime(BaseClass):
         omega      | float      | rad/s  | 
     """
     
-    """The current time instant"""
     time:float
+    """The current time instant"""
     
-    """Current time-step"""
     deltaT:float
+    """Current time-step"""
     
-    """The old time instant"""
     oldTime:float
+    """The old time instant"""
     
-    """The start time"""
     startTime:float
+    """The start time"""
     
-    """The end time"""
     endTime:float
+    """The end time"""
     
     #########################################################################
     #Constructor:

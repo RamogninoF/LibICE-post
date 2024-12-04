@@ -16,8 +16,8 @@ Atomic specie
 from chempy.util import periodic
 from libICEpost.src.thermophysicalModels.specie.specie.Atom import Atom
 
-from libICEpost.Database import database
-periodicTable = database.chemistry.specie.addFolder("periodicTable")
+from libICEpost.Database import database, _DatabaseClass
+periodicTable:dict[str,Atom] = database.chemistry.specie.addFolder("periodicTable")
 
 #############################################################################
 #                                   DATA                                    #

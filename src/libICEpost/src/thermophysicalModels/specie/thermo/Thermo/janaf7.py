@@ -55,6 +55,22 @@ class janaf7(Thermo):
     #########################################################################
     
     numCoeffs = 7
+    """Number of coefficients"""
+    
+    cpLow:list[float]
+    """Low-temperature coefficients"""
+    
+    cpHigh:list[float]
+    """High-temperature coefficients"""
+    
+    Tlow:float
+    """Lower-limit of validity"""
+    
+    Thigh:float
+    """Higher-limit of validity"""
+    
+    Tth:float
+    """Threshold temperature for changing between low-T and high-T coefficients"""
     
     #########################################################################
     #Constructor:

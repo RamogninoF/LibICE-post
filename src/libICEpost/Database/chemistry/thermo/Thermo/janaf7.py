@@ -19,10 +19,11 @@ import json
 import libICEpost.Database as Database
 from libICEpost.Database import database
 
+from libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7 import janaf7
 from libICEpost.src.thermophysicalModels.specie.specie import Molecule
 Molecules = database.chemistry.specie.Molecules
 
-janaf7_db = database.chemistry.thermo.Thermo.addFolder("janaf7")
+janaf7_db:dict[str,janaf7] = database.chemistry.thermo.Thermo.addFolder("janaf7")
 
 #############################################################################
 #                                   DATA                                    #
@@ -33,7 +34,6 @@ def fromJson(fileName, typeName="Molecules"):
     """
     Add janaf7 type Thermo to the database from a json file.
     """
-    from libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7 import janaf7
 
     from libICEpost.Database import database
     from libICEpost.src.thermophysicalModels.specie.specie import Molecule
