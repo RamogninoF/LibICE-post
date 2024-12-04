@@ -11,6 +11,13 @@ Last update:        10/06/2024
 #                               IMPORT                              #
 #####################################################################
 
+import os
+from typing import Iterable
+
+import yaml
+
+from libICEpost.src.base.Functions.typeChecking import checkType
+
 from libICEpost.src.thermophysicalModels.specie.specie.Mixture import Mixture, mixtureBlend
 from libICEpost.src.thermophysicalModels.specie.specie.Molecule import Molecule
 from libICEpost.src.thermophysicalModels.specie.reactions.Reaction.StoichiometricReaction import StoichiometricReaction
@@ -22,7 +29,6 @@ from libICEpost.Database import database
 #############################################################################
 #                              MAIN FUNCTIONS                               #
 #############################################################################
-
 def computeAlphaSt(air:Mixture, fuel:Mixture, *, oxidizer:Molecule=database.chemistry.specie.Molecules.O2) -> float:
     """
     Compute the stoichiometric air-fuel ratio given air and fuel mixture compositions.
@@ -110,6 +116,7 @@ def computeAlphaSt(air:Mixture, fuel:Mixture, *, oxidizer:Molecule=database.chem
     
     return alphaSt
 
+#############################################################################
 def computeAlpha(air:Mixture, fuel:Mixture, reactants:Mixture, *, oxidizer:Molecule=database.chemistry.specie.Molecules.O2) -> float:
     """
     Compute the air-fuel ratio given air, fuel, and reactants mixture compositions.
@@ -138,4 +145,97 @@ def computeAlpha(air:Mixture, fuel:Mixture, reactants:Mixture, *, oxidizer:Molec
     # 3)
     return yAir/yFuel
     
+#############################################################################
+def makeEquilibriumMechanism(path:str, species:Iterable[str], *, overwrite:bool=False) -> None:
+    """
+    Create a mechanism (in yaml format) for computation of chemical equilibrium 
+    (with cantera) with the desired specie. The thermophysical properties are 
+    based on NASA polinomials, which are looked-up in the corresponding database.
+    
+        File structure:
+            phases:
+            - name: gas
+              thermo: ideal-gas
+              elements: [C, H, N, ...]
+              species: [AR, N2, HE, H2, ...]
+              kinetics: gas
+              state: {T: 300.0, P: 1 atm}
+            
+            species:
+            - name: CO2
+              composition: {C: 1, O:2}
+              thermo:
+                  model: NASA7
+                  temperature-ranges: [200.0, 1000.0, 6000.0]
+                  data:
+                  - [...] #Low coefficients
+                  - [...] #High coefficients
+            - ...
+    
+    Args:
+        path (str): The path where to save the mechanism in .yaml format.
+        species (Iterable[Molecule]): The list of specie to use in the mechanism.
+        overwrite (bool, optional): Overwrite if found?  Defaults to False.
+    """
+    #Check for the path
+    checkType(path, str, "path")
+    checkType(species, Iterable, "species")
+    [checkType(s, str, f"species[{ii}]") for ii,s in enumerate(species)]
+    
+    #Make species a set (remove duplicate)
+    species = set(species)
+    species_list = list(species)
+    
+    if not path.endswith(".yaml"):
+        path += ".yaml"
+    
+    #Check path
+    if not overwrite and os.path.isfile(path):
+        raise IOError("Path '{}' exists. Set 'overwrite' to True to overwrite.")
+    
+    #Load the databases
+    from libICEpost.Database.chemistry.thermo.Thermo.janaf7 import janaf7_db, janaf7
+    from libICEpost.Database.chemistry.specie.Molecules import Molecules
+    
+    #Find the atoms
+    atoms:list[str] = []
+    for s in species_list:
+        specie = Molecules[s]
+        for a in specie:
+            if not a.atom.name in atoms:
+                atoms.append(a.atom.name)
+    
+    output = {}
+    output["phases"] = \
+        [
+            {
+                "name":"gas",
+                "thermo":"ideal-gas",
+                "elements":atoms,
+                "species":species_list,
+                "kinetics":"gas",
+                "state":{"T": 300.0, "P": 101325.0}
+            }
+        ]
+    output["species"] = \
+        [
+            {
+                "name":s,
+                "composition":{a.atom.name:a.n for a in Molecules[s]},
+                "thermo":
+                {
+                    "model":"NASA7",
+                    "temperature-ranges":[janaf7_db[s].Tlow, janaf7_db[s].Tth, janaf7_db[s].Thigh],
+                    "data":[janaf7_db[s].cpLow, janaf7_db[s].cpHigh]
+                }
+            } for s in species_list
+        ]
+    
+    output["reactions"] = []
+    
+    print(f"Writing mechanism for computation of chemical equilibrium to file '{path}'")
+    print(f"Molecules: {species}")
+    print(f"Elements: {atoms}")
+    with open(path, 'w') as yaml_file:
+        yaml.dump(output, yaml_file)
     

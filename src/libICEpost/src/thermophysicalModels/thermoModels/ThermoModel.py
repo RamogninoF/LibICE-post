@@ -31,6 +31,10 @@ class ThermoModel(Utilities): #(BaseClass):
     
     """
     _state:ThermoState
+    """The current thermodynamic state"""
+    
+    _ThermoStateClass:ThermoState = ThermoState
+    """The ThermoState class used for this engine model"""
     
     #########################################################################
     #Properties:
@@ -54,7 +58,6 @@ class ThermoModel(Utilities): #(BaseClass):
         """
         
         return self._state.copy()
-    
     
     #########################################################################
     #Class methods
@@ -120,34 +123,31 @@ class ThermoModel(Utilities): #(BaseClass):
         Returns:
             ThermoModel: self
         """
-        try:
-            stateDict = \
-                {
-                    "m":mass,
-                    "p":pressure,
-                    "V":volume,
-                    "T":temperature,
-                    "rho":density
-                }
-            
-            #Mixture
-            if not mixture is None:
-                self.checkType(mixture, Mixture, "mixture")
-                self._mixture.update(mixture=mixture)
-            
-            #Remove None entries:
-            stateDict = {key:stateDict[key] for key in stateDict if not (stateDict[key] is None)}
-            
-            if len(stateDict) > 0:
-                #Retrieve initializer:
-                initializerType = "".join(sorted([key for key in stateDict],key=str.lower))
-                stateDict["mix"] = self.mixture
-                self._state:ThermoState = StateInitializer.selector(initializerType,stateDict)()
-            else:
-                self._state:ThermoState = ThermoState()
-            
-        except BaseException as err:
-            self.fatalErrorInClass(self.initializeState, f"Failed initializing state of ThermoModel", err)
+        stateDict = \
+            {
+                "m":mass,
+                "p":pressure,
+                "V":volume,
+                "T":temperature,
+                "rho":density
+            }
+        
+        #Mixture
+        if not mixture is None:
+            self.checkType(mixture, Mixture, "mixture")
+            self._mixture.update(mixture=mixture)
+        
+        #Remove None entries:
+        stateDict = {key:stateDict[key] for key in stateDict if not (stateDict[key] is None)}
+        
+        if len(stateDict) > 0:
+            #Retrieve initializer:
+            initializerType = "".join(sorted([key for key in stateDict],key=str.lower))
+            stateDict["mix"] = self.mixture
+            stateDict["thermoStateClass"] = self._ThermoStateClass.__name__
+            self._state:ThermoState = StateInitializer.selector(initializerType,stateDict)()
+        else:
+            self._state:ThermoState = self._ThermoStateClass()
     
     ################################
     def update(self, /, *,
@@ -210,8 +210,6 @@ class ThermoModel(Utilities): #(BaseClass):
             
             self._state.rho = self.mixture.EoS.rho(self._state.p, self._state.T)
             self._state.V = self._state.m/self._state.rho
-            
-    
     ################################
     
 #########################################################################

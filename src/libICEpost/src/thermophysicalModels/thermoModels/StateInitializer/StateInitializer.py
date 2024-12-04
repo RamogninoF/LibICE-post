@@ -33,6 +33,7 @@ class StateInitializer(BaseClass):
             Reference to the thermodynamic mixture
     """
     mix:ThermoMixture
+    thermoStateClass:str
     _state:ThermoState
     
     #########################################################################
@@ -46,25 +47,20 @@ class StateInitializer(BaseClass):
     #########################################################################
     #Constructor
     @abstractmethod
-    def __init__(self, /, *, mix:ThermoMixture) -> None:
+    def __init__(self, /, *, mix:ThermoMixture, thermoStateClass:str="ThermoState") -> None:
         """
         Setting mixture, to be overwritten in child
 
         Args:
             mix (ThermoMixture): The thermodynamic mixture in the system  (stored as reference)
+            thermoStateClass (str, optional): The specific ThermoState class to construct. Defaults to "ThermoState".
         """
         #Argument checking:
-        try:
-            #Type checking
-            self.checkType(mix, ThermoMixture, "mix")
-            
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.__init__, err)
+        self.checkType(mix, ThermoMixture, "mix")
+        self.checkType(thermoStateClass, str, "thermoStateClass")
         
-        try:
-            self.mix = mix
-        except BaseException as err:
-            self.fatalErrorInClass(self.__init__, f"Failed construction of {self.__class__.__name__} instance", err)
+        self.mix = mix
+        self.thermoStateClass = thermoStateClass
     
     #########################################################################
     #Dunder methods:

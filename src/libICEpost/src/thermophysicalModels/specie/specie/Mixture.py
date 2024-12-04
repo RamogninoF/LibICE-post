@@ -9,7 +9,6 @@ Last update:        12/06/2023
 TODO:
     Optimize the dilute method
     The 'for item in self' could be non optimal with current implementation
-    Define a update(mix:Mixture) method to change the mixture composition. Then use it whenever a Mixture is changed in a class, so that its pointer is preserved.
 """
 
 #####################################################################
@@ -18,8 +17,12 @@ TODO:
 
 from __future__ import annotations
 
+from libICEpost.src.base.Functions.typeChecking import checkType
 from libICEpost.src.base.Utilities import Utilities
 from dataclasses import dataclass
+
+from typing import Literal, Iterable, Self
+from enum import Enum
 
 import math
 from .Atom import Atom
@@ -29,6 +32,11 @@ from libICEpost.Database import database
 from libICEpost.Database import chemistry
 
 constants = database.chemistry.constants
+
+#############################################################################
+class _fracType(Enum):
+    mass = "mass"
+    mole = "mole"
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -147,58 +155,16 @@ class Mixture(Utilities):
     
     #########################################################################
     #Constructor:
-    def __init__(self, specieList:list[Molecule], composition:list[float], fracType ="mass"):
+    def __init__(self, specieList:Iterable[Molecule], composition:Iterable[float], fracType:Literal["mass","mole"]="mass"):
         """
-        specieList:         list<Molecule>
-            Names of the chemical specie in the mixture (must be in
-            ThermoTable)
-        composition:    list<float>
-            Names of the atomic specie contained in the chemical specie
-        fracType:       str ("mass" or "mole")
-            Type of dilution, if mass fraction or mole fraction based.
-        
         Create a mixture composition from molecules and composition.
+
+        Args:
+            specieList (Iterable[Molecule]): The molecules in the mixture.
+            composition (Iterable[float]): The composition of the mixture.
+            fracType (Literal[&quot;mass&quot;,&quot;mole&quot;], optional): Type of fractions used in the composition. Defaults to "mass".
         """
-        #Argument checking:
-        try:
-            self.checkInstanceTemplate(specieList, [Molecule.empty()], entryName="specieList")
-            self.checkInstanceTemplate(composition, [1.0], entryName="composition")
-            self.checkType(fracType, str, entryName="fracType")
-            
-            if not((fracType == "mass") or (fracType == "mole")):
-                raise TypeError("'fracType' accepted are: 'mass', 'mole'. Cannot create the mixture.")
-        
-            if not(len(composition) == len(specieList)):
-                raise ValueError("Entries 'composition' and 'specieList' must be of same length.")
-            
-            if len(composition):
-                if not math.isclose(sum(composition), 1.):
-                    raise TypeError("Elements of entry 'composition' must add to 1." )
-                
-                if not((min(composition) >= 0.0) and (max(composition) <= 1.0)):
-                    raise ValueError("All "+ fracType+ " fractions must be in range [0,1].")
-            
-            if not(specieList == [i for n, i in enumerate(specieList) if i not in specieList[:n]]):
-                raise ValueError("Found duplicate entries in 'specieList' list.")
-        
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.__init__, err)
-        
-        #Initialize data:
-        self._specie = [s.copy() for s in specieList]
-        
-        #Store data:
-        if (fracType == "mass"):
-            self._Y = composition[:]
-            self._X = [0.0] * len(composition)
-            self.updateMolFracts()
-        elif (fracType == "mole"):
-            self._X = composition[:]
-            self._Y = [0.0] * len(composition)
-            self.updateMassFracts()
-        
-        #Data for iteration:
-        self._current_index = 0
+        self.update(species=specieList, composition=composition, fracType=fracType)
     
     #########################################################################
     #Operators:
@@ -233,7 +199,7 @@ class Mixture(Utilities):
     def __repr__(self):
         R = \
             {
-                "specie": self.specie,
+                "specie": self.specieNames,
                 "X": self.X,
                 "Y": self.Y,
                 "MM": self.MM
@@ -400,8 +366,60 @@ class Mixture(Utilities):
 
         return specieList1 == specieList2
     
+    ##############################
+    #Hashing:
+    def __hash__(self):
+        """
+        Hashing of the representation.
+        """
+        return hash(self.__repr__()) 
+    
     #########################################################################
     #Member functions:
+    
+    #Update the composition with a new one
+    def update(self, species:Iterable[Molecule], composition:Iterable[float], *, fracType:Literal["mass","mole"]="mass"):
+        """
+        Reset the mixture composition.
+
+        Args:
+            species (Iterable[Molecule]): The species in the mixture
+            composition (Iterable[float]): The composition to impose
+            fracType (Literal[&quot;mass&quot;,&quot;mole&quot;], optional): Type for composition fractions. Defaults to "mass".
+        """
+        #Argument checking:
+        self.checkType(species, Iterable, entryName="species")
+        [self.checkType(s, Molecule, entryName=f"species[{ii}]") for ii,s in enumerate(species)]
+        self.checkType(composition, Iterable, entryName="composition")
+        [self.checkType(s, float, entryName=f"composition[{ii}]") for ii,s in enumerate(composition)]
+        
+        fracType = _fracType(fracType)
+        
+        if not(len(composition) == len(species)):
+            raise ValueError("Length mismatch between species and composition.")
+        
+        if len(composition):
+            if not math.isclose(sum(composition), 1.):
+                raise TypeError("Elements of entry 'composition' must add to 1." )
+            
+            if not((min(composition) >= 0.0) and (max(composition) <= 1.0)):
+                raise ValueError("All "+ fracType+ " fractions must be in range [0,1].")
+        
+        if not(len(species) == len(set(species))):
+            raise ValueError("Found duplicate entries in 'specieList' list.")
+        
+        #Initialize data:
+        self._specie = [s.copy() for s in species]
+        
+        #Store data:
+        if (fracType == _fracType.mass):
+            self._Y = composition[:]
+            self._X = [0.0] * len(composition)
+            self.updateMolFracts()
+        elif (fracType == _fracType.mole):
+            self._X = composition[:]
+            self._Y = [0.0] * len(composition)
+            self.updateMassFracts()
     
     ###############################
     #Compute Molar fractions:
@@ -465,36 +483,35 @@ class Mixture(Utilities):
     
     ###############################
     #Dilute the mixture with a second mixture, given the mass fraction of dilutant with respect to overall mixture (for example EGR):
-    def dilute(self, dilutingMix:Mixture, dilutionFract:float, fracType:str="mass"):
+    def dilute(self, dilutingMix:Mixture, dilutionFract:float, fracType:Literal["mass","mole"]="mass") -> Self:
         """
-        dilutingMix:        Mixture/Molecule
-            Diluting mixture
-        dilutionFract:      float
-            mass/mole fraction of the dilutant mixture with respect 
-            to the overall mixture.
-        fracType:       str ("mass" or "mole")
-            Type of dilution, if mass fraction or mole fraction based.
-        
         Dilute the mixture with a second mixture, given the 
         mass/mole fraction of the dilutant mixture with respect 
         to the overall mixture.
+
+        Args:
+            dilutingMix (Mixture): The mixture to use for dilution
+            dilutionFract (float): The mass/mole fraction of the diluting mixture in the final mixture.
+            fracType (Literal[&quot;mass&quot;,&quot;mole&quot;], optional): The type of fraction for dilution. Defaults to "mass".
+            
+        Returns:
+            Self: self
         """
         #Argument checking:
-        try:
-            self.checkTypes(dilutingMix, [self.__class__, Molecule], "dilutingMix")
-            self.checkType(dilutionFract, float, "dilutionFract")
-            self.checkType(fracType, str, "fracType")
-            if not((fracType == "mass") or (fracType == "mole")):
-                raise ValueError("'fracType' accepted are: 'mass', 'mole'. Cannot perform dilution.")
-            
-            if (dilutionFract < 0.0 or dilutionFract > 1.0):
-                raise ValueError("DilutionFract must be in range [0,1].")
+        self.checkTypes(dilutingMix, [self.__class__, Molecule], "dilutingMix")
+        self.checkType(dilutionFract, float, "dilutionFract")
+        fracType = _fracType(fracType)
         
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.dilute, err)
+        if (dilutionFract < 0.0 or dilutionFract > 1.0):
+            raise ValueError("DilutionFract must be in range [0,1].")
         
-        #If dilution fraction is too low, skip
+        #If dilution fraction is too low, add the new species with zero X and Y
         if dilutionFract < 10.**(-1.*self._decimalPlaces):
+            for s in dilutingMix:
+                if not s.specie in self.specie:
+                    self._specie.append(s.specie.copy())
+                    self._X.append(0.0)
+                    self._Y.append(0.0)
             return self
         
         #Cast molecule to mixture
@@ -512,43 +529,41 @@ class Mixture(Utilities):
             self._specie = [s for s in dilutingMix.specie]
         
         #Dilute
-        try:
-            for speci in dilutingMix:
-                #Check if it was already present:
-                if not(speci.specie in self):
-                    #Add the new specie
-                    self._specie.append(speci.specie)
-                    if (fracType == "mass"):
-                        self._Y.append(speci.Y * dilutionFract)
-                        self._X.append(float('nan'))
-                        # self.updateMolFracts()
-                    elif (fracType == "mole"):
-                        self._X.append(speci.X * dilutionFract)
-                        self._Y.append(float('nan'))
-                        # self.updateMassFracts()
-                else:
-                    #Dilute the already present specie
-                    index = self.index(speci.specie)
-                    if (fracType == "mass"):
-                        self._Y[index] = (self.Y[index] * (1.0 - dilutionFract)) + (speci.Y * dilutionFract)
-                    elif (fracType == "mole"):
-                        self._X[index] = (self.X[index] * (1.0 - dilutionFract)) + (speci.X * dilutionFract)
+        for speci in dilutingMix:
+            #Check if it was already present:
+            if not(speci.specie in self):
+                #Add the new specie
+                self._specie.append(speci.specie)
+                if (fracType == _fracType.mass):
+                    self._Y.append(speci.Y * dilutionFract)
+                    self._X.append(float('nan'))
+                    # self.updateMolFracts()
+                elif (fracType ==  _fracType.mole):
+                    self._X.append(speci.X * dilutionFract)
+                    self._Y.append(float('nan'))
+                    # self.updateMassFracts()
+            else:
+                #Dilute the already present specie
+                index = self.index(speci.specie)
+                if (fracType ==  _fracType.mass):
+                    self._Y[index] = (self.Y[index] * (1.0 - dilutionFract)) + (speci.Y * dilutionFract)
+                elif (fracType ==  _fracType.mole):
+                    self._X[index] = (self.X[index] * (1.0 - dilutionFract)) + (speci.X * dilutionFract)
+        
+        #Update mass/mole fractions of other specie:
+        for speci in self:
+            if not(speci.specie in dilutingMix):
+                index = self.index(speci.specie)
+                if (fracType ==  _fracType.mass):
+                    self._Y[index] *= (1.0 - dilutionFract)
+                elif (fracType ==  _fracType.mole):
+                    self._X[index] *= (1.0 - dilutionFract)
+        
+        if (fracType ==  _fracType.mass):
+            self.updateMolFracts()
+        elif (fracType ==  _fracType.mole):
+            self.updateMassFracts()
             
-            #Update mass/mole fractions of other specie:
-            for speci in self:
-                if not(speci.specie in dilutingMix):
-                    index = self.index(speci.specie)
-                    if (fracType == "mass"):
-                        self._Y[index] *= (1.0 - dilutionFract)
-                    elif (fracType == "mole"):
-                        self._X[index] *= (1.0 - dilutionFract)
-            
-            if (fracType == "mass"):
-                self.updateMolFracts()
-            elif (fracType == "mole"):
-                self.updateMassFracts()
-        except BaseException as err:
-            self.fatalErrorInClass(self.dilute, "Failed diluting the mixture", err)
         return self
     
     ###############################
@@ -683,7 +698,7 @@ class MixtureIter:
 #                             FRIEND FUNCTIONS                              #
 #############################################################################
 #Mixture blend:
-def mixtureBlend(mixtures:list[Mixture], composition:list[float], fracType:str="mass") -> Mixture:
+def mixtureBlend(mixtures:Iterable[Mixture], composition:Iterable[float], fracType:Literal["mass","mole"]="mass") -> Mixture:
     """
     mixture:    list<mixture>
             List of mixtures to be blended
@@ -695,30 +710,22 @@ def mixtureBlend(mixtures:list[Mixture], composition:list[float], fracType:str="
     Blends together a group of mixtures.
     """
     #Argument checking:
-    try:
-        Utilities.checkContainer(mixtures, list, Mixture, entryName="mixtures")
-        Utilities.checkContainer(composition, list, float, entryName="composition")
-        
-        if not((fracType == "mass") or (fracType == "mole")):
-            raise TypeError("'fracType' accepted are: 'mass', 'mole'. Cannot create the mixture.")
-        
-        if not(len(composition) == len(mixtures)):
-            raise ValueError("Entries 'composition' and 'mixtures' must be of same length.")
-        
-        if len(composition) < 1:
-            raise TypeError("'composition' cannot be empty." )
-        
-        if not math.isclose(sum(composition), 1.):
-            raise TypeError("Elements of entry 'composition' must add to 1." )
-        
-        if not((min(composition) >= 0.0) and (max(composition) <= 1.0)):
-            raise ValueError("All "+ fracType+ " fractions must be in range [0,1].")
-        
-        if not(mixtures == [i for n, i in enumerate(mixtures) if i not in mixtures[:n]]):
-            raise ValueError("Found duplicate entries in 'mixtures' list.")
-        
-    except BaseException as err:
-        Utilities.fatalErrorInArgumentChecking(None,mixtureBlend, err)
+    checkType(mixtures, Iterable, entryName="mixtures")
+    [checkType(s, Mixture, entryName=f"mixtures[{ii}]") for ii,s in enumerate(mixtures)]
+    checkType(composition, Iterable, entryName="composition")
+    [checkType(s, float, entryName=f"composition[{ii}]") for ii,s in enumerate(composition)]
+    
+    if not(len(composition) == len(mixtures)):
+        raise ValueError("Entries 'composition' and 'mixtures' must be of same length.")
+    
+    if len(composition) < 1:
+        raise TypeError("'composition' cannot be empty." )
+    
+    if not math.isclose(sum(composition), 1.):
+        raise TypeError("Elements of entry 'composition' must add to 1." )
+    
+    if not((min(composition) >= 0.0) and (max(composition) <= 1.0)):
+        raise ValueError("All "+ fracType+ " fractions must be in range [0,1].")
     
     mixBlend:Mixture = None
     for ii, mix in enumerate(mixtures):

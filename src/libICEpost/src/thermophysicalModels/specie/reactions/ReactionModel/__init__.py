@@ -10,7 +10,12 @@ Content of the package:
         
     Stoichiometry (module)
         Combustion with infinitely fast combustion through balancing of stoichiometry
+        
+    Equilibrium (module)
+        Computation of combustion products based on equilibrium
 """
 
 from .ReactionModel import ReactionModel
 from .Stoichiometry import Stoichiometry
+from .Equilibrium import Equilibrium
+from .Inhert import Inhert

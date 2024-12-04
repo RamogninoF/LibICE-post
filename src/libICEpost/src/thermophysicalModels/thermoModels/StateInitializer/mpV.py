@@ -53,27 +53,23 @@ class mpV(StateInitializer):
             V (float): volume [m^3]
         }
         """
-        try:
-            #Create the dictionary for construction
-            Dict = {}
-            
-            #List of mandatory entries in the dictionary.
-            entryList = ["mix", "p", "m", "V"]
-            for entry in entryList:
-                if not entry in dictionary:
-                    raise ValueError(f"Mandatory entry '{entry}' not found in dictionary.")
-                #Set the entry
-                Dict[entry] = dictionary[entry]
-            
-            #Constructing this class with the specific entries
-            out = cls\
-                (
-                    **Dict
-                )
-            return out
+        #Create the dictionary for construction
+        Dict = {}
         
-        except BaseException as err:
-            cls.fatalErrorInClass(cls.fromDictionary, "Failed construction from dictionary", err)
+        #List of mandatory entries in the dictionary.
+        entryList = ["mix", "p", "m", "V"]
+        for entry in entryList:
+            if not entry in dictionary:
+                raise ValueError(f"Mandatory entry '{entry}' not found in dictionary.")
+            #Set the entry
+            Dict[entry] = dictionary[entry]
+        
+        #Constructing this class with the specific entries
+        out = cls\
+            (
+                **Dict
+            )
+        return out
     
     #########################################################################
     def __init__(self, /, *, p:float, m:float, V:float, **kwargv):
@@ -85,41 +81,29 @@ class mpV(StateInitializer):
             m (float): mass [kg]
             V (float): volume [m^3]
         """
-        #Argument checking:
-        try:
-            # Check that the arguments satisfy what is expected from the init method
+        #Type checking
+        self.checkType(p, float, "p")
+        self.checkType(m, float, "m")
+        self.checkType(V, float, "V")
+        #Initialize base class
+        super().__init__(**kwargv)
 
-            #Type checking
-            self.checkType(p, float, "p")
-            self.checkType(m, float, "m")
-            self.checkType(V, float, "V")
+        #Compute the state
+        stateDict = \
+            {
+                "p":p,
+                "V":V,
+                "m":m
+            }
             
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.__init__, err)
+        #Compute density:
+        stateDict["rho"] = stateDict["m"]/stateDict["V"]
         
-        try:
-            #Initialize base class
-            super().__init__(**kwargv)
-
-            #Compute the state
-            stateDict = \
-                {
-                    "p":p,
-                    "V":V,
-                    "m":m
-                }
-                
-            #Compute density:
-            stateDict["rho"] = stateDict["m"]/stateDict["V"]
-            
-            #Compute temperature:
-            stateDict["T"] = self.mix.EoS.T(stateDict["p"], stateDict["rho"]) #T(p,rho)
-            
-            #Construct state:
-            self._state = ThermoState(**stateDict)
-
-        except BaseException as err:
-            self.fatalErrorInClass(self.__init__, f"Failed construction of {self.__class__.__name__}", err)
+        #Compute temperature:
+        stateDict["T"] = self.mix.EoS.T(stateDict["p"], stateDict["rho"]) #T(p,rho)
+        
+        #Construct state:
+        self._state = ThermoState.selector(self.thermoStateClass, stateDict)
     
     #########################################################################
     #Dunder methods:

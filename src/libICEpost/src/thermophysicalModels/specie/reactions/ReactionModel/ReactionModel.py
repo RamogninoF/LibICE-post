@@ -20,6 +20,7 @@ from ..Reaction.Reaction import Reaction
 from libICEpost.src.thermophysicalModels.specie.specie.Mixture import Mixture
 from libICEpost.Database import database
 
+from libICEpost.src.thermophysicalModels.thermoModels.ThermoState import ThermoState
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -28,24 +29,29 @@ class ReactionModel(BaseClass):
     """
     Defines classes to handel reaction of mixtures involving multiple simple reactions
     
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     Attributes:
-        reactants:  (Mixture)
-            The mixture of the reactants
-        
-        products:  (Mixture)
-            The mixture of products of the reaction
-            
-        reactions:  (_Database)
-           Database of oxidation reactions. Reference to database.chemistry.reactions
+        reactants (Mixture):    The mixture of the reactants
+        products (Mixture):     The mixture of products of the reaction
+        reactions (_Database):  Database of oxidation reactions. Reference to database.chemistry.reactions[ReactionType]
     
     """
     _ReactionType:str
+    """The type for reactions to lookup for in the database"""
+    
+    _reactants:Mixture
+    """The mixture of reactants"""
+    
+    _products:Mixture
+    """The mixture of products"""
+    
+    _state:ThermoState|None
+    """The last thermodynamic state used to update the reaction model"""
     
     #########################################################################
     #Properties:
     @property
-    def reactants(self):
+    def reactants(self) -> Mixture:
+        """The mixture of reactants"""
         return self._reactants
     
     @reactants.setter
@@ -55,92 +61,97 @@ class ReactionModel(BaseClass):
 
     @property
     def products(self):
-        self.update()
+        """The mixture of products"""
         return self._products
         
     @property
     def reactions(self):
-        return self._reactions
+        """The database with the avaliabe reactions"""
+        return self._reactions[self.ReactionType]
     
     @property
     def ReactionType(self):
+        """Name of the reactions used"""
         return self._ReactionType
+    
+    @property
+    def state(self):
+        """The last thermodynamic state used to update the reaction model"""
+        return self._state
     
     #########################################################################
     #Constructor:
-    def __init__(self, reactants:Mixture):
+    def __init__(self, reactants:Mixture, *, state:ThermoState=None):
         """
-        reactants: Mixture
-            The composition of the reactants
-        Construct from reactants
+        Construct from reactants and initial state.
+
+        Args:
+            reactants (Mixture): The composition of the reactants
+            state (ThermoState): Thermodynamic state to update the reaction model.
         """
-        try:
-            self.checkType(reactants, Mixture, "reactants")
-            self._reactions = database.chemistry.reactions
-            
-            self.update(reactants)
-        except BaseException as err:
-            self.fatalErrorInClass(self.__init__, "Failed construction", err)
+        self.checkType(reactants, Mixture, "reactants")
+        self._reactions = database.chemistry.reactions
+        
+        self._reactants = Mixture.empty()
+        self._products = Mixture.empty()
+        
+        self._state = None
+        
+        self.update(reactants=reactants, state=state)
 
     #########################################################################
     #Operators:
-    
-    ################################
-    
 
     #########################################################################
-    def update(self, reactants:Mixture=None, **state:dict[str:float]) -> ReactionModel:
+    def update(self, reactants:Mixture=None, *, state:ThermoState=None) -> bool:
         """
         Method to update the reactants data based on the mixture composition (interface).
 
         Args:
             reactants (Mixture, optional): Mixture of reactants if to be changed. Defaults to None.
-            **state (dict[str:float]): State variables that could be needed by specific reaction model.
+            state (ThermoState, optional): Thermodynamic state to update the reaction model.
 
         Returns:
-            ReactionModel: self
+            bool: if something changed
         """
-        try:
-            if not reactants is None:
-                self.checkType(reactants, Mixture, "reactants")
-        except BaseException as err:
-            self.fatalErrorInClass(self.__init__,"Argument checking failed", err)
+        if not reactants is None:
+            self.checkType(reactants, Mixture, "reactants")
         
-        self._update(reactants,**state)
+        if not state is None:
+            self.checkType(state, ThermoState, "state")
         
-        return self
+        return self._update(reactants, state=state)
     
     #####################################
     @abstractmethod
-    def _update(self, reactants:Mixture=None) -> bool:
+    def _update(self, reactants:Mixture=None, *, state:ThermoState=None) -> bool:
         """
         Method to update the reactants based on the mixture composition (implementation).
         
         Args:
             reactants (Mixture, optional): Mixture of reactants if to be changed. Defaults to None.
-        
+            state (ThermoState): Thermodynamic state to update the reaction model.
+            
         Returns:
-            bool: returns true if already up-to-date, otherwise False. Used in derived class to know if can skipp updating the state.
+            bool: if something changed
         """
+        update = False
+        
         #Update reactants
         if not reactants is None:
-            self._reactants = reactants
+            self.checkType(reactants, Mixture, "reactants")
+            if self._reactants != reactants:
+                self._reactants.update(reactants.specie, reactants.Y, fracType="mass")
+                update = True
         
-        # Store current mixture composition. Used to update the class 
-        # data in case the mixutre has changed
-        if not hasattr(self,"_reactantsOld"):
-            #First initialization
-            self._reactantsOld = self._reactants.copy()
-            return False
-        else:
-            #Updating
-            if not (self._reactants == self._reactantsOld):
-                #Change detected
-                self._reactantsOld = self._reactants
-                return False
+        #Update state variables
+        if not state is None:
+            self.checkType(state, ThermoState, "state")
+            if self._state != state:
+                self._state = state.copy()
+                update = True
         
-        #Already updated (True)
-        return True
+        return update
     
 #########################################################################
 #Create selection table

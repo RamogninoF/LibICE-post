@@ -39,10 +39,16 @@ class CombustionModel(BaseClass):
         
     """
     _freshMixture:Mixture
+    """The mixture of reactants"""
+    
     _combustionProducts:Mixture
+    """The mixture of combustion products"""
+    
     _mixture:Mixture
-    _state:ThermoState
+    """The current mixture"""
+    
     _reactionModel:ReactionModel
+    """The reaction model"""
     
     #########################################################################
     #Properties:
@@ -90,17 +96,6 @@ class CombustionModel(BaseClass):
             ReactionModel
         """
         return self._reactionModel
-    
-    ################################
-    @property
-    def state(self) -> ThermoState:
-        """
-        The current state (read only access)
-
-        Returns:
-            ThermoState
-        """
-        return self._state.copy()
         
     #########################################################################
     #Class methods and static methods:
@@ -110,7 +105,7 @@ class CombustionModel(BaseClass):
     def __init__(self, /, *,
                  reactants:Mixture,
                  reactionModel:str="Stoichiometry",
-                 state:ThermoState|dict[str:type]=ThermoState(),
+                 state:ThermoState=ThermoState(),
                  **kwargs
                  ):
         """
@@ -120,40 +115,27 @@ class CombustionModel(BaseClass):
             reactants (Mixture): Air
             reactionModel (str, optional): Model handling reactions. defaults to "Stoichiometry".
             state (ThermoState, optional): Giving current state to manage state-dependend 
-                combustion models(e.g. equilibrium). Defaults to empty state ThermoState().
+                reaction models (e.g. equilibrium). Defaults to empty state ThermoState().
         """
 
         #Argument checking:
-        try:
-            #Type checking
-            self.checkType(reactants, Mixture, "reactants")
-            self.checkTypes(state, [ThermoState, dict], "state")
-            
-            kwargs = Dictionary(**kwargs)
-            
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.__init__, err)
+        #Type checking
+        self.checkType(reactants, Mixture, "reactants")
+        self.checkTypes(state, [ThermoState, dict], "state")
         
-        try:
-            #Initialize the object
-            if isinstance(state, dict):
-                state = ThermoState(**state)
-            self._state = state
-            
-            #To be updated by specific combustion model
-            self._mixture = reactants.copy()
-            self._freshMixture = reactants.copy()
-            self._combustionProducts = reactants.copy()
-            
-            self._reactionModel = ReactionModel.selector(
-                reactionModel, 
-                kwargs.lookupOrDefault(reactionModel + "Dict", Dictionary()).update(reactants=self._freshMixture)
-                )
-            
-            #In child classes need to initialize the state (fresh mixture, combustion products, etc.)
-            
-        except BaseException as err:
-            self.fatalErrorInClass(self.__init__, f"Failed construction of {self.__class__.__name__}", err)
+        kwargs = Dictionary(**kwargs)
+        
+        #To be updated by specific combustion model
+        self._mixture = reactants.copy()
+        self._freshMixture = reactants.copy()
+        self._combustionProducts = reactants.copy()
+        
+        self._reactionModel = ReactionModel.selector(
+            reactionModel, 
+            kwargs.lookupOrDefault(reactionModel + "Dict", Dictionary()).update(reactants=self._freshMixture, state=state)
+            )
+        
+        #In child classes need to initialize the state (fresh mixture, combustion products, etc.)
     
     #########################################################################
     #Dunder methods:
@@ -161,13 +143,13 @@ class CombustionModel(BaseClass):
     #########################################################################
     #Methods:
     @abstractmethod
-    def update(self, *, reactants:Mixture=None, state:ThermoState|dict[str:type]=None, **kwargs) -> bool:
+    def update(self, *, reactants:Mixture=None, state:ThermoState=None, **kwargs) -> bool:
         """
         Update the state of the system. To be overwritten in child classes.
         
         Args:
             reactants (Mixture, optional): update reactants composition. Defaults to None.
-            state (ThermoState|dict[str:type], optional): the state variables of the system (needed to 
+            state (ThermoState, optional): the state variables of the system (needed to 
                 update the combustion model - e.g. equilibrium)
                 
         Returns:
@@ -177,25 +159,13 @@ class CombustionModel(BaseClass):
         
         #Update reactants
         if not reactants is None:
-            self.checkType(reactants, Mixture, "air")
-            
-            old = self._freshMixture
-            self._freshMixture = reactants
-            # self._combustionProducts = reactants
-            # self._mixture = reactants
-            if old != self.freshMixture:
+            self.checkType(reactants, Mixture, "reactants")
+            if self._freshMixture != reactants:
+                self._freshMixture.update(reactants.specie, reactants.Y, fracType="mass")
                 update = True
-            
-        #Update state variables
-        if not state is None:
-            self.checkTypes(state, (dict, ThermoState), "state")
-            if isinstance(state, dict):
-                state = ThermoState(**state)
-            
-            oldState = self.state
-            self._state = state
-            if oldState != self.state:
-                update = True
+        
+        #Update the reaction model
+        update = update or self._reactionModel.update(state=state, reactants=reactants)
             
         return update
     

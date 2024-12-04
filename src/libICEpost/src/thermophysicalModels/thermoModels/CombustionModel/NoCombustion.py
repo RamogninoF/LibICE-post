@@ -41,30 +41,23 @@ class NoCombustion(CombustionModel):
     def fromDictionary(cls, dictionary:dict|Dictionary):
         """
         Create from dictionary.
-        {
-            reactants (Mixture): The reactants composition
-        }
+        
+        Args:
+            dictionary (dict): The dictionary from which constructing, containing:
+                reactants (Mixture): The reactants composition
         """
-        try:
-            #Cast to Dictionary
-            cls.checkTypes(dictionary,(dict, Dictionary),"dictionary")
-            if isinstance(dictionary, dict):
-                dictionary = Dictionary(**dictionary)
-                
-            #Constructing this class with the specific entries
-            out = cls\
-                (
-                    **dictionary,
-                )
-            return out
+        cls.checkType(dictionary,dict,"dictionary")
+        dictionary = Dictionary(**dictionary)
             
-        except BaseException as err:
-            cls.fatalErrorInClass(cls.fromDictionary, "Failed construction from dictionary", err)
+        #Constructing this class with the specific entries
+        out = cls\
+            (
+                **dictionary,
+            )
+        return out
     
     #########################################################################
-    def __init__(self, /, *, 
-                 reactants:Mixture,
-                 **kwargs):
+    def __init__(self, /, *, reactants:Mixture, **kwargs):
         """
         Construct combustion model from reactants.
         Other keyword arguments passed to base class CombustionModel.
@@ -72,14 +65,14 @@ class NoCombustion(CombustionModel):
         Args:
             reactants (Mixture): The fresh mixture of reactants
         """
-        super().__init__(reactants=reactants, **kwargs)
+        super().__init__(reactants=reactants, reactionModel="Inhert")
     
     #########################################################################
     #Dunder methods:
     
     #########################################################################
     #Methods:
-    def update(self, 
+    def update(self,
                *args,
                **kwargs,
                ) -> bool:
@@ -92,7 +85,13 @@ class NoCombustion(CombustionModel):
         Returns:
             bool: if something changed
         """
-        return super().update(*args,**kwargs)
+        update = super().update(*args, **kwargs)
+        
+        if update:
+            self._combustionProducts = self._freshMixture
+            self._mixture = self._freshMixture
+        
+        return update
 
 #########################################################################
 #Add to selection table of Base

@@ -36,7 +36,7 @@ from libICEpost.src.base.Filter.Filter import Filter
 from ..EngineTime.EngineTime import EngineTime
 from ..EngineGeometry.EngineGeometry import EngineGeometry
 from libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.ThermoMixture import ThermoMixture
-from libICEpost.src.thermophysicalModels.thermoModels.ThermoModel import ThermoModel
+from libICEpost.src.thermophysicalModels.thermoModels.ThermoModel import ThermoModel, ThermoState
 from libICEpost.src.thermophysicalModels.thermoModels.CombustionModel.CombustionModel import CombustionModel
 from libICEpost.src.thermophysicalModels.thermoModels.EgrModel.EgrModel import EgrModel
 from libICEpost.src.engineModel.HeatTransferModel.HeatTransferModel import HeatTransferModel
@@ -466,8 +466,10 @@ class EngineModel(BaseClass):
         """
         #TODO: Update the reactants mixture based on injection models (may have already injected some mass)
         
+        #All data
         index = self.data.index[self.data.loc[:,'CA'] == self.time.time].tolist()[0]
         data = self.data.loc[index].to_dict()
+        
         self.CombustionModel.update(**data) #NOTE: update also fuel when implementing injection models
     
     #########################################################################
@@ -845,39 +847,44 @@ class EngineModel(BaseClass):
                 ...
         """
         #Add fields to data:
-        fields = ["dpdCA", "V", "T", "m", "gamma", "AHRR", "ROHR", "A"]
+        fields = {"dpdCA", "gamma", "AHRR", "ROHR", "A"}
+        for zone in self.Zones:
+            fields |= {(v if zone == "cylinder" else f"{v}_{zone}") for v in getattr(self, f"_{zone}").state.__dict__}
         for f in fields:
             if not f in self.data.columns:
                 self.data.loc[:,f] = float("nan")
         
-        #Specie
-        for specie in self._cylinder.mixture.mix:
-            self.data.loc[:,specie.specie.name + "_x"] = 0.0
-            self.data.loc[:,specie.specie.name + "_y"] = 0.0
-        
-        #Set initial values as start-time:
+        #Loop over zones
         CA = self.time.time
-        if CA == self.time.startTime:
-            index = self.data.index[self.data.loc[:,'CA'] == CA].tolist()
-            
-            #In-cylinder data
-            V = self.geometry.V(CA)
-            p = self.data.p(CA)
-            T = self._cylinder.state.T
-            m = self._cylinder.state.m
-            gamma = self._cylinder.mixture.gamma(p,T)
-            self.data.loc[index, "V"] = V
-            self.data.loc[index, "T"] = T
-            self.data.loc[index, "Tm"] = m
-            self.data.loc[index, "gamma"] = gamma
-            
-            #Ahrr
-            self.data.loc[index, "ahrr"] = 0.0
+        for zone in self.Zones:
+            postfix = "" if zone == "cylinder" else f"_{zone}"
+            Z:ThermoModel = getattr(self, f"_{zone}")
             
             #Specie
-            for specie in self._cylinder.mixture.mix:
-                self.data.loc[index, specie.specie.name + "_x"] = specie.X
-                self.data.loc[index, specie.specie.name + "_y"] = specie.Y
+            for specie in Z.mixture.mix:
+                self.data.loc[:,specie.specie.name + "_x" + postfix] = 0.0
+                self.data.loc[:,specie.specie.name + "_y" + postfix] = 0.0
+            
+            #Set initial values as start-time:
+            if CA == self.time.startTime:
+                index = self.data.index[self.data.loc[:,'CA'] == CA].tolist()
+                
+                #Properties
+                T = Z.state.T
+                p = Z.state.p
+                gamma = self._cylinder.mixture.gamma(p,T)
+                
+                self.data.loc[index, "gamma" + postfix] = gamma
+                self.data.loc[index, Z.state.__dict__.keys()] = [Z.state.__dict__[key] for key in Z.state.__dict__.keys()]
+                
+                #Ahrr
+                if zone == "cylinder":
+                    self.data.loc[index, "ahrr"] = 0.0
+                
+                #Specie
+                for specie in self._cylinder.mixture.mix:
+                    self.data.loc[index, specie.specie.name + "_x" + postfix] = specie.X
+                    self.data.loc[index, specie.specie.name + "_y" + postfix] = specie.Y
     
     ####################################
     def _update(self) -> None:
@@ -1227,31 +1234,39 @@ class EngineModel(BaseClass):
         return ax
     
     ####################################
-    
-    def plotP_ROHR(self, *, label="_noLabel", legend=False, apparent=False, pkwargs:dict=dict(), rohrkwargs:dict=dict(), axes:tuple[Axes,Axes]=None, **kwargs):
+    def plotP_ROHR(self, *, label="_noLabel", legend=False, apparent=False, pkwargs:dict=None, rohrkwargs:dict=None, axes:tuple[Axes,Axes]=None, adjustLims:bool=True, **kwargs):
         """
         Plot pressure (left axis) and ROHR (right axis).
         Automatically adjust limits of y axes to minimize overlapping between 
         left and right curves. X axis limits are set to [IVC,EVO].
 
         Args:
-        label (str, optional): the label to use in the legend. Defaults to "_noLabel".
-        legend (bool, optional): wether to make the legend. Defaults to False.
-        apparent (bool, optional): plot apparent heat release instead of ROHR. Defaults to False.
-        axes (tuple[matplotlib.axes.Axes,matplotlib.axes.Axes]): tuple with pressure and ROHR axes to use. Defaults to None.
-            pkwargs(dict, optional): The kwargs for the pressure plot. Defaults to:
-            {
-                "linestyle":"-"
-            }
-            
-            rohrkwargs(dict, optional): The kwargs for the pressure plot. Defaults to:
-            {
-                "linestyle":"--"
-            }
-            
-            
-        **kwargs: Keyword arguments common to both plots (for example, figsize)
+            label (str, optional): the label to use in the legend. Defaults to "_noLabel".
+            legend (bool, optional): wether to make the legend. Defaults to False.
+            apparent (bool, optional): plot apparent heat release instead of ROHR. Defaults to False.
+            adjustLims (bool, optional): Automatically adjust x/y limits. Defaults to True.
+            axes (tuple[matplotlib.axes.Axes,matplotlib.axes.Axes]): tuple with pressure and ROHR axes to use. Defaults to None.
+            pkwargs(dict, optional): The kwargs for the pressure plot. Defaults to:\
+                {\
+                    "linestyle":"-"\
+                }
+            rohrkwargs(dict, optional): The kwargs for the pressure plot. Defaults to:\
+                {\
+                    "linestyle":"--"\
+                }
+            **kwargs: Keyword arguments common to both plots (for example, figsize)
         """
+        if not rohrkwargs is None:
+            self.checkType(rohrkwargs, dict, "rohrkwargs")
+            rohrkwargs = {**rohrkwargs}
+        else:
+            rohrkwargs = {}
+        
+        if not pkwargs is None:
+            self.checkType(pkwargs, dict, "pkwargs")
+            pkwargs = {**pkwargs}
+        else:
+            pkwargs = {}
         
         #Check if data were already processed:
         if not all(var in self.data.columns for var in ["p", "ROHR"]):
@@ -1261,12 +1276,21 @@ class EngineModel(BaseClass):
         self.data.loc[:,"pBar"] = self.data.loc[:,"p"]/1e5
         
         #Check axes:
+        pLim_old = [float("inf"), -float("inf")]
+        rohrLim_old = [float("inf"), -float("inf")]
         if not axes is None:
             self.checkType(axes, tuple, "axes")
             if not len(axes) == 2:
                 raise ValueError("Entry 'axes' must be of length 2.")
-            self.checkType(axes[0], Axes, "axes[0]")
-            self.checkType(axes[1], Axes, "axes[1]")
+            
+            from matplotlib import pyplot as plt
+            if not axes[0] is None:
+                self.checkType(axes[0], Axes, "axes[0]")
+                pLim_old = axes[0].get_ylim()
+                
+            if not axes[1] is None:
+                self.checkType(axes[1], Axes, "axes[1]")
+                rohrLim_old = axes[1].get_ylim()
 
             axp = axes[0]
             axrohr = axes[1]
@@ -1298,7 +1322,7 @@ class EngineModel(BaseClass):
 
         #Color
         if not any(var in rohrkwargs for var in ["c", "color"]): #Use same color of pressure plot if not specified
-            rohrkwargs["color"] = axp.lines[-1]. get_color()
+            rohrkwargs["color"] = axp.lines[-1].get_color()
 
         if apparent:
             self.data.plot(x="CA", y="AHRR", xlabel="CA [°]", ylabel="AHRR [J/CA]", legend=False, label="_no", ax=axrohr, **rohrkwargs)
@@ -1306,27 +1330,36 @@ class EngineModel(BaseClass):
             self.data.plot(x="CA", y="ROHR", xlabel="CA [°]", ylabel="ROHR [J/CA]", legend=False, label="_no", ax=axrohr, **rohrkwargs)
         
         #x limits
-        axp.set_xlim([self.time.IVC, self.time.EVO])
-        where = np.array(self.data.loc[:,"CA"] >= self.time.IVC) & np.array(self.data.loc[:,"CA"] <= self.time.EVO)
+        xlim = kwargs["xlim"] if "xlim" in kwargs else [self.time.IVC if self.time.startOfCombustion() is None else self.time.startOfCombustion(), self.time.EVO]
+        axp.set_xlim(xlim)
+        where = np.array(self.data.loc[:,"CA"] >= xlim[0]) & np.array(self.data.loc[:,"CA"] <= xlim[-1])
         
         #Limits
-        a = 0.02
-        b = 0.2
-        c = 0.7
-        
-        #pressure limits
-        lim = [np.nanmin(self.data.loc[:,"pBar"][where]), np.nanmax(self.data.loc[:,"pBar"][where])]
-        lim = [lim[0] - (lim[1] - lim[0])*b, lim[1] + (lim[1] - lim[0])*a]
-        axp.set_ylim(lim)
-        
-        #ROHR limits
-        if apparent:
-            data = self.data.loc[:,"AHRR"]
-        else:
-            data = self.data.loc[:,"ROHR"]
-        lim = [np.nanmin(data[where]), np.nanmax(data[where])]
-        lim = [lim[0] - (lim[1] - lim[0])*a, lim[1] + (lim[1] - lim[0])*c]
-        axrohr.set_ylim(lim)
+        if adjustLims:
+            a = 0.02
+            b = 0.2
+            c = 0.7
+            
+            #pressure limits
+            if not "ylim" in pkwargs:
+                data = self.data.loc[:,"pBar"][where]
+                if len(data[np.invert(np.isnan(data))]) > 0:
+                    lim = [np.nanmin(data), np.nanmax(data)]
+                    lim = [lim[0] - (lim[1] - lim[0])*b, lim[1] + (lim[1] - lim[0])*a]
+                    lim = [min(lim[0], pLim_old[0]), max(lim[1], pLim_old[1])]
+                    axp.set_ylim(lim)
+            
+            #ROHR limits
+            if not "ylim" in rohrkwargs:
+                if apparent:
+                    data = self.data.loc[:,"AHRR"][where]
+                else:
+                    data = self.data.loc[:,"ROHR"][where]
+                if len(data[np.invert(np.isnan(data))]) > 0:
+                    lim = [np.nanmin(data), np.nanmax(data)]
+                    lim = [lim[0] - (lim[1] - lim[0])*a, lim[1] + (lim[1] - lim[0])*c]
+                    lim = [min(lim[0], rohrLim_old[0]), max(lim[1], rohrLim_old[1])]
+                    axrohr.set_ylim(lim)
         
         #Return the Axes
         return (axp, axrohr)

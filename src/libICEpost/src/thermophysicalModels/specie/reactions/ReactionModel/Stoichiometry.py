@@ -12,12 +12,15 @@ Last update:        12/06/2023
 #####################################################################
 
 import math
-import sympy as sym
+
+from libICEpost import Dictionary
 
 from .ReactionModel import ReactionModel
 from ..Reaction.Reaction import Reaction
 from libICEpost.src.thermophysicalModels.specie.specie.Mixture import Mixture, mixtureBlend
 from libICEpost.src.thermophysicalModels.specie.specie.Molecule import Molecule
+
+from libICEpost.src.thermophysicalModels.thermoModels.ThermoState import ThermoState
 
 from libICEpost.Database import database
 
@@ -46,8 +49,8 @@ class Stoichiometry(ReactionModel):
            Database of oxidation reactions. Reference to database.chemistry.reactions
     
     """
-    #The type of reation to look-up for
     _ReactionType:str = "StoichiometricReaction"
+    """The type for reactions to lookup for in the database"""
     
     #########################################################################
     @property
@@ -70,33 +73,22 @@ class Stoichiometry(ReactionModel):
     @classmethod
     def fromDictionary(cls, dictionary):
         """
-        Args:
-            dictionary (dict): The dictionary from which constructing
-                {
-                    "reactants" (Mixture): the mixture of reactants
-                    "oxidiser" (Molecule): the oxidizer
-                }
+        Construct from dictionary.
         
-        Constructs from dictionary
+        Args:
+            dictionary (dict): The dictionary from which constructing, containing:
+                reactants (Mixture): the mixture of reactants
+                oxidiser (Molecule): the oxidizer
         """
-        try:
-            entryList = ["reactants"]
-            for entry in entryList:
-                if not entry in dictionary:
-                    raise ValueError(f"Mandatory entry '{entry}' not found in dictionary.")
-            
-            if not "oxidizer" in dictionary:
-                dictionary["oxidizer"] = database.chemistry.specie.Molecules.O2
-            
-            out = cls\
-                (
-                    dictionary["reactants"],
-                    dictionary["oxidizer"]
-                )
-            return out
-            
-        except BaseException as err:
-            cls.fatalErrorInClass(cls.fromDictionary, "Failed construction from dictionary", err)
+        cls.checkType(dictionary,dict,"dictionary")
+        dictionary = Dictionary(**dictionary)
+        
+        out = cls\
+            (
+                dictionary.lookup("reactants"),
+                dictionary.lookupOrDefault("oxidizer",default=database.chemistry.specie.Molecules.O2)
+            )
+        return out
     
     #########################################################################
     #Properties:
@@ -109,13 +101,11 @@ class Stoichiometry(ReactionModel):
             reactants (Mixture): the mixture of reactants
             oxidizer (Molecule, optional): The oxidizing molecule. Defaults to database.chemistry.specie.Molecules.O2.
         """
-        
         self.checkType(oxidizer, Molecule, "oxidizer")
         self._oxidizer = oxidizer
         
         super().__init__(reactants)
         
-
     #########################################################################
     #Operators:
     
@@ -136,19 +126,21 @@ class Stoichiometry(ReactionModel):
         return self
         
     ###################################
-    def _update(self, reactants:Mixture=None, **state) -> bool:
+    def _update(self, reactants:Mixture=None, *, state:ThermoState=None) -> bool:
         """
         Method to update the products.
 
         Args:
             reactants (Mixture, optional): Update mixture of reactants. Defaults to None.
+            state (ThermoState, optional): Thermodynamic state to update the reaction model. (NOT USED)
 
         Returns:
-            bool: wether the system was updated
+            bool: if something changed
         """
-        #Update reactants, return True if the reactants are already up-to-date:
-        if super()._update(reactants):
-            return True
+        #Update reactants, return False if the reactants where not changed:
+        #Not passing the state: not needed for update
+        if not super()._update(reactants):
+            return False
         self._updateFuels()
         
         #Splitting the computation into three steps:
@@ -164,8 +156,8 @@ class Stoichiometry(ReactionModel):
         oxReactions = {}    #List of oxidation reactions
         for f in self._fuels:
             found = False
-            for r in self.reactions[self.ReactionType]:
-                react = self.reactions[self.ReactionType][r]
+            for r in self.reactions:
+                react = self.reactions[r]
                 if (f in react.reactants) and (self.oxidizer in react.reactants):
                     found = True
                     oxReactions[f.name] = react
@@ -339,13 +331,13 @@ class Stoichiometry(ReactionModel):
         if not inerts is None:
             prods.dilute(inerts, yInert, "mass")
         
-        self._products = prods
+        self._products.update(prods.specie, prods.Y, fracType="mass")
         
         # print("Products:")
         # print(prods)
         
         #Updated
-        return False
+        return True
         
     ################################
     
