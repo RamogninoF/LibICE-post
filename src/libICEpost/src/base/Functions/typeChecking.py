@@ -74,7 +74,7 @@ def checkType(entry:str, Type:type|tuple[type|_SpecialGenericAlias], entryName:s
     if (Type == None.__class__) and not(checkForNone):
         return
     
-    if (isinstance(entry, (int,np.int64)) and (Type == float) and intAsFloat):
+    if (isinstance(entry, (int,np.integer)) and issubclass(Type,(float, np.floating)) and intAsFloat):
         return
     
     if not(isinstance(entry, Type)):

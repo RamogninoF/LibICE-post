@@ -108,15 +108,12 @@ class SelectionTable(Utilities):
         """
         Get from database
         """
-        try:
-            self.checkType(typeName, str, "typeName")
-            if not typeName in self:
-                string = f"Class {typeName} not found in selection table. Available classes are:"
-                for entry in self.__db:
-                    string += f"\n{entry}"
-                raise ValueError(string)
-        except BaseException as err:
-            self.fatalErrorInClass(self.__getitem__, f"Argument checking failed", err)
+        self.checkType(typeName, str, "typeName")
+        if not typeName in self:
+            string = f"Class {typeName} not found in selection table. Available classes are:"
+            for entry in self.__db:
+                string += f"\n{entry}"
+            raise ValueError(string)
         
         return self.__db[typeName]
     
@@ -184,24 +181,18 @@ class BaseClass(Utilities, metaclass=ABCMeta):
         
         Construct an instance of a subclass of this that was added to the selection table.
         """
-        try:
-            cls.checkType(dictionary, dict, "dictionary")
-            cls.checkType(typeName, str, "typeName")
-        except BaseException as err:
-            cls.fatalErrorInClass(cls.selector, f"Argument checking failed", err)
+        cls.checkType(dictionary, dict, "dictionary")
+        cls.checkType(typeName, str, "typeName")
+    
+        #Check if has table
+        if not cls.hasSelectionTable():
+            raise ValueError(f"No run-time selection table available for class {cls.__name__}")
         
-        try:
-            #Check if has table
-            if not cls.hasSelectionTable():
-                raise ValueError(f"No run-time selection table available for class {cls.__name__}")
-            
-            #Check if class in table
-            cls.selectionTable().check(typeName)
-            
-            #Try instantiation
-            instance = cls.selectionTable()[typeName].fromDictionary(dictionary)
-        except BaseException as err:
-            cls.fatalErrorInClass(cls.selector, f"Failed constructing instance of type '{cls.selectionTable()[typeName].__name__}'", err)
+        #Check if class in table
+        cls.selectionTable().check(typeName)
+        
+        #Try instantiation
+        instance = cls.selectionTable()[typeName].fromDictionary(dictionary)
         
         return instance
     
@@ -223,10 +214,7 @@ class BaseClass(Utilities, metaclass=ABCMeta):
         
         Construct an instance of this class from a dictionary. To be overwritten by derived class.
         """
-        try:
-            cls.checkType(dictionary, dict, "dictionary")
-        except BaseException as err:
-            cls.fatalErrorInClass(cls.fromDictionary, f"Argument checking failed", err)
+        cls.checkType(dictionary, dict, "dictionary")
         
         if inspect.isabstract(cls):
             cls.fatalErrorInClass(cls.fromDictionary, f"Can't instantiate abstract class {cls.__name__} with abstract methods: " + ", ".join(am for am in cls.__abstractmethods__) + ".")

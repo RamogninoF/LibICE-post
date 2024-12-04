@@ -11,14 +11,14 @@ Last update:        25/21/2024
 #                               IMPORT                              #
 #####################################################################
 
-from typing import Any
+from typing import Any, Mapping
 import types
 from libICEpost.src.base.BaseClass import BaseClass
 
 #############################################################################
 #                               MAIN CLASSES                                #
 #############################################################################
-class _DatabaseClass(BaseClass, dict):
+class _DatabaseClass(BaseClass, dict, Mapping):
     def __init__(self, name:str, **values):
         """
         Initialize as named database

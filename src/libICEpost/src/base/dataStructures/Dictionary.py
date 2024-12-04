@@ -169,7 +169,7 @@ class Dictionary(OrderedDict, Utilities):
             return default
         else:
             if not isinstance(self[entryName], type(default)) and fatal:
-                self.fatalErrorInClass(self.lookupOrDefault,f"Inconsistent type of returne value ({type(self[entryName]).__name__}) with default ({type(default).__name__}).", err)
+                raise TypeError(f"Inconsistent type of returne value ({type(self[entryName]).__name__}) with default ({type(default).__name__}).")
             return self[entryName]
     
     ######################################
