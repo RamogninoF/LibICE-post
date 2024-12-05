@@ -1,12 +1,22 @@
 # libICEpost
 
-Postprocessing of data sampled from internal combustion engines (Experimental, 1D/0D (Gasdyn), 3D (LibICE), etc.)
+Postprocessing of data sampled from internal combustion engines (Experimental, 1D/0D (Gasdyn/GT-Power), 3D (LibICE-OpenFOAM/commercial codes), etc.)
 
 ## Installation
 
+Installation from PyPI repositories (not up-to-date):
 ```bash
 $ pip install libICEpost
 ```
+
+Installation from source code:
+```bash
+$ git clone https://github.com/RamogninoF/LibICE-post.git
+$ cd LibICE-post
+$ pip install .
+```
+
+Sugersted to run pip with `-e` option to install in editable mode, so that the changes are detected when pulling from the repository.
 
 ## Usage
 
