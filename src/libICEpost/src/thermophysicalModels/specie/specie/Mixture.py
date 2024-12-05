@@ -505,15 +505,6 @@ class Mixture(Utilities):
         if (dilutionFract < 0.0 or dilutionFract > 1.0):
             raise ValueError("DilutionFract must be in range [0,1].")
         
-        #If dilution fraction is too low, add the new species with zero X and Y
-        if dilutionFract < 10.**(-1.*self._decimalPlaces):
-            for s in dilutingMix:
-                if not s.specie in self.specie:
-                    self._specie.append(s.specie.copy())
-                    self._X.append(0.0)
-                    self._Y.append(0.0)
-            return self
-        
         #Cast molecule to mixture
         if isinstance(dilutingMix, Molecule):
             dilutingMix = Mixture([dilutingMix], [1.0])
@@ -527,6 +518,15 @@ class Mixture(Utilities):
             self._X = dilutingMix.X[:]
             self._Y = dilutingMix.Y[:]
             self._specie = [s for s in dilutingMix.specie]
+        
+        #If dilution fraction is too low, add the new species with zero X and Y
+        if dilutionFract < 10.**(-1.*self._decimalPlaces):
+            for s in dilutingMix:
+                if not s.specie in self.specie:
+                    self._specie.append(s.specie.copy())
+                    self._X.append(0.0)
+                    self._Y.append(0.0)
+            return self
         
         #Dilute
         for speci in dilutingMix:
