@@ -129,6 +129,23 @@ class ThermoMixture(Utilities):
         
     #########################################################################
     #Operators:
+    def __repr__(self) -> str:
+        """Dict-like representation with thermodynamic model classes and mixture"""
+        out = \
+            {
+                "EoS":self.EoS.__class__.__name__,
+                "Thermo":self.Thermo.__class__.__name__,
+                "mixture":self.mix
+            }
+        return out.__repr__()
+    
+    ####################################
+    def __str__(self) -> str:
+        """Printing the type of thermodynamic models and the mixture"""
+        str = f"Equation of state: {self.EoS.__class__.__name__}\n" + \
+              f"Thermo model: {self.Thermo.__class__.__name__}\n" + \
+              f"Mixture:\n{self.mix.__str__()}"
+        return str
     
     #########################################################################
     #Member functions:

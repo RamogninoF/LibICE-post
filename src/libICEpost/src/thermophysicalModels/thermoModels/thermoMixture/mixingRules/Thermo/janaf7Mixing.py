@@ -41,9 +41,9 @@ class janaf7Mixing(ThermoMixing):
     # set of coefficients. Hence, it is necessary to introduce a new class here defined consistenty
     # with Thermo implementation, and then use the properties of each component and averaging them.
 
-    class _ThermoClass(Thermo):
+    class janaf7(Thermo):
         """
-        Thermodynamic data of janaf7 mixture consistent with Thermo class.
+        Thermodynamic data of mixture with NASA-7 polinomial coefficients consistent with janaf7 class.
         """
 
         ###################################
@@ -52,7 +52,13 @@ class janaf7Mixing(ThermoMixing):
             """
             Not to be used!
             """
-            raise NotImplementedError
+            raise NotImplementedError("Not to be used!")
+        
+        ###################################
+        @property
+        def Rgas(self):
+            """The mass-specific gas constant [J/kgK]"""
+            return self._mix.Rgas
         
         ###################################
         def __init__(self, mix:Mixture):
@@ -148,7 +154,7 @@ class janaf7Mixing(ThermoMixing):
         Construct from Mixture.
         """
         try:
-            self._Thermo = self._ThermoClass(mix)
+            self._Thermo = self.janaf7(mix)
             super().__init__(mix)
             
         except BaseException as err:
