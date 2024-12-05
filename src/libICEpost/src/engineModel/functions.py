@@ -32,6 +32,6 @@ def upMean(*, geometry:EngineGeometry.ConRod.ConRodGeometry, time:EngineTime.Eng
         checkType(geometry, EngineGeometry.ConRod.ConRodGeometry, "geometry")
         checkType(time, EngineTime.EngineTime.EngineTime, "time")
         
-        return 2.*time.omega*geometry.S
+        return 2.*time.n/60.*geometry.S
     except BaseException as err:
         fatalErrorInFunction(upMean, "Failed computing mean piston speed", err)
