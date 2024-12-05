@@ -3,22 +3,25 @@
 Postprocessing of data sampled from internal combustion engines (Experimental, 1D/0D (Gasdyn/GT-Power), 3D (LibICE-OpenFOAM/commercial codes), etc.)
 
 ## Installation
+Suggested to use [anaconda](https://www.anaconda.com/) python environment manager to use the library, so that the correct python version can be used in a dedicated environment. Currently working on python version 3.11.4.
 
 Installation from PyPI repositories (not up-to-date):
 ```bash
 $ pip install libICEpost
 ```
 
-Installation from source code:
+Installation from source code (suggested):
 ```bash
 $ git clone https://github.com/RamogninoF/LibICE-post.git
 $ cd LibICE-post
 $ pip install .
 ```
 
-Sugersted to run `pip install` with `-e` option to install in editable mode, so that the changes are detected when pulling from the repository.
+Suggested to run `pip install` with `-e` option to install in editable mode, so that the changes are detected when pulling from the repository:
 
-Sugersted to use [anaconda](https://www.anaconda.com/) python environment manager to use the library, so that the correct python version can be used in a dedicated environment. Currently working on python version 3.11.4.
+```bash
+$ pip install -e .
+```
 
 ## Usage
 
