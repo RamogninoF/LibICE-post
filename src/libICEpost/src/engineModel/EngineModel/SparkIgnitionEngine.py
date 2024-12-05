@@ -26,7 +26,7 @@ from libICEpost.src.thermophysicalModels.thermoModels.CombustionModel.PremixedCo
 from libICEpost.src.engineModel.EngineTime.SparkIgnitionTime import SparkIgnitionTime
 
 from libICEpost.src.thermophysicalModels.thermoModels.ThermoModel import ThermoModel
-from libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.functions import computeAlphaSt
+from libICEpost.src.thermophysicalModels.specie.reactions.functions import computeAlphaSt
 from libICEpost.Database.chemistry.specie.Mixtures import Mixture
 
 #############################################################################

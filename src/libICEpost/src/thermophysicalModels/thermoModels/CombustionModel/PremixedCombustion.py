@@ -18,7 +18,7 @@ from .CombustionModel import CombustionModel
 
 #Other imports
 from libICEpost.src.thermophysicalModels.specie.specie.Mixture import Mixture
-from libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.functions import computeAlphaSt, computeAlpha
+from libICEpost.src.thermophysicalModels.specie.reactions.functions import computeAlphaSt, computeAlpha
 from libICEpost.src.base.dataStructures.Dictionary import Dictionary
 
 from ..ThermoState import ThermoState

@@ -18,7 +18,7 @@ from .EgrModel import EgrModel
 
 from libICEpost.src.thermophysicalModels.specie.specie.Mixture import Mixture
 from libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.Stoichiometry import Stoichiometry
-from libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.functions import computeAlphaSt
+from libICEpost.src.thermophysicalModels.specie.reactions.functions import computeAlphaSt
 from libICEpost.src.thermophysicalModels.specie.specie.Mixture import mixtureBlend
 
 from libICEpost.src.base.dataStructures.Dictionary import Dictionary

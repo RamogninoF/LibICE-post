@@ -78,7 +78,7 @@ import pandas as pd
 from pandas import DataFrame
 
 from libICEpost.src.base.dataStructures.Dictionary import Dictionary
-from libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.functions import computeAlphaSt, Mixture
+from libICEpost.src.thermophysicalModels.specie.reactions.functions import computeAlphaSt, Mixture
 from libICEpost.src.thermophysicalModels.thermoModels.EgrModel.StoichiometricMixtureEGR import StoichiometricMixtureEGR
 
 from libICEpost.Database.chemistry.specie.Molecules import Molecules

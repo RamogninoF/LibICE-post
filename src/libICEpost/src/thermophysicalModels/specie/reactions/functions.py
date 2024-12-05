@@ -239,3 +239,31 @@ def makeEquilibriumMechanism(path:str, species:Iterable[str], *, overwrite:bool=
     with open(path, 'w') as yaml_file:
         yaml.dump(output, yaml_file)
     
+#############################################################################
+def computeLHV(fuel:Molecule|str) -> float:
+    """
+    Compute the lower heating value (LHV) of a molecule. This must be stored in 
+    the database of fuels (database.chemistry.specie.Fuels), so that it has an 
+    oxidation reaction in the corresponding database (database.chemistry.reactions.StoichiometricReaction).
+    
+    Attributes:
+        fuel (Molecule|str): A fuel molecule or its name. This will be looked-up 
+        in the database of oxidation reactions.
+    
+    Returns:
+        float: The LHV [J/kg]
+    """
+    checkType(fuel, (str, Molecule), "fuel")
+    if isinstance(fuel, str):
+        from libICEpost.Database.chemistry.specie.Molecules import Fuels
+        fuel = Fuels[fuel]
+    
+    from libICEpost.Database.chemistry.reactions.StoichiometricReaction import StoichiometricReaction_db
+    from libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.ThermoMixture import ThermoMixture
+    
+    oxReact = StoichiometricReaction_db[fuel.name + "-ox"]
+    
+    reactants = ThermoMixture(oxReact.reactants,thermoType={"Thermo":"janaf7", "EquationOfState":"PerfectGas"})
+    products = ThermoMixture(oxReact.products,thermoType={"Thermo":"janaf7", "EquationOfState":"PerfectGas"})
+    
+    return (reactants.Thermo.hf() - products.Thermo.hf())/oxReact.reactants.Y[oxReact.reactants.specie.index(fuel)]
