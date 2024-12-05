@@ -16,7 +16,9 @@ $ cd LibICE-post
 $ pip install .
 ```
 
-Sugersted to run pip with `-e` option to install in editable mode, so that the changes are detected when pulling from the repository.
+Sugersted to run `pip install` with `-e` option to install in editable mode, so that the changes are detected when pulling from the repository.
+
+Sugersted to use [anaconda](https://www.anaconda.com/) python environment manager to use the library, so that the correct python version can be used in a dedicated environment. Currently working on python version 3.11.4.
 
 ## Usage
 
