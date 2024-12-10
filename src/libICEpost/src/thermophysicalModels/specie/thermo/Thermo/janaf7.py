@@ -13,8 +13,6 @@ Last update:        12/06/2023
 
 from .Thermo import Thermo
 
-from numpy import math
-
 from libICEpost.Database.chemistry.constants import database
 Tstd = database.chemistry.constants.Tstd
 
