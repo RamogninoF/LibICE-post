@@ -42,11 +42,7 @@ class HeatTransferModel(BaseClass):
         Returns:
             Self: instance of selected heatTransferModel
         """
-        try:
-            return cls(**dictionary)
-            
-        except BaseException as err:
-            cls.fatalErrorInClass(cls.fromDictionary, "Failed contruction from dictionary", err)
+        return cls(**dictionary)
     
     #########################################################################
     #Compute heat transfer coefficient:
