@@ -61,11 +61,10 @@ class ThermoMixing(BaseClass):
 
         Base (virtual) class: does not support instantiation.
         """
-        try:
-            Thermo.selectionTable().check(self.ThermoType)
-            self.update(mix)
-        except BaseException as err:
-            self.fatalErrorInClass(self.__init__, f"Failed construction of {self.__class__.__name__} class",err)
+        Thermo.selectionTable().check(self.ThermoType)
+        self._mix = mix.copy()
+        self.update(mix)
+        
     #########################################################################
     #Properties:
     @property
@@ -77,44 +76,37 @@ class ThermoMixing(BaseClass):
         return self._Thermo
 
     #########################################################################
-    def update(self, mix:Mixture=None) -> ThermoMixing:
+    def update(self, mix:Mixture=None) -> bool:
         """
-        Method to update the thermodynamic data based on the mixture composition (interface).
-        """
-        try:
-            if not mix is None:
-                self.checkType(mix, Mixture, "Mixture")
-        except BaseException as err:
-            self.fatalErrorInClass(self.__init__,"Argument checking failed", err)
-        
-        self._update(mix)
+        Method to update the equation of state based on the mixture composition (interface).
 
-        return self
+        Args:
+            mix (Mixture, optional): Change the mixture. Defaults to None.
+
+        Returns:
+            bool: If something changed
+        """
+        return self._update(mix)
     
     #####################################
     @abstractmethod
-    def _update(self, mix:Mixture=None):
+    def _update(self, mix:Mixture=None) -> bool:
         """
-        Method to update the thermodynamic data based on the mixture composition (implementation).
+        Method to update the equation of state based on the mixture composition (implementation).
+        
+        Args:
+            mix (Mixture, optional): Change the mixture. Defaults to None.
+
+        Returns:
+            bool: If something changed
         """
         if not mix is None:
-            self._mix = mix
+            if mix != self._mix:
+                self._mix.update(mix.specie, mix.Y, fracType="mass")
+                return True
         
-        # Store current mixture composition. Used to update the class 
-        # data in case the mixutre has changed
-        if not hasattr(self,"_mixOld"):
-            #First initialization
-            self._mixOld = self._mix.copy()
-            return False
-        else:
-            #Updating
-            if not (self._mix == self._mixOld):
-                #Change detected
-                self._mixOld = self._mix
-                return False
-        
-        #Already updated (True)
-        return True
+        #Already updated
+        return False
 
 #########################################################################
 #Create selection table

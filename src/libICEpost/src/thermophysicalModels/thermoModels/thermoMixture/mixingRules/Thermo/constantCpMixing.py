@@ -40,20 +40,16 @@ class constantCpMixing(ThermoMixing):
         """
         Create from dictionary.
         """
-        try:
-            entryList = ["mixture"]
-            for entry in entryList:
-                if not entry in dictionary:
-                    raise ValueError(f"Mandatory entry '{entry}' not found in dictionary.")
-            
-            out = cls\
-                (
-                    dictionary["mixture"]
-                )
-            return out
-            
-        except BaseException as err:
-            cls.fatalErrorInClass(cls.fromDictionary, "Failed construction from dictionary", err)
+        entryList = ["mixture"]
+        for entry in entryList:
+            if not entry in dictionary:
+                raise ValueError(f"Mandatory entry '{entry}' not found in dictionary.")
+        
+        out = cls\
+            (
+                dictionary["mixture"]
+            )
+        return out
     
     #########################################################################
     #Constructor:
@@ -63,32 +59,41 @@ class constantCpMixing(ThermoMixing):
             The mixture
         Construct from Mixture.
         """
-        try:
-            #Initialize to nan and then set with update method in base class __init__
-            self._Thermo = Thermo.selector\
-                (
-                    self.ThermoType,
-                    {
-                        "Rgas":float('nan'),
-                        "cp":float('nan'),
-                    }
-                )
-            super().__init__(mix)
-            
-        except BaseException as err:
-            self.fatalErrorInClass(self.__init__, "Failed construction", err)
+        #Initialize to nan and then set with update method in base class __init__
+        self._Thermo = Thermo.selector\
+            (
+                self.ThermoType,
+                {
+                    "Rgas":float('nan'),
+                    "cp":float('nan'),
+                }
+            )
+        super().__init__(mix)
+        
+        #Save old mixture
+        self._oldMix:Mixture = self._mix.copy()
             
     #########################################################################
     #Operators:
-    def _update(self, mix:Mixture=None):
+    def _update(self, mix:Mixture=None) -> bool:
         """
         Compute new properties as mass-weighted from individual specie in mixture.
+        
+        Args:
+            mix (Mixture, optional): Change the mixture. Defaults to None.
+
+        Returns:
+            bool: If something changed
         """
-        #Update of base class, return if already updated
-        if super()._update(mix):
-            return True
+        #Update of base class
+        super()._update(mix)
+
+        if self.mix == self._oldMix:
+            #Updated
+            return False
 
         #Update
+        self._oldMix = self._mix.copy()
         cp = []
         hf = []
         weigths = []
@@ -101,10 +106,11 @@ class constantCpMixing(ThermoMixing):
             cp.append(th._cp)
             hf.append(th._hf)
         
+        self._Thermo.Rgas = self.mix.Rgas
         self._Thermo._cp = (sum([weigths[ii]*v for ii, v in enumerate(cp)]))
         self._Thermo._hf = (sum([weigths[ii]*v for ii, v in enumerate(hf)]))
 
-        return False
+        return True
 
         
 

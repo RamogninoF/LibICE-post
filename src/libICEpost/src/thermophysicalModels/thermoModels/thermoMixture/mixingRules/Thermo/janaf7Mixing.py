@@ -62,7 +62,7 @@ class janaf7Mixing(ThermoMixing):
         
         ###################################
         def __init__(self, mix:Mixture):
-            self._mix = mix
+            self._mix = mix #Take as reference!
 
         ###################################
         def _combineMethod(self, func:str, *fargs, **fkwargs):
@@ -122,7 +122,7 @@ class janaf7Mixing(ThermoMixing):
         ###################################
         def update(self, mix:Mixture=None)-> None:
             if not mix is None:
-                self._mix = mix
+                self._mix.update(mix.specie, mix.Y, fracType="mass")
 
     #########################################################################
     @classmethod
@@ -130,20 +130,16 @@ class janaf7Mixing(ThermoMixing):
         """
         Create from dictionary.
         """
-        try:
-            entryList = ["mixture"]
-            for entry in entryList:
-                if not entry in dictionary:
-                    raise ValueError(f"Mandatory entry '{entry}' not found in dictionary.")
-            
-            out = cls\
-                (
-                    dictionary["mixture"]
-                )
-            return out
-            
-        except BaseException as err:
-            cls.fatalErrorInClass(cls.fromDictionary, "Failed construction from dictionary", err)
+        entryList = ["mixture"]
+        for entry in entryList:
+            if not entry in dictionary:
+                raise ValueError(f"Mandatory entry '{entry}' not found in dictionary.")
+        
+        out = cls\
+            (
+                dictionary["mixture"]
+            )
+        return out
     
     #########################################################################
     #Constructor:
@@ -153,20 +149,22 @@ class janaf7Mixing(ThermoMixing):
             The mixture
         Construct from Mixture.
         """
-        try:
-            self._Thermo = self.janaf7(mix)
-            super().__init__(mix)
-            
-        except BaseException as err:
-            self.fatalErrorInClass(self.__init__, "Failed construction", err)
+        self._Thermo = self.janaf7(mix)
+        super().__init__(mix)
             
     #########################################################################
     #Operators:
     
     #########################################################################
-    def _update(self, mix:Mixture=None):
+    def _update(self, mix:Mixture=None) -> bool:
         """
-        Not class data to be updated
+        No class data to be updated.
+        
+        Args:
+            mix (Mixture, optional): Change the mixture. Defaults to None.
+
+        Returns:
+            bool: If something changed
         """
         self._Thermo.update(mix)
         return super()._update(mix)

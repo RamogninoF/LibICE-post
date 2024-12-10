@@ -150,20 +150,18 @@ class Dictionary(OrderedDict, Utilities):
     ######################################
     def lookupOrDefault(self, entryName:str, default:T, fatal:bool=True) -> T:
         """
-        entryName:  str
-            Name of the entry to look for
-        default:    instance
-            Instance to return in case the value is not found. It is also used for typeChecking
-        fatal:      bool (True)
-            If the type is not consistent rise a FatalError
-            
         Lookup of give a default value if not found
+        
+        Args:
+            entryName (str): Name of the entry to look for
+            default (T): Instance to return in case the value is not found. It is also used for typeChecking
+            fatal (bool, optional): If the type is not consistent rise a TypeError. Defaults to True.
+            
+        Returns:
+            T
         """
-        try:
-            self.checkType(entryName, str, "entryName")
-            self.checkType(fatal, bool, "fatal")
-        except BaseException as err:
-            self.fatalErrorInClass(self.lookupOrDefault,"Argument checking failed", err)
+        self.checkType(entryName, str, "entryName")
+        self.checkType(fatal, bool, "fatal")
         
         if not entryName in self:
             return default

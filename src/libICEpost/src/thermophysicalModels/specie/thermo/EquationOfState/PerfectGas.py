@@ -35,20 +35,16 @@ class PerfectGas(EquationOfState):
         """
         Create from dictionary.
         """
-        try:
-            entryList = ["Rgas"]
-            for entry in entryList:
-                if not entry in dictionary:
-                    raise ValueError(f"Mandatory entry '{entry}' not found in dictionary.")
-            
-            out = cls\
-                (
-                    dictionary["Rgas"]
-                )
-            return out
-            
-        except BaseException as err:
-            cls.fatalErrorInClass(cls.fromDictionary, "Failed construction from dictionary", err)
+        entryList = ["Rgas"]
+        for entry in entryList:
+            if not entry in dictionary:
+                raise ValueError(f"Mandatory entry '{entry}' not found in dictionary.")
+        
+        out = cls\
+            (
+                dictionary["Rgas"]
+            )
+        return out
     
     #########################################################################
     #Constructor:
@@ -57,10 +53,7 @@ class PerfectGas(EquationOfState):
         Rgas: float
             The mass specific gas constant
         """
-        try:
-            self.checkType(Rgas, float, "Rgas")
-        except BaseException as err:
-            self.fatalErrorInClass(self.__init__, "Argument checking failed", err)
+        self.checkType(Rgas, float, "Rgas")
         self.Rgas = Rgas
         
     #########################################################################

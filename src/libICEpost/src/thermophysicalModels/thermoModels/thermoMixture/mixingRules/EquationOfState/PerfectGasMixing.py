@@ -39,20 +39,16 @@ class PerfectGasMixing(EquationOfStateMixing):
         """
         Create from dictionary.
         """
-        try:
-            entryList = ["mixture"]
-            for entry in entryList:
-                if not entry in dictionary:
-                    raise ValueError(f"Mandatory entry '{entry}' not found in dictionary.")
-            
-            out = cls\
-                (
-                    dictionary["mixture"]
-                )
-            return out
-            
-        except BaseException as err:
-            cls.fatalErrorInClass(cls.fromDictionary, "Failed construction from dictionary", err)
+        entryList = ["mixture"]
+        for entry in entryList:
+            if not entry in dictionary:
+                raise ValueError(f"Mandatory entry '{entry}' not found in dictionary.")
+        
+        out = cls\
+            (
+                dictionary["mixture"]
+            )
+        return out
     
     #########################################################################
     #Constructor:
@@ -62,27 +58,25 @@ class PerfectGasMixing(EquationOfStateMixing):
             The mixture
         Construct from Mixture.
         """
-        try:
-            self._EoS = EquationOfState.selector(self.EoSType, {"Rgas":mix.Rgas})
-            
-            super().__init__(mix)
-        except BaseException as err:
-            self.fatalErrorInClass(self.__init__, "Failed construction", err)
-            
+        self._EoS = EquationOfState.selector(self.EoSType, {"Rgas":mix.Rgas})
+        super().__init__(mix)
+        
     #########################################################################
     #Operators:
     
     #########################################################################
-    def _update(self, mix:Mixture=None):
+    def _update(self, mix:Mixture=None) -> bool:
         """
-        Equation of state of perfect gas mixture depend only on R*, which needs to be updated.
+        Equation of state of perfect gas mixture depend only on R*. Update only the mixture composition.
         
         Pv/R*T = 1
+        
+        Returns:
+            bool: if womething changed
         """
-        if super()._update(mix):
-            return True
+        super()._update(mix)
         self._EoS.Rgas = self.mix.Rgas
-        return False
+        return True
 
 #########################################################################
 #Add to selection table:

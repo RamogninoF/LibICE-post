@@ -108,24 +108,20 @@ class ThermoMixture(Utilities):
         """
         from libICEpost.Database.chemistry.thermo import database
 
-        try:
-            self.checkType(mixture, Mixture, "mixture")
-            self.checkType(thermoType, dict, "ThermoType")
+        self.checkType(mixture, Mixture, "mixture")
+        self.checkType(thermoType, dict, "ThermoType")
 
-            self._db:_DatabaseClass = database.chemistry.thermo
-            self._mix:Mixture = mixture
-            
-            thermoType = Dictionary(**thermoType)
-            ThermoType = thermoType.lookup("Thermo")
-            EoSType = thermoType.lookup("EquationOfState")
-            
-            #Set the Thermo and EoS
-            thermoData:Dictionary = Dictionary(thermoData)
-            self._Thermo = mixingRules.ThermoMixing.selector(ThermoType + "Mixing", thermoData.lookupOrDefault(ThermoType + "Dict", Dictionary()).update(mixture=mixture))
-            self._EoS = mixingRules.EquationOfStateMixing.selector(EoSType + "Mixing", thermoData.lookupOrDefault(EoSType + "Dict", Dictionary()).update(mixture=mixture))
-                
-        except BaseException as err:
-            self.fatalErrorInClass(self.__init__, "Failed construction", err)
+        self._db:_DatabaseClass = database.chemistry.thermo
+        self._mix:Mixture = mixture.copy()
+        
+        thermoType = Dictionary(**thermoType)
+        ThermoType = thermoType.lookup("Thermo")
+        EoSType = thermoType.lookup("EquationOfState")
+        
+        #Set the Thermo and EoS
+        thermoData:Dictionary = Dictionary(thermoData)
+        self._Thermo = mixingRules.ThermoMixing.selector(ThermoType + "Mixing", thermoData.lookupOrDefault(ThermoType + "Dict", Dictionary()).update(mixture=mixture))
+        self._EoS = mixingRules.EquationOfStateMixing.selector(EoSType + "Mixing", thermoData.lookupOrDefault(EoSType + "Dict", Dictionary()).update(mixture=mixture))
         
     #########################################################################
     #Operators:
@@ -166,7 +162,7 @@ class ThermoMixture(Utilities):
         """
         
         if not mixture is None:
-            self._mix = mixture
+            self._mix.update(mixture.specie, mixture.Y, fracType="mass")
             self._Thermo.update(mixture)
             self._EoS.update(mixture)
         return self

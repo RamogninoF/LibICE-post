@@ -14,12 +14,14 @@ Last update:        12/06/2023
 #Typing
 from __future__ import annotations
 from types import FunctionType
+from typing import Iterable
 from matplotlib.axes import Axes
 
 #Other
 from operator import attrgetter
 import os
 from tqdm import tqdm
+import traceback
 
 #Plotting
 import numpy as np
@@ -33,10 +35,10 @@ from libICEpost.src.base.dataStructures.Dictionary import Dictionary
 from libICEpost.src.base.Filter.Filter import Filter
 
 #Submodels
-from ..EngineTime.EngineTime import EngineTime
-from ..EngineGeometry.EngineGeometry import EngineGeometry
+from libICEpost.src.engineModel.EngineTime.EngineTime import EngineTime
+from libICEpost.src.engineModel.EngineGeometry.EngineGeometry import EngineGeometry
 from libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.ThermoMixture import ThermoMixture
-from libICEpost.src.thermophysicalModels.thermoModels.ThermoModel import ThermoModel, ThermoState
+from libICEpost.src.thermophysicalModels.thermoModels.ThermoModel import ThermoModel
 from libICEpost.src.thermophysicalModels.thermoModels.CombustionModel.CombustionModel import CombustionModel
 from libICEpost.src.thermophysicalModels.thermoModels.EgrModel.EgrModel import EgrModel
 from libICEpost.src.engineModel.HeatTransferModel.HeatTransferModel import HeatTransferModel
@@ -253,7 +255,10 @@ class EngineModel(BaseClass):
                     print(f"\tType: {smTypeName}")
                     subModels[sm] = cls.Types[sm].selector(smTypeName, smDict.lookup(smTypeName + "Dict"))
             
-            out = cls(time=ET, geometry=EG, thermophysicalProperties=thermophysicalProperties, combustionProperties=combustionProperties, dataDict=dataDict, **subModels)
+            #Function objects
+            functionObjects = dictionary.lookupOrDefault("functionObjects", default=[])
+            
+            out = cls(time=ET, geometry=EG, thermophysicalProperties=thermophysicalProperties, combustionProperties=combustionProperties, dataDict=dataDict, functionObjects=functionObjects, **subModels)
             return out
             
         except BaseException as err:
@@ -266,7 +271,8 @@ class EngineModel(BaseClass):
                  geometry:EngineGeometry,
                  thermophysicalProperties:dict|Dictionary,
                  combustionProperties:dict|Dictionary,
-                 dataDict:dict|Dictionary=None,
+                 dataDict:dict=None,
+                 functionObjects:Iterable[FunctionType]=None,
                  **submodels,
                  ):
         """
@@ -277,69 +283,74 @@ class EngineModel(BaseClass):
             geometry (EngineGeometry): The engine geometry
             thermophysicalProperties (dict|Dictionary): Dictionary with thermophysical properties of mixtures
             combustionProperties (dict|Dictionary): Dictionary with combustion data and chemical composition
-            dataDict (dict|Dictionary, optional): Dictionary for loading data. If not given, data are not loaded 
+            dataDict (dict, optional): Dictionary for loading data. If not given, data are not loaded 
                 and thermodynamic regions not initialized. Defaults to None.
+            functionObjects (Iterable[FunctionType], optional): A list of function objects to apply at 
+                every time-step. They must be functions takining the EngineModel (self) as *ONLY* input and
+                returning None. These can be used to further post-processing (example, save the mixture
+                compositions of the thermodynamic models)
             **submodels (dict, optional): Optional sub-models to load. Defaults to {}.
         """
-        try:
-            #Main models
-            self.checkType(geometry, self.Types["EngineGeometry"], "geometry")
-            self.checkType(time, self.Types["EngineTime"], "engineTime")
-            self.geometry = geometry
-            self.time = time
-            
-            #Data structures
-            self._raw = EngineData()     #Raw data
-            self._data = EngineData()    #Filtered data
-            
-            #Submodels
-            for model in self.Submodels:
-                if model in submodels:
-                    #Get from input
-                    sm = submodels[model]
-                    self.checkType(sm, self.Types[model], f"{submodels}[{model}]")
-                else:
-                    #Take default
-                    sm = self.Submodels[model].copy()
-                #Set sub-model
-                self.__setattr__(model, sm)
-            
-            #Thermos
-            self.checkType(thermophysicalProperties, dict, "thermophysicalProperties")
-            if isinstance(thermophysicalProperties, dict):
-                thermophysicalProperties = Dictionary(**thermophysicalProperties)
-            self.thermophysicalProperties = thermophysicalProperties.copy()
-            
-            #Combustion properties
-            self.checkType(combustionProperties, dict, "combustionProperties")
-            if isinstance(combustionProperties, dict):
-                combustionProperties = Dictionary(**combustionProperties)
-            self.combustionProperties = combustionProperties.copy()
-            
-            #Contruct the thermodynamic models
-            self._constructThemodynamicModels(combustionProperties)
-            
-            #TODO: construct injection models
-            
-            #Construct the Egr model
-            self._constructEgrModel(combustionProperties)
-            
-            #Construct the combustion model
-            self._constructCombustionModel(combustionProperties)
-            
-            #Misc parameters
-            self.info = Dictionary()
-            self.info["path"] = None
-            self.info["dataDict"] = None
-            self.info["filter"] = None
-            self.info["initialConditions"] = None
-            
-            #Pre-processing
-            if not dataDict is None:
-                self.preProcess(**dataDict)
-            
-        except BaseException as err:
-            self.fatalErrorInClass(self.__init__, f"Failed constructing instance of class {self.__class__.__name__}", err)
+        #Main models
+        self.checkType(geometry, self.Types["EngineGeometry"], "geometry")
+        self.checkType(time, self.Types["EngineTime"], "engineTime")
+        self.geometry = geometry
+        self.time = time
+        
+        #Data structures
+        self._raw = EngineData()     #Raw data
+        self._data = EngineData()    #Filtered data
+        
+        #Submodels
+        for model in self.Submodels:
+            if model in submodels:
+                #Get from input
+                sm = submodels[model]
+                self.checkType(sm, self.Types[model], f"{submodels}[{model}]")
+            else:
+                #Take default
+                sm = self.Submodels[model].copy()
+            #Set sub-model
+            self.__setattr__(model, sm)
+        
+        #Thermos
+        self.checkType(thermophysicalProperties, dict, "thermophysicalProperties")
+        if isinstance(thermophysicalProperties, dict):
+            thermophysicalProperties = Dictionary(**thermophysicalProperties)
+        self.thermophysicalProperties = thermophysicalProperties.copy()
+        
+        #Combustion properties
+        self.checkType(combustionProperties, dict, "combustionProperties")
+        if isinstance(combustionProperties, dict):
+            combustionProperties = Dictionary(**combustionProperties)
+        self.combustionProperties = combustionProperties.copy()
+        
+        #Contruct the thermodynamic models
+        self._constructThemodynamicModels(combustionProperties)
+        
+        #TODO: construct injection models
+        
+        #Construct the Egr model
+        self._constructEgrModel(combustionProperties)
+        
+        #Construct the combustion model
+        self._constructCombustionModel(combustionProperties)
+        
+        #Misc parameters
+        self.info = Dictionary()
+        self.info["path"] = None
+        self.info["dataDict"] = None
+        self.info["filter"] = None
+        self.info["initialConditions"] = None
+        
+        #Function objects
+        self.checkType(functionObjects, Iterable, "functionObjects")
+        [self.checkType(fo, FunctionType, f"functionObjects[{ii}]")for ii,fo in enumerate(functionObjects)]
+        self.info["functionObjects"] = [fo for fo in functionObjects]
+        
+        #Pre-processing
+        if not dataDict is None:
+            self.preProcess(**dataDict)
     
     #########################################################################
     #Construction methods:
@@ -826,7 +837,15 @@ class EngineModel(BaseClass):
             #Process cylinder data
             for t in tqdm(self.time(self.data.loc[:,"CA"]), "Progress: ", initial=0, total=(self.time.endTime-self.time.startTime), unit="CAD"):  #With progress bar :)
                 self.info["time"] = t
-                self._update()
+                #Break the time loop if the updating fails:
+                try:
+                    self._update()                                      #Update
+                    self._storeLatestTime()                             #Save results at this time
+                    [fo(self) for fo in self.info["functionObjects"]]   #Compute function objects
+                except BaseException as err:
+                    self.runtimeError(f"Failed uploading engine model at time {t}",stack=True)
+                    print(traceback.format_exc())
+                    break
 
             #Final updates (heat transfer, cumulatives, etc...)
             self._process__post__()
@@ -847,44 +866,25 @@ class EngineModel(BaseClass):
                 ...
         """
         #Add fields to data:
-        fields = {"dpdCA", "gamma", "AHRR", "ROHR", "A"}
+        fields = {"dpdCA", "AHRR", "ROHR", "A"}
         for zone in self.Zones:
             fields |= {(v if zone == "cylinder" else f"{v}_{zone}") for v in getattr(self, f"_{zone}").state.__dict__}
         for f in fields:
             if not f in self.data.columns:
                 self.data.loc[:,f] = float("nan")
         
-        #Loop over zones
-        CA = self.time.time
+        #Loop over zones to set mixture compositions
         for zone in self.Zones:
             postfix = "" if zone == "cylinder" else f"_{zone}"
             Z:ThermoModel = getattr(self, f"_{zone}")
             
-            #Specie
-            for specie in Z.mixture.mix:
-                self.data.loc[:,specie.specie.name + "_x" + postfix] = 0.0
-                self.data.loc[:,specie.specie.name + "_y" + postfix] = 0.0
-            
-            #Set initial values as start-time:
-            if CA == self.time.startTime:
-                index = self.data.index[self.data.loc[:,'CA'] == CA].tolist()
-                
-                #Properties
-                T = Z.state.T
-                p = Z.state.p
-                gamma = self._cylinder.mixture.gamma(p,T)
-                
-                self.data.loc[index, "gamma" + postfix] = gamma
-                self.data.loc[index, Z.state.__dict__.keys()] = [Z.state.__dict__[key] for key in Z.state.__dict__.keys()]
-                
-                #Ahrr
-                if zone == "cylinder":
-                    self.data.loc[index, "ahrr"] = 0.0
-                
-                #Specie
-                for specie in self._cylinder.mixture.mix:
-                    self.data.loc[index, specie.specie.name + "_x" + postfix] = specie.X
-                    self.data.loc[index, specie.specie.name + "_y" + postfix] = specie.Y
+            # #Specie
+            # for specie in Z.mixture.mix:
+            #     self.data.loc[:,specie.specie.name + "_x" + postfix] = 0.0
+            #     self.data.loc[:,specie.specie.name + "_y" + postfix] = 0.0
+        
+        #Store at startTime
+        self._storeLatestTime()
     
     ####################################
     def _update(self) -> None:
@@ -904,48 +904,51 @@ class EngineModel(BaseClass):
         
         #Current time
         CA = self.time.time
+        index = self.data.index[self.data.loc[:,'CA'] == CA].tolist()[0]
         
         #Update state
-        p = self.data.p(CA)
+        p = self.data.loc[index,"p"]
         V = self.geometry.V(CA)
-        dpdCA = (self.data.p(CA) - self.data.p(self.time.oldTime))/self.time.deltaT
+        dpdCA = (self.data.loc[index,"p"] - self.data.loc[index-1,"p"])/self.time.deltaT
         self._cylinder.update(pressure=p, volume=V)
-        
-        #Gamma
-        T = self._cylinder.state.T
-        gamma = self._cylinder.mixture.gamma(p,T)
-        m = self._cylinder.state.m
+        self._updateMixtures()
         
         #Apparent heat release rate [J/CA]
         #Generalization to allow other EoS
-        TOld = self.data.T(self.time.oldTime)
-        pOld = self.data.p(self.time.oldTime)
-        mOld = self.data.m(self.time.oldTime)
+        T = self._cylinder.state.T
+        m = self._cylinder.state.m
+        TOld = self.data.loc[index-1,"T"]
+        pOld = self.data.loc[index-1,"p"]
+        mOld = self.data.loc[index-1,"m"]
         #Apporximating Us derivative backwards in time
         dUsdCA = (self._cylinder.mixture.us(p,T)*m - self._cylinder.mixture.us(pOld,TOld)*mOld)/self.time.deltaT
         ahrr = dUsdCA + p*self.geometry.dVdCA(CA) #- dmIndCA*mixtureIn.hs(p,T) + dmOutdCA*mixtureOut.hs(p,T)
         
-        self._updateMixtures()
-        
-        #Store
-        index = self.data.index[self.data.loc[:,'CA'] == CA].tolist()[0]
-        
-        #Main parameters
+        #Store main parameters
         self.data.loc[index, "dpdCA"] = dpdCA
-        self.data.loc[index, "V"] = V
-        self.data.loc[index, "T"] = T
-        self.data.loc[index, "m"] = m
-        self.data.loc[index, "gamma"] = gamma
         self.data.loc[index, "AHRR"] = ahrr
         
-        #Mixture composition
-        for specie in self._cylinder.mixture.mix:
-            if not (specie.specie.name + "_x") in self.data.columns:
-                self.data.loc[:,specie.specie.name + "_x"] = 0.0
-                self.data.loc[:,specie.specie.name + "_y"] = 0.0
-            else:
-                self.data.loc[index, specie.specie.name + "_x"] = specie.X
-                self.data.loc[index, specie.specie.name + "_y"] = specie.Y
+    ####################################
+    def _storeLatestTime(self):
+        """
+        Store all properties at latest time.
+        """
+        #Current time
+        CA = self.time.time
+        index = self.data.index[self.data.loc[:,'CA'] == CA].tolist()
+        
+        #Loop over zones
+        for zone in self.Zones:
+            postfix = "" if zone == "cylinder" else f"_{zone}"
+            Z:ThermoModel = getattr(self, f"_{zone}")
+            
+            #Properties
+            self.data.loc[index, Z.state.__dict__.keys()] = [Z.state.__dict__[key] for key in Z.state.__dict__.keys()]
+            
+            #Specie
+            # for specie in Z.mixture.mix:
+            #     self.data.loc[index, specie.specie.name + "_x" + postfix] = specie.X
+            #     self.data.loc[index, specie.specie.name + "_y" + postfix] = specie.Y
     
     ####################################
     def _process__post__(self) -> None:
@@ -1010,36 +1013,6 @@ class EngineModel(BaseClass):
             self.data.loc[:,"dQwalls"] += self.data.loc[:,f"dQ{patch}"]
             self.data.loc[:,"Qwalls"] += self.data.loc[:,f"Q{patch}"]
             
-    ####################################
-    def refresh(self, reset:bool=False) -> EngineModel:
-        """
-        Refresh data and restart processing:
-            1) loadData
-            2) filterData
-            3) process
-
-        Args:
-            reset (bool, optional): If need to restart from scratch. Defaults to False.
-        
-        Returns:
-            EngineModel: self
-        """
-        #TODO: refactoring of initialization of thermodynamic models
-        if reset:
-            self._data = EngineData()
-            self._raw = EngineData()
-            self.preProcess(
-                dataPath=self.info["dataPath"],
-                data=self.info["data"],
-                preProcessing=self.info["preProcessing"],
-                initialConditions=self.info["initialConditions"])
-        
-        else:
-            self.loadData(self.info["dataPath"], data=self.info["data"])
-            self.filterData(self.info["filter"])
-            
-        self.process()
-        
     ####################################
     def integrateVariable(self, y:str, *, x:str="CA", start:float=None, end:float=None) -> float:
         """

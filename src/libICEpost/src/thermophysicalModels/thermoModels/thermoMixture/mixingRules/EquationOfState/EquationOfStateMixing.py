@@ -45,6 +45,7 @@ class EquationOfStateMixing(BaseClass):
     """
 
     _EoS:EquationOfState
+    _mix:Mixture
     EoSType:str
     thermos = EoS_db
     
@@ -55,15 +56,20 @@ class EquationOfStateMixing(BaseClass):
         """
         The equation of state of the mixture.
         """
-        #In case mixture has changed, update the class data
-        if self.mix != self._mixOld:
-            self.update(self.mix)
+        self._update()
         return self._EoS
     
     ##############################
     @property
     def mix(self) -> Mixture:
+        """The mixture"""
         return self._mix
+
+    ##############################
+    @property
+    def Rgas(self) -> float:
+        """The mass-specific gas constant of the mixture"""
+        return self._mix.Rgas
 
     #########################################################################
     #Constructor:
@@ -74,51 +80,42 @@ class EquationOfStateMixing(BaseClass):
 
         Base (virtual) class: does not support instantiation.
         """
-        try:
-            EquationOfState.selectionTable().check(self.EoSType)
-            self.update(mix)
-        except BaseException as err:
-            self.fatalErrorInClass(self.__init__, f"Failed construction of {self.__class__.__name__} class",err)
+        EquationOfState.selectionTable().check(self.EoSType)
+        self._mix = mix.copy()
+        self.update(mix)
 
     #########################################################################
-    def update(self, mix:Mixture=None):
+    def update(self, mix:Mixture=None) -> bool:
         """
         Method to update the equation of state based on the mixture composition (interface).
-        """
-        try:
-            if not mix is None:
-                self.checkType(mix, Mixture, "Mixture")
-        except BaseException as err:
-            self.fatalErrorInClass(self.__init__,"Argument checking failed", err)
-        
-        self._update(mix)
 
-        return self
+        Args:
+            mix (Mixture, optional): Change the mixture. Defaults to None.
+
+        Returns:
+            bool: If something changed
+        """
+        return self._update(mix)
     
     #####################################
     @abstractmethod
-    def _update(self, mix:Mixture=None):
+    def _update(self, mix:Mixture=None) -> bool:
         """
         Method to update the equation of state based on the mixture composition (implementation).
+        
+        Args:
+            mix (Mixture, optional): Change the mixture. Defaults to None.
+
+        Returns:
+            bool: If something changed
         """
         if not mix is None:
-            self._mix = mix
+            if mix != self._mix:
+                self._mix.update(mix.specie, mix.Y, fracType="mass")
+                return True
         
-        # Store current mixture composition. Used to update the class 
-        # data in case the mixutre has changed
-        if not hasattr(self,"_mixOld"):
-            #First initialization
-            self._mixOld = self._mix.copy()
-            return False
-        else:
-            #Updating
-            if not (self._mix == self._mixOld):
-                #Change detected
-                self._mixOld = self._mix
-                return False
-        
-        #Already updated (True)
-        return True
+        #Already updated
+        return False
 
 #########################################################################
 #Create selection table
