@@ -16,7 +16,6 @@ from .Thermo import Thermo
 import json
 from libICEpost.Database.chemistry import constants
 from libICEpost.Database import database
-from numpy import math
 
 
 Tstd = database.chemistry.constants.Tstd
