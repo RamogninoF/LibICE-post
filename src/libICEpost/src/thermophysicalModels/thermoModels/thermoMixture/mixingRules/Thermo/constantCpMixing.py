@@ -68,10 +68,11 @@ class constantCpMixing(ThermoMixing):
                     "cp":float('nan'),
                 }
             )
+        #Save old mixture
+        self._oldMix:Mixture = mix.copy()
+        
         super().__init__(mix)
         
-        #Save old mixture
-        self._oldMix:Mixture = self._mix.copy()
             
     #########################################################################
     #Operators:
