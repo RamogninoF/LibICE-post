@@ -39,5 +39,33 @@
         "name": "SO2",
         "specie": ["S", "O"],
         "atoms": [1.0, 2.0]
+    },
+
+    "CO":
+    {
+        "name": "CO",
+        "specie": ["C", "O"],
+        "atoms": [1.0, 1.0]
+    },
+
+    "NO":
+    {
+        "name": "CO",
+        "specie": ["N", "O"],
+        "atoms": [1.0, 1.0]
+    },
+
+    "N2O":
+    {
+        "name": "CO",
+        "specie": ["N", "O"],
+        "atoms": [2.0, 1.0]
+    },
+
+    "NO2":
+    {
+        "name": "CO",
+        "specie": ["N", "O"],
+        "atoms": [1.0, 2.0]
     }
 }
