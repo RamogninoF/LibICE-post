@@ -66,7 +66,7 @@ class ConRodGeometry(EngineGeometry):
         stroke            | float  | -         | m      | Stroke
         conRodLen         | float  | -         | m      | connecting-rod length
         ------------------|--------|-----------|--------|----------------------------------
-        pistCylAreaRatio  | float  | 1         | -      | piston surf. area / cyl. section
+        pistonCylAreaRatio| float  | 1         | -      | piston surf. area / cyl. section
         headCylAreaRatio  | float  | 1         | -      | head surf. area / cyl. section
         
         """
@@ -77,23 +77,19 @@ class ConRodGeometry(EngineGeometry):
                 "bore"             : float('nan'),
                 "stroke"           : float('nan'),
                 "conRodLen"        : float('nan'),
-                "pistCylAreaRatio" : 1.0,
+                "pistonCylAreaRatio": 1.0,
                 "headCylAreaRatio" : 1.0
             }
         
         #Argument checking:
-        try:
-            for entry in mandatoryEntries:
-                if not entry in inputDict:
-                    raise ValueError(f"Entry '{entry}' not found in contruction dictionary.")
-            
-            Dict = cls.updateKeywordArguments(inputDict, defaultDict)
-            
-            return cls(Dict["CR"], Dict["bore"], Dict["stroke"], Dict["conRodLen"], Dict["pistCylAreaRatio"], Dict["headCylAreaRatio"])
-            
-        except BaseException as err:
-            cls.fatalErrorInClass(cls.__init__, "Failed constructing from dictionary", err)
+        for entry in mandatoryEntries:
+            if not entry in inputDict:
+                raise ValueError(f"Entry '{entry}' not found in contruction dictionary.")
         
+        Dict = cls.updateKeywordArguments(inputDict, defaultDict)
+        
+        return cls(**Dict)
+    
     #########################################################################
     def __str__(self):
         STR = super(self.__class__, self).__str__()
@@ -104,6 +100,7 @@ class ConRodGeometry(EngineGeometry):
         STR += "\n{:15s} {:10.3e} {:15s}".format("stroke (S)", self.S,"[m]")
         STR += "\n{:15s} {:10.3e} {:15s}".format("conRodLen (L)", self.l,"[m]")
         STR += "\n{:15s} {:10.3e} {:15s}".format("Pin-offset (PO)", self.pinOffset,"[m]")
+        STR += "\n{:15s} {:10.3e} {:15s}".format("clearence", self.clearence,"[m]")
         STR += "\n{:15s} {:10.3e} {:15s}".format("cylArea", self.cylArea,"[m^2]")
         STR += "\n{:15s} {:10.3e} {:15s}".format("pistonArea", self.pistonArea,"[m^2]")
         STR += "\n{:15s} {:10.3e} {:15s}".format("headArea", self.headArea,"[m^2]")
@@ -115,7 +112,7 @@ class ConRodGeometry(EngineGeometry):
     
     #########################################################################
     #Constructor:
-    def __init__(self, /, CR:float, bore:float, stroke:float, conRodLen:float, pistonCylAreaRatio:float=1.0, headCylAreaRatio:float=1.0, pinOffset=0.0):
+    def __init__(self, /, *, CR:float, bore:float, stroke:float, conRodLen:float, pistonCylAreaRatio:float=1.0, headCylAreaRatio:float=1.0, pinOffset=0.0, clearence:float=None):
         """
         [Variable]        | [Type] | [Default] | [Unit] | [Description]
         ------------------|--------|-----------|--------|----------------------------------
@@ -125,59 +122,52 @@ class ConRodGeometry(EngineGeometry):
         stroke            | float  | -         | m      | Stroke
         conRodLen         | float  | -         | m      | connecting-rod length
         pinOffset         | float  | 0.0       | m      | Piston pin offset
+        clearence         | float  | None      | m      | TDC clearence
         ------------------|--------|-----------|--------|----------------------------------
-        pistCylAreaRatio  | float  | 1         | -      | piston surf. area / cyl. section
+        pistonCylAreaRatio| float  | 1         | -      | piston surf. area / cyl. section
         headCylAreaRatio  | float  | 1         | -      | head surf. area / cyl. section
         """
-        inputDict = \
-            {
-                "CR"               : CR,
-                "bore"             : bore,
-                "stroke"           : stroke,
-                "conRodLen"        : conRodLen,
-                "pistCylAreaRatio" : 1.0,
-                "headCylAreaRatio" : 1.0,
-                "pinOffset"        : 0.0
-            }
-        
-        defaultDict = \
-            {
-                "CR"               : float('nan'),
-                "bore"             : float('nan'),
-                "stroke"           : float('nan'),
-                "conRodLen"        : float('nan'),
-                "pistCylAreaRatio" : 1.0,
-                "headCylAreaRatio" : 1.0,
-                "pinOffset"        : 0.0
-            }
-        
         #Argument checking:
-        try:
-            Dict = self.updateKeywordArguments(inputDict, defaultDict)
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.__init__, err)
+        data = \
+            {
+                "CR"                : CR                 ,
+                "bore"              : bore               ,
+                "stroke"            : stroke             ,
+                "conRodLen"         : conRodLen          ,
+                "pinOffset"         : pinOffset          ,
+                "pistonCylAreaRatio": pistonCylAreaRatio ,
+                "headCylAreaRatio"  : headCylAreaRatio   ,
+            }
+        [self.checkType(data[var], float, var) for var in data]
         
-        try:
-            #[-]
-            self.CR = Dict["CR"]
-            self.lam = 0.5*Dict["stroke"]/Dict["conRodLen"]
-            self.delta = Dict["pinOffset"]/(.5*Dict["stroke"])
-            #[m]
-            self.D = Dict["bore"]
-            self.S = Dict["stroke"]
-            self.l = Dict["conRodLen"]
-            self.pinOffset = Dict["pinOffset"]
-            #[m^2]
-            self.cylArea = pi * Dict["bore"]**2 / 4.0
-            self.pistonArea = self.cylArea * Dict["pistCylAreaRatio"]
-            self.headArea = self.cylArea * Dict["headCylAreaRatio"]
-            #[m^3]
-            self.Vs = self.cylArea * Dict["stroke"]
-            self.Vmin = self.Vs/(Dict["CR"] - 1.0)
-            self.Vmax = self.Vs + self.Vmin
-            
-        except BaseException as err:
-            self.fatalErrorInClass(self.__init__, "Construction failed", err)
+        #Clearence
+        if clearence is None:
+            #Compute clearence assuming cylindrical chamber
+            cylArea = pi * bore**2 / 4.0
+            Vs = cylArea * stroke
+            Vmin = Vs/(CR - 1.0)
+            clearence = Vmin/cylArea
+        else:
+            self.checkType(clearence, float, "clearence")
+        
+        #[-]
+        self.CR = CR
+        self.lam = 0.5*stroke/conRodLen
+        self.delta = pinOffset/(.5*stroke)
+        #[m]
+        self.D = bore
+        self.S = stroke
+        self.l = conRodLen
+        self.pinOffset = pinOffset
+        self.clearence = clearence
+        #[m^2]
+        self.cylArea = pi * bore**2 / 4.0
+        self.pistonArea = self.cylArea * pistonCylAreaRatio
+        self.headArea = self.cylArea * headCylAreaRatio
+        #[m^3]
+        self.Vs = self.cylArea * stroke
+        self.Vmin = self.Vs/(CR - 1.0)
+        self.Vmax = self.Vs + self.Vmin
     
     #########################################################################
     #Piston position:
@@ -273,9 +263,9 @@ class ConRodGeometry(EngineGeometry):
         """
         try:
             if isinstance(CA, list):
-                return np.array([s * pi * self.D for s in self.s(CA)])
+                return np.array([(s + self.clearence) * pi * self.D for s in self.s(CA)])
             else:
-                return self.s(CA) * pi * self.D
+                return (self.s(CA) + self.clearence) * pi * self.D
         except BaseException as err:
             self.fatalErrorInClass(self.linerArea, "Failed computing liner area", err)
     
