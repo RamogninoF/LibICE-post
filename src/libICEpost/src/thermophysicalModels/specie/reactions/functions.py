@@ -21,6 +21,7 @@ from libICEpost.src.base.Functions.typeChecking import checkType
 from libICEpost.src.thermophysicalModels.specie.specie.Mixture import Mixture, mixtureBlend
 from libICEpost.src.thermophysicalModels.specie.specie.Molecule import Molecule
 from libICEpost.src.thermophysicalModels.specie.reactions.Reaction.StoichiometricReaction import StoichiometricReaction
+from libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.Stoichiometry import Stoichiometry
 
 from libICEpost.Database import database
 
@@ -267,3 +268,20 @@ def computeLHV(fuel:Molecule|str) -> float:
     products = ThermoMixture(oxReact.products,thermoType={"Thermo":"janaf7", "EquationOfState":"PerfectGas"})
     
     return (reactants.Thermo.hf() - products.Thermo.hf())/oxReact.reactants.Y[oxReact.reactants.specie.index(fuel)]
+
+#############################################################################
+def computeMixtureEnergy(mixture:Mixture, oxidizer:Molecule=database.chemistry.specie.Molecules.O2) -> float:
+    """
+    Compute the energy of a mixture based on the LHV of fuels contained. Computes stoichiometric 
+    combustion based on the fuels in the database (database.chemistry.specie.Fuels).
+    
+    Attributes:
+        mixture (Mixture): The mixture.
+        oxidizer (Molecule, optional): The oxidizing agend. Defaults to database.chemistry.specie.Molecules.O2.
+    
+    Returns:
+        float: The avaliable chemical energy of the mixture [J/kg]
+    """
+    reactionModel = Stoichiometry(mixture)
+    
+    return (reactionModel.reactants.Thermo.hf() - reactionModel.products.Thermo.hf())
