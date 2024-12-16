@@ -32,7 +32,12 @@ class EngineGeometry(BaseClass):
     Attibutes:
         
     """
-    
+    #########################################################################
+    @classmethod
+    def fromDictionary(cls, dictionary:dict):
+        """Construct from dictionary"""
+        cls.checkType(dictionary, dict, "dictionary")
+        return cls(**dictionary)
     
     #########################################################################
     def __str__(self):

@@ -11,6 +11,8 @@ Last update:        12/06/2023
 #                               IMPORT                              #
 #####################################################################
 
+from typing import Iterable
+
 from libICEpost.src.base.BaseClass import BaseClass, abstractmethod
 
 from ...specie.Mixture import Mixture
@@ -53,27 +55,24 @@ class Reaction(BaseClass):
         return self._products
     
     #########################################################################
-    def __init__(self, reactants, products):
+    def __init__(self, reactants:Iterable[Molecule], products:Iterable[Molecule]):
         """
-        reactants:  list<Molecule>
-            List of molecules in the reactants
-        products:   list<Molecule>
-            List of molecules in the products
+        Construct from list of moleucles in reactants and products
+        
+        Args:
+            reactants (Iterable[Molecule]): List of molecules in the reactants
+            products (Iterable[Molecule]): List of molecules in the products
         """
         #Argument checking:
-        try:
-            self.checkContainer(reactants, list, Molecule, "reactants")
-            self.checkContainer(products, list, Molecule, "products")
-            
-            self._reactants = Mixture(reactants, [1.0/len(reactants)]*len(reactants))
-            self._products = Mixture(products, [1.0/len(products)]*len(products))
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.__init__, err)
+        self.checkType(reactants, Iterable, "reactants")
+        self.checkType(products, Iterable, "products")
+        [self.checkType(r, Molecule, f"reactants[{ii}]") for ii, r in enumerate(reactants)]
+        [self.checkType(r, Molecule, f"products[{ii}]") for ii, r in enumerate(products)]
         
-        try:
-            self.update()
-        except BaseException as err:
-            self.fatalErrorInClass(self.__init__, "Failed constructing the reaction", err)
+        self._reactants = Mixture(reactants, [1.0/len(reactants)]*len(reactants))
+        self._products = Mixture(products, [1.0/len(products)]*len(products))
+        
+        self.update()
     
     ##############################
     #Representation:
@@ -114,17 +113,10 @@ class Reaction(BaseClass):
         """
         Method to update the composition of reactants and products (interface).
         """
-        try:
-            if not mix is None:
-                self.checkType(mix, Mixture, "Mixture")
-        except BaseException as err:
-            self.fatalErrorInClass(self.__init__,"Argument checking failed", err)
+        if not mix is None:
+            self.checkType(mix, Mixture, "Mixture")
         
-        try:
-            self._update(mix)
-        except BaseException as err:
-            self.fatalErrorInClass(self.update, "Failed balancing the reaction", err)
-
+        self._update(mix)
         return self
     
     #####################################
@@ -134,10 +126,8 @@ class Reaction(BaseClass):
         Method to update the composition of reactants and products (implementation).
         """
         if not mix is None:
-            self._reactants = mix
-            # Store current mixture composition. Used to update the class 
-            # data in case the mixutre has changed
-            self._reactantsOld = self._reactants.copy()
+            if self._reactants != mix:
+                self._reactants.update(mix)
     
 #########################################################################
 #Create selection table

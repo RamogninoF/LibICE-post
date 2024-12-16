@@ -11,6 +11,8 @@ Last update:        12/06/2023
 #                               IMPORT                              #
 #####################################################################
 
+from typing import Iterable
+
 from libICEpost.src.base.Utilities import Utilities
 from dataclasses import dataclass
 
@@ -113,25 +115,25 @@ class Molecule(Utilities):
     
     #########################################################################
     #Constructor:
-    def __init__(self, specieName, atomicSpecie, numberOfAtoms):
+    def __init__(self, specieName:str, atomicSpecie:Iterable[Atom], numberOfAtoms:Iterable[float]):
         """
-        atomicSpecie:   list<Atom>
-            List of the atomic specie in the chemical specie
-        numberOfAtoms:  list<float>
-            Number of atoms for each atomic specie contained in the
-            chemical specie
+        Construct giving the name of the molecule, the list of atomic specie and number of atoms for each element.
+        Args:
+            specieName (str): Name of the molecule
+            atomicSpecie (Iterable[Atom]): List of the atomic specie in the chemical specie
+            numberOfAtoms (Iterable[float]): Number of atoms for each atomic specie contained in the
+                chemical specie
         """
         
         #Check arguments:
-        try:
-            self.checkType(specieName, str, entryName="specieName")
-            self.checkInstanceTemplate(atomicSpecie, [Atom.empty()], entryName="atomicSpecie")
-            self.checkInstanceTemplate(numberOfAtoms, [1.], entryName="numberOfAtoms")
-            
-            if not(len(atomicSpecie) == len(numberOfAtoms)):
-                raise ValueError("Lists 'atomicSpecie' and 'numberOfAtoms' are not consistent.")
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.__init__, err)
+        self.checkType(specieName, str, entryName="specieName")
+        self.checkType(atomicSpecie, Iterable, "atomicSpecie")
+        self.checkType(numberOfAtoms, Iterable, "numberOfAtoms")
+        [self.checkType(a, Atom, f"atomicSpecie[{ii}]") for ii, a in enumerate(atomicSpecie)]
+        [self.checkType(a, float, f"numberOfAtoms[{ii}]") for ii, a in enumerate(numberOfAtoms)]
+        
+        if not(len(atomicSpecie) == len(numberOfAtoms)):
+            raise ValueError("Lists 'atomicSpecie' and 'numberOfAtoms' are not consistent.")
         
         #Initialization:
         self.name = specieName
@@ -231,7 +233,7 @@ class Molecule(Utilities):
         """
         #Argument checking:
         try:
-            Utilities.checkTypes(otherSpecie, [self.__class__, Atom], entryName="otherSpecie")
+            Utilities.checkType(otherSpecie, [self.__class__, Atom], entryName="otherSpecie")
         except BaseException as err:
             self.fatalErrorInArgumentChecking(self.__add__, err)
         
@@ -322,7 +324,7 @@ class Molecule(Utilities):
         """
         #Argument checking:
         try:
-            self.checkTypes(entry, [str, Atom], "entry")
+            self.checkType(entry, [str, Atom], "entry")
         except BaseException as err:
             self.fatalErrorInArgumentChecking(self.__contains__, err)
         
@@ -376,7 +378,7 @@ class Molecule(Utilities):
         """
         #Argument checking:
         try:
-            self.checkTypes(atom, [str, Atom, int], entryName="atom")
+            self.checkType(atom, [str, Atom, int], entryName="atom")
         except BaseException as err:
             self.fatalErrorInArgumentChecking(self.__getitem__, err)
         

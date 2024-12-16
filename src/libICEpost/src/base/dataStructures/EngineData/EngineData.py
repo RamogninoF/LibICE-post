@@ -410,7 +410,7 @@ class EngineData(Utilities):
 
         def interpolator(self, CA:float|collections.abc.Iterable) -> float|collections.abc.Iterable:
             try:
-                self.checkTypes(CA, (float,collections.abc.Iterable), "CA")
+                self.checkType(CA, (float,collections.abc.Iterable), "CA")
                 return self.np.interp(CA, self._data["CA"], self._data[varName], float("nan"), float("nan"))
             except BaseException as err:
                 self.fatalErrorInClass(getattr(self,varName), "Failed interpolation", err)

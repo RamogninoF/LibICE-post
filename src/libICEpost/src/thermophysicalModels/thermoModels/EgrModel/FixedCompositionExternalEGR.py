@@ -45,7 +45,7 @@ class FixedCompositionExternalEGR(EgrModel):
         }
         """
         try:
-            cls.checkTypes(dictionary,(dict, Dictionary),"dictionary")
+            cls.checkType(dictionary,(dict, Dictionary),"dictionary")
             #Cast to Dictionary
             if isinstance(dictionary, dict):
                 dictionary = Dictionary(**dictionary)

@@ -135,15 +135,10 @@ class Dictionary(OrderedDict, Utilities):
         entryName:  str
             Name of the entry to look for
         
-        Same as dictionary.pop but embeds error handling
+        Same as dictionary.pop but custom error message
         """
-        try:
-            self.checkType(entryName, str, "entryName")
-        except BaseException as err:
-            self.fatalErrorInClass(self.lookup,f"Argument checking failed", err)
-            
         if not entryName in self:
-            self.fatalErrorInClass(self.lookup, f"Entry '{entryName}' not found in Dictionary. Available entries are:\n\t" + "\n\t".join([str(k) for k in self.keys()]))
+            raise KeyError(f"Entry '{entryName}' not found in Dictionary. Available entries are:\n\t" + "\n\t".join([str(k) for k in self.keys()]))
         else:
             return super().pop(entryName)
     
@@ -158,7 +153,7 @@ class Dictionary(OrderedDict, Utilities):
             fatal (bool, optional): If the type is not consistent rise a TypeError. Defaults to True.
             
         Returns:
-            T
+            T: self[entryName] if entryName is found, else default
         """
         self.checkType(entryName, str, "entryName")
         self.checkType(fatal, bool, "fatal")
@@ -173,7 +168,7 @@ class Dictionary(OrderedDict, Utilities):
     ######################################
     def _correctSubdicts(self):
         """
-        Convert ricorsively every subdictionary into Dictionary classes.
+        Convert recursively every subdictionary into Dictionary classes.
         """
         try:
             for entry in self:
@@ -186,12 +181,9 @@ class Dictionary(OrderedDict, Utilities):
     
     ######################################
     def __setitem__(self, *args, **argv):
-        try:
-            super().__setitem__(*args, **argv)
-            self._correctSubdicts()
-            return self
-        except BaseException as err:
-            self.fatalErrorInClass(self.__setitem__,f"Error setting Dictionary item", err)
+        super().__setitem__(*args, **argv)
+        self._correctSubdicts()
+        return self
     
     ######################################
     def update(self, **kwargs):
@@ -201,15 +193,12 @@ class Dictionary(OrderedDict, Utilities):
             
         Performs like dict.update() method but recursively updates sub-dictionaries
         """
-        try:
-            for key in kwargs:
-                if (isinstance(kwargs[key],dict)) and (key in self):
-                    self[key].update(**kwargs[key])
-                else:
-                    super().update({key:kwargs[key]})
-                    
-            self._correctSubdicts()
-        except BaseException as err:
-            self.fatalErrorInClass(self.update,f"Error updating dictionary keys", err)
+        for key in kwargs:
+            if (isinstance(kwargs[key],dict) if (key in self) else False):
+                self[key].update(**kwargs[key])
+            else:
+                super().update({key:kwargs[key]})
+                
+        self._correctSubdicts()
         
         return self

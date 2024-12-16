@@ -140,7 +140,7 @@ class Atom(Utilities):
         
         #Argument checking:
         try:
-            Utilities.checkTypes(otherSpecie, [self.__class__, Molecule], entryName="otherSpecie")
+            Utilities.checkType(otherSpecie, [self.__class__, Molecule], entryName="otherSpecie")
         except BaseException as err:
             self.fatalErrorInArgumentChecking(self.__add__, err)
         

@@ -54,7 +54,7 @@ class ConRodGeometry(EngineGeometry):
     #########################################################################
     #Construct from dictionary
     @classmethod
-    def fromDictionary(cls,inputDict):
+    def fromDictionary(cls,inputDict:dict):
         """
         Construct from dictionary containing the following parameters:
         
@@ -70,25 +70,7 @@ class ConRodGeometry(EngineGeometry):
         headCylAreaRatio  | float  | 1         | -      | head surf. area / cyl. section
         
         """
-        mandatoryEntries = ["CR", "bore", "stroke", "conRodLen"]
-        defaultDict = \
-            {
-                "CR"               : float('nan'),
-                "bore"             : float('nan'),
-                "stroke"           : float('nan'),
-                "conRodLen"        : float('nan'),
-                "pistonCylAreaRatio": 1.0,
-                "headCylAreaRatio" : 1.0
-            }
-        
-        #Argument checking:
-        for entry in mandatoryEntries:
-            if not entry in inputDict:
-                raise ValueError(f"Entry '{entry}' not found in contruction dictionary.")
-        
-        Dict = cls.updateKeywordArguments(inputDict, defaultDict)
-        
-        return cls(**Dict)
+        return super().fromDictionary(inputDict)
     
     #########################################################################
     def __str__(self):

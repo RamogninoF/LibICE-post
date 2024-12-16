@@ -58,7 +58,7 @@ class EngineTime(BaseClass):
     
     #########################################################################
     #Constructor:
-    def __init__(self,speed, *, IVC, EVO, startTime=None, endTime:float=None):
+    def __init__(self,speed, *, IVC:float, EVO:float, startTime:float=None, endTime:float=None):
         """
         Construct from keyword arguments containing the following parameters:
         
@@ -222,7 +222,7 @@ class EngineTime(BaseClass):
         """
         try:
             if not CA is None:
-                self.checkTypes(CA, (float, Iterable), "CA")
+                self.checkType(CA, (float, Iterable), "CA")
             else:
                 CA = self.time
         except BaseException as err:
@@ -254,7 +254,7 @@ class EngineTime(BaseClass):
         """
         try:
             if not CA is None:
-                self.checkTypes(CA, (float, Iterable), "CA")
+                self.checkType(CA, (float, Iterable), "CA")
             else:
                 CA = self.time
         except BaseException as err:

@@ -121,7 +121,7 @@ class CombustionModel(BaseClass):
         #Argument checking:
         #Type checking
         self.checkType(reactants, Mixture, "reactants")
-        self.checkTypes(state, [ThermoState, dict], "state")
+        self.checkType(state, [ThermoState, dict], "state")
         
         kwargs = Dictionary(**kwargs)
         

@@ -11,6 +11,8 @@ Last update:        12/06/2023
 #                               IMPORT                              #
 #####################################################################
 
+from typing import Iterable
+
 from .Thermo import Thermo
 
 from libICEpost.Database.chemistry.constants import database
@@ -72,7 +74,7 @@ class janaf7(Thermo):
     
     #########################################################################
     #Constructor:
-    def __init__(self, Rgas, cpLow, cpHigh, Tth, Tlow, Thigh):
+    def __init__(self, Rgas:float, cpLow:Iterable[float], cpHigh:Iterable[float], Tth:float, Tlow:float, Thigh:float):
         """
         Rgas: float
             The mass specific gas constant
@@ -94,17 +96,16 @@ class janaf7(Thermo):
         """
         #Argument checking:
         super().__init__(Rgas)
-        try:
-            self.checkInstanceTemplate(cpLow, [1.0], entryName="cpLow")
-            self.checkInstanceTemplate(cpHigh, [1.0], entryName="cpHigh")
-            self.checkType(Tth, float, entryName="Tth")
-            self.checkType(Tlow, float, entryName="Tlow")
-            self.checkType(Thigh, float, entryName="Thigh")
-            
-            if not(len(cpLow) == self.numCoeffs) or not(len(cpHigh) == self.numCoeffs):
-                raise ValueError("Required lists of 7 coefficients for 'cpLow' and 'cpHigh'.")
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.__init__, err)
+        self.checkType(cpLow, Iterable, entryName="cpLow")
+        self.checkType(cpHigh, Iterable, entryName="cpHigh")
+        [self.checkType(c, float, entryName=f"cpLow[{ii}]") for ii, c in enumerate(cpLow)]
+        [self.checkType(c, float, entryName=f"cpHigh[{ii}]") for ii, c in enumerate(cpHigh)]
+        self.checkType(Tth, float, entryName="Tth")
+        self.checkType(Tlow, float, entryName="Tlow")
+        self.checkType(Thigh, float, entryName="Thigh")
+        
+        if not(len(cpLow) == self.numCoeffs) or not(len(cpHigh) == self.numCoeffs):
+            raise ValueError("Required lists of 7 coefficients for 'cpLow' and 'cpHigh'.")
         
         self.cpLow = cpLow[:]
         self.cpHigh = cpHigh[:]

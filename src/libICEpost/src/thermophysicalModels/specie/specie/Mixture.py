@@ -94,7 +94,7 @@ class Mixture(Utilities):
     #################################
     @Y.setter
     def Y(self, y:list):
-        self.checkTypes(y, [list, self.np.ndarray], "y")
+        self.checkType(y, [list, self.np.ndarray], "y")
         if not len(y) == len(self):
             raise ValueError("Inconsistent size of y with mixture composition.")
         self._Y = list(y[:])
@@ -111,7 +111,7 @@ class Mixture(Utilities):
     #################################
     @X.setter
     def X(self, x:list):
-        self.checkTypes(x, [list, self.np.ndarray], "x")
+        self.checkType(x, [list, self.np.ndarray], "x")
         if not len(x) == len(self):
             raise ValueError("Inconsistent size of x with mixture composition.")
         self._X = list(x[:])
@@ -223,7 +223,7 @@ class Mixture(Utilities):
         """
         #Argument checking:
         try:
-            self.checkTypes(specie, [str, Molecule, int], entryName="specie")
+            self.checkType(specie, [str, Molecule, int], entryName="specie")
         except BaseException as err:
             self.fatalErrorInArgumentChecking(self.__getitem__, err)
         
@@ -268,7 +268,7 @@ class Mixture(Utilities):
         """
         #Argument checking:
         try:
-            self.checkTypes(specie, [str, Molecule, int], entryName="specie")
+            self.checkType(specie, [str, Molecule, int], entryName="specie")
         except BaseException as err:
             self.fatalErrorInArgumentChecking(self.__getitem__, err)
         
@@ -315,7 +315,7 @@ class Mixture(Utilities):
         """
         #Argument checking:
         try:
-            self.checkTypes(entry, [str, Molecule], "entry")
+            self.checkType(entry, [str, Molecule], "entry")
         except BaseException as err:
             self.fatalErrorInArgumentChecking(self.__contains__, err)
         
@@ -498,7 +498,7 @@ class Mixture(Utilities):
             Self: self
         """
         #Argument checking:
-        self.checkTypes(dilutingMix, [self.__class__, Molecule], "dilutingMix")
+        self.checkType(dilutingMix, [self.__class__, Molecule], "dilutingMix")
         self.checkType(dilutionFract, float, "dilutionFract")
         fracType = _fracType(fracType)
         
@@ -576,27 +576,25 @@ class Mixture(Utilities):
         Extract a submixture from a list of specie. Raises ValueError if a Molecule
         is not found in mixture
         """
-        try:
-            self.checkContainer(specieList, list, Molecule, "specieList")
-            
-            output = None
-            xOutput = 0.0
-            for specie in specieList:
-                if specie in self:
-                    if output is None:
-                        output = Mixture([specie], [1])
-                    else:
-                        output.dilute(specie, self[specie].X/(xOutput + self[specie].X), "mole")
-                    xOutput += self[specie].X
+        self.checkType(specieList, Iterable, "specieList")
+        [self.checkType(s, Molecule, f"specieList[{ii}]") for ii,s in enumerate(specieList)]
+        
+        output = None
+        xOutput = 0.0
+        for specie in specieList:
+            if specie in self:
+                if output is None:
+                    output = Mixture([specie], [1])
                 else:
-                    raise ValueError(f"Specie {specie.name} not found in mixture.")
-            
-            if output is None:
-                raise ValueError("Cannot extract empty mixture.")
-            
-            return output
-        except BaseException as err:
-            self.fatalErrorInClass(self.extract, "Error extracting sub-mixture", err)
+                    output.dilute(specie, self[specie].X/(xOutput + self[specie].X), "mole")
+                xOutput += self[specie].X
+            else:
+                raise ValueError(f"Specie {specie.name} not found in mixture.")
+        
+        if output is None:
+            raise ValueError("Cannot extract empty mixture.")
+        
+        return output
 
     ###############################
     def removeZeros(self) -> Mixture:

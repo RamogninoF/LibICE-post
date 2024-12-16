@@ -12,7 +12,7 @@ sys.path.append("/home/framognino/OpenFOAM/utilities/LibICE_postV3/")
 
 from src.thermophysicalModels.laminarFlameSpeedModels import tabulatedLFS
 from src.base.Functions.runtimeWarning import fatalError
-import src.GLOBALS
+import libICEpost.GLOBALS
 
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -25,7 +25,7 @@ GLOBALS = \
         "path":None,
     }
 
-src.GLOBALS.VERBOSITY_LEVEL=0
+libICEpost.GLOBALS.__VERBOSITY_LEVEL__=0
 
 ######################################################################
 #Check script arguments

@@ -14,7 +14,6 @@ Last update:        12/06/2023
 from typing import Self
 
 from .Functions.typeChecking import *
-from .Functions.functionsForDictionaries import *
 from .Functions.runtimeWarning import runtimeWarning, runtimeError, printStack, fatalErrorIn, fatalErrorInClass, fatalErrorInFunction, fatalErrorInArgumentChecking, fatalError
 
 import numpy as np
@@ -33,39 +32,6 @@ class Utilities(object):
     @staticmethod
     def checkType(*args, **argv):
         return checkType(*args, **argv)
-        
-    @staticmethod
-    def checkTypes(*args, **argv):
-        return checkTypes(*args, **argv)
-        
-    @staticmethod
-    def checkInstanceTemplate(*args, **argv):
-        return checkInstanceTemplate(*args, **argv)
-        
-    @staticmethod
-    def updateKeywordArguments(*args, **argv):
-        return updateKeywordArguments(*args, **argv)
-        
-    @staticmethod
-    def checkContainer(*args, **argv):
-        return checkContainer(*args, **argv)
-    
-    #Dictionaries
-    @staticmethod
-    def lookupOrDefault(*args, **argv):
-        return lookupOrDefault(*args, **argv)
-        
-    @staticmethod
-    def dictFromTemplate(*args, **argv):
-        return dictFromTemplate(*args, **argv)
-        
-    @staticmethod
-    def checkDictEntries(*args, **argv):
-        return checkDictEntries(*args, **argv)
-        
-    @staticmethod
-    def checkDictTypes(*args, **argv):
-        return checkDictTypes(*args, **argv)
     
     #Errors
     @staticmethod
@@ -87,14 +53,6 @@ class Utilities(object):
     @staticmethod
     def fatalErrorInFunction(*args, **argv):
         return fatalErrorInFunction(*args, **argv)
-    
-    @staticmethod
-    def fatalErrorInFunctionArgumentChecking(*args, **argv):
-        return fatalErrorInFunctionArgumentChecking(*args, **argv)
-        
-    @classmethod
-    def fatalErrorInClassArgumentChecking(*args, **argv):
-        return fatalErrorInClassArgumentChecking(*args, **argv)
     
     fatalErrorIn = fatalErrorIn
     fatalErrorInArgumentChecking = fatalErrorInArgumentChecking

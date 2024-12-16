@@ -158,7 +158,7 @@ class Woschni(HeatTransferModel):
         #Check arguments:
         self.checkType(engine,EngineModel.EngineModel,"engine")
         if not CA is None:
-            self.checkTypes(CA,(float, Iterable),"CA")
+            self.checkType(CA,(float, Iterable),"CA")
         
         CA = engine.time.time if CA is None else CA
         p = engine.data.p(CA)

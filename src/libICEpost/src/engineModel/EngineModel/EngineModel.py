@@ -629,25 +629,21 @@ class EngineModel(BaseClass):
         filtered data to self.data.
         If filter is None, data are cloned from self.raw
         """
-        try:
-            #Save filter
-            self.info["filter"] = filter
-            
-            #Clone if no filter is given
-            if filter is None:
-                for field in self._raw.columns:
-                    self._data.loadArray(np.array((self._raw.loc[:,"CA"],self._raw.loc[:,field])).T, field)
-                return self
-            
-            #Apply filter
-            print(f"Applying filter {filter if isinstance(filter,Filter) else filter.__name__}")
-            for var in self._raw.columns:
-                #Filter data
-                if var != "CA":
-                    self._data.loadArray(np.array(filter(self._raw.loc[:,"CA"], self._raw.loc[:,var])).T, var)
-            
-        except BaseException as err:
-            self.fatalErrorInClass(self.filterData, f"Failed filtering data", err)
+        #Save filter
+        self.info["filter"] = filter
+        
+        #Clone if no filter is given
+        if filter is None:
+            for field in self._raw.columns:
+                self._data.loadArray(np.array((self._raw.loc[:,"CA"],self._raw.loc[:,field])).T, field)
+            return self
+        
+        #Apply filter
+        print(f"Applying filter {filter if isinstance(filter,Filter) else filter.__name__}")
+        for var in self._raw.columns:
+            #Filter data
+            if var != "CA":
+                self._data.loadArray(np.array(filter(self._raw.loc[:,"CA"], self._raw.loc[:,var])).T, var)
         
         return self
     
@@ -674,31 +670,27 @@ class EngineModel(BaseClass):
         Args:
             **initialConditions:  data initialization of each zone in the model.
         """
-        try:
-            #Update start-time of engine time so that it is bounded to first avaliable time-step
+        #Update start-time of engine time so that it is bounded to first avaliable time-step
+        
+        if not "CA" in self.data.columns:
+            raise ValueError("No data loaded yet.")
+        
+        #Set start-time
+        self.time.updateStartTime(self.data.loc[:,"CA"])
+        self.info["time"] = self.time.time
+        
+        #Update the mixtures at start-time (combustion models, injection models, etc.)
+        self._updateMixtures()
+        
+        initialConditions = Dictionary(**initialConditions)
+        #Store initial conditions
+        self.info["initialConditions"] = initialConditions
+        
+        for zone in self.Zones:
+            zoneDict = initialConditions.lookup(zone)
+            self.checkType(zoneDict, dict, "zoneDict")
             
-            if not "CA" in self.data.columns:
-                raise ValueError("No data loaded yet.")
-            
-            #Set start-time
-            self.time.updateStartTime(self.data.loc[:,"CA"])
-            self.info["time"] = self.time.time
-            
-            #Update the mixtures at start-time (combustion models, injection models, etc.)
-            self._updateMixtures()
-            
-            initialConditions = Dictionary(**initialConditions)
-            #Store initial conditions
-            self.info["initialConditions"] = initialConditions
-            
-            for zone in self.Zones:
-                zoneDict = initialConditions.lookup(zone)
-                self.checkType(zoneDict, dict, "zoneDict")
-                
-                attrgetter("_" + zone)(self).initializeState(**self._preprocessThermoModelInput(zoneDict, zone=zone))
-
-        except BaseException as err:
-            self.fatalErrorInClass(self.filterData, f"Failed initializing thermodynamic regions", err)
+            attrgetter("_" + zone)(self).initializeState(**self._preprocessThermoModelInput(zoneDict, zone=zone))
         
         return self
     

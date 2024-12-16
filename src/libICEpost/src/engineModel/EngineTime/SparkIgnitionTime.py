@@ -49,17 +49,10 @@ class SparkIgnitionTime(EngineTime):
         
         """
         #Argument checking:
-        try:
-            self.checkType(SA,float,"SA")
-            super().__init__(*args,**argv)
-            
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.__init__, err)
+        self.checkType(SA,float,"SA")
+        super().__init__(*args,**argv)
         
-        try:
-            self.SA = SA
-        except BaseException as err:
-            self.fatalErrorInClass(self.__init__, "Construction failed", err)
+        self.SA = SA
     
     #########################################################################
     def __str__(self):

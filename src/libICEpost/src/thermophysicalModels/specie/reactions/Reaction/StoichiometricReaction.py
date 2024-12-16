@@ -11,7 +11,8 @@ Last update:        12/06/2023
 #                               IMPORT                              #
 #####################################################################
 
-from ...specie.Mixture import Mixture
+from typing import Iterable
+from ...specie.Mixture import Mixture, Molecule
 
 from .Reaction import Reaction
 
@@ -36,16 +37,13 @@ class StoichiometricReaction(Reaction):
     """
     
     #########################################################################
-    def __init__(self, reactants, products):
+    def __init__(self, reactants:Iterable[Molecule], products:Iterable[Molecule]):
         """
-        reactants:  list<Molecule>
-            List of molecules in the reactants. The composition is 
-            automatically computed based on mass balances of atomic 
-            species
-        products:   list<Molecule>
-            List of molecules in the products. The composition is 
-            automatically computed based on mass balances of atomic 
-            species
+        Construct from reactants and products. The composition is automatically computed based on mass balances of atomic species.
+
+        Args:
+            reactants (Iterable[Molecule]): List of molecules in the products.
+            products (Iterable[Molecule]): List of molecules in the reactants.
         """
         #Argument checking:
         try:

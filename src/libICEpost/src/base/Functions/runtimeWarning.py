@@ -19,23 +19,7 @@ import inspect
 import colorama
 colorama.init(autoreset=False)
 
-from libICEpost.src import GLOBALS
-
-if not "ERROR_RECURSION" in GLOBALS.__dict__:
-    GLOBALS.ERROR_RECURSION = 0
-
-if not "CUSTOM_ERROR_MESSAGE" in GLOBALS.__dict__:
-    GLOBALS.CUSTOM_ERROR_MESSAGE = False
-
-if not "VERBOSITY_LEVEL" in GLOBALS.__dict__:
-    GLOBALS.VERBOSITY_LEVEL=1
-    """
-    Verbosity levels:
-        0:  Do not display any runtime message
-        1:  Display runtime warnings
-        2:  Base verbosity (TODO)
-        3:  Advanced debug verbosity (TODO)
-    """
+from libICEpost import GLOBALS
 
 class bcolors:
     HEADER = '\033[95m'
@@ -89,7 +73,7 @@ def printStack(e=None):
 def baseRuntimeWarning(WarningMSG, Msg, verbosityLevel=1, stack=True):
     Where = traceback.extract_stack()
     
-    if (verbosityLevel <= GLOBALS.VERBOSITY_LEVEL):
+    if (verbosityLevel <= GLOBALS.__VERBOSITY_LEVEL__):
         tabbedMSG = ""
         for cc in Msg:
             tabbedMSG += cc
@@ -131,10 +115,10 @@ def fatalErrorIn(self, func, msg, err=None):
     if not(err is None):
         msg += " - " + str(err)
     
-    if not(GLOBALS.CUSTOM_ERROR_MESSAGE):
+    if not(GLOBALS.__CUSTOM_ERROR_MESSAGE__):
         raise RuntimeError(msg)
     else:
-        if GLOBALS.ERROR_RECURSION > 0:
+        if GLOBALS.__ERROR_RECURSION__ > 0:
             print("")
             print(enf(enf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~", "warning"), "bold"))
             
@@ -160,7 +144,7 @@ def fatalErrorIn(self, func, msg, err=None):
             print(enf("Detailed error stack:","bold"))
             printStack(err)
         
-        GLOBALS.ERROR_RECURSION += 1
+        GLOBALS.__ERROR_RECURSION__ += 1
         exit(RuntimeError(MSG))
 
 #############################################################################
@@ -175,10 +159,10 @@ def fatalErrorInClass(cls, func, msg, err=None):
     if not(err is None):
         msg += " - " + str(err)
     
-    if not(GLOBALS.CUSTOM_ERROR_MESSAGE):
+    if not(GLOBALS.__CUSTOM_ERROR_MESSAGE__):
         raise RuntimeError(msg)
     else:
-        if GLOBALS.ERROR_RECURSION > 0:
+        if GLOBALS.__ERROR_RECURSION__ > 0:
             print("")
             print(enf(enf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~", "warning"), "bold"))
         
@@ -206,7 +190,7 @@ def fatalErrorInClass(cls, func, msg, err=None):
             print(enf("Detailed error stack:","bold"))
             printStack(err)
         
-        GLOBALS.ERROR_RECURSION += 1
+        GLOBALS.__ERROR_RECURSION__ += 1
         exit(RuntimeError(MSG))
 
 #############################################################################
@@ -223,10 +207,10 @@ def fatalErrorInFunction(func, msg, err=None):
     if not(err is None):
         msg += " - " + str(err)
     
-    if not(GLOBALS.CUSTOM_ERROR_MESSAGE):
+    if not(GLOBALS.__CUSTOM_ERROR_MESSAGE__):
         raise RuntimeError(msg)
     else:
-        if GLOBALS.ERROR_RECURSION > 0:
+        if GLOBALS.__ERROR_RECURSION__ > 0:
             print("")
             print(enf(enf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~", "warning"), "bold"))
             
@@ -252,7 +236,7 @@ def fatalErrorInFunction(func, msg, err=None):
             print(enf("Detailed error stack:","bold"))
             printStack(err)
         
-        GLOBALS.ERROR_RECURSION += 1
+        GLOBALS.__ERROR_RECURSION__ += 1
         exit(RuntimeError(MSG))
 
 #############################################################################
@@ -273,10 +257,10 @@ def fatalError(msg, err=None):
     if not(err is None):
         msg += " - " + str(err)
     
-    if not(GLOBALS.CUSTOM_ERROR_MESSAGE):
+    if not(GLOBALS.__CUSTOM_ERROR_MESSAGE__):
         raise RuntimeError(msg)
 
-    if GLOBALS.ERROR_RECURSION > 0:
+    if GLOBALS.__ERROR_RECURSION__ > 0:
         print("")
         print(enf(enf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~", "warning"), "bold"))
     
@@ -290,5 +274,5 @@ def fatalError(msg, err=None):
         print(enf("Detailed error stack:","bold"))
         printStack(err)
     
-    GLOBALS.ERROR_RECURSION += 1
+    GLOBALS.__ERROR_RECURSION__ += 1
     exit(RuntimeError(MSG))
