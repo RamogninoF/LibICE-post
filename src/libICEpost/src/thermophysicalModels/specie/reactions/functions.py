@@ -22,14 +22,18 @@ from libICEpost.src.thermophysicalModels.specie.specie.Mixture import Mixture, m
 from libICEpost.src.thermophysicalModels.specie.specie.Molecule import Molecule
 from libICEpost.src.thermophysicalModels.specie.reactions.Reaction.StoichiometricReaction import StoichiometricReaction
 from libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.Stoichiometry import Stoichiometry
+from libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.ThermoMixture import ThermoMixture
 
 from libICEpost.Database import database
 
 #TODO caching (memoization package handles also unhashable types)
+from functools import lru_cache
+from libICEpost.GLOBALS import __CACHE_SIZE__
 
 #############################################################################
 #                              MAIN FUNCTIONS                               #
 #############################################################################
+@lru_cache(maxsize=__CACHE_SIZE__)
 def computeAlphaSt(air:Mixture, fuel:Mixture, *, oxidizer:Molecule=database.chemistry.specie.Molecules.O2) -> float:
     """
     Compute the stoichiometric air-fuel ratio given air and fuel mixture compositions.
@@ -118,6 +122,7 @@ def computeAlphaSt(air:Mixture, fuel:Mixture, *, oxidizer:Molecule=database.chem
     return alphaSt
 
 #############################################################################
+@lru_cache(maxsize=__CACHE_SIZE__)
 def computeAlpha(air:Mixture, fuel:Mixture, reactants:Mixture, *, oxidizer:Molecule=database.chemistry.specie.Molecules.O2) -> float:
     """
     Compute the air-fuel ratio given air, fuel, and reactants mixture compositions.
@@ -241,6 +246,7 @@ def makeEquilibriumMechanism(path:str, species:Iterable[str], *, overwrite:bool=
         yaml.dump(output, yaml_file)
     
 #############################################################################
+@lru_cache(maxsize=__CACHE_SIZE__)
 def computeLHV(fuel:Molecule|str) -> float:
     """
     Compute the lower heating value (LHV) of a molecule. This must be stored in 
@@ -270,6 +276,7 @@ def computeLHV(fuel:Molecule|str) -> float:
     return (reactants.Thermo.hf() - products.Thermo.hf())/oxReact.reactants.Y[oxReact.reactants.specie.index(fuel)]
 
 #############################################################################
+@lru_cache(maxsize=__CACHE_SIZE__)
 def computeMixtureEnergy(mixture:Mixture, oxidizer:Molecule=database.chemistry.specie.Molecules.O2) -> float:
     """
     Compute the energy of a mixture based on the LHV of fuels contained. Computes stoichiometric 
@@ -284,4 +291,13 @@ def computeMixtureEnergy(mixture:Mixture, oxidizer:Molecule=database.chemistry.s
     """
     reactionModel = Stoichiometry(mixture)
     
-    return (reactionModel.reactants.Thermo.hf() - reactionModel.products.Thermo.hf())
+    #Build thermodynamic models of mixture based on janaf and perfect gas
+    thermoType = \
+        {
+            "EquationOfState":"PerfectGas",
+            "Thermo":"janaf7"
+        }
+    reactants = ThermoMixture(reactionModel.reactants, thermoType=thermoType)
+    products = ThermoMixture(reactionModel.products, thermoType=thermoType)
+    
+    return (reactants.Thermo.hf() - products.Thermo.hf())
