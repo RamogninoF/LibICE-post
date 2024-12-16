@@ -62,13 +62,16 @@ class Woschni(HeatTransferModel):
                 C1      (float, default 3.26)
                 C2cv    (float, default 2.28)
                 C2ge    (float, default 6.18)
+                C2corrcv(float, default 0.308)
+                C2corrge(float, default 0.417)
                 C3comp  (float, default 0.0)
                 C3comb  (float, default 3.24e-3)
+                useTurbulence (bool, False)
 
         Returns:
             Woschni: Instance of this class
         """
-        args = ["nwos", "C1", "C2cv", "Cge", "C2corr", "C3comp", "C3comb", "useTurbulence"]
+        args = ["nwos", "C1", "C2cv", "Cge", "C2corrcv", "C2corrge", "C3comp", "C3comb", "useTurbulence"]
         inputDict = {var:dictionary[var] for var in args if var in dictionary}
         return cls(**inputDict)
     
@@ -80,7 +83,8 @@ class Woschni(HeatTransferModel):
                  C1:float=3.26,
                  C2cv:float=2.28,
                  C2ge:float=6.18,
-                 C2corr:float=0.417,
+                 C2corrcv:float=0.308,
+                 C2corrge:float=0.417,
                  C3comp:float=0.0,
                  C3comb:float=3.24e-3,
                  useTurbulence:bool=False):
@@ -98,7 +102,8 @@ class Woschni(HeatTransferModel):
         Where:
             1) C2 changes depending if at closed-valves (C2cv) or during gas-exchange (C2ge)\\
             2) C3 changes depending if during compression (C3comp) or during combustion/expansion (C3comb)\\
-            3) Reference conditions (0) are at IVC or startTime if it is in closed-valve region.
+            3) Reference conditions (0) are at IVC or startTime if it is in closed-valve region.\\
+            4) C2corr changes depending if at closed-valves (C2corrcv) or during gas-exchange (C2corrge)
         
         Args:
             nwos (float, optional): Defaults to 1.32.
@@ -115,7 +120,8 @@ class Woschni(HeatTransferModel):
              "C1"           : C1            ,
              "C2cv"         : C2cv          ,
              "C2ge"         : C2ge          ,
-             "C2corr"       : C2corr        ,
+             "C2corrcv"     : C2corrcv      ,
+             "C2corrge"     : C2corrge      ,
              "C3comp"       : C3comp        ,
              "C3comb"       : C3comb        ,
              "useTurbulence": useTurbulence ,
@@ -146,6 +152,7 @@ class Woschni(HeatTransferModel):
             1) C2 changes depending if at closed-valves (C2cv) or during gas-exchange (C2ge)
             2) C3 changes depending if during compression (C3comp) or during combustion/expansion (C3comb)
             3) Reference conditions (0) are at IVC or startTime if it is in closed-valve region.
+            4) C2corr changes depending if at closed-valves (C2corrcv) or during gas-exchange (C2corrge)
         
         Args:
             engine (EngineModel): The engine model from which taking data.
@@ -167,7 +174,7 @@ class Woschni(HeatTransferModel):
         
         #Compute heat transfer coefficient:
         uwos = self.uwos(CA=CA, engine=engine)
-        h = self.coeffs["C1"] * (p/1000.)**(0.8) * T**(-0.53) * geometry.D**(-0.2) * uwos**(0.8)
+        h = self.coeffs["C1"] * ((p/1000.)**0.8) * (T**(-0.53)) * (geometry.D**(-0.2)) * (uwos**0.8)
         
         return h
     
@@ -186,6 +193,7 @@ class Woschni(HeatTransferModel):
             1) C2 changes depending if at closed-valves (C2cv) or during gas-exchange (C2ge)
             2) C3 changes depending if during compression (C3comp) or during combustion/expansion (C3comb)
             3) Reference conditions (0) are at IVC or startTime if it is in closed-valve region.
+            4) C2corr changes depending if at closed-valves (C2corrcv) or during gas-exchange (C2corrge)
         
         Args:
             engine (EngineModel): The engine model from which taking data.
@@ -206,7 +214,8 @@ class Woschni(HeatTransferModel):
         
         if self.coeffs["useTurbulence"]:
             uPrime = engine.data.uPrime(CA)
-            C2 += self.coeffs["C2corr"]*uPrime/UPistMean
+            C2corr = self.coeffs["C2corrcv"]*engine.time.isClosedValves(CA) + self.coeffs["C2corrge"]*(1. - engine.time.isClosedValves(CA))
+            C2 += C2corr*uPrime/UPistMean
         
         refCA = engine.time.startTime if engine.time.isClosedValves(engine.time.startTime) else engine.time.IVC
         refP = engine.data.p(refCA)
