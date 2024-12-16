@@ -24,6 +24,9 @@ from libICEpost.src.thermophysicalModels.thermoModels.ThermoState import ThermoS
 
 from libICEpost.Database import database
 
+from typing import Iterable
+from libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.DissociationModel.DissociationModel import DissociationModel
+
 #############################################################################
 #                               MAIN CLASSES                                #
 #############################################################################
@@ -52,6 +55,12 @@ class Stoichiometry(ReactionModel):
     _ReactionType:str = "StoichiometricReaction"
     """The type for reactions to lookup for in the database"""
     
+    _productsPreDissociation:Mixture
+    """The combustion products before applying the dissociation models"""
+    
+    dissociationModels:list[DissociationModel]
+    """A list of the dissociation models to apply"""
+    
     #########################################################################
     @property
     def fuel(self):
@@ -79,15 +88,27 @@ class Stoichiometry(ReactionModel):
             dictionary (dict): The dictionary from which constructing, containing:
                 reactants (Mixture): the mixture of reactants
                 oxidiser (Molecule): the oxidizer
+                dissociationModels (dict[str:dict]): Construction dictionaries for dissociation models in the form:
+                {
+                    <DissociationModelType>: construction dictionary for the specific model
+                    ...
+                }
         """
         cls.checkType(dictionary,dict,"dictionary")
         dictionary = Dictionary(**dictionary)
         
-        out = cls\
-            (
-                dictionary.lookup("reactants"),
-                dictionary.lookupOrDefault("oxidizer",default=database.chemistry.specie.Molecules.O2)
-            )
+        dissModels = dictionary.lookupOrDefault("dissociationModels", default={})
+        
+        out = \
+        cls(
+            reactants=dictionary.lookup("reactants"),
+            oxidizer=dictionary.lookupOrDefault("oxidizer",default=database.chemistry.specie.Molecules.O2),
+            dissociationModels=\
+                [
+                    DissociationModel.selector(d,dissModels[d])
+                    for d in dissModels
+                ]
+        )
         return out
     
     #########################################################################
@@ -95,7 +116,7 @@ class Stoichiometry(ReactionModel):
     
     #########################################################################
     #Constructor:
-    def __init__(self, reactants:Mixture, oxidizer:Molecule=database.chemistry.specie.Molecules.O2):
+    def __init__(self, reactants:Mixture, *, oxidizer:Molecule=database.chemistry.specie.Molecules.O2, dissociationModels:Iterable[DissociationModel]=None):
         """
         Args:
             reactants (Mixture): the mixture of reactants
@@ -103,13 +124,21 @@ class Stoichiometry(ReactionModel):
         """
         self.checkType(oxidizer, Molecule, "oxidizer")
         self._oxidizer = oxidizer
+        if not dissociationModels is None:
+            self.checkType(dissociationModels, Iterable, "dissociationModels")
+            [self.checkType(dm, DissociationModel, f"dissociationModels[{ii}]") for ii,dm in enumerate(dissociationModels)]
+        else:
+            dissociationModels = []
+            
+        #Dissociation models
+        self.dissociationModels = dissociationModels[:]
         
+        #Create the combustionProducts pre dissociation models
+        self._productsPreDissociation = Mixture.empty()
         super().__init__(reactants)
         
     #########################################################################
     #Operators:
-    
-    ################################
     
     #########################################################################
     #Methods:
@@ -138,9 +167,22 @@ class Stoichiometry(ReactionModel):
             bool: if something changed
         """
         #Update reactants, return False if the reactants where not changed:
-        #Not passing the state: not needed for update
         if not super()._update(reactants):
-            return False
+            #Update the state, if only this has changed, update only the dissociation models:
+            if super()._update(state=state):
+                #Try updating all the dissociation models
+                update = any([DM.update(state=state) for DM in self.dissociationModels])
+                #If some dissociation model has changed, apply the dissociation models and return True:
+                if update:
+                    self._products.update(self._productsPreDissociation.specie, self._products.Y, fracType="mass")
+                    [DM.apply(self._products) for DM in self.dissociationModels]
+                    return True
+                else:
+                    return False
+            else:
+                return False
+        
+        #The mixture has changed, compute combustion products
         self._updateFuels()
         
         #Splitting the computation into three steps:
@@ -229,17 +271,6 @@ class Stoichiometry(ReactionModel):
                     inerts.dilute(specie.specie, specie.Y/(yInert + specie.Y), "mass")
                 yInert += specie.Y
         
-        # print("Reactants:")
-        # print(self.reactants)
-        
-        # print(f"Reacting mixture (Y = {yReact})")
-        # print(reactingMix)
-        
-        # print(f"Inerts (Y = {yInert})")
-        # print(inerts)
-        
-        # print("Active reactions:",[str(r) for r in activeReactions])
-        
         #To assess if lean or rich, mix the oxidation reactions based on the
         #fuel mole/mass fractions in the fuels-only mixture. If the concentration
         #of oxidizer is higher then the actual, the mixture is rich, else lean.
@@ -278,8 +309,6 @@ class Stoichiometry(ReactionModel):
         v = self.np.c_[self.np.zeros((1,len(fuelMix))), [1]].T
         xStoich = self.np.linalg.solve(M,v).T[0][:-1]
         
-        # print(xStoich)
-        
         stoichReactingMix = mixtureBlend\
             (
                 [oxReactions[f.name].reactants for f in self._fuels], 
@@ -287,21 +316,12 @@ class Stoichiometry(ReactionModel):
                 "mole"
             )
         
-        # print("Fuel mixture:")
-        # print(fuelMix)
-        
-        # print("Stoichiometric reacting mixture:")
-        # print(stoichReactingMix)
-        
         prods = mixtureBlend\
             (
                 [oxReactions[f.name].products for f in self._fuels], 
                 [xx for xx in xStoich],
                 "mole"
             )
-        
-        # print("Stoichiometric products:")
-        # print(prods)
         
         #If the reaction is not stoichiometric, add the non-reacting part:
         # y_exc_prod = y_exc - y_def*(y_exc_st/y_def_st)
@@ -323,18 +343,21 @@ class Stoichiometry(ReactionModel):
             y_def_st = 1. - y_exc_st
             y_exc_prod = y_exc - y_def*(y_exc_st/y_def_st)
             prods.dilute(excMix,y_exc_prod, "mass")
-            
-            # print(f"Excess mixture: (Y = {y_exc_prod})")
-            # print(excMix)
         
         #Add inherts:
         if not inerts is None:
             prods.dilute(inerts, yInert, "mass")
         
-        self._products.update(prods.specie, prods.Y, fracType="mass")
+        #Save the combustion products pre-dissociation
+        self._productsPreDissociation.update(prods.specie, prods.Y, fracType="mass")
         
-        # print("Products:")
-        # print(prods)
+        #Apply dissociation models:
+        for DM in self.dissociationModels:
+            DM.update(state=state)
+            DM.apply(prods)
+        
+        #Store post-dissociation
+        self._products.update(prods.specie, prods.Y, fracType="mass")
         
         #Updated
         return True

@@ -13,9 +13,18 @@ Content of the package:
         
     Equilibrium (module)
         Computation of combustion products based on equilibrium
+    
+    Inhert (module)
+        Non-reacting mixture
+    
+    DissociationModel (module)
+        Defines classes to handel dissociation of specie in a mixture. Used in the 
+        Stoichiometry reaction model to impose dissociation of molecules.
 """
 
 from .ReactionModel import ReactionModel
 from .Stoichiometry import Stoichiometry
 from .Equilibrium import Equilibrium
 from .Inhert import Inhert
+
+from . import DissociationModel
