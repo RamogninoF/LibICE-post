@@ -206,7 +206,7 @@ class Woschni(HeatTransferModel):
         CA = engine.time.time if CA is None else CA
         p = engine.data.p(CA)
         V = engine.geometry.V(CA)
-        UPistMean = upMean(time=engine.time, geometry=engine.geometry)
+        UPistMean = upMean(n=engine.time.n, S=engine.geometry.S)
         
         #Using bool operations to extend to vectorization
         C3 = self.coeffs["C3comb"]*engine.time.isCombustion(CA) + self.coeffs["C3comp"]*(1. - engine.time.isCombustion(CA))

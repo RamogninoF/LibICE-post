@@ -43,10 +43,8 @@ class SparkIgnitionEngine(EngineModel):
     """
     Types = {t:EngineModel.Types[t] for t in EngineModel.Types}
     Types["CombustionModel"] = PremixedCombustion
-    Types["EngineTime"] = SparkIgnitionTime
     
     CombustionModel:PremixedCombustion
-    time:SparkIgnitionTime
     
     _fuel:Mixture
     """The current in-cylinder fuel mixture composition"""

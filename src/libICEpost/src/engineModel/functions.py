@@ -1,37 +1,35 @@
 """
 @author: F. Ramognino       <federico.ramognino@polimi.it>
 Last update:        25/06/2024
+
+Generic functions useful for internal combustion engines.
 """
 
 #####################################################################
 #                               IMPORT                              #
 #####################################################################
 
-from libICEpost.src.engineModel  import EngineGeometry, EngineTime
-
 from libICEpost.src.base.Functions.typeChecking import checkType
-from libICEpost.src.base.Functions.runtimeWarning import fatalErrorInFunction
 
-#TODO caching (memoization package handles also unhashable types)
+from functools import lru_cache
+from libICEpost.GLOBALS import __CACHE_SIZE__
 
 #############################################################################
 #                              MAIN FUNCTIONS                               #
 #############################################################################
-def upMean(*, geometry:EngineGeometry.ConRod.ConRodGeometry, time:EngineTime.EngineTime.EngineTime) -> float:
+@lru_cache(__CACHE_SIZE__)
+def upMean(*, n:float, S:float) -> float:
     """
-    Compute the mean piston speed of a piston engine.
+    Compute the mean piston speed of a piston engine [m/s].
 
     Args:
-        geometry (EngineGeometry.ConRod.ConRodGeometry): The engine geometry
-        time (EngineTime.EngineTime.EngineTime): The engine time
+        n (float): Engine speed [rpm]
+        S (float): Engine stroke [m]
 
     Returns:
-        float: mean piston speed
+        float: mean piston speed [m/s]
     """
-    try:
-        checkType(geometry, EngineGeometry.ConRod.ConRodGeometry, "geometry")
-        checkType(time, EngineTime.EngineTime.EngineTime, "time")
-        
-        return 2.*time.n/60.*geometry.S
-    except BaseException as err:
-        fatalErrorInFunction(upMean, "Failed computing mean piston speed", err)
+    checkType(n, float, "n")
+    checkType(S, float, "S")
+    
+    return 2.*n/60.*S

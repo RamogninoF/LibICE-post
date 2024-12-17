@@ -14,7 +14,7 @@ Last update:        12/06/2023
 #Typing
 from __future__ import annotations
 from types import FunctionType
-from typing import Iterable
+from typing import Iterable, Callable
 from matplotlib.axes import Axes
 
 #Other
@@ -25,6 +25,9 @@ import traceback
 
 #Plotting
 import numpy as np
+import pandas as pd
+
+import libICEpost as lice
 
 #Base class
 from libICEpost.src.base.BaseClass import BaseClass
@@ -47,6 +50,21 @@ from libICEpost.src.engineModel.HeatTransferModel.Woschni import Woschni
 
 #Database
 from libICEpost.Database.chemistry.specie.Mixtures import Mixtures, Mixture
+
+#############################################################################
+#                                  FUNCTIONS                                #
+#############################################################################
+def get_postfix(zone:str) -> str:
+    """
+    Return the postfix to append to a corresponding zone. By default, no postfix corresponds to 'cylinder' zone, while '_<zone>' to all the others.
+
+    Args:
+        zone (str): The zone to which compute the postfix to append to the data of that zone.
+
+    Returns:
+        str: The postfix
+    """
+    return "" if zone == "cylinder" else f"_{zone}"
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -215,54 +233,63 @@ class EngineModel(BaseClass):
             {
                 TODO
             }
+            
+            functionObjects (Iterable[tuple[str,dict]]): Function object to apply at every time-loop
+            [
+                tuple[str, dict]: FunctionObjectType, constructionDictionary
+            ]
         }
         """
-        try:
-            cls.checkTypes(dictionary, [dict, Dictionary], "dictionary")
-            if isinstance(dictionary, dict):
-                dictionary = Dictionary(dictionary)
-            
-            print("Constructing engine model from dictionary\n")
-            
-            #Engine time:
-            print("Construct EngineTime")
-            etModel = dictionary.lookup("EngineTime")
-            ET = EngineTime.selector(etModel, dictionary.lookup(etModel + "Dict"))
-            print(ET,"\n")
-            
-            #EngineGeometry:
-            print("Construct EngineGeometry")
-            egModel = dictionary.lookup("EngineGeometry")
-            EG = EngineGeometry.selector(egModel, dictionary.lookup(egModel + "Dict"))
-            print(EG,"\n")
+        cls.checkType(dictionary, [dict, Dictionary], "dictionary")
+        if isinstance(dictionary, dict):
+            dictionary = Dictionary(dictionary)
+        
+        print("Constructing engine model from dictionary\n")
+        
+        #Engine time:
+        print("Construct EngineTime")
+        etModel = dictionary.lookup("EngineTime")
+        ET = EngineTime.selector(etModel, dictionary.lookup(etModel + "Dict"))
+        print(ET,"\n")
+        
+        #EngineGeometry:
+        print("Construct EngineGeometry")
+        egModel = dictionary.lookup("EngineGeometry")
+        EG = EngineGeometry.selector(egModel, dictionary.lookup(egModel + "Dict"))
+        print(EG,"\n")
 
-            #combustionProperties
-            combustionProperties = dictionary.lookup("combustionProperties")
-            
-            #thermophysical properties
-            thermophysicalProperties = dictionary.lookup("thermophysicalProperties")
-            
-            #Data for pre-processing
-            dataDict = dictionary.lookup("dataDict")
-            
-            #Submodels
-            subModels = {}
-            smDict = dictionary.lookupOrDefault("submodels", Dictionary())
-            for sm in cls.Submodels:
-                if sm + "Type" in smDict:
-                    print(f"Constructing {sm} sub-model")
-                    smTypeName = smDict.lookup(sm + "Type")
-                    print(f"\tType: {smTypeName}")
-                    subModels[sm] = cls.Types[sm].selector(smTypeName, smDict.lookup(smTypeName + "Dict"))
-            
-            #Function objects
-            functionObjects = dictionary.lookupOrDefault("functionObjects", default=[])
-            
-            out = cls(time=ET, geometry=EG, thermophysicalProperties=thermophysicalProperties, combustionProperties=combustionProperties, dataDict=dataDict, functionObjects=functionObjects, **subModels)
-            return out
-            
-        except BaseException as err:
-            cls.fatalErrorInClass(cls.fromDictionary, "Failed contruction from dictionary", err)
+        #combustionProperties
+        combustionProperties = dictionary.lookup("combustionProperties")
+        
+        #thermophysical properties
+        thermophysicalProperties = dictionary.lookup("thermophysicalProperties")
+        
+        #Data for pre-processing
+        dataDict = dictionary.lookup("dataDict")
+        
+        #Submodels
+        subModels = {}
+        smDict = dictionary.lookupOrDefault("submodels", Dictionary())
+        for sm in cls.Submodels:
+            if sm + "Type" in smDict:
+                print(f"Constructing {sm} sub-model")
+                smTypeName = smDict.lookup(sm + "Type")
+                print(f"\tType: {smTypeName}")
+                subModels[sm] = cls.Types[sm].selector(smTypeName, smDict.lookup(smTypeName + "Dict"))
+        
+        #Function objects
+        from libICEpost.src.engineModel.functionObjects import FunctionObject
+        functionObjects = []
+        foList = dictionary.lookupOrDefault("functionObjects", default=[])
+        for ii, fo in enumerate(foList):
+            cls.checkType(fo, tuple, "dictionary[functionObjects][{ii}]")
+            if not len(fo) == 2: raise ValueError(f"dictionary[functionObjects][{ii}] must be of length 2 with FunctionObjectType and corresponding construction dictionary")
+            cls.checkType(fo[0], str, f"dictionary[functionObjects][{ii}][0]")
+            cls.checkType(fo[1], dict, f"dictionary[functionObjects][{ii}][1]")
+            functionObjects.append(FunctionObject.selector(*fo))
+        
+        out = cls(time=ET, geometry=EG, thermophysicalProperties=thermophysicalProperties, combustionProperties=combustionProperties, dataDict=dataDict, functionObjects=functionObjects, **subModels)
+        return out
     
     #########################################################################
     #Constructor:
@@ -272,7 +299,7 @@ class EngineModel(BaseClass):
                  thermophysicalProperties:dict|Dictionary,
                  combustionProperties:dict|Dictionary,
                  dataDict:dict=None,
-                 functionObjects:Iterable[FunctionType]=None,
+                 functionObjects:Iterable[Callable]=None,
                  **submodels,
                  ):
         """
@@ -285,7 +312,7 @@ class EngineModel(BaseClass):
             combustionProperties (dict|Dictionary): Dictionary with combustion data and chemical composition
             dataDict (dict, optional): Dictionary for loading data. If not given, data are not loaded 
                 and thermodynamic regions not initialized. Defaults to None.
-            functionObjects (Iterable[FunctionType], optional): A list of function objects to apply at 
+            functionObjects (Iterable[Callable], optional): A list of function objects to apply at 
                 every time-step. They must be functions takining the EngineModel (self) as *ONLY* input and
                 returning None. These can be used to further post-processing (example, save the mixture
                 compositions of the thermodynamic models)
@@ -345,7 +372,7 @@ class EngineModel(BaseClass):
         
         #Function objects
         self.checkType(functionObjects, Iterable, "functionObjects")
-        [self.checkType(fo, FunctionType, f"functionObjects[{ii}]")for ii,fo in enumerate(functionObjects)]
+        [self.checkType(fo, Callable, f"functionObjects[{ii}]")for ii,fo in enumerate(functionObjects)]
         self.info["functionObjects"] = [fo for fo in functionObjects]
         
         #Pre-processing
@@ -554,7 +581,7 @@ class EngineModel(BaseClass):
                 self.checkType(dataDict, Dictionary, f"{zone}[{entry}]")
                 
                 #If the region is not cylinder, append its name to the field
-                entryName:str = entry + (f"_{zone}" if zone != "cylinder" else "")
+                entryName:str = entry + get_postfix(zone)
                 currData:Dictionary = dataDict.lookup("data")
                 opts:Dictionary = currData.lookupOrDefault("opts", Dictionary())
                 
@@ -817,35 +844,32 @@ class EngineModel(BaseClass):
         Returns:
             EngineModel: self
         """
-        try:
-            print("")
-            print("Processing")
-            print("startTime:",self.time.startTime)
-            print("endTime:",self.time.endTime)
-            
-            #Create fields
-            self._process__pre__()
-            
-            #Process cylinder data
-            for t in tqdm(self.time(self.data.loc[:,"CA"]), "Progress: ", initial=0, total=(self.time.endTime-self.time.startTime), unit="CAD"):  #With progress bar :)
-                self.info["time"] = t
-                #Break the time loop if the updating fails:
-                try:
-                    self._update()                                      #Update
-                    self._storeLatestTime()                             #Save results at this time
-                    [fo(self) for fo in self.info["functionObjects"]]   #Compute function objects
-                except BaseException as err:
-                    self.runtimeError(f"Failed uploading engine model at time {t}",stack=True)
-                    print(traceback.format_exc())
-                    break
+        print("")
+        print("Processing")
+        print("startTime:",self.time.startTime)
+        print("endTime:",self.time.endTime)
+        
+        #Create fields
+        self._process__pre__()
+        
+        #Process cylinder data
+        for t in tqdm(self.time(self.data.loc[:,"CA"]), "Progress: ", initial=0, total=(self.time.endTime-self.time.startTime), unit="CAD"):  #With progress bar :)
+            self.info["time"] = t
+            #Break the time loop if the updating fails:
+            try:
+                self._update()                                      #Update
+                self._storeLatestTime()                             #Save results at this time
+                [fo(self) for fo in self.info["functionObjects"]]   #Compute function objects
+            except BaseException as err:
+                self.runtimeError(f"Failed uploading engine model at time {t}",stack=True)
+                print(traceback.format_exc())
+                break
 
-            #Final updates (heat transfer, cumulatives, etc...)
-            self._process__post__()
-            
-            return self
-        except BaseException as err:
-            self.fatalErrorInClass(self.process, f"Failed processing data for engine model {self.__class__.__name__}", err)
-    
+        #Final updates (heat transfer, cumulatives, etc...)
+        self._process__post__()
+        
+        return self
+        
     ####################################
     def _process__pre__(self) -> None:
         """
@@ -860,14 +884,14 @@ class EngineModel(BaseClass):
         #Add fields to data:
         fields = {"dpdCA", "AHRR", "ROHR", "A"}
         for zone in self.Zones:
-            fields |= {(v if zone == "cylinder" else f"{v}_{zone}") for v in getattr(self, f"_{zone}").state.__dict__}
+            fields |= {v + get_postfix(zone) for v in getattr(self, f"_{zone}").state.__dict__}
         for f in fields:
             if not f in self.data.columns:
                 self.data.loc[:,f] = float("nan")
         
         #Loop over zones to set mixture compositions
         for zone in self.Zones:
-            postfix = "" if zone == "cylinder" else f"_{zone}"
+            postfix = get_postfix(zone)
             Z:ThermoModel = getattr(self, f"_{zone}")
             
             # #Specie
@@ -931,7 +955,7 @@ class EngineModel(BaseClass):
         
         #Loop over zones
         for zone in self.Zones:
-            postfix = "" if zone == "cylinder" else f"_{zone}"
+            postfix = get_postfix(zone)
             Z:ThermoModel = getattr(self, f"_{zone}")
             
             #Properties
@@ -1199,6 +1223,13 @@ class EngineModel(BaseClass):
         return ax
     
     ####################################
+    def plot(self, *args, **kwargs):
+        """
+        Redirects to 'self.data.plot' (See helper of DataFrame.plot method)
+        """
+        return self.data.plot(*args, **kwargs)
+        
+    ####################################
     def plotP_ROHR(self, *, label="_noLabel", legend=False, apparent=False, pkwargs:dict=None, rohrkwargs:dict=None, axes:tuple[Axes,Axes]=None, adjustLims:bool=True, **kwargs):
         """
         Plot pressure (left axis) and ROHR (right axis).
@@ -1328,6 +1359,36 @@ class EngineModel(BaseClass):
         
         #Return the Axes
         return (axp, axrohr)
+    
+    ####################################
+    def save(self, file:str, *, overwrite:bool=False) -> None:
+        """Save the results to an excel file 
+
+        Args:
+            file (str): The name of the file where to save
+        """
+        self.checkType(file, str, "file")
+        self.checkType(overwrite, bool, "overwrite")
+        
+        if os.path.isfile(file) and not overwrite:
+            raise IOError(f"File {file} exists. Run with overwrite=True to overwrite.")
+
+        file = file if file.endswith(".xlsx") else f"{file}.xlsx"
+        
+        #Write the data
+        with pd.ExcelWriter(file, engine = 'xlsxwriter') as writer:
+            self.data._data.to_excel(writer, sheet_name="Data")
+        
+        #Some info
+        import openpyxl
+        book = openpyxl.load_workbook(file)
+        sh = book.create_sheet("Info")
+        sh = book["Info"]
+        sh.cell(row=1, column=1).value = f"File generated with {lice.__name__} package"
+        for ii, row in enumerate(self.__str__().split("\n")):
+            sh.cell(row=ii+2, column=1).value = row
+        book.save(file)
+        
     
 #########################################################################
 #Create selection table
