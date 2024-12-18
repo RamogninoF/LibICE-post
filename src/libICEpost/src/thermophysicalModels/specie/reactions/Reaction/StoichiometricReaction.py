@@ -16,6 +16,9 @@ from ...specie.Mixture import Mixture, Molecule
 
 from .Reaction import Reaction
 
+from libICEpost.Database.chemistry.specie.periodicTable import periodicTable
+from libICEpost.Database.chemistry.specie.Molecules import database, Molecules
+
 #############################################################################
 #                               MAIN CLASSES                                #
 #############################################################################
@@ -46,10 +49,7 @@ class StoichiometricReaction(Reaction):
             products (Iterable[Molecule]): List of molecules in the reactants.
         """
         #Argument checking:
-        try:
-            super().__init__(reactants, products)
-        except BaseException as err:
-            self.fatalErrorInClass(self.__init__, "Failed constructing the reaction", err)
+        super().__init__(reactants, products)
     
     #########################################################################
     @classmethod
@@ -100,12 +100,12 @@ class StoichiometricReaction(Reaction):
         string += " -> "
         
         for p in self.products:
-            if (p.X == 1):
+            if (p.X*self.moleRatio == 1):
                 string += p.specie.name
-            elif p.X == int(p.X):
-                string += str(int(p.X)) + " " + p.specie.name
+            elif p.X*self.moleRatio == int(p.X*self.moleRatio):
+                string += str(int(p.X*self.moleRatio)) + " " + p.specie.name
             else:
-                string += "{:.3f}".format(p.X) + " " + p.specie.name
+                string += "{:.3f}".format(p.X*self.moleRatio) + " " + p.specie.name
             
             string += " + "
         string = string[:-3]

@@ -316,10 +316,11 @@ class Stoichiometry(ReactionModel):
                 "mole"
             )
         
+        xProd = [(xx * oxReactions[f.name].moleRatio) for xx in xStoich]
         prods = mixtureBlend\
             (
                 [oxReactions[f.name].products for f in self._fuels], 
-                [xx for xx in xStoich],
+                [x/sum(xProd) for x in xProd],
                 "mole"
             )
         

@@ -18,6 +18,8 @@ from libICEpost.src.base.BaseClass import BaseClass, abstractmethod
 from ...specie.Mixture import Mixture
 from ...specie.Molecule import Molecule
 
+from libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.ThermoMixture import ThermoMixture
+
 from operator import attrgetter
 
 #############################################################################
@@ -54,6 +56,12 @@ class Reaction(BaseClass):
     def products(self):
         return self._products
     
+    ################################
+    @property
+    def moleRatio(self):
+        """The ratio of number of moles between products and reactants"""
+        return self._reactants.MM/self._products.MM
+    
     #########################################################################
     def __init__(self, reactants:Iterable[Molecule], products:Iterable[Molecule]):
         """
@@ -81,7 +89,8 @@ class Reaction(BaseClass):
             {
                 "name": self.__str__(),
                 "reactants": self.reactants,
-                "products": self.products
+                "products": self.products,
+                "moleRatio": self.moleRatio
             }
         
         return R.__repr__()
@@ -104,7 +113,7 @@ class Reaction(BaseClass):
                     atomsP.append(a.atom)
         
         if not ( sorted(atomsR, key=attrgetter('name')) == sorted(atomsP, key=attrgetter('name')) ):
-            raise ValueError("Incompatible atomic compositions of reactants and products.")
+            raise ValueError(f"Incompatible atomic compositions of reactants ({self.reactants.__repr__()}) and products ({self.products.__repr__()}).")
         
         return self
     
@@ -128,6 +137,27 @@ class Reaction(BaseClass):
         if not mix is None:
             if self._reactants != mix:
                 self._reactants.update(mix)
+    
+    #########################################################################
+    def releasedEnergy(self) -> float:
+        """
+        Compute the released energy from the reaction per unit mass.
+
+        Returns:
+            float: [J/kg]
+        """
+        
+        #Build thermodynamic models of mixture based on janaf and perfect gas
+        thermoType = \
+            {
+                "EquationOfState":"PerfectGas",
+                "Thermo":"janaf7"
+            }
+        reactants = ThermoMixture(self.reactants, thermoType=thermoType)
+        products = ThermoMixture(self.products, thermoType=thermoType)
+        
+        return (reactants.Thermo.hf() - products.Thermo.hf())
+    
     
 #########################################################################
 #Create selection table
