@@ -1,0 +1,22 @@
+{
+    "NO":
+    {
+        "name": "NO",
+        "specie": ["N", "O"],
+        "atoms": [1.0, 1.0]
+    },
+
+    "N2O":
+    {
+        "name": "N2O",
+        "specie": ["N", "O"],
+        "atoms": [2.0, 1.0]
+    },
+
+    "NO2":
+    {
+        "name": "NO2",
+        "specie": ["N", "O"],
+        "atoms": [1.0, 2.0]
+    }
+}

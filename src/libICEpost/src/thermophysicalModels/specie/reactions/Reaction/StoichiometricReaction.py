@@ -80,6 +80,56 @@ class StoichiometricReaction(Reaction):
             cls.fatalErrorInClass(cls.fromDictionary, "Failed construction from dictionary", err)
     
     #########################################################################
+    #Create oxidation reactions from Fuels database
+    @classmethod
+    def fromFuelOxidation(cls, fuel:Molecule, oxidizer:Molecule=database.chemistry.specie.Molecules.O2):
+        """
+        Create oxidation reactions for a fuel. Can handle oxidizers with H, N, O
+        
+        Args:
+            fuel (Molecule): The fuel molecule.
+        """
+        prod = []
+        if (periodicTable.N in fuel.atoms) or (periodicTable.N in oxidizer.atoms): #Example NOx
+            prod.append(Molecules.N2)
+        if (periodicTable.H in fuel.atoms) or (periodicTable.H in oxidizer.atoms): #Example H2O2
+            prod.append(Molecules.H2O)
+        if periodicTable.C in fuel.atoms:
+            prod.append(Molecules.CO2)
+        if periodicTable.S in fuel.atoms:
+            prod.append(Molecules.SO2)
+        
+        return cls(
+                    [fuel, oxidizer],
+                    prod
+                )
+        
+    #########################################################################
+    #Create oxidation reactions from Fuels database
+    @classmethod
+    def fromOxidizerReduction(cls, oxidizer:Molecule):
+        """
+        Create a reduction reaction of an oxidizer that is not in pure form (example NO2)
+        
+        Args:
+            oxidizer (Molecule): The oxidizer molecule.
+        """
+        prod = []
+        if periodicTable.N in oxidizer.atoms: #Example NOx
+            prod.append(Molecules.N2)
+        if (periodicTable.H in oxidizer.atoms) and (periodicTable.O in oxidizer.atoms): #Example H2O2
+            prod.append(Molecules.H2O)
+        if (periodicTable.H in oxidizer.atoms): #Example H2O2
+            prod.append(Molecules.H2)
+        if periodicTable.O in oxidizer.atoms:
+            prod.append(Molecules.O2)
+        
+        return cls(
+                    [oxidizer],
+                    prod
+                )
+    
+    #########################################################################
     def __str__(self):
         """
         Print the formula of the reaction (coefficient in mole fractions):

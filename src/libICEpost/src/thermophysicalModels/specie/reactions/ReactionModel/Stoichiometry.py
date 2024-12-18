@@ -214,6 +214,7 @@ class Stoichiometry(ReactionModel):
         #Loop over specie of the reactants
         for specie in self.reactants:
             #Loop over all oxidation reactions to find the active reactions
+            #TODO: loop over reducers to find also the reducers.
             found = False
             for r in oxReactions:
                 react = oxReactions[r]

@@ -503,7 +503,7 @@ class Mixture(Utilities):
         fracType = _fracType(fracType)
         
         if (dilutionFract < 0.0 or dilutionFract > 1.0):
-            raise ValueError("DilutionFract must be in range [0,1].")
+            raise ValueError(f"DilutionFract must be in range [0,1] ({dilutionFract}).")
         
         #Cast molecule to mixture
         if isinstance(dilutingMix, Molecule):

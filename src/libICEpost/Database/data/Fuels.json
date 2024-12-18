@@ -32,5 +32,12 @@
         "name": "CH3O",
         "specie": ["C", "H", "O"],
         "atoms": [1.0, 3.0, 1.0]
+    },
+
+    "CO":
+    {
+        "name": "CO",
+        "specie": ["C", "O"],
+        "atoms": [1.0, 1.0]
     }
 }

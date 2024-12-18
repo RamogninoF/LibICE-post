@@ -41,30 +41,23 @@
         "atoms": [1.0, 2.0]
     },
 
-    "CO":
-    {
-        "name": "CO",
-        "specie": ["C", "O"],
-        "atoms": [1.0, 1.0]
-    },
-
     "NO":
     {
-        "name": "CO",
+        "name": "NO",
         "specie": ["N", "O"],
         "atoms": [1.0, 1.0]
     },
 
     "N2O":
     {
-        "name": "CO",
+        "name": "N2O",
         "specie": ["N", "O"],
         "atoms": [2.0, 1.0]
     },
 
     "NO2":
     {
-        "name": "CO",
+        "name": "NO2",
         "specie": ["N", "O"],
         "atoms": [1.0, 2.0]
     }

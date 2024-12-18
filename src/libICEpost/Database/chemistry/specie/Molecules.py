@@ -24,6 +24,7 @@ from libICEpost.Database import database
 
 Molecules:dict[str,Molecule] = database.chemistry.specie.addFolder("Molecules")
 Fuels:dict[str,Molecule] = database.chemistry.specie.addFolder("Fuels")
+Oxidizers:dict[str,Molecule] = database.chemistry.specie.addFolder("Oxidizers")
 
 #############################################################################
 #                                   DATA                                    #
@@ -52,10 +53,9 @@ def fromJson(fileName, typeName="Molecules"):
                             data[mol]["atoms"]
                         )
                     
-                if typeName == "Fuels":
-                    Fuels[mol] = Molecules[mol]
-                elif not (typeName == "Molecules"):
-                    raise ValueError(f"Invalid typeName {typeName}. Available are:\t Molecules, Fuels.")
+                if typeName != "Molecules":
+                    moleculeClass = database.chemistry.specie[typeName] if typeName in database.chemistry.specie else database.chemistry.specie.addFolder(typeName)
+                    moleculeClass[mol] = Molecules[mol]
             
     except BaseException as err:
         fatalErrorInFunction(fromJson, f"Failed to load the molecule database '{fileName}':\n{err}.")
@@ -66,6 +66,9 @@ fromJson(fileName, "Molecules")
 
 fileName = Database.location + "/data/Fuels.json"
 fromJson(fileName, "Fuels")
+
+fileName = Database.location + "/data/Oxidizers.json"
+fromJson(fileName, "Oxidizers")
 
 del fileName
 
