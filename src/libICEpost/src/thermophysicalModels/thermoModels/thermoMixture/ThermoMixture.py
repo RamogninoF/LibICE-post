@@ -92,12 +92,12 @@ class ThermoMixture(Utilities):
 
     #########################################################################
     #Constructor:
-    def __init__(self, mixture: Mixture, thermoType: dict[str:str], **thermoData):
+    def __init__(self, mixture: Mixture, thermoType: dict[str,str], **thermoData):
         """
-        mixture:    ThermoTable
+        mixture:    Mixture
             The composition of the mixture.
         
-        thermoType: dict[str:str]
+        thermoType: dict[str,str]
             The types of thermodynamic models. Required are:
             {
                 Thermo
@@ -120,8 +120,12 @@ class ThermoMixture(Utilities):
         
         #Set the Thermo and EoS
         thermoData:Dictionary = Dictionary(thermoData)
-        self._Thermo = mixingRules.ThermoMixing.selector(ThermoType + "Mixing", thermoData.lookupOrDefault(ThermoType + "Dict", Dictionary()).update(mixture=mixture))
-        self._EoS = mixingRules.EquationOfStateMixing.selector(EoSType + "Mixing", thermoData.lookupOrDefault(EoSType + "Dict", Dictionary()).update(mixture=mixture))
+        self._Thermo = mixingRules.ThermoMixing.selector(ThermoType + "Mixing", thermoData.lookupOrDefault(ThermoType + "Dict", Dictionary()).update(mixture=self._mix))
+        self._EoS = mixingRules.EquationOfStateMixing.selector(EoSType + "Mixing", thermoData.lookupOrDefault(EoSType + "Dict", Dictionary()).update(mixture=self._mix))
+        
+        #Set the _Thermo and _EoS references to this one to be in sync
+        self._Thermo._mix = self._mix
+        self._EoS._mix = self._mix
         
     #########################################################################
     #Operators:

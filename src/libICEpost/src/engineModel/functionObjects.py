@@ -24,6 +24,10 @@ from libICEpost.src.base.BaseClass import BaseClass, abstractmethod
 from libICEpost import Dictionary
 
 from libICEpost.src.thermophysicalModels.thermoModels.ThermoModel import ThermoModel
+from libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.ThermoMixture import ThermoMixture
+
+import numpy as np
+import cantera as ct
 
 #############################################################################
 #                                MAIN CLASSES                               #
@@ -177,9 +181,6 @@ class SaveMixtureComposition(ZoneFunctionObject):
         specie: The specie name
         x/y: Wether mole or mass fraction
         zone: The zone name. By convention, properties of the cylinder zone have no '_<zone>' postfix.
-        
-    Args:
-        model (EngineModel): The model to which apply the functionObject.
     """
     fracType:str
     """Which kind of fraction to save"""
@@ -236,6 +237,164 @@ class SaveMixtureComposition(ZoneFunctionObject):
                 model.data.loc[index, specie.specie.name + "_y" + self.postfix] = specie.Y
 
 #############################################################################
+class EstimateBurntUnburntProperties(ZoneFunctionObject):
+    """
+    Estimate the burnt volume fraction from xb and density ratio for a zone at each time-step as:
+        yb = (1 + (1/densityRatio)*(1/xb - 1))^-1
+        
+    Using a constant density ratio rhou/rhob computed at start of combustion at the adiabatic flame temperature.
+    Hence, estimate properties of burnt and unburnt mixtures from the volume fractions:
+        <property><u/b>_<zone>
+        
+    Where:
+        property: The property saved.
+        u/b: Whether of burnt or unburnt mixture.
+        zone: The zone name. By convention, properties of the cylinder zone have no '_<zone>' postfix.
+        zone: The zone name. By convention, properties of the cylinder zone have no '_<zone>' postfix.
+    """
+    densityRatio:float
+    """Density ratio rhou/rhob"""
+    
+    reactor:ct.Solution
+    """The cantera reactor to compute properties at adiabati flame temperature at start of combustion"""
+    
+    unburnt:ThermoModel
+    """The unburnt mixture"""
+    
+    burnt:ThermoModel
+    """The burnt mixture"""
+    
+    #############################################################################
+    def __init__(self, *, mechanism:str=None, densityRatio:float=None, **kwargs):
+        """
+        Construct  either giving:
+            1) the mechanism used to compute the density ratio rhou/rhob at
+            adiabatic flame temperature ad spark-advance. 
+            2) The density ratio to use
+        
+        yb is computed as:
+            yb = (1 + (1/densityRatio)*(1/xb - 1))^-1
+
+        Args:
+            mechanism (str, optional): Path of the mechanism
+            densityRatio (float, optional): The density ratio to use
+            zone (str, optional): The zone for which saving the properties. Defaults to "cylinder".
+        """
+        #Type checking
+        super().__init__(**kwargs)
+        
+        self.reactor = None
+        self.densityRatio = float("nan")
+        
+        if not mechanism is None:
+            self.checkType(mechanism, str, "mechanism")
+            self.reactor = ct.Solution(mechanism)
+        if not densityRatio is None:
+            self.checkType(densityRatio, float, "densityRatio")
+            self.densityRatio = densityRatio
+        
+        if not(densityRatio is None) and not(mechanism is None):
+            raise ValueError("Can either impose densityRatio or mechanism, not both.")
+        
+        self.unburnt = None
+        self.burnt = None
+        
+    #############################################################################
+    @classmethod
+    def fromDictionary(cls, dictionary:dict):
+        """
+        Construct from dictionary.
+
+        Args:
+            dictionary (dict): Dictionary containing:
+                zone (str): zone for which saving
+                mechanism (str, optional): The path of the chemical mechanism to compute chemical 
+                    composition at adiabati flame temperature (used to compute rhou/rhob).
+                densityRatio (float, optional): The density ratio to use
+        
+        Returns:
+            EstimateBurntUnburntProperties: Instance of this class
+        """
+        dictionary = Dictionary(**dictionary)
+        return cls(**dictionary)
+    
+    #############################################################################
+    def __call__(self, model:EngineModel):
+        """
+        Evaluate the function object for a model. yb is computed as:
+            yb = (1 + (1/densityRatio)*(1/xb - 1))^-1
+
+        Args:
+            model (EngineModel): Input model
+        """
+        
+        #Type checking
+        CA, index, Z = super().__call__(model)
+        
+        p = Z.state.p
+        T = Z.state.T
+        V = Z.state.V
+        m = Z.state.m
+        xb = model.data.loc[index, "xb" + self.postfix]
+        
+        #If model was not initialized or at first CA after startOfCombustion
+        firstCA = model.data["CA"][model.time.isClosedValves(model.data["CA"]) & model.time.isCombustion(model.data["CA"])].to_list()[0]
+        if not (model.time.isCombustion(CA) and model.time.isClosedValves(CA)):
+            #Not (combustion and closedValves) -> only unburnt
+            model.data.loc[index, "yb" + self.postfix] = 0.0
+            model.data.loc[index, "mu" + self.postfix] = Z.state.m
+            model.data.loc[index, "mb" + self.postfix] = float("nan")
+            model.data.loc[index, "Tu" + self.postfix] = Z.state.T
+            model.data.loc[index, "Tb" + self.postfix] = float("nan")
+            model.data.loc[index, "rhou" + self.postfix] = Z.state.rho
+            model.data.loc[index, "rhob" + self.postfix] = float("nan")
+            model.data.loc[index, "Vu" + self.postfix] = Z.state.V
+            model.data.loc[index, "Vb" + self.postfix] = float("nan")
+            return
+        
+        elif CA == firstCA:
+            #Compute the density ratio from combustion ad adiabatic flame temperature
+            if not self.reactor is None:
+                #Given mechanism
+                self.reactor.TP = T, p
+                self.reactor.Y = {s.specie.name:s.Y for s in Z.mixture.mix}
+                self.reactor.equilibrate("HP") #Compute adiabatic flame temperature
+                self.densityRatio = Z.state.rho / self.reactor.density
+            
+            #Compute yb
+            yb = (1. + 1./self.densityRatio*(1./max(xb, 1e-6) - 1.))**-1. if model.time.isCombustion(CA) else 0.0
+            
+            #Initialize
+            ThermoType = {"Thermo":"janaf7", "EquationOfState":"PerfectGas"}
+            self.unburnt = ThermoModel(ThermoMixture(model.CombustionModel.freshMixture, thermoType=ThermoType))
+            self.unburnt.initializeState(mass=m*max(1.-xb, 1e-6), pressure=p, volume=V*max(1.-yb, 1e-6))
+            self.burnt = ThermoModel(ThermoMixture(model.CombustionModel.combustionProducts, thermoType=ThermoType))
+            self.burnt.initializeState(mass=m*max(xb, 1e-6), pressure=p, volume=V*max(yb, 1e-6))
+        else:
+            #Update
+            m_old = model.data.loc[index-1, "m" + self.postfix]
+            xb_old = model.data.loc[index-1, "xb" + self.postfix]
+            dm = m*xb - m_old*xb_old
+            
+            #Compute yb
+            yb = (1. + 1./self.densityRatio*(1./max(xb, 1e-6) - 1.))**-1. if model.time.isCombustion(CA) else 0.0
+            
+            self.unburnt.mixture.update(mixture=model.CombustionModel.freshMixture)
+            self.unburnt.update(pressure=p, volume=V*max(1.-yb, 1e-6), dm_in=-dm)
+            self.burnt.mixture.update(mixture=model.CombustionModel.freshMixture)
+            self.burnt.update(pressure=p, volume=V*max(yb, 1e-6), dm_in=dm)
+        
+        model.data.loc[index, "yb" + self.postfix] = yb
+        model.data.loc[index, "mu" + self.postfix] = self.unburnt.state.m
+        model.data.loc[index, "mb" + self.postfix] = self.burnt.state.m
+        model.data.loc[index, "Tu" + self.postfix] = self.unburnt.state.T
+        model.data.loc[index, "Tb" + self.postfix] = self.burnt.state.T
+        model.data.loc[index, "rhou" + self.postfix] = self.unburnt.state.rho
+        model.data.loc[index, "rhob" + self.postfix] = self.burnt.state.rho
+        model.data.loc[index, "Vu" + self.postfix] = self.unburnt.state.V
+        model.data.loc[index, "Vb" + self.postfix] = self.burnt.state.V
+        
+#############################################################################
 class SaveMixtureProperties(ZoneFunctionObject):
     """
     Store the mixture thermophysical properties for a zone at each time-step as:
@@ -243,10 +402,9 @@ class SaveMixtureProperties(ZoneFunctionObject):
         
     Where:
         property: The property
-        zone: The zone name. By convention, properties of the cylinder zone have no '_<zone>' postfix.
         
-    Args:
-        model (EngineModel): The model to which apply the functionObject.
+    Where:
+        zone: The zone name. By convention, properties of the cylinder zone have no '_<zone>' postfix.
     """
     cp:bool
     """save cp?"""
@@ -372,9 +530,9 @@ class SaveMixtureProperties(ZoneFunctionObject):
         if self.MM:
             model.data.loc[index, "MM" + self.postfix] = Z.mixture.mix.MM
 
-
 #############################################################################
 FunctionObject.createRuntimeSelectionTable()
 FunctionObject.addToRuntimeSelectionTable(SaveMixtureComposition)
 FunctionObject.addToRuntimeSelectionTable(SaveMixtureProperties)
 FunctionObject.addToRuntimeSelectionTable(CodedFunctionObject)
+FunctionObject.addToRuntimeSelectionTable(EstimateBurntUnburntProperties)

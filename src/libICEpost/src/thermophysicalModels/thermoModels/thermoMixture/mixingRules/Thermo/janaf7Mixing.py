@@ -149,8 +149,9 @@ class janaf7Mixing(ThermoMixing):
             The mixture
         Construct from Mixture.
         """
-        self._Thermo = self.janaf7(mix)
+        self._Thermo = self.janaf7(mix.copy())  #Start with a copy
         super().__init__(mix)
+        self._Thermo._mix = self._mix #Get in sync after first update
             
     #########################################################################
     #Operators:
