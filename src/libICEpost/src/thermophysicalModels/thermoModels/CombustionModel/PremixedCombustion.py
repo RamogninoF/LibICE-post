@@ -111,7 +111,7 @@ class PremixedCombustion(CombustionModel):
         #Xb
         if not xb is None:
             if xb != self._xb:
-                self._xb = xb
+                self._xb = min(max(xb, 0.), 1.) #Clamp between 0 and 1
                 update = True
             
         #Update the state and air composition
