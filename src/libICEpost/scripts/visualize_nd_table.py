@@ -22,7 +22,7 @@ import logging
 from libICEpost.src.base.dataStructures.Tabulation.OFTabulation import OFTabulation
 from libICEpost.src.base.Functions.runtimeWarning import enf
 
-log = logging.getLogger("createPremixedChemistryTable")
+log = logging.getLogger("visualizeOFTabulation")
 
 #--------------------------------------------#
 #              Argument parsing              #
@@ -214,10 +214,11 @@ def makeApp(tablePath:str):
             subData = subData[data.loc[:, ax] == ranges[ax][slice_idx[ii]]]
 
         hover_template = (
-            f'<b>{xaxis}</b>:'+'%{customdata[0]}<br>'+
-            f'<b>{yaxis}</b>:'+'%{customdata[1]}<br>'+
-            f'<b>{zaxis}</b>:'+'%{customdata[2]}<br>'+
+            f'<b>{xaxis}</b>: '+'%{customdata[0]}<br>'+
+            f'<b>{yaxis}</b>: '+'%{customdata[1]}<br>'+
+            f'<b>{zaxis}</b>: '+'%{customdata[2]}<br>'+
             f"".join([f'<b>{ax}</b>: {ranges[ax][slice_idx[ii]]}<br>' for ii, ax in enumerate(waxis)])+
+            f"<b>{variable}</b>: "+'%{customdata[3]}<br>'+
             f'<extra></extra>'
         )
         # Create 3D scatter plot
@@ -233,7 +234,7 @@ def makeApp(tablePath:str):
                 colorbar=dict(title=variable),
                 opacity=0.8
             ),
-            customdata=np.stack([subData[xaxis], subData[yaxis], subData[zaxis]], axis=-1),
+            customdata=np.stack([subData[xaxis], subData[yaxis], subData[zaxis], subData[variable]], axis=-1),
             hovertemplate=hover_template
         ))
         fig.update_layout(
@@ -269,6 +270,7 @@ def main() -> None:
         logging.basicConfig(level="DEBUG" if args.debug else "INFO",handlers=hdlrs)
         
         #Running the program
+        
         app = makeApp(args.tablePath)
         
         host = "127.0.0.1"
