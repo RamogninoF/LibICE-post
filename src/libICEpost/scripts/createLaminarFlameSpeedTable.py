@@ -704,6 +704,12 @@ def run(dictName:str, *, overwrite=False, restart=False) -> None:
         log.info(f"Saving to csv state {debugFileName}")
         results.to_csv(debugFileName, index=False)
     
+    #Set non-completed cases:
+    #   Su = 0.0
+    #   deltaL = 1e15
+    results.loc[np.invert(results["completed"]),"Su"] = 0.0
+    results.loc[np.invert(results["completed"]),"deltaL"] = 1e15
+    
     #Additional information for the user
     tabProp = Dictionary(
             alphaSt=alphaSt,
@@ -725,9 +731,12 @@ def run(dictName:str, *, overwrite=False, restart=False) -> None:
     tablePropertiesParameters=tabProp,
     )
     
+    #Add "completed" option
+    tableOF.addField([float(v) for v in results["completed"].to_numpy()], variable="completed", file="completed")
+    
     #Write the table
     log.info(f"Saving tabulation to {tableName}")
-    tableOF.write(binary=format)
+    tableOF.write(binary=(format == FileFormat.binary))
     
 #--------------------------------------------#
 #                     Main                   #
