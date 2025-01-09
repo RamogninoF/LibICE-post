@@ -74,11 +74,14 @@ def checkType(entry:str, Type:type|Iterable[type|_SpecialGenericAlias], entryNam
     if (Type == None.__class__) and not(checkForNone):
         return
     
-    if (isinstance(entry, (int,np.integer)) and issubclass(Type,(float, np.floating)) and intAsFloat):
+    if (isinstance(entry, (int,np.integer))
+        and 
+        (any([issubclass(t,(float, np.floating)) for t in Type]) if isinstance(Type, Iterable) else issubclass(Type,(float, np.floating))) # Handle iterable of types
+        and intAsFloat):
         return
     
     if not(isinstance(entry, Type)):
         if entryName is None:
-            raise TypeError("'{}' expected but '{}' was found.".format([t.__name__ for t in Type] if isinstance(Type, tuple) else Type.__name__, entry.__class__.__name__))
+            raise TypeError("'{}' expected but '{}' was found.".format([t.__name__ for t in Type] if isinstance(Type, Iterable) else Type.__name__, entry.__class__.__name__))
         else:
-            raise TypeError("Wrong type for entry '{}': '{}' expected but '{}' was found.".format(entryName, Type.__name__, entry.__class__.__name__))
+            raise TypeError("Wrong type for entry '{}': '{}' expected but '{}' was found.".format(entryName, ([t.__name__ for t in Type] if isinstance(Type, Iterable) else Type.__name__), entry.__class__.__name__))
