@@ -14,6 +14,10 @@ from libICEpost.src.base.Functions.typeChecking import checkType
 from functools import lru_cache
 from libICEpost.GLOBALS import __CACHE_SIZE__
 
+from .EngineModel.EngineModel import EngineModel
+
+from scipy.interpolate import interp1d
+
 #############################################################################
 #                              MAIN FUNCTIONS                               #
 #############################################################################
@@ -33,3 +37,24 @@ def upMean(*, n:float, S:float) -> float:
     checkType(S, float, "S")
     
     return 2.*n/60.*S
+
+#############################################################################
+def MFB(engine:EngineModel, xb:float) -> float:
+    """Compute the CA instant at which the engine
+    model reaches a given fuel mass fraction (xb).
+    Assuming that the xb array was already computed
+    and stored in the engine model.
+
+    Args:
+        engine (EngineModel): The engine model
+        xb (float): The value of xb to reach [0,1]
+    Returns:
+        float: CA(xb)
+    """
+    
+    checkType(engine, EngineModel, "engine")
+    checkType(xb,float,"xb")
+    if not (xb > 0.0) and (xb <= 1.0):
+         raise ValueError("xb must be in range [0,1]")
+    
+    return interp1d(engine.data["xb"], engine.data["CA"])(xb)
