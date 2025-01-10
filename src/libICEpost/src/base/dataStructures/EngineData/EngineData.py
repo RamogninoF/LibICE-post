@@ -144,7 +144,7 @@ class EngineData(Utilities):
             varScale:float=1.0,
             skipRows:int=0,
             maxRows:int=None,
-            interpolate:bool=False,
+            interpolate:bool=True,
             comments:str='#',
             verbose:bool=True,
             delimiter:str=None,
@@ -168,7 +168,7 @@ class EngineData(Utilities):
             varScale (float, optional): Scaling factor to apply to variable range. Defaults to 1.0.
             skipRows (int, optional): Number of raws to skip at beginning of file. Defaults to 0.
             maxRows (int, optional): Maximum number of raws to use. Defaults to None.
-            interpolate (bool, optional): Interpolate the data-set at existing CA range (used to load non-consistent data). Defaults to False.
+            interpolate (bool, optional): Interpolate the data-set at existing CA range (used to load non-consistent data). Defaults to True.
             comments (str, optional): Character to use to detect comment lines. Defaults to '#'.
             verbose (bool, optional): Print info/warnings. Defaults to True.
             delimiter (str, optional): Delimiter for the columns (defaults to whitespace). Defaults to None.
