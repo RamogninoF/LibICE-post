@@ -346,10 +346,6 @@ class EngineData(Utilities):
 
             #If data were not stored yet, just load this
             if len(self._data) < 1:
-                #Cannot use interpolate here
-                if interpolate:
-                    raise ValueError("Cannot load first with 'interpolate' method")
-
                 #Update based on CA of right
                 self._data = self._data.join(df, how="right")
 
