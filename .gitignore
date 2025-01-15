@@ -8,6 +8,7 @@ TODO/
 dist/
 src/libICEpost.egg-info
 upload.sh
+.coverage
 /.idea/.gitignore
 /.idea/LibICE-post.iml
 /.idea/misc.xml
