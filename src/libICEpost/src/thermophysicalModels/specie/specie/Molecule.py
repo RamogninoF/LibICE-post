@@ -40,18 +40,11 @@ class Molecule(Utilities):
     #########################################################################
     """
     Class containing information of a chemical specie.
-    
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    
+
     Attributes:
-        name:           str
-            Name of the chemical specie
-            
-        atoms:          list<Atom>
-            Atomic composition of the chemical specie
-        numberOfAtoms:  list<float>
-            Number of atoms of each specie
-        
+        name (str): Name of the chemical specie.
+        atoms (list[Atom]): Atomic composition of the chemical specie.
+        numberOfAtoms (list[float]): Number of atoms of each specie.
     """
     
     name:str

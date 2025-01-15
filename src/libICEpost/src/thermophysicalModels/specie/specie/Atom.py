@@ -11,6 +11,8 @@ Last update:        12/06/2023
 #                               IMPORT                              #
 #####################################################################
 
+from __future__ import annotations
+
 from libICEpost.src.base.Utilities import Utilities
 from libICEpost.src.base.Functions.runtimeWarning import runtimeWarning
 
@@ -21,39 +23,57 @@ from libICEpost.src.base.Functions.runtimeWarning import runtimeWarning
 class Atom(Utilities):
     """
     Class handling an atomic specie.
-    
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    
-    Attibutes:
-        name:   str
-            Name of the atomic specie
-            
-        mass:   float
-            Atomic mass
-    
+
+    Attributes:
+        name (str): Name of the atomic specie.
+        mass (float): Atomic mass.
     """
     
-    name:str
-    mass:float
+    _name:str
+    """The name of the atomic specie."""
+    
+    _mass:float
+    """The atomic mass of the atomic specie."""
+    
+    
+    #############################################################################
+    #Properties:
+    @property
+    def name(self) -> str:
+        """
+        Get the name of the atomic specie.
+
+        Returns:
+            str: The name of the atomic specie.
+        """
+        return self._name
+
+    @property
+    def mass(self) -> float:
+        """
+        Get the atomic mass.
+
+        Returns:
+            float: The atomic mass.
+        """
+        return self._mass
     
     #############################################################################
     #Constructor:
     def __init__(self, name, mass):
         """
-        name:   str
-                Name of the atomic specie
-        mass:   float
-            Atomic mass
+        Initialize an Atom instance.
+        
+        Args:
+            name (str): Name of the element.
+            mass (float): Atomic mass.
         """
         #Check arguments:
-        try:
-            Utilities.checkType(name, str, entryName="name")
-            Utilities.checkType(mass, float, entryName="mass")
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.__init__, err)
+        Utilities.checkType(name, str, entryName="name")
+        Utilities.checkType(mass, float, entryName="mass")
         
-        self.name = name
-        self.mass = mass
+        self._name = name
+        self._mass = mass
         
     #############################################################################
     #Operators:
@@ -62,15 +82,24 @@ class Atom(Utilities):
     #Equality:
     def __eq__(self, otherSpecie):
         """
-        Two species are equal if have the same value for all attributes.
+        Determine if two species are equal by comparing all their attributes.
+
+        Args:
+            otherSpecie (Atom): The other species to compare with.
+
+        Returns:
+            bool: True if all attributes of both species are equal, False otherwise.
+
+        Raises:
+            TypeError: If the other object is not of the same class.
         """
         if isinstance(otherSpecie, self.__class__):
-            for field in otherSpecie.__dict__:
-                if self.__dict__[field] != otherSpecie.__dict__[field]:
+            for field in set(self.__dict__.keys()).union(otherSpecie.__dict__.keys()):  # Union of the keys of the two dictionaries
+                if self.__dict__.get(field) != otherSpecie.__dict__.get(field):
                     return False
             return True
         else:
-            self.__class__.runtimeWarning("Trying to compare elements of type '{}' and '{}'.".format(otherSpecie.__class__.__name__, self.__class__.__name__))
+            raise TypeError("Cannot compare elements of type '{}' and '{}'.".format(otherSpecie.__class__.__name__, self.__class__.__name__))
             return False
     
     ##############################
@@ -83,9 +112,15 @@ class Atom(Utilities):
     
     ##############################
     #Disequality:
-    def __ne__(self,otherSpecie):
+    def __ne__(self,otherSpecie:Atom):
         """
-        Negation of __eq__ operator
+        Determine if two Atom objects are not equal.
+
+        Args:
+            otherSpecie (Atom): The other Atom object to compare against.
+
+        Returns:
+            bool: True if the Atom objects are not equal, False otherwise.
         """
         return not(self.__eq__(otherSpecie))
     
@@ -93,19 +128,33 @@ class Atom(Utilities):
     #Lower then:
     def __lt__(self,otherSpecie):
         """
-        Ordering by molecular weight
+        Compare if the molecular weight of this Atom is lower than another Atom.
+
+        Parameters:
+            otherSpecie (Atom): The other Atom to compare with.
+
+        Returns:
+            bool: True if the molecular weight of this Atom is lower than the molecular weight of the other Atom, False otherwise.
         """
+        
         if isinstance(otherSpecie, self.__class__):
             return self.mass < otherSpecie.mass
         else:
-            raise ValueError("Cannot to compare elements of type '{}' and '{}'.".format(otherSpecie.__class__.__name__, self.__class__.__name__))
+            raise ValueError("Cannot compare elements of type '{}' and '{}'.".format(otherSpecie.__class__.__name__, self.__class__.__name__))
     
     ##############################
     #Higher then:
-    def __gt__(self,otherSpecie):
+    def __gt__(self,otherSpecie:Atom):
         """
-        Ordering by molecular weight
+        Compare if the molecular weight of this Atom is greater than another Atom.
+
+        Parameters:
+            otherSpecie (Atom): The other Atom to compare with.
+
+        Returns:
+            bool: True if the molecular weight of this Atom is greater than the molecular weight of the other Atom, False otherwise.
         """
+
         if isinstance(otherSpecie, self.__class__):
             return self.mass > otherSpecie.mass
         else:
@@ -113,9 +162,15 @@ class Atom(Utilities):
     
     ##############################
     #Higher/equal then:
-    def __ge__(self,otherSpecie):
+    def __ge__(self,otherSpecie:Atom):
         """
-        Ordering by molecular weight
+        Compare if the molecular weight of this Atom is greater than or equal to another Atom.
+
+        Parameters:
+            otherSpecie (Atom): The other Atom to compare with.
+
+        Returns:
+            bool: True if the molecular weight of this Atom is greater than or equal to the molecular weight of the other Atom, False otherwise.
         """
         return ((self == otherSpecie) or (self > otherSpecie))
     
@@ -124,50 +179,54 @@ class Atom(Utilities):
     #Lower/equal then:
     def __le__(self,otherSpecie):
         """
-        Ordering by molecular weight
+        Compare if the molecular weight of this specie is less than or equal to another specie.
+
+        Args:
+            otherSpecie (Specie): The other specie to compare with.
+
+        Returns:
+            bool: True if the molecular weight of this specie is less than or equal to the molecular weight of the other specie, False otherwise.
         """
         return ((self == otherSpecie) or (self < otherSpecie))
     
     ##############################
     #Sum:
-    def __add__(self, otherSpecie):
+    def __add__(self, otherSpecie:Atom|"Molecule") -> "Molecule":
         """
-        Possible additions:
-            Atom + Atom = Molecule
-            atomSpecie + Molecule = Molecule
+        Add an Atom to another Atom or a Molecule to form a new Molecule.
+            Atom + Molecule = Molecule
+        Args:
+            otherSpecie (Atom | Molecule): The other species to add, which can be either an Atom or a Molecule.
+        Returns:
+            Molecule: A new Molecule formed by the addition of the current Atom and the other species.
+        Raises:
+            TypeError: If two atomic species with the same name but different properties are added.
         """
         from .Molecule import Molecule
         
         #Argument checking:
-        try:
-            Utilities.checkType(otherSpecie, [self.__class__, Molecule], entryName="otherSpecie")
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.__add__, err)
+        Utilities.checkType(otherSpecie, [self.__class__, Molecule], entryName="otherSpecie")
         
-        try:
-            if isinstance(otherSpecie, self.__class__):
-                atomicSpecie = [self.copy()]
-                numberOfAtoms = [1]
-                    
-                if (self == otherSpecie):
-                    numberOfAtoms[0] += 1
-                    
-                elif (self.name == otherSpecie.name):
-                    raise TypeError("Cannot add two atomic specie with same name but different properties.")
+        if isinstance(otherSpecie, self.__class__):
+            atomicSpecie = [self.copy()]
+            numberOfAtoms = [1]
                 
-                else:
-                    atomicSpecie.append(otherSpecie)
-                    numberOfAtoms.append(1)
+            if (self == otherSpecie):
+                numberOfAtoms[0] += 1
                 
-                #Create specie from atoms and initialize name from brute formula
-                returnSpecie = Molecule("", atomicSpecie, numberOfAtoms)
-                returnSpecie.name = returnSpecie.bruteFormula()
+            elif (self.name == otherSpecie.name):
+                raise ValueError("Cannot add two atomic specie with same name but different properties.")
             
             else:
-                returnSpecie = otherSpecie + self
+                atomicSpecie.append(otherSpecie)
+                numberOfAtoms.append(1)
             
-        except BaseException as err:
-            self.fatalErrorInClass(self.__add__, "Failed addition '{} + {}'".format(self.__class__.__name__, otherSpecie.__class__.__name__), err)
+            #Create specie from atoms and initialize name from brute formula
+            returnSpecie = Molecule("", atomicSpecie, numberOfAtoms)
+            returnSpecie.name = returnSpecie.bruteFormula()
+            
+        else:
+            returnSpecie = otherSpecie + self
         
         return returnSpecie
     
@@ -175,23 +234,20 @@ class Atom(Utilities):
     #Multiplication:
     def __mul__(self, num):
         """
-        Possible additions:
-            Atom * float/int = Molecule
+        Multiplies the current Atom instance by a given number to create a Molecule.
+        Args:
+            num (float): The number to multiply the Atom instance by.
+        Returns:
+            Molecule: A new Molecule instance created by multiplying the Atom instance by the given number.
         """
+        
         from .Molecule import Molecule
         
         #Argument checking:
-        try:
-            Utilities.checkType(num, float, entryName="num")
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.__mul__, err)
+        Utilities.checkType(num, float, entryName="num")
         
-        try:
-            returnSpecie = Molecule("",[self.copy()], [num])
-            returnSpecie.name = returnSpecie.bruteFormula()
-            
-        except BaseException as err:
-            self.fatalErrorInClass(self.__mul__, "Failed multiplication '{}*{}'".format(self.__class__.__name__, num.__class__.__name__), err)
+        returnSpecie = Molecule("",[self.copy()], [num])
+        returnSpecie.name = returnSpecie.bruteFormula()
         
         return returnSpecie
     
@@ -199,8 +255,13 @@ class Atom(Utilities):
     #Multiplication:
     def __rmul__(self, num):
         """
-        Possible additions:
-            Atom * float/int = Molecule
+        Implements the reflected multiplication operation for the Atom class.
+        This method allows the Atom instance to be multiplied by a number using the
+        reverse multiplication operator (num * Atom).
+        Args:
+            num (int or float): The number to multiply with the Atom instance.
+        Returns:
+            Atom: A new Atom instance resulting from the multiplication.
         """
         return self*num
     
