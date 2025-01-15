@@ -19,7 +19,6 @@ from collections.abc import Iterable
 from .HeatTransferModel import HeatTransferModel
 
 from libICEpost.src.engineModel.EngineModel import EngineModel
-from libICEpost.src.engineModel.functions import upMean
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -206,6 +205,8 @@ class Woschni(HeatTransferModel):
         CA = engine.time.time if CA is None else CA
         p = engine.data.p(CA)
         V = engine.geometry.V(CA)
+        
+        from libICEpost.src.engineModel.functions import upMean
         UPistMean = upMean(n=engine.time.n, S=engine.geometry.S)
         
         #Using bool operations to extend to vectorization

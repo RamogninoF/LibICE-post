@@ -13,6 +13,8 @@ from __future__ import annotations
 
 from libICEpost.src.base.Functions.typeChecking import checkType
 
+from .EngineModel.EngineModel import EngineModel
+
 from functools import lru_cache
 from libICEpost.GLOBALS import __CACHE_SIZE__
 
@@ -39,7 +41,7 @@ def upMean(*, n:float, S:float) -> float:
     return 2.*n/60.*S
 
 #############################################################################
-def MFB(engine:"EngineModel", xb:float) -> float:
+def MFB(engine:EngineModel, xb:float) -> float:
     """Compute the CA instant at which the engine
     model reaches a given fuel mass fraction (xb).
     Assuming that the xb array was already computed
@@ -52,7 +54,6 @@ def MFB(engine:"EngineModel", xb:float) -> float:
         float: CA(xb)
     """
     
-    from .EngineModel.EngineModel import EngineModel
     checkType(engine, EngineModel, "engine")
     checkType(xb,float,"xb")
     if not (xb > 0.0) and (xb <= 1.0):
@@ -61,4 +62,3 @@ def MFB(engine:"EngineModel", xb:float) -> float:
     return interp1d(engine.data["xb"], engine.data["CA"])(xb)
 
 #############################################################################
-# from .EngineModel.EngineModel import EngineModel
