@@ -33,7 +33,7 @@ class Atom(Utilities):
     """The name of the atomic specie."""
     
     _mass:float
-    """The atomic mass of the atomic specie."""
+    """The atomic mass of the atomic specie [g/mol]."""
     
     
     #############################################################################
@@ -51,10 +51,10 @@ class Atom(Utilities):
     @property
     def mass(self) -> float:
         """
-        Get the atomic mass.
+        Get the atomic mass [g/mol].
 
         Returns:
-            float: The atomic mass.
+            float: The atomic mass [g/mol].
         """
         return self._mass
     
@@ -205,18 +205,21 @@ class Atom(Utilities):
         from .Molecule import Molecule
         
         #Argument checking:
-        Utilities.checkType(otherSpecie, [self.__class__, Molecule], entryName="otherSpecie")
+        Utilities.checkType(otherSpecie, [Atom, Molecule], entryName="otherSpecie")
         
-        if isinstance(otherSpecie, self.__class__):
-            atomicSpecie = [self.copy()]
+        if isinstance(otherSpecie, Atom):
+            atomicSpecie = [self]
             numberOfAtoms = [1]
-                
+            
+            #If same specie, increase number of atoms
             if (self == otherSpecie):
                 numberOfAtoms[0] += 1
-                
+            
+            #Check if the two atoms have different properties
             elif (self.name == otherSpecie.name):
                 raise ValueError("Cannot add two atomic specie with same name but different properties.")
             
+            #Add the other specie
             else:
                 atomicSpecie.append(otherSpecie)
                 numberOfAtoms.append(1)
@@ -226,13 +229,14 @@ class Atom(Utilities):
             returnSpecie.name = returnSpecie.bruteFormula()
             
         else:
+            #Use the Molecule class to handle the addition
             returnSpecie = otherSpecie + self
         
         return returnSpecie
     
     ##############################
     #Multiplication:
-    def __mul__(self, num):
+    def __mul__(self, num) -> "Molecule":
         """
         Multiplies the current Atom instance by a given number to create a Molecule.
         Args:
@@ -253,7 +257,7 @@ class Atom(Utilities):
     
     ##############################
     #Multiplication:
-    def __rmul__(self, num):
+    def __rmul__(self, num:float|int) -> "Molecule":
         """
         Implements the reflected multiplication operation for the Atom class.
         This method allows the Atom instance to be multiplied by a number using the
@@ -261,7 +265,7 @@ class Atom(Utilities):
         Args:
             num (int or float): The number to multiply with the Atom instance.
         Returns:
-            Atom: A new Atom instance resulting from the multiplication.
+            Molecule: A Molecule instance resulting from the multiplication.
         """
         return self*num
     

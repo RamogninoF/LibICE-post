@@ -99,11 +99,11 @@ def test_atom_addition_same_atom():
 def test_atom_addition_different_atoms():
     atom1 = Atom("H", 1.008)
     atom2 = Atom("O", 16.00)
-    molecule = atom1 * 2 + atom2
+    molecule = atom2 + atom1
     assert isinstance(molecule, Molecule)
-    assert molecule.name == "H2O"
-    assert molecule.atoms == [atom1, atom2]
-    assert molecule.numberOfAtoms == [2, 1]
+    assert molecule.name == "OH"
+    assert molecule.atoms == [atom2, atom1]
+    assert molecule.numberOfAtoms == [1, 1]
     
 def test_atom_addition_same_name_different_properties():
     atom1 = Atom("H", 1.008)

@@ -11,7 +11,9 @@ Last update:        12/06/2023
 #                               IMPORT                              #
 #####################################################################
 
+from __future__ import annotations
 from typing import Iterable
+import numpy as np
 
 from libICEpost.src.base.Utilities import Utilities
 from dataclasses import dataclass
@@ -32,7 +34,9 @@ class MoleculeItem:
     Dataclass used as return value by Molecule.__getitem__ method
     """
     atom:Atom
+    """The atomic specie."""
     n:float
+    """The number of atoms of the atomic specie."""
 
 #Chemical specie:
 class Molecule(Utilities):
@@ -48,20 +52,39 @@ class Molecule(Utilities):
     """
     
     name:str
-    atoms:list[Atom]
-    numberOfAtoms:list[float]
+    """The name of the chemical specie."""
     
-
-    #Compute Rgas:
+    _atoms:list[Atom]
+    """The atomic composition of the chemical specie."""
+    
+    _numberOfAtoms:list[float]
+    """The number of atoms of each specie."""
+    
+    #########################################################################
+    #Properties:
     @property
-    def Rgas(self):
+    def Rgas(self) -> float:
         """
         Compute the mass-specific gas constant of the molecule:
-            Rgas = R / MM
+            Rgas = R / MM [J/(kg K)]
         """
-        specGasConst = constants.Rgas / self.MM
+        specGasConst = constants.Rgas / (self.MM * 1e-3)
         return specGasConst
 
+    @property
+    def atoms(self) -> list[Atom]:
+        """
+        Get the atomic composition of the chemical specie.
+        """
+        return self._atoms[:]
+
+    @property
+    def numberOfAtoms(self) -> list[float]:
+        """
+        Get the number of atoms of each specie.
+        """
+        return self._numberOfAtoms[:]
+    
     #########################################################################
     @classmethod
     def empty(cls):
@@ -72,39 +95,6 @@ class Molecule(Utilities):
         item.atoms = []
         item.numberOfAtoms = []
         return item
-    
-    #########################################################################
-    @classmethod
-    def fromDictionary(cls, dictionary):
-        """
-        Construct from dictionary:
-        {
-            name:           str
-                Name of the chemical specie
-            atoms:          list<Atom>
-                Atomic composition of the chemical specie
-            numberOfAtoms:  list<float>
-                Number of atoms of each specie
-        }
-        """
-        try:
-            cls.checkType(dictionary, dict, "dictionary")
-            
-            entryList = ["name", "atoms", "numberOfAtoms"]
-            for entry in entryList:
-                if not entry in dictionary:
-                    raise ValueError(f"Mandatory entry '{entry}' not found in dictionary.")
-            
-            out = cls\
-                (
-                    dictionary["name"], 
-                    dictionary["atoms"], 
-                    dictionary["numberOfAtoms"]
-                )
-            return out
-            
-        except BaseException as err:
-            cls.fatalErrorInClass(cls.fromDictionary, "Failed construction from dictionary", err)
     
     #########################################################################
     #Constructor:
@@ -130,28 +120,38 @@ class Molecule(Utilities):
         
         #Initialization:
         self.name = specieName
-        self.atoms = []
-        self.numberOfAtoms = []
+        self._atoms = []
+        self._numberOfAtoms = []
         
         #Fill atoms:
         for ii, atom in enumerate(atomicSpecie):
             if not atom.name in self:
-                self.atoms.append(atom.copy())
-                self.numberOfAtoms.append(numberOfAtoms[ii])
+                self._atoms.append(atom.copy())
+                self._numberOfAtoms.append(numberOfAtoms[ii])
             else:
                 index = self.index(atom)
-                self.numberOfAtoms[index] += numberOfAtoms[ii]
+                self._numberOfAtoms[index] += numberOfAtoms[ii]
     
     #########################################################################
     #Operators:
     
     ##############################
     #Equality:
-    def __eq__(self, otherSpecie):
-        """
-        Two chemical specie are equal if they have same name, 
-        the same atomic specie (with same names), and the same 
-        thermodynamic properties.
+    def __eq__(self, otherSpecie:Molecule):
+        """Determine if two chemical species are equal.
+
+        Two chemical species are considered equal if they have the same name,
+        the same atomic species (with the same names), and the same thermodynamic
+        properties.
+
+        Args:
+            otherSpecie (Molecule): The other chemical species to compare against.
+
+        Returns:
+            bool: True if the chemical species are equal, False otherwise.
+
+        Raises:
+            ValueError: If the otherSpecie is not an instance of the same class.
         """
         if isinstance(otherSpecie, self.__class__):
             if (self.name != otherSpecie.name) or not(self.atoms == otherSpecie.atoms):
@@ -171,19 +171,36 @@ class Molecule(Utilities):
     
     ##############################
     #Disequality:
-    def __ne__(self,other):
-        """
-        Negation of __eq__ operator
+    def __ne__(self,other:Molecule):
+        """Check if two Molecule objects are not equal.
+
+        This method negates the result of the __eq__ method to determine
+        if two Molecule objects are not equal.
+
+        Args:
+            other (Molecule): The other Molecule object to compare with.
+
+        Returns:
+            bool: True if the Molecule objects are not equal, False otherwise.
         """
         return not(self.__eq__(other))
     
     ##############################
     #Lower then:
-    def __lt__(self,otherSpecie):
+    def __lt__(self,otherSpecie:Molecule):
         """
-        Ordering by molecular weight
+        Compare the molecular mass (MM) of this specie with another specie.
+        
+        Args:
+            otherSpecie (Molecule): The other Molecule instance to compare with.
+        
+        Returns:
+            bool: True if this Molecule's molecular mass (MM) is less than the otherSpecie's molecular weight, False otherwise.
+        
+        Raises:
+            ValueError: If the otherSpecie is not an instance of the same class.
         """
-        if isinstance(otherSpecie, self.__class__):
+        if isinstance(otherSpecie, Molecule):
             return self.MM < otherSpecie.MM
         else:
             raise ValueError("Cannot to compare elements of type '{}' and '{}'.".format(otherSpecie.__class__.__name__, self.__class__.__name__))
@@ -192,9 +209,19 @@ class Molecule(Utilities):
     #Higher then:
     def __gt__(self,otherSpecie):
         """
-        Ordering by molecular weight
+        Compare the molecular mass (MM) of this specie with another specie.
+
+        Args:
+            otherSpecie (Molecule): The other specie to compare with.
+
+        Returns:
+            bool: True if the molecular mass (MM) of this specie is greater than the molecular mass of the other specie, False otherwise.
+
+        Raises:
+            ValueError: If the otherSpecie is not an instance of the same class.
         """
-        if isinstance(otherSpecie, self.__class__):
+
+        if isinstance(otherSpecie, Molecule):
             return self.MM > otherSpecie.MM
         else:
             raise ValueError("Cannot to compare elements of type '{}' and '{}'.".format(otherSpecie.__class__.__name__, self.__class__.__name__))
@@ -203,74 +230,83 @@ class Molecule(Utilities):
     #Higher/equal then:
     def __ge__(self,otherSpecie):
         """
-        Ordering by molecular weight
+        Check if this specie is greater than or equal to another specie (by molecular mass).
+        
+        Args:
+            otherSpecie (Molecule): The other specie to compare against.
+            
+        Returns:
+            bool: True if this specie is greater than or equal to the other specie, False otherwise.
         """
+        
         return ((self == otherSpecie) or (self > otherSpecie))
     
 
     ##############################
     #Lower/equal then:
-    def __le__(self,otherSpecie):
+    def __le__(self,otherSpecie:Molecule):
         """
-        Ordering by molecular weight
+        Check if this Molecule instance is less than or equal to another Molecule instance (by molecular mass).
+        Args:
+            otherSpecie (Molecule): The other Molecule instance to compare with.
+        Returns:
+            bool: True if this Molecule instance is less than or equal to the other Molecule instance, False otherwise.
         """
+        
+        
         return ((self == otherSpecie) or (self < otherSpecie))
     
     ##############################
     #Sum:
-    def __iadd__(self,otherSpecie):
+    def __add__(self,otherSpecie:Molecule|Atom) -> Molecule:
         """
-        In place addition. Possible additions:
-            Molecule + Molecule = Molecule
-            Molecule + Atom = Molecule
+        Adding a Molecule or Atom to the current Molecule.
+        The resulting Molecule will have the combined atoms of both 
+        the original and the added Molecule or Atom. The name is 
+        set with the brute formula.
+        
+        Args:
+            otherSpecie (Molecule | Atom): The Molecule or Atom to be added to the 
+            current Molecule.
+            
+        Returns:
+            Molecule: The new Molecule instance with the added atoms.
+            
+        Raises:
+            ValueError: If an atomic specie with the same name but different 
+            properties is already present in the Molecule.
         """
         #Argument checking:
-        try:
-            Utilities.checkType(otherSpecie, [self.__class__, Atom], entryName="otherSpecie")
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.__add__, err)
+        self.checkType(otherSpecie, [Molecule, Atom], entryName="otherSpecie")
         
         if isinstance(otherSpecie, Atom):
             otherSpecie = Molecule(otherSpecie.name, [otherSpecie], [1])
         
-        try:
-            #Add atoms of second specie
-            for atom in otherSpecie:
-                #Check if already present
-                if atom.atom.name in self:
-                    #Check if with different properties:
-                    if not(atom.atom in self):
-                        raise ValueError("Atomic specie named '{}' already present in molecule with different properties, cannot add atomic specie to molecule.".format(atom.atom.name))
-                    #Add number of atoms of second specie
-                    indexSelf = self.index(atom.atom)
-                    self.numberOfAtoms[indexSelf] += atom.n
-                else:
-                    #Add new atomic specie
-                    self.atoms.append(atom.atom.copy())
-                    self.numberOfAtoms.append(atom.n)
-            
-            #Set name from brute formula
-            self.name = self.bruteFormula()
+        atoms = self.atoms
+        numberOfAtoms = self.numberOfAtoms
+        #Add atoms of second specie
+        for atom in otherSpecie:
+            #Check if already present
+            if atom.atom.name in self:
+                #Check if with different properties:
+                if not(atom.atom in self):
+                    raise ValueError("Atomic specie named '{}' already present in molecule with different properties, cannot add atomic specie to molecule.".format(atom.atom.name))
+                #Add number of atoms of second specie
+                indexSelf = self.index(atom.atom)
+                numberOfAtoms[indexSelf] += atom.n
+            else:
+                #Add new atomic specie
+                atoms.append(atom.atom.copy())
+                numberOfAtoms.append(atom.n)
         
-        except BaseException as err:
-            self.fatalErrorInClass(self.__iadd__, "Failed addition '{} += {}'".format(self.__class__.__name__, otherSpecie.__class__.__name__), err)
+        #Create the Molecule instance
+        mol = Molecule("", atoms, numberOfAtoms)
         
-        return self
-    
-    ##############################
-    #Sum:
-    def __add__(self,otherSpecie):
-        """
-        Possible additions:
-            Molecule + Molecule = Molecule
-            Molecule + Atom = Molecule
-        """
-        try:
-            newSpecie = self.copy()
-            newSpecie += otherSpecie
-        except BaseException as err:
-            self.fatalErrorInClass(self.__add__, "Failed addition '{} + {}'".format(self.__class__.__name__, otherSpecie.__class__.__name__), err)
-        return newSpecie
+        #Set the name of the Molecule to brute formula
+        mol.name = mol.bruteFormula()
+        
+        #Return the Molecule
+        return mol
     
     ##############################
     #Print function:
@@ -311,15 +347,20 @@ class Molecule(Utilities):
         return R.__repr__()
     
     ###############################
-    def __contains__(self, entry):
-        """
-        Checks if a Atom is part of the Molecule.
+    def __contains__(self, entry:str|Atom):
+        """Checks if an Atom or a string representing an Atom's name is part of the Molecule.
+        
+        Args:
+            entry (str | Atom): The Atom or the name of the Atom to check for membership in the Molecule.
+        
+        Returns:
+            bool: True if the Atom or the Atom's name is part of the Molecule, False otherwise.
+        
+        Raises:
+            TypeError: If the entry is not of type str or Atom.
         """
         #Argument checking:
-        try:
-            self.checkType(entry, [str, Atom], "entry")
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.__contains__, err)
+        self.checkType(entry, [str, Atom], "entry")
         
         if isinstance(entry, Atom):
             return (entry in self.atoms)
@@ -327,77 +368,89 @@ class Molecule(Utilities):
             return (entry in [s.name for s in self.atoms])
     
     ###############################
-    def __index__(self, entry):
+    def __index__(self, entry:Atom):
         """
-        Return the idex position of the Atom in the Molecule.
+        Return the index position of the Atom in the Molecule.
+        
+        Parameters:
+            entry (Atom): The Atom object whose index position is to be found in the Molecule.
+        
+        Returns:
+            int: The index position of the Atom in the Molecule.
+        
+        Raises:
+            ValueError: If the Atom is not found in the Molecule.
         """
         #Argument checking:
-        try:
-            self.checkType(entry, Atom, "entry")
-            if not entry in self:
-                raise ValueError("Atom {} not found in molecule".format(entry.name))
-            
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.__index__, err)
+        self.checkType(entry, Atom, "entry")
+        if not entry in self:
+            raise ValueError("Atom {} not found in molecule".format(entry.name))
         
         return self.atoms.index(entry)
     
     ###############################
-    def index(self, entry):
+    def index(self, entry:Atom):
         """
-        Return the idex position of the Atom in the Molecule.
+        Return the index position of the Atom in the Molecule.
+        
+        Parameters:
+            entry (Atom): The Atom object whose index position is to be found in the Molecule.
+        
+        Returns:
+            int: The index position of the Atom in the Molecule.
+        
+        Raises:
+            ValueError: If the Atom is not found in the Molecule.
         """
         return self.__index__(entry)
     
     ###############################
-    def __len__(self):
+    def __len__(self) -> int:
         """
-        Return the number of Atomic specie in the molecule.
+        Return the number of atomic species in the molecule.
+        Returns:
+            int: The number of atoms in the molecule.
         """
         return len(self.atoms)
     
     ###############################
     #Access:
-    def __getitem__(self, atom):
+    def __getitem__(self, atom:str|Atom|int) -> MoleculeItem:
         """
-        atom:     str / Atom / int
-        
-        Get the data relative to Atom in the Molecule
-            -> If str: checking for atom matching the name
-            -> If Atom: checking for atomic specie
-            -> If int:  checing for entry following the order
-        
-        Return: MoleculeItem
+        Retrieve data relative to an Atom in the Molecule.
+        Parameters:
+            atom (str | Atom | int): The atom to retrieve data for.
+                - If str: Checks for an atom matching the name.
+                - If Atom: Checks for the atomic species.
+                - If int: Checks for the entry following the order.
+        Returns:
+            MoleculeItem: The data associated with the specified atom.
+        Raises:
+            ValueError: If the atom is not found in the molecule
+            IndexError: If the index is out of range.
         """
         #Argument checking:
-        try:
-            self.checkType(atom, [str, Atom, int], entryName="atom")
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.__getitem__, err)
+        self.checkType(atom, [str, Atom, int], entryName="atom")
         
-        try:
-            if isinstance(atom, str):
-                if not atom in [a.name for a in self.atoms]:
-                    raise ValueError("Atom {} not found in molecule".format(atom))
-                index = [a.name for a in self.atoms].index(atom)
-            
-            elif isinstance(atom, Atom):
-                if not atom in self:
-                    raise ValueError("Atom {} not found in molecule".format(atom.name))
-                index = self.index(atom)
-            
-            elif isinstance(atom, int):
-                if atom < 0 or atom >= len(self):
-                    raise ValueError("Index {} out of range".format(atom))
-                index = atom
-        except BaseException as err:
-            self.fatalErrorInClass(self.__getitem__, "failure retrieving atom in molecule", err)
+        #If str, check for atom name:
+        if isinstance(atom, str):
+            if not atom in [a.name for a in self.atoms]:
+                raise ValueError("Atom {} not found in molecule".format(atom))
+            index = [a.name for a in self.atoms].index(atom)
         
-        data = MoleculeItem(self.atoms[index].copy(), self.numberOfAtoms[index])
-            # {
-            #     "atom":self.atoms[index].copy(),
-            #     "numberOfAtoms":self.numberOfAtoms[index]
-            # }
+        #If Atom, check for atom:
+        elif isinstance(atom, Atom):
+            if not atom in self:
+                raise ValueError("Atom {} not found in molecule".format(atom.name))
+            index = self.index(atom)
+        
+        #If int, check for index:
+        elif isinstance(atom, int):
+            if atom < 0 or atom >= len(self):
+                raise IndexError("Index {} out of range".format(atom))
+            index = atom
+                
+        data = MoleculeItem(self.atoms[index], self.numberOfAtoms[index])
         
         return data
     
@@ -405,16 +458,18 @@ class Molecule(Utilities):
     #Iteration:
     def __iter__(self):
         """
-        Iteration over the atoms in the molecule.
+        Returns an iterator that yields MoleculeItem instances for each atom and its corresponding count in the molecule.
+        Yields:
+            MoleculeItem: An instance containing an atom and its count.
         """
-        return MoleculeIter(self)
+        return (MoleculeItem(a, n) for a, n in zip(self.atoms, self.numberOfAtoms))
     
     #########################################################################
     #Molecular mass:
     @property
-    def MM(self):
+    def MM(self) -> float:
         """
-        Compute the molecular mass of the chemical specie.
+        Compute the molecular mass of the chemical specie [g/mol].
         """
         MM = 0.0
         for atom in self:
@@ -423,9 +478,9 @@ class Molecule(Utilities):
     
     ##############################
     #Compute the brute formula of the chemical specie:
-    def bruteFormula(self):
+    def bruteFormula(self) -> str:
         """
-        Returns the brute formula of the specie
+        Returns the brute formula of the specie.
         """
         BF = ""
         
@@ -439,19 +494,6 @@ class Molecule(Utilities):
         
         return BF
     
-    ##############################
-    #List of atomic specie:
-    def atomList(self):
-        """
-        Returns a list<Atom> containing a list of the atomic specie
-        contained in the chemical specie.
-        """
-        atomList = []
-        for atom in self.atoms:
-            atomList.append(atom.copy())
-        
-        return atomList
-    
     ###############################
     def atomicCompositionMatrix(self):
         """
@@ -460,40 +502,11 @@ class Molecule(Utilities):
         in the molecule. Each element of the matrix is the number 
         of atoms of the atomic specie in the mixture, sorted 
         according to their order in 'atoms' array.
+
+        Returns:
+            numpy.ndarray: A 1xN array representing the atomic composition matrix.
         """
-        return self.__class__.np.array([a.n for a in self])
-    
-    def setName(self, value):
-        """
-        Set the name of the specie.
-        """
-        self.name = str(value)
-        return self
-    
-#############################################################################
-#                               FRIEND CLASSES                              #
-#############################################################################
-#Iterator:
-class MoleculeIter:
-    """
-    Iterator for Molecule class.
-    """
-    def __init__(self, molecule:Molecule):
-        self.molecule = molecule
-        self.atoms = [a.name for a in molecule.atoms]
-        
-        self.current_index = 0
-    
-    def __iter__(self):
-        return self
-    
-    def __next__(self):
-        if self.current_index < len(self.atoms):
-            out = self.molecule[self.atoms[self.current_index]]
-            self.current_index += 1
-            return out
-        else:
-            raise StopIteration
+        return np.array([a.n for a in self])
 
 #############################################################################
 #Load database

@@ -76,11 +76,11 @@ class Mixture(Utilities):
     
     #########################################################################
     @property
-    def Rgas(self):
+    def Rgas(self) -> float:
         """
-        The mass-specific gas constant of the mixture.
+        The mass-specific gas constant of the mixture [J/(kg K)].
         """
-        specGasConst = constants.Rgas / self.MM
+        specGasConst = constants.Rgas / (self.MM * 1e-3)
         return specGasConst
 
     #########################################################################
@@ -137,7 +137,7 @@ class Mixture(Utilities):
     @property
     def specieWeights(self) -> list[float]:
         """
-        The names of the specie in the mixture.
+        The molecular weights of the chemical specie in the mixture [g/mol].
         """
         return [s.MM for s in self._specie]
     
@@ -450,9 +450,9 @@ class Mixture(Utilities):
     ###############################
     #Compute MMmix:
     @property
-    def MM(self):
+    def MM(self) -> MM:
         """
-        Return the average molecular mass of the mixture.
+        Return the average molecular mass of the mixture [g/mol].
         """
         MMmixture = 0.0
         for specj in self:
