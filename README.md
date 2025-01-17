@@ -23,6 +23,12 @@ Suggested to run `pip install` with `-e` option to install in editable mode, so 
 $ pip install -e .
 ```
 
+It might appen that spyder or VS Code cannot access the module when installed in editable mode (`ImportError: module libICEpost not found`). If so, install it with `editable_mode=strict`:
+
+```bash
+$ pip install -e . --config-settings editable_mode=strict
+```
+
 ## Usage
 
 - TODO
