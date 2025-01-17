@@ -111,7 +111,7 @@ class EquationOfStateMixing(BaseClass):
         """
         if not mix is None:
             if mix != self._mix:
-                self._mix.update(mix.specie, mix.Y, fracType="mass")
+                self._mix.update(mix.species, mix.Y, fracType="mass")
                 return True
         
         #Already updated

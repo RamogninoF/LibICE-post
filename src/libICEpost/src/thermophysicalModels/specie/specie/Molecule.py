@@ -89,12 +89,9 @@ class Molecule(Utilities):
     @classmethod
     def empty(cls):
         """
-        Overload empty initializer.
+        Disable empty initializer.
         """
-        item = super().empty()
-        item.atoms = []
-        item.numberOfAtoms = []
-        return item
+        raise NotImplementedError("Cannot create an empty Molecule instance.")
     
     #########################################################################
     #Constructor:
@@ -117,6 +114,9 @@ class Molecule(Utilities):
         
         if not(len(atomicSpecie) == len(numberOfAtoms)):
             raise ValueError("Lists 'atomicSpecie' and 'numberOfAtoms' are not consistent.")
+        
+        if len(atomicSpecie) == 0:
+            raise ValueError("Cannot create a Molecule instance without atomic species.")
         
         #Initialization:
         self.name = specieName
@@ -373,7 +373,7 @@ class Molecule(Utilities):
         Return the index position of the Atom in the Molecule.
         
         Parameters:
-            entry (Atom): The Atom object whose index position is to be found in the Molecule.
+            entry (Atom|str): The Atom object or its name index position is to be found in the Molecule.
         
         Returns:
             int: The index position of the Atom in the Molecule.
@@ -382,27 +382,18 @@ class Molecule(Utilities):
             ValueError: If the Atom is not found in the Molecule.
         """
         #Argument checking:
-        self.checkType(entry, Atom, "entry")
+        self.checkType(entry, (Atom, str), "entry")
         if not entry in self:
-            raise ValueError("Atom {} not found in molecule".format(entry.name))
+            raise ValueError("Atom {} not found in molecule".format(entry.name if isinstance(entry, Atom) else entry))
         
-        return self.atoms.index(entry)
+        if isinstance(entry, str):
+            return [a.name for a in self.atoms].index(entry)
+        else:
+            return self.atoms.index(entry)
     
     ###############################
-    def index(self, entry:Atom):
-        """
-        Return the index position of the Atom in the Molecule.
-        
-        Parameters:
-            entry (Atom): The Atom object whose index position is to be found in the Molecule.
-        
-        Returns:
-            int: The index position of the Atom in the Molecule.
-        
-        Raises:
-            ValueError: If the Atom is not found in the Molecule.
-        """
-        return self.__index__(entry)
+    #Alias:
+    index = __index__
     
     ###############################
     def __len__(self) -> int:

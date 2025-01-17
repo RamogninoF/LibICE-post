@@ -122,7 +122,7 @@ class janaf7Mixing(ThermoMixing):
         ###################################
         def update(self, mix:Mixture=None)-> None:
             if not mix is None:
-                self._mix.update(mix.specie, mix.Y, fracType="mass")
+                self._mix.update(mix.species, mix.Y, fracType="mass")
 
     #########################################################################
     @classmethod

@@ -153,7 +153,7 @@ class ConstantDissociationFraction(DissociationModel):
         
         #Update the mixture
         if inplace:
-            mixture.update(cleanMix.specie, cleanMix.Y, fracType="mass")
+            mixture.update(cleanMix.species, cleanMix.Y, fracType="mass")
             
             print(mixture)
         else:

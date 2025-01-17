@@ -120,12 +120,12 @@ class PremixedCombustion(CombustionModel):
         if update:
             #Update combustion products
             prod = self._reactionModel.products
-            self._combustionProducts.update(prod.specie, prod.Y, fracType="mass")
+            self._combustionProducts.update(prod.species, prod.Y, fracType="mass")
             
             #Update current state based on combustion progress variable
             newMix = self.freshMixture.copy()
             newMix.dilute(self.combustionProducts, self._xb, "mass")
-            self._mixture.update(newMix.specie, newMix.Y, fracType="mass")
+            self._mixture.update(newMix.species, newMix.Y, fracType="mass")
             
         return update
 

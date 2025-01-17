@@ -161,7 +161,7 @@ class CombustionModel(BaseClass):
         if not reactants is None:
             self.checkType(reactants, Mixture, "reactants")
             if self._freshMixture != reactants:
-                self._freshMixture.update(reactants.specie, reactants.Y, fracType="mass")
+                self._freshMixture.update(reactants.species, reactants.Y, fracType="mass")
                 update = True
         
         #Update the reaction model

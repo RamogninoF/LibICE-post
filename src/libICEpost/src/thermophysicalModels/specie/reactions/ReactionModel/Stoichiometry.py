@@ -174,7 +174,7 @@ class Stoichiometry(ReactionModel):
                 update = any([DM.update(state=state) for DM in self.dissociationModels])
                 #If some dissociation model has changed, apply the dissociation models and return True:
                 if update:
-                    self._products.update(self._productsPreDissociation.specie, self._products.Y, fracType="mass")
+                    self._products.update(self._productsPreDissociation.species, self._products.Y, fracType="mass")
                     [DM.apply(self._products) for DM in self.dissociationModels]
                     return True
                 else:
@@ -351,7 +351,7 @@ class Stoichiometry(ReactionModel):
             prods.dilute(inerts, yInert, "mass")
         
         #Save the combustion products pre-dissociation
-        self._productsPreDissociation.update(prods.specie, prods.Y, fracType="mass")
+        self._productsPreDissociation.update(prods.species, prods.Y, fracType="mass")
         
         #Apply dissociation models:
         for DM in self.dissociationModels:
@@ -359,7 +359,7 @@ class Stoichiometry(ReactionModel):
             DM.apply(prods)
         
         #Store post-dissociation
-        self._products.update(prods.specie, prods.Y, fracType="mass")
+        self._products.update(prods.species, prods.Y, fracType="mass")
         
         #Updated
         return True

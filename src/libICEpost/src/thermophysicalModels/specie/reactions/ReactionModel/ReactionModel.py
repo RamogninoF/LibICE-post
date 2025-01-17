@@ -141,7 +141,7 @@ class ReactionModel(BaseClass):
         if not reactants is None:
             self.checkType(reactants, Mixture, "reactants")
             if self._reactants != reactants:
-                self._reactants.update(reactants.specie, reactants.Y, fracType="mass")
+                self._reactants.update(reactants.species, reactants.Y, fracType="mass")
                 update = True
         
         #Update state variables

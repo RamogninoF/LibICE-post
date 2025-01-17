@@ -166,7 +166,7 @@ class ThermoMixture(Utilities):
         """
         
         if not mixture is None:
-            self._mix.update(mixture.specie, mixture.Y, fracType="mass")
+            self._mix.update(mixture.species, mixture.Y, fracType="mass")
             self._Thermo.update(mixture)
             self._EoS.update(mixture)
         return self

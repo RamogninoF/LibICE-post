@@ -59,6 +59,10 @@ def test_molecule_brute_formula():
     molecule = Molecule("H2O", [atom1, atom2], [2.0, 1.0])
     assert molecule.bruteFormula() == "H2O"
 
+    molecule = Molecule("", [atom1, atom2], [4./3, 1.0])
+    molecule.name = molecule.bruteFormula()
+    assert molecule.name == "H1.333O"
+
 def test_molecule_hash():
     atom1 = Atom("H", 1.008)
     atom2 = Atom("O", 16.00)
@@ -87,6 +91,11 @@ def test_molecule_index():
     molecule = Molecule("H2O", [atom1, atom2], [2.0, 1.0])
     assert molecule.index(atom1) == 0
     assert molecule.index(atom2) == 1
+    assert molecule.index("H") == molecule.index(atom1)
+    with pytest.raises(ValueError):
+        molecule.index("C")
+    with pytest.raises(ValueError):
+        molecule.index(Atom("C", 12.00))
 
 def test_molecule_getitem():
     atom1 = Atom("H", 1.008)
@@ -182,3 +191,10 @@ def test_molecule_getitem_invalid_index():
     molecule = Molecule("H2O", [atom1, atom2], [2.0, 1.0])
     with pytest.raises(IndexError):
         molecule[3]
+
+def test_empty_molecule_initialization():
+    with pytest.raises(ValueError):
+        Molecule("H2O", [], [])
+    
+    with pytest.raises(NotImplementedError):
+        Molecule.empty()
