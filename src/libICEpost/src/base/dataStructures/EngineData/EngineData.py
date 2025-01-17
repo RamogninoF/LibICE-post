@@ -408,7 +408,7 @@ class EngineData(Utilities):
             return self.np.interp(CA, self._data["CA"], self._data[varName], float("nan"), float("nan"))
 
         interpolator.__doc__  = f"Linear interpolation of {varName} at CA."
-        interpolator.__doc__ += f"\n\Args:"
+        interpolator.__doc__ += f"\nArgs:"
         interpolator.__doc__ += f"\n\t\tCA (float | collections.abc.Iterable): CA at which iterpolating data."
         interpolator.__doc__ += f"\n\tReturns:"
         interpolator.__doc__ += f"\n\t\tCA at which iterpolating data."

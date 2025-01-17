@@ -669,7 +669,7 @@ class Tabulation(Utilities):
         otherRanges = {f:self.ranges[f] for f in otherFields}
         otherRangesSecond = {f:table.ranges[f] for f in otherFields}
         if otherRanges != otherRangesSecond:
-            raise ValueError("Table ranges of other fields not compatible.\nTable ranges:\n{}\Ranges of table to append:\n{}".format(otherRanges, otherRangesSecond))
+            raise ValueError("Table ranges of other fields not compatible.\nTable ranges:\n{}Ranges of table to append:\n{}".format(otherRanges, otherRangesSecond))
         
         #Append data:
         if inplace:
