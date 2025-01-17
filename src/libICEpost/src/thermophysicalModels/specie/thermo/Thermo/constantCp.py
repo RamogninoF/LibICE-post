@@ -59,21 +59,17 @@ class constantCp(Thermo):
 
         Give 1 out of three of (cp, cv, gamma)
         """
-        try:
-            entryList = ["cp", "cv", "gamma", "hf"]
-            Dic = {}
-            for entry in entryList:
-                if entry in dictionary:
-                    Dic[entry] = dictionary[entry]
-            
-            if not "Rgas" in dictionary:
-                raise ValueError(f"Mandatory entry 'Rgas' not found in dictionary.")
-            
-            out = cls(dictionary["Rgas"], **Dic)
-            return out
-            
-        except BaseException as err:
-            cls.fatalErrorInClass(cls.fromDictionary, "Failed construction from dictionary", err)
+        entryList = ["cp", "cv", "gamma", "hf"]
+        Dic = {}
+        for entry in entryList:
+            if entry in dictionary:
+                Dic[entry] = dictionary[entry]
+        
+        if not "Rgas" in dictionary:
+            raise ValueError(f"Mandatory entry 'Rgas' not found in dictionary.")
+        
+        out = cls(dictionary["Rgas"], **Dic)
+        return out
     
     #########################################################################
     #Constructor:
@@ -90,15 +86,12 @@ class constantCp(Thermo):
         Construct from one of the above data. Give 1 out of three of (cp, cv, gamma)
         """
         #Argument checking:
-        super(self.__class__, self).__init__(Rgas)
-        try:
-            self.checkType(cp, float, entryName="cp")
-            self.checkType(hf, float, entryName="hf")
-            
-            self._cp = cp
-            self._hf = hf
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.__init__, err)
+        super().__init__(Rgas)
+        self.checkType(cp, float, entryName="cp")
+        self.checkType(hf, float, entryName="hf")
+        
+        self._cp = cp
+        self._hf = hf
         
     #########################################################################
     #Operators:
@@ -131,7 +124,7 @@ class constantCp(Thermo):
         Constant pressure heat capacity [J/kg/K]
         """
         #Argument checking
-        super(self.__class__,self).cp(p,T)
+        super().cp(p,T)
         return self._cp
     
     ################################
@@ -143,10 +136,10 @@ class constantCp(Thermo):
         """
         #Check argument types
         try:
-            self.checkType(p, float, "p")
-            self.checkType(T, float, "T")
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.ha, err)
+            super().ha(p,T)
+        except NotImplementedError:
+            #Passed the check of p and T
+            pass
             
         return self._cp * (T - Tstd) + self._hf
     
@@ -164,7 +157,7 @@ class constantCp(Thermo):
         """
         dcp/dT [J/kg/K^2]
         """
-        super(self.__class__,self).dcpdT(p,T)
+        super().dcpdT(p,T)
         
         return 0.0
     

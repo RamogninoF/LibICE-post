@@ -199,7 +199,7 @@ class janaf7(Thermo):
         cp(T) = sum_{i=0,4} ( a_{i} * T^i )
         """
         #Argument checking
-        super(self.__class__,self).cp(p,T)
+        super().cp(p,T)
         
         coeffs = self.coeffs(T)
         
@@ -221,8 +221,9 @@ class janaf7(Thermo):
         """
         #Argument checking
         try:
-            super(self.__class__,self).ha(p,T)
+            super().ha(p,T)
         except NotImplementedError:
+            #Passed the check of p and T
             pass
         
         coeffs= self.coeffs(T)
@@ -252,7 +253,7 @@ class janaf7(Thermo):
         dcp/dT(T) = sum_{i=1,4}(i * a_{i} * T^(i - 1))
         """
         #Check arguments
-        super(self.__class__,self).dcpdT(p,T)
+        super().dcpdT(p,T)
         
         coeffs = self.coeffs(T)
         
@@ -288,25 +289,21 @@ class janaf7(Thermo):
                 coefficients for computation of cp
         }
         """
-        try:
-            entryList = ["specie", "cpLow", "cpHigh", "Tth", "Tlow", "Thigh"]
-            for entry in entryList:
-                if not entry in dictionary:
-                    raise ValueError(f"Mandatory entry '{entry}' not found in dictionary.")
-            
-            out = cls\
-                (
-                    dictionary["specie"], 
-                    dictionary["cpLow"], 
-                    dictionary["cpHigh"], 
-                    dictionary["Tth"], 
-                    dictionary["Tlow"], 
-                    dictionary["Thigh"]
-                )
-            return out
-            
-        except BaseException as err:
-            cls.fatalErrorInClass(cls.fromDictionary, "Failed construction from dictionary", err)
+        entryList = ["specie", "cpLow", "cpHigh", "Tth", "Tlow", "Thigh"]
+        for entry in entryList:
+            if not entry in dictionary:
+                raise ValueError(f"Mandatory entry '{entry}' not found in dictionary.")
+        
+        out = cls\
+            (
+                dictionary["specie"], 
+                dictionary["cpLow"], 
+                dictionary["cpHigh"], 
+                dictionary["Tth"], 
+                dictionary["Tlow"], 
+                dictionary["Thigh"]
+            )
+        return out
     
 #############################################################################
 Thermo.addToRuntimeSelectionTable(janaf7)

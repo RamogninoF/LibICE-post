@@ -36,10 +36,7 @@ class Thermo(BaseClass):
     #########################################################################
     #Constructor:
     def __init__(self, Rgas:float):
-        try:
-            self.checkType(Rgas, float, "Rgas")
-        except BaseException as err:
-            self.fatalErrorInClass(self.__init__, "Argument checking failed", err)
+        self.checkType(Rgas, float, "Rgas")
         self.Rgas = Rgas
     
     #########################################################################
@@ -70,11 +67,8 @@ class Thermo(BaseClass):
         """
         Constant pressure heat capacity [J/kg/K]
         """
-        try:
-            self.checkType(p, float, "p")
-            self.checkType(T, float, "T")
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.cp, err)
+        self.checkType(p, float, "p")
+        self.checkType(T, float, "T")
     
     ################################
     @abstractmethod
@@ -90,11 +84,8 @@ class Thermo(BaseClass):
         Absolute enthalpy [J/kg]
         """
         #Check argument types
-        try:
-            self.checkType(p, float, "p")
-            self.checkType(T, float, "T")
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.ha, err)
+        self.checkType(p, float, "p")
+        self.checkType(T, float, "T")
             
         raise NotImplementedError(f"Absolute enthalpy not implemented for Thermo class {self.__class__.__name__}")
     
@@ -105,11 +96,8 @@ class Thermo(BaseClass):
         
         us = ua + hf
         """
-        try:
-            self.checkType(p, float, "p")
-            self.checkType(T, float, "T")
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.ua, err)
+        self.checkType(p, float, "p")
+        self.checkType(T, float, "T")
         
         return self.us(p,T) + self.hf()
     
@@ -119,11 +107,8 @@ class Thermo(BaseClass):
         Sensible internal energy [J/kg]
         """
         #Check argument types
-        try:
-            self.checkType(p, float, "p")
-            self.checkType(T, float, "T")
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.us, err)
+        self.checkType(p, float, "p")
+        self.checkType(T, float, "T")
             
         raise NotImplementedError(f"Sensible internal energy not implemented for Thermo class {self.__class__.__name__}")
     
@@ -134,11 +119,8 @@ class Thermo(BaseClass):
         
         hs = ha - hf
         """
-        try:
-            self.checkType(p, float, "p")
-            self.checkType(T, float, "T")
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.hs, err)
+        self.checkType(p, float, "p")
+        self.checkType(T, float, "T")
         
         return self.ha(p,T) - self.hf()
     
@@ -148,11 +130,8 @@ class Thermo(BaseClass):
         """
         dcp/dT [J/kg/K^2]
         """
-        try:
-            self.checkType(p, float, "p")
-            self.checkType(T, float, "T")
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.dcpdT, err)
+        self.checkType(p, float, "p")
+        self.checkType(T, float, "T")
         
 #############################################################################
 Thermo.createRuntimeSelectionTable()
