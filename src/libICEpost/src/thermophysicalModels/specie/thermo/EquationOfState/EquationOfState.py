@@ -60,11 +60,8 @@ class EquationOfState(BaseClass):
         """
         Constant pressure heat capacity contribution [J/kg/K]
         """
-        try:
-            self.checkType(p, float, "p")
-            self.checkType(T, float, "T")
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.cp, err)
+        self.checkType(p, float, "p")
+        self.checkType(T, float, "T")
     
     #########################################################################
     @abstractmethod
@@ -72,11 +69,8 @@ class EquationOfState(BaseClass):
         """
         Enthalpy contribution [J/kg]
         """
-        try:
-            self.checkType(p, float, "p")
-            self.checkType(T, float, "T")
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.h, err)
+        self.checkType(p, float, "p")
+        self.checkType(T, float, "T")
             
     #########################################################################
     @abstractmethod
@@ -84,11 +78,8 @@ class EquationOfState(BaseClass):
         """
         Internal energy contribution [J/kg]
         """
-        try:
-            self.checkType(p, float, "p")
-            self.checkType(T, float, "T")
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.u, err)
+        self.checkType(p, float, "p")
+        self.checkType(T, float, "T")
     
     #########################################################################
     @abstractmethod
@@ -96,11 +87,8 @@ class EquationOfState(BaseClass):
         """
         Density [kg/m^3]
         """
-        try:
-            self.checkType(p, float, "p")
-            self.checkType(T, float, "T")
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.rho, err)
+        self.checkType(p, float, "p")
+        self.checkType(T, float, "T")
     
     #########################################################################
     @abstractmethod
@@ -108,11 +96,8 @@ class EquationOfState(BaseClass):
         """
         Temperature [K]
         """
-        try:
-            self.checkType(p, float, "p")
-            self.checkType(rho, float, "rho")
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.T, err)
+        self.checkType(p, float, "p")
+        self.checkType(rho, float, "rho")
             
     #########################################################################
     @abstractmethod
@@ -120,11 +105,8 @@ class EquationOfState(BaseClass):
         """
         pressure [Pa]
         """
-        try:
-            self.checkType(T, float, "T")
-            self.checkType(rho, float, "rho")
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.p, err)
+        self.checkType(T, float, "T")
+        self.checkType(rho, float, "rho")
     
     #########################################################################
     @abstractmethod
@@ -132,11 +114,8 @@ class EquationOfState(BaseClass):
         """
         Compression factor [-]
         """
-        try:
-            self.checkType(p, float, "p")
-            self.checkType(T, float, "T")
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.Z, err)
+        self.checkType(p, float, "p")
+        self.checkType(T, float, "T")
     
     #########################################################################
     @abstractmethod
@@ -144,11 +123,8 @@ class EquationOfState(BaseClass):
         """
         Difference cp - cv.
         """
-        try:
-            self.checkType(p, float, "p")
-            self.checkType(T, float, "T")
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.cpMcv, err)
+        self.checkType(p, float, "p")
+        self.checkType(T, float, "T")
             
     #########################################################################
     @abstractmethod
@@ -156,11 +132,8 @@ class EquationOfState(BaseClass):
         """
         dcp/dT [J/kg/K^2]
         """
-        try:
-            self.checkType(p, float, "p")
-            self.checkType(T, float, "T")
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.dcpdT, err)
+        self.checkType(p, float, "p")
+        self.checkType(T, float, "T")
     
     #########################################################################
     @abstractmethod
@@ -168,11 +141,8 @@ class EquationOfState(BaseClass):
         """
         dp/dT [Pa/K]
         """
-        try:
-            self.checkType(p, float, "p")
-            self.checkType(T, float, "T")
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.dpdT, err)
+        self.checkType(p, float, "p")
+        self.checkType(T, float, "T")
     
     #########################################################################
     @abstractmethod
@@ -180,11 +150,8 @@ class EquationOfState(BaseClass):
         """
         dT/dp [K/Pa]
         """
-        try:
-            self.checkType(p, float, "p")
-            self.checkType(T, float, "T")
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.dTdp, err)
+        self.checkType(p, float, "p")
+        self.checkType(T, float, "T")
     
     #########################################################################
     @abstractmethod
@@ -192,11 +159,8 @@ class EquationOfState(BaseClass):
         """
         drho/dp [kg/(m^3 Pa)]
         """
-        try:
-            self.checkType(p, float, "p")
-            self.checkType(T, float, "T")
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.drhodp, err)
+        self.checkType(p, float, "p")
+        self.checkType(T, float, "T")
     
     #########################################################################
     @abstractmethod
@@ -204,11 +168,8 @@ class EquationOfState(BaseClass):
         """
         dp/drho [Pa * m^3 / kg]
         """
-        try:
-            self.checkType(p, float, "p")
-            self.checkType(T, float, "T")
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.dpdrho, err)
+        self.checkType(p, float, "p")
+        self.checkType(T, float, "T")
     
     #########################################################################
     @abstractmethod
@@ -216,11 +177,8 @@ class EquationOfState(BaseClass):
         """
         drho/dT [kg/(m^3 K)]
         """
-        try:
-            self.checkType(p, float, "p")
-            self.checkType(T, float, "T")
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.drhodT, err)
+        self.checkType(p, float, "p")
+        self.checkType(T, float, "T")
     
     #########################################################################
     @abstractmethod
@@ -228,11 +186,8 @@ class EquationOfState(BaseClass):
         """
         dT/drho [K * m^3 / kg]
         """
-        try:
-            self.checkType(p, float, "p")
-            self.checkType(T, float, "T")
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.drhodT, err)
+        self.checkType(p, float, "p")
+        self.checkType(T, float, "T")
 
 #############################################################################
 #Generate selection table

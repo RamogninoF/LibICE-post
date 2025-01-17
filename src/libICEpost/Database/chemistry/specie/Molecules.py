@@ -13,8 +13,6 @@ Chemical specie
 #                               IMPORT                              #
 #####################################################################
 
-from libICEpost.src.base.Functions.runtimeWarning import fatalErrorInFunction
-
 from libICEpost.src.thermophysicalModels.specie.specie.Molecule import Molecule
 
 import json
@@ -41,24 +39,20 @@ def fromJson(fileName, typeName="Molecules"):
     Molecules = database.chemistry.specie.Molecules
     Fuels = database.chemistry.specie.Fuels
 
-    try:
-        with open(fileName) as f:
-            data = json.load(f)
-            for mol in data:
-                Molecules[mol] = \
-                    Molecule\
-                        (
-                            data[mol]["name"],
-                            [periodicTable[atom] for atom in data[mol]["specie"]],
-                            data[mol]["atoms"]
-                        )
-                    
-                if typeName != "Molecules":
-                    moleculeClass = database.chemistry.specie[typeName] if typeName in database.chemistry.specie else database.chemistry.specie.addFolder(typeName)
-                    moleculeClass[mol] = Molecules[mol]
-            
-    except BaseException as err:
-        fatalErrorInFunction(fromJson, f"Failed to load the molecule database '{fileName}':\n{err}.")
+    with open(fileName) as f:
+        data = json.load(f)
+        for mol in data:
+            Molecules[mol] = \
+                Molecule\
+                    (
+                        data[mol]["name"],
+                        [periodicTable[atom] for atom in data[mol]["specie"]],
+                        data[mol]["atoms"]
+                    )
+                
+            if typeName != "Molecules":
+                moleculeClass = database.chemistry.specie[typeName] if typeName in database.chemistry.specie else database.chemistry.specie.addFolder(typeName)
+                moleculeClass[mol] = Molecules[mol]
 
 #Load database
 fileName = Database.location + "/data/Molecules.json"

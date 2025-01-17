@@ -13,8 +13,6 @@ Chemical reactions
 #                               IMPORT                              #
 #####################################################################
 
-from libICEpost.src.base.Functions.runtimeWarning import fatalErrorInFunction
-
 from libICEpost.src.thermophysicalModels.specie.reactions.Reaction.StoichiometricReaction import StoichiometricReaction
 
 import json
@@ -37,19 +35,15 @@ def fromJson(fileName):
     """
     Add reactions to the database from a json file.
     """
-    try:
-        with open(fileName) as f:
-            data = json.load(f)
-            for react in data:
-                StoichiometricReaction_db[react] = \
-                    StoichiometricReaction\
-                        (
-                            [Molecules[mol] for mol in data[react]["reactants"]],
-                            [Molecules[mol] for mol in data[react]["products"]]
-                        )
-                    
-    except BaseException as err:
-        fatalErrorInFunction(fromJson,f"Failed to load the reactions database '{fileName}':\n{err}.")
+    with open(fileName) as f:
+        data = json.load(f)
+        for react in data:
+            StoichiometricReaction_db[react] = \
+                StoichiometricReaction\
+                    (
+                        [Molecules[mol] for mol in data[react]["reactants"]],
+                        [Molecules[mol] for mol in data[react]["products"]]
+                    )
 
 
 #Load database

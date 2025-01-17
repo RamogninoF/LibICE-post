@@ -13,7 +13,6 @@ janaf7 thermodynamic propeties
 #                               IMPORT                              #
 #####################################################################
 
-from libICEpost.src.base.Functions.runtimeWarning import fatalErrorInFunction
 import json
 
 import libICEpost.Database as Database
@@ -40,23 +39,19 @@ def fromJson(fileName, typeName="Molecules"):
     Molecules = database.chemistry.specie.Molecules
     janaf7_db = database.chemistry.thermo.Thermo.janaf7
     
-    try:
-        with open(fileName) as f:
-            data = json.load(f)
-            for mol in data:
-                janaf7_db[mol] = \
-                    janaf7\
-                        (
-                            Molecules[mol].Rgas,
-                            data[mol]["lowCpCoeffs"],
-                            data[mol]["highCpCoeffs"],
-                            data[mol]["Tcommon"],
-                            data[mol]["Tlow"],
-                            data[mol]["Thigh"]
-                        )
-                
-    except BaseException as err:
-        fatalErrorInFunction(fromJson,f"Failed to load the janaf7 database '{fileName}'", err)
+    with open(fileName) as f:
+        data = json.load(f)
+        for mol in data:
+            janaf7_db[mol] = \
+                janaf7\
+                    (
+                        Molecules[mol].Rgas,
+                        data[mol]["lowCpCoeffs"],
+                        data[mol]["highCpCoeffs"],
+                        data[mol]["Tcommon"],
+                        data[mol]["Tlow"],
+                        data[mol]["Thigh"]
+                    )
 
 #Load database
 fileName = Database.location + "/data/janaf7.json"

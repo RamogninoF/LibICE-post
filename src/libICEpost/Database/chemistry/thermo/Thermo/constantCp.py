@@ -13,7 +13,6 @@ janaf7 thermodynamic propeties
 #                               IMPORT                              #
 #####################################################################
 
-from libICEpost.src.base.Functions.runtimeWarning import fatalErrorInFunction
 import json
 
 import libICEpost.Database as Database
@@ -54,27 +53,23 @@ def fromJson(fileName, typeName="Molecules"):
     Molecules = database.chemistry.specie.Molecules
     constantCp_db = database.chemistry.thermo.Thermo.constantCp
     
-    try:
-        with open(fileName) as f:
-            data = json.load(f)
-            for mol in data:
-                Dict = {}
-                for var in ["cp", "hf"]:
-                    if var in data[mol]:
-                        Dict[var] = data[mol][var]
-                    else:
-                        raise ValueError(f"Missing input key {var} for entry {mol}")
+    with open(fileName) as f:
+        data = json.load(f)
+        for mol in data:
+            Dict = {}
+            for var in ["cp", "hf"]:
+                if var in data[mol]:
+                    Dict[var] = data[mol][var]
+                else:
+                    raise ValueError(f"Missing input key {var} for entry {mol}")
 
-                constantCp_db[mol] = \
-                    constantCp\
-                        (
-                            Molecules[mol].Rgas,
-                            Dict["cp"],
-                            Dict["hf"]
-                        )
-                
-    except BaseException as err:
-        fatalErrorInFunction(fromJson,f"Failed to load the janaf7 database '{fileName}'", err)
+            constantCp_db[mol] = \
+                constantCp\
+                    (
+                        Molecules[mol].Rgas,
+                        Dict["cp"],
+                        Dict["hf"]
+                    )
 
 #Load database
 fileName = Database.location + "/data/constantCp.json"
