@@ -101,20 +101,12 @@ class LowPass(Filter):
         order (int): The order of the filter (default:5)
         """
         #Argument checking:
-        try:
-            #Type checking
-            self.checkType(cutoff, float, "cutoff")
-            self.checkType(order, int, "order")
+        #Type checking
+        self.checkType(cutoff, float, "cutoff")
+        self.checkType(order, int, "order")
 
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.__init__, err)
-        
-        try:
-            self._cutoff = cutoff
-            self._order = order
-            
-        except BaseException as err:
-            self.fatalErrorInClass(self.__init__, "Failed construction of filter", err)
+        self._cutoff = cutoff
+        self._order = order
     
     #########################################################################
     #Dunder methods:

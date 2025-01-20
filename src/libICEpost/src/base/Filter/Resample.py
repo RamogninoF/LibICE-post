@@ -81,18 +81,9 @@ class Resample(Filter):
         delta (float): The spacing
         """
         #Argument checking:
-        try:
-            #Type checking
-            self.checkType(delta, float, "delta")
-
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.__init__, err)
-        
-        try:
-            self._delta = delta
-            
-        except BaseException as err:
-            self.fatalErrorInClass(self.__init__, "Failed construction of filter", err)
+        #Type checking
+        self.checkType(delta, float, "delta")
+        self._delta = delta
     
     #########################################################################
     #Dunder methods:

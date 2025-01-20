@@ -82,18 +82,9 @@ class UserDefinedFilter(Filter):
         filter the (x,y) data, returning the filtered (xp,yp) data
         """
         #Argument checking:
-        try:
-            #Type checking
-            self.checkType(function, FunctionType, "function")
-
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.__init__, err)
-        
-        try:
-            self.__call__ = function
-            
-        except BaseException as err:
-            self.fatalErrorInClass(self.__init__, "Failed construction of filter", err)
+        #Type checking
+        self.checkType(function, FunctionType, "function")
+        self.__call__ = function
     
     #########################################################################
     #Dunder methods:

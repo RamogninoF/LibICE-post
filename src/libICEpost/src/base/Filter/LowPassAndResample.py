@@ -44,15 +44,11 @@ class LowPassAndResample(LowPass, Resample):
             order (int): order of the filter
         }
         """
-        try:
-            out = cls\
-                (
-                    **dictionary
-                )
-            return out
-        
-        except BaseException as err:
-            cls.fatalErrorInClass(cls.fromDictionary, "Failed construction from dictionary", err)
+        out = cls\
+            (
+                **dictionary
+            )
+        return out
     
     #########################################################################
     def __init__(self, *, delta:float, cutoff:float, order=5):
@@ -61,12 +57,8 @@ class LowPassAndResample(LowPass, Resample):
         cutoff (float): The cur-off frequency
         order (int): The order of the filter (default:5)
         """
-        try:
-            Resample.__init__(self, delta)
-            LowPass.__init__(self, cutoff, order=order)
-            
-        except BaseException as err:
-            self.fatalErrorInClass(self.__init__, "Failed construction of filter", err)
+        Resample.__init__(self, delta)
+        LowPass.__init__(self, cutoff, order=order)
     
     #########################################################################
     #Dunder methods:

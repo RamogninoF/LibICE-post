@@ -15,7 +15,6 @@ Functions for type checking.
 
 import copy as cp
 import inspect
-from .runtimeWarning import fatalErrorInArgumentChecking
 
 from libICEpost import GLOBALS
 

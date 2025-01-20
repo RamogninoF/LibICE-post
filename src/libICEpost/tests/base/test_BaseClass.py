@@ -1,5 +1,5 @@
 import pytest
-from ...src.base.BaseClass import BaseClass, abstractmethod
+from libICEpost.src.base.BaseClass import BaseClass, abstractmethod
 
 def defineClasses():
     class TestBaseClass(BaseClass):

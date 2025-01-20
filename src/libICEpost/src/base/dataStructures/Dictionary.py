@@ -37,31 +37,27 @@ class Dictionary(OrderedDict, Utilities):
         """
         Same constructor as collections.OrderedDict class.
         """
-        try:
-            if _fileName is None:
-                # no file assosiaction
-                self.fileName = None
-                self.path = None
-            else:
-                #Relative  or absolute path
-                base, file = path.split(_fileName)
-                
-                #Path
-                if (base == "") or (base is None):
-                    self.path = "." + path.sep
-                else:
-                    self.path = base
-                
-                #File name:
-                if (file == "") or (file is None):
-                    raise ValueError(f"Invalid file name {_fileName}")
-                self.fileName = file
+        if _fileName is None:
+            # no file assosiaction
+            self.fileName = None
+            self.path = None
+        else:
+            #Relative  or absolute path
+            base, file = path.split(_fileName)
             
-            super().__init__(*args,**argv)
-                
-        except BaseException as err:
-            self.fatalErrorInClass(self.__init__,f"Construction of {self.__class__.__name__} entry failed", err)
-    
+            #Path
+            if (base == "") or (base is None):
+                self.path = "." + path.sep
+            else:
+                self.path = base
+            
+            #File name:
+            if (file == "") or (file is None):
+                raise ValueError(f"Invalid file name {_fileName}")
+            self.fileName = file
+        
+        super().__init__(*args,**argv)
+        
     #############################################################################
     @classmethod
     def fromFile(cls, fileName:str):
@@ -72,29 +68,22 @@ class Dictionary(OrderedDict, Utilities):
         
         NOTE: local variable 'this' for this file. You can access the local folder as 'this.path' within the dictionary.
         """
-        try:
-            cls.checkType(fileName, str, "fileName")
-        except BaseException as err:
-            cls.fatalErrorInClass(cls.fromFile,f"Argument checking failed", err)
-            
-        try:
-            this = cls(_fileName=fileName)
-            
-            _LOCALS = locals().copy()
-            _OLDLOCALS = list(_LOCALS)
-            
-            with open(fileName) as _FILE:
-                exec(_FILE.read())
-            
-            _LOCALS = locals().copy()
-            for l in _LOCALS.keys():
-                #If the variable is not a module and is not a local variable of the function, add to the dictionary
-                if not l in (_OLDLOCALS + ["_OLDLOCALS", "_LOCALS", "_FILE"]) and (not isinstance(_LOCALS[l], ModuleType)):
-                    this[l] = _LOCALS[l]
-                    
-        except BaseException as err:
-            cls.fatalErrorInClass(cls.fromFile,f"Error reading {cls.__name__} from file {fileName}", err)
+        cls.checkType(fileName, str, "fileName")
         
+        this = cls(_fileName=fileName)
+        
+        _LOCALS = locals().copy()
+        _OLDLOCALS = list(_LOCALS)
+        
+        with open(fileName) as _FILE:
+            exec(_FILE.read())
+        
+        _LOCALS = locals().copy()
+        for l in _LOCALS.keys():
+            #If the variable is not a module and is not a local variable of the function, add to the dictionary
+            if not l in (_OLDLOCALS + ["_OLDLOCALS", "_LOCALS", "_FILE"]) and (not isinstance(_LOCALS[l], ModuleType)):
+                this[l] = _LOCALS[l]
+            
         return this
         
     #############################################################################
@@ -104,29 +93,28 @@ class Dictionary(OrderedDict, Utilities):
 
         Args:
             entryName (str): Name of the entry to look for
-            varType (type, optional): Type of the variable to lookup for. 
+            varType (type|Iterable[type], optional): Type of the variable to lookup for. 
                 Performes type-checking if it is given. Defaults to None.
 
+        Raises:
+            KeyError: If the entry is not found
+            TypeError: If the type is not consistent with varType
+            
         Returns:
             varType|Any: self[entryName]
         """
-        try:
-            self.checkType(entryName, str, "entryName")
-            if varType is None:
-                pass
-            elif isinstance(varType, Iterable):
-                [self.checkType(t, (type, _SpecialGenericAlias), f"varType[{ii}]") for ii,t in enumerate(varType)]
-            else:
-                self.checkType(varType, (type, _SpecialGenericAlias), f"varType")
-        except BaseException as err:
-            self.fatalErrorInClass(self.lookup,f"Argument checking failed", err)
+        self.checkType(entryName, str, "entryName")
+        if varType is None:
+            pass
+        elif isinstance(varType, Iterable):
+            [self.checkType(t, (type, _SpecialGenericAlias), f"varType[{ii}]") for ii,t in enumerate(varType)]
+        else:
+            self.checkType(varType, (type, _SpecialGenericAlias), f"varType")
             
         if not entryName in self:
-            self.fatalErrorInClass(self.lookup, f"Entry '{entryName}' not found in Dictionary. Available entries are:\n\t" + "\n\t".join([str(k) for k in self.keys()]))
+            raise KeyError(f"Entry '{entryName}' not found in Dictionary. Available entries are:\n\t" + "\n\t".join([str(k) for k in self.keys()]))
         elif (not varType is None) and (not isinstance(self[entryName], varType)):
-            self.fatalErrorInClass(\
-                self.lookup, 
-                f"Entry '{entryName}' of wrong type. {varType.__name__ if not isinstance(varType, Iterable) else [v.__name__ for v in varType]} expected but {self[entryName].__class__.__name__} was found.")
+            raise TypeError(f"Entry '{entryName}' of wrong type. {varType.__name__ if not isinstance(varType, Iterable) else [v.__name__ for v in varType]} expected but {self[entryName].__class__.__name__} was found.")
         else:
             return self[entryName]
     
@@ -171,14 +159,10 @@ class Dictionary(OrderedDict, Utilities):
         """
         Convert recursively every subdictionary into Dictionary classes.
         """
-        try:
-            for entry in self:
-                if isinstance(self[entry], dict) and not isinstance(self[entry], Dictionary):
-                    self[entry] = Dictionary(**self[entry])
-            return self
-        except BaseException as err:
-            self.fatalErrorInClass(self._correctSubdicts,f"Error updating subdictionary types", err)
-    
+        for entry in self:
+            if isinstance(self[entry], dict) and not isinstance(self[entry], Dictionary):
+                self[entry] = Dictionary(**self[entry])
+        return self
     
     ######################################
     def __setitem__(self, *args, **argv):
@@ -187,13 +171,17 @@ class Dictionary(OrderedDict, Utilities):
         return self
     
     ######################################
-    def update(self, **kwargs):
+    def update(self, /, dictionary:dict=None, **kwargs):
         """
-        kwargs:    dict
-            Keyword-argumentrs to be updated in dictionary
+        Performs like dict.update() method but recursively updates sub-dictionaries. 
+        Accepts both a dictionary and keyword arguments.
+        
+        Args:
+            dictionary (dict, optional): Dictionary to update with. Defaults to None.
+        """
+        if not dictionary is None:
+            self.update(**dictionary)
             
-        Performs like dict.update() method but recursively updates sub-dictionaries
-        """
         for key in kwargs:
             if (isinstance(kwargs[key],dict) if (key in self) else False):
                 self[key].update(**kwargs[key])

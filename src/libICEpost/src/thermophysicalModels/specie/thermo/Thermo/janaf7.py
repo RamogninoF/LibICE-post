@@ -15,6 +15,7 @@ from typing import Iterable
 
 from .Thermo import Thermo
 
+from libICEpost import Dictionary
 from libICEpost.Database.chemistry.constants import database
 Tstd = database.chemistry.constants.Tstd
 
@@ -24,75 +25,99 @@ Tstd = database.chemistry.constants.Tstd
 class janaf7(Thermo):
     """
     Class for computation of thermophysical properties with NASA (janaf) 7-coefficient polynomials.
-    
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        cp(T) = sum_{i=0,4} ( a_{i} * T^i )
+        ha(T) = sum_{i=0,4} ( a_{i}/(i + 1) * T^i )*T + a_{5}
+        s(T) = sum_{i=0,4} ( a_{i}/(i + 1) * T^i ) + a_{5} * ln(T) + a_{6}
     
     Attibutes:
-        Rgas: float
-            The mass specific gas constant
-        
-        cpLow:  list<float>
-            List of polynomial coefficients to compute cp of the specie
-            in the range of temperature below Tth
-            
-        cpHigh: list<float>
-            List of polynomial coefficients to compute cp of the specie
-            in the range of temperature above Tth
-            
-        Tth:    float
-            Threshold temperature to change polynomial coefficient to
-            be used to compute the cp of the specie
-            
-        Tlow:   float
-            Lower limit of the range of valodity of the polynomial
-            coefficients for computation of cp
-            
-        Thigh:   float
-            Higher limit of the range of valodity of the polynomial
-            coefficients for computation of cp
+        - Rgas (float): The mass specific gas constant.
+        - cpLow (Iterable[float]): List of polynomial coefficients to compute cp of the specie in the range of temperature below Tth.
+        - cpHigh (Iterable[float]): List of polynomial coefficients to compute cp of the specie in the range of temperature above Tth.
+        - Tth (float): Threshold temperature to change polynomial coefficient to be used to compute the cp of the specie.
+        - Tlow (float): Lower limit of the range of validity of the polynomial coefficients for computation of cp.
+        - Thigh (float): Higher limit of the range of validity of the polynomial coefficients for computation of cp.
     """
     
     #########################################################################
     
+    __WARNING__ = False
+    """If True, a warning is displayed when the temperature is outside of the range of validity."""
+    
     numCoeffs = 7
     """Number of coefficients"""
     
-    cpLow:list[float]
+    _cpLow:list[float]
     """Low-temperature coefficients"""
     
-    cpHigh:list[float]
+    _cpHigh:list[float]
     """High-temperature coefficients"""
     
-    Tlow:float
+    _Tlow:float
     """Lower-limit of validity"""
     
-    Thigh:float
+    _Thigh:float
     """Higher-limit of validity"""
     
-    Tth:float
+    _Tth:float
     """Threshold temperature for changing between low-T and high-T coefficients"""
+
+    #########################################################################
+    #Properties:
+    @property
+    def cpLow(self) -> list[float]:
+        """Low-temperature coefficients"""
+        return self._cpLow[:]
+
+    @property
+    def cpHigh(self) -> list[float]:
+        """High-temperature coefficients"""
+        return self._cpHigh[:]
+
+    @property
+    def Tlow(self) -> float:
+        """Lower-limit of validity"""
+        return self._Tlow
+
+    @property
+    def Thigh(self) -> float:
+        """Higher-limit of validity"""
+        return self._Thigh
+
+    @property
+    def Tth(self) -> float:
+        """Threshold temperature for changing between low-T and high-T coefficients"""
+        return self._Tth
+    
+    #########################################################################
+    #Class methods:
+    def copy(self):
+        """
+        Create a copy with the same coefficients.
+        
+        Returns:
+            janaf7: The copied object.
+        """
+        return janaf7(self.Rgas, self.cpLow, self.cpHigh, self.Tth, self.Tlow, self.Thigh)
     
     #########################################################################
     #Constructor:
     def __init__(self, Rgas:float, cpLow:Iterable[float], cpHigh:Iterable[float], Tth:float, Tlow:float, Thigh:float):
         """
-        Rgas: float
-            The mass specific gas constant
-        cpLow:  list<float>
-            List of polynomial coefficients to compute cp of the specie
-            in the range of temperature below Tth
-        cpHigh: list<float>
-            List of polynomial coefficients to compute cp of the specie
-            in the range of temperature above Tth
-        Tth:    float
-            Threshold temperature to change polynomial coefficient to
-            be used to compute the cp of the specie
-        Tlow:   float
-            Lower limit of the range of valodity of the polynomial
-            coefficients for computation of cp
-        Thigh:   float
-            Higher limit of the range of valodity of the polynomial
-            coefficients for computation of cp
+        Initializes the thermo model with specific gas constant and polynomial coefficients.
+        Args:
+            Rgas (float): The mass specific gas constant.
+            cpLow (Iterable[float]): List of polynomial coefficients to compute cp of the specie
+                in the range of temperature below Tth.
+            cpHigh (Iterable[float]): List of polynomial coefficients to compute cp of the specie
+                in the range of temperature above Tth.
+            Tth (float): Threshold temperature to change polynomial coefficient to
+                be used to compute the cp of the specie.
+            Tlow (float): Lower limit of the range of validity of the polynomial
+                coefficients for computation of cp.
+            Thigh (float): Higher limit of the range of validity of the polynomial
+                coefficients for computation of cp.
+        Raises:
+            ValueError: If the length of cpLow or cpHigh is not equal to the required number of coefficients.
         """
         #Argument checking:
         super().__init__(Rgas)
@@ -107,11 +132,11 @@ class janaf7(Thermo):
         if not(len(cpLow) == self.numCoeffs) or not(len(cpHigh) == self.numCoeffs):
             raise ValueError("Required lists of 7 coefficients for 'cpLow' and 'cpHigh'.")
         
-        self.cpLow = cpLow[:]
-        self.cpHigh = cpHigh[:]
-        self.Tth = Tth
-        self.Tlow = Tlow
-        self.Thigh = Thigh
+        self._cpLow = cpLow[:]
+        self._cpHigh = cpHigh[:]
+        self._Tth = Tth
+        self._Tlow = Tlow
+        self._Thigh = Thigh
         
     #########################################################################
     #Operators:
@@ -177,12 +202,20 @@ class janaf7(Thermo):
     
     #########################################################################
     #Member functions:
-    def coeffs(self, T:float) -> float:
+    def coeffs(self, T:float) -> Iterable[float]:
         """
         Get coefficients, depending on temperature range.
+        - If T < Tth, returns cpLow
+        - If T >= Tth, returns cpHigh
+        
+        Args:
+            T (float): Temperature [K].
+        
+        Returns:
+            Iterable[float]: The coefficients to be used for the computation of cp.
         """
-        # if (T < self.Tlow) or (T > self.Thigh):
-        #     self.__class__.runtimeWarning("Temperature outside of range ["+ "{:.3f}".format(self.Tlow) + ","+ "{:.3f}".format(self.Thigh) + "] (T = "+ "{:.3f}".format(T) + " [K])")
+        if (T < self.Tlow) or (T > self.Thigh) and self.__class__.__WARNING__:
+            self.runtimeWarning("Temperature outside of range ["+ "{:.3f}".format(self.Tlow) + ","+ "{:.3f}".format(self.Thigh) + "] (T = "+ "{:.3f}".format(T) + " [K])")
         
         if T < self.Tth:
             return self.cpLow
@@ -193,21 +226,16 @@ class janaf7(Thermo):
     def cp(self, p:float, T:float) -> float:
         """
         Constant pressure heat capacity [J/kg/K].
-        If the temperature is not within Tlow and Thigh, a
-        warning is displayed.
-            
+        If the temperature is not within Tlow and Thigh, 
+        and janaf7.__WARNING__ is True a warning is displayed.
+        
         cp(T) = sum_{i=0,4} ( a_{i} * T^i )
         """
         #Argument checking
         super().cp(p,T)
         
         coeffs = self.coeffs(T)
-        
-        cp = 0.0
-        for nn in [0, 1, 2, 3, 4]:
-            cp += coeffs[nn] * (T **nn)
-        
-        return cp*self.Rgas
+        return sum(coeffs[nn] * (T ** nn) for nn in [0, 1, 2, 3, 4])*self.Rgas
     
     ################################
     def ha(self, p:float, T:float) -> float:
@@ -227,12 +255,7 @@ class janaf7(Thermo):
             pass
         
         coeffs= self.coeffs(T)
-        
-        ha = coeffs[5]
-        for nn in [0, 1, 2, 3, 4]:
-            ha += coeffs[nn] * (T ** (nn + 1)) / (nn + 1.0)
-        
-        return ha*self.Rgas
+        return (coeffs[5] + sum(coeffs[nn] * (T ** (nn + 1)) / (nn + 1.0) for nn in [0, 1, 2, 3, 4]))*self.Rgas
     
     ##################################
     def hf(self) -> float:
@@ -256,54 +279,36 @@ class janaf7(Thermo):
         super().dcpdT(p,T)
         
         coeffs = self.coeffs(T)
-        
-        dcpdT = 0.0
-        for nn in [1, 2, 3, 4]:
-            dcpdT += nn * coeffs[nn] * (T ** (nn - 1))
-        
-        return dcpdT*self.Rgas
+        return sum(nn * coeffs[nn] * (T ** (nn - 1)) for nn in [1, 2, 3, 4])*self.Rgas
     
     #########################################################################
     @classmethod
     def fromDictionary(cls,dictionary):
         """
-        Create from dictionary.
-
-        {
-            Rgas: float
-                The mass specific gas constant
-            cpLow:  list<float>
-                List of polynomial coefficients to compute cp of the specie
-                in the range of temperature below Tth
-            cpHigh: list<float>
-                List of polynomial coefficients to compute cp of the specie
-                in the range of temperature above Tth
-            Tth:    float
-                Threshold temperature to change polynomial coefficient to
-                be used to compute the cp of the specie
-            Tlow:   float
-                Lower limit of the range of valodity of the polynomial
-                coefficients for computation of cp
-            Thigh:   float
-                Higher limit of the range of valodity of the polynomial
-                coefficients for computation of cp
-        }
-        """
-        entryList = ["specie", "cpLow", "cpHigh", "Tth", "Tlow", "Thigh"]
-        for entry in entryList:
-            if not entry in dictionary:
-                raise ValueError(f"Mandatory entry '{entry}' not found in dictionary.")
+        Create from dictionary with the following entries:
+            - Rgas (float): The mass specific gas constant.
+            - cpLow (Iterable[float]): List of polynomial coefficients to compute cp of the specie in the range of temperature below Tth.
+            - cpHigh (Iterable[float]): List of polynomial coefficients to compute cp of the specie in the range of temperature above Tth.
+            - Tth (float): Threshold temperature to change polynomial coefficient to be used to compute the cp of the specie.
+            - Tlow (float): Lower limit of the range of validity of the polynomial coefficients for computation of cp.
+            - Thigh (float): Higher limit of the range of validity of the polynomial coefficients for computation of cp.
         
-        out = cls\
-            (
-                dictionary["specie"], 
-                dictionary["cpLow"], 
-                dictionary["cpHigh"], 
-                dictionary["Tth"], 
-                dictionary["Tlow"], 
-                dictionary["Thigh"]
+        Args:
+            dictionary (dict): Dictionary for construction.
+        
+        Returns:
+            janaf7: The constructed object.
+        """
+        dictionary = Dictionary(**dictionary)
+        #Here check only the presence of the keys, argument checking is done in the constructor
+        return cls(
+            dictionary.lookup("Rgas"),
+            dictionary.lookup("cpLow"),
+            dictionary.lookup("cpHigh"),
+            dictionary.lookup("Tth"),
+            dictionary.lookup("Tlow"),
+            dictionary.lookup("Thigh")
             )
-        return out
     
 #############################################################################
 Thermo.addToRuntimeSelectionTable(janaf7)

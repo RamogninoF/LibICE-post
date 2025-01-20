@@ -1,5 +1,5 @@
 import pytest
-from ...src.base.Functions.typeChecking import checkType
+from libICEpost.src.base.Functions.typeChecking import checkType
 
 def test_checkType_entryName_type_error():
     with pytest.raises(TypeError):

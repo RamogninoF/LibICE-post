@@ -13,10 +13,10 @@ Last update:        12/06/2023
 
 from .Thermo import Thermo
 
+from libICEpost import Dictionary
 import json
 from libICEpost.Database.chemistry import constants
 from libICEpost.Database import database
-
 
 Tstd = database.chemistry.constants.Tstd
 
@@ -25,13 +25,10 @@ Tstd = database.chemistry.constants.Tstd
 #############################################################################
 class constantCp(Thermo):
     """
-    Class for computation of thermophysical properties with constant cp cv and gamma.
-    
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Class for computation of thermophysical properties with constant cp.
     
     Attibutes:
-        Rgas: float
-            The mass specific gas constant
+        - Rgas (float): The mass specific gas constant
         
     """
     
@@ -39,51 +36,32 @@ class constantCp(Thermo):
     @classmethod
     def fromDictionary(cls,dictionary):
         """
-        Create from dictionary:
-        {
-            Rgas:  float
-                Mass specific gas constant
-            
-            cp:    float (None)
-                Mass-specific constant-pressure heat capacity
-            
-            cv:    float (None)
-                Mass-specific constant-volume heat capacity
-
-            gamma: float (None)
-                cp/cv ratio
-            
-            hf:    float (0.0)
-                Enthalpy of formation (optional)
-        }
-
-        Give 1 out of three of (cp, cv, gamma)
+        Construct from dictionary containing the following keys:
+        - Rgas (float): The mass specific gas constant
+        - cp (float): Constant pressure heat capacity [J/kg/K]
+        - hf (float): Enthalpy of formation [J/kg] (Optional)
+        
+        Args:
+            dictionary (dict): The dictionary containing the data
         """
-        entryList = ["cp", "cv", "gamma", "hf"]
-        Dic = {}
-        for entry in entryList:
-            if entry in dictionary:
-                Dic[entry] = dictionary[entry]
-        
-        if not "Rgas" in dictionary:
-            raise ValueError(f"Mandatory entry 'Rgas' not found in dictionary.")
-        
-        out = cls(dictionary["Rgas"], **Dic)
-        return out
+        dictionary = Dictionary(**dictionary)
+        #Here check only the presence of the keys, argument checking is done in the constructor
+        return cls(
+            dictionary.lookup("Rgas"),
+            dictionary.lookup("cp"),
+            dictionary.lookupOrDefault("hf", float('nan'))
+            )
     
     #########################################################################
     #Constructor:
     def __init__(self, Rgas, cp, hf=float('nan')):
         """
-        Rgas: float
-            The mass specific gas constant
-        cp:     float (None)
-            Constant pressure heat capacity [J/kgK]
-            
-        hf:     float (0.0)
-            Enthalpy of formation (Optional)
-            
-        Construct from one of the above data. Give 1 out of three of (cp, cv, gamma)
+        Construct from the mass specific gas constant and the normalized constant cp.
+        
+        Args:
+            Rgas (float): The mass specific gas constant
+            cp (float): Constant pressure heat capacity [J/kg/K]
+            hf (float): Enthalpy of formation [J/kg] (Optional)
         """
         #Argument checking:
         super().__init__(Rgas)
@@ -109,7 +87,7 @@ class constantCp(Thermo):
     ##############################
     #Representation:
     def __repr__(self):
-        R = eval(super(self.__class__,self).__repr__())
+        R = eval(super().__repr__())
         R["cp"]   = self._cp 
         R["hf"]  = self._hf
                        

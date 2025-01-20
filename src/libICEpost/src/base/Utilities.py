@@ -14,7 +14,7 @@ Last update:        12/06/2023
 from typing import Self
 
 from .Functions.typeChecking import *
-from .Functions.runtimeWarning import runtimeWarning, runtimeError, printStack, fatalErrorIn, fatalErrorInClass, fatalErrorInFunction, fatalErrorInArgumentChecking, fatalError
+from .Functions.runtimeWarning import runtimeWarning, runtimeError, printStack
 
 import numpy as np
 import copy as cp
@@ -46,17 +46,6 @@ class Utilities(object):
     def printStack(*args, **argv):
         return printStack(*args, **argv)
     
-    @classmethod
-    def fatalErrorInClass(cls, *args, **argv):
-        return fatalErrorInClass(cls, *args, **argv)
-    
-    @staticmethod
-    def fatalErrorInFunction(*args, **argv):
-        return fatalErrorInFunction(*args, **argv)
-    
-    fatalErrorIn = fatalErrorIn
-    fatalErrorInArgumentChecking = fatalErrorInArgumentChecking
-    
     #Copy
     def copy(self) -> Self:
         """
@@ -78,5 +67,5 @@ class Utilities(object):
         """
         out = cls.__new__(cls)
         return out
-    
-    
+
+

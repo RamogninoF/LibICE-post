@@ -14,7 +14,7 @@ Functions used to handle OpenFOAM files
 #####################################################################
 
 #Type checking
-from .typeChecking import checkType
+from libICEpost.src.base.Functions.typeChecking import checkType
 
 import struct
 import os
@@ -24,18 +24,22 @@ from typing import Iterable
 from PyFoam.RunDictionary.ParsedParameterFile import ParsedFileHeader,ParsedParameterFile
 from PyFoam.Basics.DataStructures import BinaryList
 
-from ..Utilities import Utilities
-
 #############################################################################
 #                               MAIN FUNCTIONS                              #
 #############################################################################
 #Read a OpenFOAM file with a scalar list:
-def readOFscalarList(fileName:str):
+def readOFscalarList(fileName:str) -> Iterable[float]:
     """
-    Reads an OpenFOAM file storing a scalarList. 
+    Reads an OpenFOAM file storing a scalarList. Automatically detects if the file is binary or not.
 
     Args:
-        fileName (str): Name of the OpenFOAM file
+        fileName (str): Name of the OpenFOAM file.
+    
+    Raises:
+        IOError: If the file does not exist or if it does not store a scalarList
+    
+    Returns:
+        Iterable[float]: The data stored in the file.
     """
     #Argument checking:
     checkType(fileName, str, entryName="fileName")
@@ -82,6 +86,9 @@ def writeOFscalarList(values:Iterable[float], path:str, *, overwrite:bool=False,
         path (str): The location where to file the scalarList.
         overwrite (bool, optional): Overwrite if found? Defaults to False.
         binary (bool, optional): Write in binary? Defaults to False.
+    
+    Raises:
+        IOError: If the file exists and overwrite is False.
     """
     #Argument checking:
     checkType(values, Iterable, entryName="values")
