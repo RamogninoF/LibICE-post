@@ -88,9 +88,10 @@ class Dictionary(OrderedDict, Utilities):
             
             _LOCALS = locals().copy()
             for l in _LOCALS.keys():
+                #If the variable is not a module and is not a local variable of the function, add to the dictionary
                 if not l in (_OLDLOCALS + ["_OLDLOCALS", "_LOCALS", "_FILE"]) and (not isinstance(_LOCALS[l], ModuleType)):
                     this[l] = _LOCALS[l]
-            
+                    
         except BaseException as err:
             cls.fatalErrorInClass(cls.fromFile,f"Error reading {cls.__name__} from file {fileName}", err)
         
