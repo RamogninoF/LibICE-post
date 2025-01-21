@@ -25,6 +25,21 @@ from libICEpost.Database import database
 
 constants = database.chemistry.constants
 
+from functools import lru_cache
+from libICEpost.GLOBALS import __CACHE_SIZE__
+
+#############################################################################
+#                               FUNCTIONS                                   #
+#############################################################################
+
+#Allow caching of molecular mass:
+@lru_cache(maxsize=__CACHE_SIZE__)
+def molecularMass(molecule:Molecule) -> float:
+    """
+    Compute the molecular mass of a molecule.
+    """
+    return sum([a.atom.mass * a.n for a in molecule])
+
 #############################################################################
 #                               MAIN CLASSES                                #
 #############################################################################
@@ -165,7 +180,7 @@ class Molecule(Utilities):
         """
         Hashing of the representation.
         """
-        return hash(self.__repr__())
+        return hash(tuple((a,n) for a,n in zip(self.atoms, self.numberOfAtoms)))
     
     ##############################
     #Disequality:
@@ -460,10 +475,7 @@ class Molecule(Utilities):
         """
         Compute the molecular mass of the chemical specie [g/mol].
         """
-        MM = 0.0
-        for atom in self:
-            MM += atom.atom.mass * atom.n
-        return MM
+        return molecularMass(self)
     
     ##############################
     #Compute the brute formula of the chemical specie:

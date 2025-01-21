@@ -189,14 +189,15 @@ class janaf7(Thermo):
     ##############################
     #Representation:
     def __repr__(self):
-        R = eval(super(self.__class__,self).__repr__())
+        R = {}
+        R["Rgas"]    = self.Rgas
         R["cpLow"]   = self.cpLow 
         R["cpHigh"]  = self.cpHigh 
         R["Tth"]     = self.Tth    
         R["Tlow"]    = self.Tlow   
         R["Thigh"]   = self.Thigh  
                        
-        return R.__repr__()
+        return f"{self.TypeName}{R.__repr__()}"
     
     #########################################################################
     #Member functions:

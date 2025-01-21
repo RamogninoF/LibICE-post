@@ -196,3 +196,9 @@ def test_janaf7_fromDictionary_invalid_value_type(thermo_dict):
 def test_janaf7_ua(thermo):
     with pytest.raises(NotImplementedError):
         thermo.ua(0, 300)
+
+def test_janaf7_str(thermo):
+    str_output = str(thermo)
+
+def test_janaf7_repr(thermo):
+    repr_output = repr(thermo)

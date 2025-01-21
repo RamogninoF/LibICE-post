@@ -19,6 +19,7 @@ from libICEpost.src.base.dataStructures.Dictionary import Dictionary
 from libICEpost.src.thermophysicalModels.specie.specie.Mixture import Mixture
 
 from libICEpost.Database import _DatabaseClass
+from libICEpost.Database.chemistry.thermo import database
 
 from .mixingRules.EquationOfState.EquationOfStateMixing import EquationOfStateMixing
 from .mixingRules.Thermo.ThermoMixing import ThermoMixing
@@ -35,23 +36,16 @@ class ThermoMixture(Utilities):
     """
     Class for computing thermodynamic data of a mixture.
     
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    
     Attributes:
-        _mix:    Mixture
-            The composition of the mixture.
-        
-        _EoS: mixingRules.EquationOfStateMixing
-            The mixing rule used for computation of the equation of state of the mixture.
-
-        _Thermo: mixingRules.ThermoMixing
-            The mixing rule used for computation of the thermo of the mixture.
+        mix (Mixture): The composition of the mixture.
+        EoS (EquationOfState): The equation of state of the mixture.
+        Thermo (Thermo): The thermodynamic model of the mixture.
     """
     
     _mix:Mixture
     _EoS:EquationOfStateMixing
     _Thermo:ThermoMixing
-    _db:_DatabaseClass
+    _db:_DatabaseClass = database.chemistry.thermo
     
     #########################################################################
     #Properties:
@@ -94,26 +88,23 @@ class ThermoMixture(Utilities):
     #Constructor:
     def __init__(self, mixture: Mixture, thermoType: dict[str,str], **thermoData):
         """
-        mixture:    Mixture
-            The composition of the mixture.
-        
-        thermoType: dict[str,str]
-            The types of thermodynamic models. Required are:
-            {
-                Thermo
-                EquationOfState
-            }
-        
         Construct new instance of thermodynamic model of mixture from the mixture composition and mixingRule
+        
+        Args:
+            mixture (Mixture): The composition of the mixture.
+            thermoType (dict[str,str]): The types of thermodynamic models. Required are:
+                - Thermo
+                - EquationOfState
+            **thermoData: Additional data for the thermodynamic models.
         """
-        from libICEpost.Database.chemistry.thermo import database
 
         self.checkType(mixture, Mixture, "mixture")
-        self.checkType(thermoType, dict, "ThermoType")
+        self.checkMap(thermoType, str, str, "thermoType")
 
-        self._db:_DatabaseClass = database.chemistry.thermo
+        #Copy the mixture
         self._mix:Mixture = mixture.copy()
         
+        #Lookup the Thermo and EoS types
         thermoType = Dictionary(**thermoType)
         ThermoType = thermoType.lookup("Thermo")
         EoSType = thermoType.lookup("EquationOfState")
@@ -137,7 +128,7 @@ class ThermoMixture(Utilities):
                 "Thermo":self.Thermo.__class__.__name__,
                 "mixture":self.mix
             }
-        return out.__repr__()
+        return ThermoMixture.__name__ + repr(out)
     
     ####################################
     def __str__(self) -> str:
@@ -167,8 +158,6 @@ class ThermoMixture(Utilities):
         
         if not mixture is None:
             self._mix.update(mixture.species, mixture.Y, fracType="mass")
-            self._Thermo.update(mixture)
-            self._EoS.update(mixture)
         return self
     
     ################################

@@ -87,11 +87,12 @@ class constantCp(Thermo):
     ##############################
     #Representation:
     def __repr__(self):
-        R = eval(super().__repr__())
+        R = {}
+        R["Rgas"] = self.Rgas
         R["cp"]   = self._cp 
         R["hf"]  = self._hf
                        
-        return R.__repr__()
+        return f"{self.TypeName}{R.__repr__()}"
     
     #########################################################################
     #Member functions:

@@ -51,16 +51,6 @@ class Thermo(BaseClass):
         
         return stringToPrint
     
-    ##############################
-    #Representation:
-    def __repr__(self):
-        R = \
-            {
-                "type": self.TypeName,
-                "Rgas": self.Rgas
-            }
-        return R.__repr__()
-
      #########################################################################
     @abstractmethod
     def cp(self, p:float, T:float) -> float:

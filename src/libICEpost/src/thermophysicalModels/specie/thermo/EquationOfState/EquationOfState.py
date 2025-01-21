@@ -19,11 +19,6 @@ from libICEpost.src.base.BaseClass import BaseClass, abstractmethod
 class EquationOfState(BaseClass):
     """
     Class handling thermodynamic equation of state
-    
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    
-    Attributes:
-        None
     """
     
     #########################################################################
@@ -48,11 +43,7 @@ class EquationOfState(BaseClass):
     ##############################
     #Representation:
     def __repr__(self):
-        R = \
-            {
-                "type": self.TypeName
-            }
-        return R.__repr__()
+        return f"{self.TypeName}()"
 
      #########################################################################
     @abstractmethod

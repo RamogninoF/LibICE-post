@@ -93,3 +93,9 @@ def test_constantCp_fromDictionary_missing_cp():
 def test_constantCp_ua(model):
     with pytest.raises(NotImplementedError):
         model.ua(0, 300)
+
+def test_constantCp_str(model):
+    str(model)
+
+def test_constantCp_repr(model):
+    repr(model)
