@@ -180,40 +180,36 @@ class EngineData(Utilities):
         if verbose:
             print(f"{self.__class__.__name__}: Loading... '{fileName}' -> '{varName}'")
         
-        try:
-            self.checkType(fileName , str   , "fileName")
-            self.checkType(varName  , str   , "varName" )
-            self.checkType(CACol    , int   , "CACol"   )
-            self.checkType(varCol   , int   , "varCol"  )
-            self.checkType(CAOff    , float , "CAOff"   )
-            self.checkType(varOff   , float , "varOff"  )
-            self.checkType(CAscale  , float , "CAscale" )
-            self.checkType(varScale , float , "varScale")
-            self.checkType(comments , str   , "comments")
-            self.checkType(skipRows , int   , "skipRows")
-            self.checkType(verbose  , bool  , "verbose")
-            if not maxRows is None:
-                self.checkType(maxRows   , int , "maxRows")
+        self.checkType(fileName , str   , "fileName")
+        self.checkType(varName  , str   , "varName" )
+        self.checkType(CACol    , int   , "CACol"   )
+        self.checkType(varCol   , int   , "varCol"  )
+        self.checkType(CAOff    , float , "CAOff"   )
+        self.checkType(varOff   , float , "varOff"  )
+        self.checkType(CAscale  , float , "CAscale" )
+        self.checkType(varScale , float , "varScale")
+        self.checkType(comments , str   , "comments")
+        self.checkType(skipRows , int   , "skipRows")
+        self.checkType(verbose  , bool  , "verbose")
+        if not maxRows is None:
+            self.checkType(maxRows   , int , "maxRows")
 
-            data:np.ndarray = np.loadtxt\
-                (
-                    fileName,
-                    comments=comments,
-                    usecols=(CACol, varCol),
-                    skiprows=skipRows,
-                    max_rows=maxRows,
-                    delimiter=delimiter
-                )
+        data:np.ndarray = np.loadtxt\
+            (
+                fileName,
+                comments=comments,
+                usecols=(CACol, varCol),
+                skiprows=skipRows,
+                max_rows=maxRows,
+                delimiter=delimiter
+            )
 
-            data[:,0] *= CAscale
-            data[:,0] += CAOff
-            data[:,1] *= varScale
-            data[:,1] += varOff
+        data[:,0] *= CAscale
+        data[:,0] += CAOff
+        data[:,1] *= varScale
+        data[:,1] += varOff
 
-            self.loadArray(data, varName, verbose, default, interpolate)
-
-        except BaseException as err:
-            self.fatalErrorInClass(self.loadFile, f"Failed loading field '{varName}' from file '{fileName}'", err)
+        self.loadArray(data, varName, verbose, default, interpolate)
 
         return self
 
@@ -308,81 +304,77 @@ class EngineData(Utilities):
             11  10.0   NaN  0.00       NaN
             12  11.0   NaN -1.00       NaN
         """
-        try:
-            self.checkType(varName  , str   , "varName" )
-            self.checkType(data    , collections.abc.Iterable   , "data")
-            self.checkType(verbose  , bool  , "verbose")
-            self.checkType(default  , float  , "default")
+        self.checkType(varName  , str   , "varName" )
+        self.checkType(data    , collections.abc.Iterable   , "data")
+        self.checkType(verbose  , bool  , "verbose")
+        self.checkType(default  , float  , "default")
 
-            #Cast to pandas.DataFrame
-            df:pd.DataFrame = pd.DataFrame(data=data)
-            if (dataFormat == "column") and (len(df.columns) != 2):
-                raise ValueError(f"Array must be of shape (N,2) while dataFormat='column', while ({len(df.columns)},{len(df)}) was found.")
-            elif (dataFormat == "row") and (len(df) != 2):
-                raise ValueError(f"Array must be of shape (2,N) while dataFormat='row', while ({len(df.columns)},{len(df)}) was found.")
-            elif (dataFormat == "row"):
-                df = df.transpose()
-            elif (dataFormat != "column"):
-                raise ValueError(f"Unknown dataFormat '{dataFormat}'. Avaliable formats are 'row' and 'column'.")
+        #Cast to pandas.DataFrame
+        df:pd.DataFrame = pd.DataFrame(data=data)
+        if (dataFormat == "column") and (len(df.columns) != 2):
+            raise ValueError(f"Array must be of shape (N,2) while dataFormat='column', while ({len(df.columns)},{len(df)}) was found.")
+        elif (dataFormat == "row") and (len(df) != 2):
+            raise ValueError(f"Array must be of shape (2,N) while dataFormat='row', while ({len(df.columns)},{len(df)}) was found.")
+        elif (dataFormat == "row"):
+            df = df.transpose()
+        elif (dataFormat != "column"):
+            raise ValueError(f"Unknown dataFormat '{dataFormat}'. Avaliable formats are 'row' and 'column'.")
 
-            #Set column names
-            df.columns = ["CA", varName]
+        #Set column names
+        df.columns = ["CA", varName]
 
-            #Remove duplicates
-            df.drop_duplicates(subset="CA", keep="first", inplace=True)
+        #Remove duplicates
+        df.drop_duplicates(subset="CA", keep="first", inplace=True)
 
-            #Index with CA (useful for merging)
-            self._data.set_index("CA", inplace=True)
-            df.set_index("CA", inplace=True)
+        #Index with CA (useful for merging)
+        self._data.set_index("CA", inplace=True)
+        df.set_index("CA", inplace=True)
 
-            #Check types
-            if any([t not in [float, int] for t in df.dtypes]):
-                raise TypeError("Data must be numeric (float or int).")
+        #Check types
+        if any([t not in [float, int] for t in df.dtypes]):
+            raise TypeError("Data must be numeric (float or int).")
 
-            #Check if data were already loaded
-            firstTime = not (varName in self.columns)
-            if (not firstTime) and verbose:
-                self.runtimeWarning(f"Overwriting existing data for field '{varName}'", stack=False)
+        #Check if data were already loaded
+        firstTime = not (varName in self.columns)
+        if (not firstTime) and verbose:
+            self.runtimeWarning(f"Overwriting existing data for field '{varName}'", stack=False)
 
-            #If data were not stored yet, just load this
-            if len(self._data) < 1:
-                #Update based on CA of right
-                self._data = self._data.join(df, how="right")
+        #If data were not stored yet, just load this
+        if len(self._data) < 1:
+            #Update based on CA of right
+            self._data = self._data.join(df, how="right")
 
-            else:
-                #Check if index are not consistent, to perform interpolation later
-                consistentCA = False if (len(self._data.index) != len(df.index)) else all(self._data.index == df.index)
-                if (not consistentCA) and interpolate:
-                    CAold = self._data.index
+        else:
+            #Check if index are not consistent, to perform interpolation later
+            consistentCA = False if (len(self._data.index) != len(df.index)) else all(self._data.index == df.index)
+            if (not consistentCA) and interpolate:
+                CAold = self._data.index
 
-                #Update based on CA of self
-                self._data = self._data.join(df, how="outer", rsuffix="_new")
+            #Update based on CA of self
+            self._data = self._data.join(df, how="outer", rsuffix="_new")
 
-                #Merge data if overwriting
-                if not firstTime:
-                    self._data.update(pd.DataFrame(self._data[varName + "_new"].rename(varName)))
-                    self._data.drop(varName + "_new", axis="columns", inplace=True)
+            #Merge data if overwriting
+            if not firstTime:
+                self._data.update(pd.DataFrame(self._data[varName + "_new"].rename(varName)))
+                self._data.drop(varName + "_new", axis="columns", inplace=True)
 
-                #Perform interpolation
-                if (not consistentCA) and interpolate:
-                    #Interpolate original dataset
-                    missingCA = self._data.index[pd.DataFrame(self._data.index).apply((lambda x:not CAold.__contains__(x),))["CA"]["<lambda>"]]
+            #Perform interpolation
+            if (not consistentCA) and interpolate:
+                #Interpolate original dataset
+                missingCA = self._data.index[pd.DataFrame(self._data.index).apply((lambda x:not CAold.__contains__(x),))["CA"]["<lambda>"]]
+                if len(missingCA > 0):
+                    #Interpolate everything but the loaded variable:
+                    for var in [v for v in self.columns if not v == varName]:
+                        self[var].loc[missingCA] = self.np.interp(missingCA, CAold, self._data.loc[CAold,var], float("nan"), float("nan"))
+
+                #Interpolate loaded dataset (needed if new variable):
+                if firstTime:
+                    missingCA = self._data.index[pd.DataFrame(self._data.index).apply((lambda x:not df.index.__contains__(x),))["CA"]["<lambda>"]]
                     if len(missingCA > 0):
-                        #Interpolate everything but the loaded variable:
-                        for var in [v for v in self.columns if not v == varName]:
-                            self[var].loc[missingCA] = self.np.interp(missingCA, CAold, self._data.loc[CAold,var], float("nan"), float("nan"))
+                        self[varName].loc[missingCA] = self.np.interp(missingCA, df.index, df[varName], default, default)
 
-                    #Interpolate loaded dataset (needed if new variable):
-                    if firstTime:
-                        missingCA = self._data.index[pd.DataFrame(self._data.index).apply((lambda x:not df.index.__contains__(x),))["CA"]["<lambda>"]]
-                        if len(missingCA > 0):
-                            self[varName].loc[missingCA] = self.np.interp(missingCA, df.index, df[varName], default, default)
-
-            #Return to normal indexing
-            self._data.reset_index(inplace=True)
-
-        except BaseException as err:
-            self.fatalErrorInClass(self.loadArray, f"Failed loading array", err)
+        #Return to normal indexing
+        self._data.reset_index(inplace=True)
 
         return self
 
@@ -430,27 +422,23 @@ class EngineData(Utilities):
 
         Write data to a file
         """
-        try:
-            self.checkType(fileName, str, "fileName")
-            self.checkType(overwrite, bool, "overwrite")
+        self.checkType(fileName, str, "fileName")
+        self.checkType(overwrite, bool, "overwrite")
 
-            if os.path.exists(fileName) and not overwrite:
-                self.fatalErrorInClass(self.write, "File {fileName} exists. Use overwrite=True keyword to force overwriting data.")
+        if os.path.exists(fileName) and not overwrite:
+            raise ValueError("File {fileName} exists. Use overwrite=True keyword to force overwriting data.")
 
-            self._data.to_csv\
-                (
-                    path_or_buf=fileName,
-                    sep=sep,
-                    na_rep='nan',
-                    columns=None,
-                    header=True,
-                    index=False,
-                    mode='w',
-                    decimal='.'
-                )
-
-        except BaseException as err:
-            self.fatalErrorInClass(self.write, f"Failed writing data to file '{fileName}'", err)
+        self._data.to_csv\
+            (
+                path_or_buf=fileName,
+                sep=sep,
+                na_rep='nan',
+                columns=None,
+                header=True,
+                index=False,
+                mode='w',
+                decimal='.'
+            )
 
     #########################################################################
     #Auxiliary plotting methods

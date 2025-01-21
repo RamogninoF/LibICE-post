@@ -24,14 +24,13 @@ import pandas as pd
 class EngineGeometry(BaseClass):
     """
     Base class for handling engine geometrical parameters during cycle.
-    
-    NOTE: Crank angles are defined with 0 CAD at TDC
-    
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    
-    Attibutes:
-        
     """
+    
+    @property
+    @abstractmethod
+    def patches(cls) -> list[str]:
+        """The list of patches"""
+    
     #########################################################################
     @classmethod
     def fromDictionary(cls, dictionary:dict):
@@ -48,53 +47,56 @@ class EngineGeometry(BaseClass):
     ###################################
     #Instant. chamber volume:
     @abstractmethod
-    def V(self,CA:float|Iterable) -> float|np.ndarray:
+    def V(self,CA:float|Iterable[float]) -> float|Iterable[float]:
         """
         Returns the instantaneous in-cylinder volume at CA
 
         Args:
-            CA (float | Iterable): Time in CA
+            CA (float | Iterable[float]): Time in CA
 
         Returns:
-            float|np.ndarray[float]: In-cylinder volume [m^3]
+            float||Iterable[float]: In-cylinder volume [m^3]
         """
         pass
     
     ###################################
     @abstractmethod
-    def A(self,CA:float|Iterable) -> float|np.ndarray:
+    def A(self,CA:float|Iterable[float]) -> float|Iterable[float]:
         """
         Returns the chamber area at CA
         Args:
-            CA (float | Iterable): Time in CA
+            CA (float | Iterable[float]): Time in CA
 
         Returns:
-            float|np.ndarray[float]: [m^2]
+            float|Iterable[float]: [m^2]
         """
         pass
     
     ###################################
     @abstractmethod
-    def areas(self,CA:float|Iterable) -> pd.DataFrame:
+    def areas(self,CA:float|Iterable[float]) -> pd.DataFrame:
         """
-        CA:     float / list<float/int>
-            Crank angle
+        Get pandas.Dataframe with area of all patches at CA
         
-        Returns a pandas.Dataframe with area of all patches at CA
+        Args:
+            CA (float | Iterable[float]): Time in CA
+
+        Returns:
+            pandas.Dataframe: DataFrame of areas [m^2] at CA. Columns are patch names and CA.
         """
         pass
     
     ###################################
     #Time (in CA) derivative of chamber volume:
     @abstractmethod
-    def dVdCA(self,CA:float|Iterable) -> float|np.ndarray:
+    def dVdCA(self,CA:float|Iterable[float]) -> float|Iterable[float]:
         """
         Returns the time (in CA) derivative of instantaneous in-cylinder volume at CA
         Args:
-            CA (float | Iterable): Time in CA
+            CA (float | Iterable[float]): Time in CA
 
         Returns:
-            float|np.ndarray[float]: dV/dCA [m^3/CA]
+            float|Iterable[float]: dV/dCA [m^3/CA]
         """
         pass
     

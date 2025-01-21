@@ -49,28 +49,24 @@ class Child(Base):
             arg2 (<type_arg2>): Description
         }
         """
-        try:
-            #Create the dictionary for construction
-            Dict = {}
-            
-            #List of mandatory entries in the dictionary. Here only arg2 as it does not
-            #have a default value
-            entryList = ["arg2"]
-            for entry in entryList:
-                if not entry in dictionary:
-                    raise ValueError(f"Mandatory entry '{entry}' not found in dictionary.")
-                #Set the entry
-                Dict[entry] = dictionary[entry]
-            
-            #Constructing this class with the specific entries
-            out = cls\
-                (
-                    **Dict
-                )
-            return out
+        #Create the dictionary for construction
+        Dict = {}
         
-        except BaseException as err:
-            cls.fatalErrorInClass(cls.fromDictionary, "Failed construction from dictionary", err)
+        #List of mandatory entries in the dictionary. Here only arg2 as it does not
+        #have a default value
+        entryList = ["arg2"]
+        for entry in entryList:
+            if not entry in dictionary:
+                raise ValueError(f"Mandatory entry '{entry}' not found in dictionary.")
+            #Set the entry
+            Dict[entry] = dictionary[entry]
+        
+        #Constructing this class with the specific entries
+        out = cls\
+            (
+                **Dict
+            )
+        return out
     
     #########################################################################
     def __init__(self, arg2:<type_arg2>, arg1:<type_arg1>=default_val1):
@@ -79,31 +75,21 @@ class Child(Base):
         arg1 (<type_arg1>): Description (default: default_val1)
         """
         #Argument checking:
-        try:
-            # Check that the arguments satisfy what is expected from the init method
+        # Check that the arguments satisfy what is expected from the init method
 
-            #Type checking
-            self.checkType(arg2, type_arg2, "arg2")
+        #Type checking
+        self.checkType(arg2, type_arg2, "arg2")
 
-            #Here I only check for arg2 as arg1 is already handled bu the __init__ of class Base
-            
-            #...
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.__init__, err)
+        #Here I only check for arg2 as arg1 is already handled bu the __init__ of class Base
         
-        try:
-            #Initialize the object
-            #Here might be convenient to call the __init__ method of the base
-            #class to initialize arg1 which is shared with the base class Base.
-            #To do so i use the function super()
+        #Initialize the object
+        #Here might be convenient to call the __init__ method of the base
+        #class to initialize arg1 which is shared with the base class Base.
+        #To do so i use the function super()
 
-            super().__init__(arg1)
+        super().__init__(arg1)
 
-            #Other stuff to initialize specific of Child
-
-
-        except BaseException as err:
-            self.fatalErrorInClass(self.__init__, "Failed construction of ...", err)
+        #Other stuff to initialize specific of Child
     
     #########################################################################
     #Dunder methods:

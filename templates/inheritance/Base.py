@@ -68,21 +68,13 @@ class Base(BaseClass):
         arg1 (<type_arg1>): Description (default: default_val)
         """
         #Argument checking:
-        try:
-            # Check that the arguments satisfy what is expected from the init method
+        # Check that the arguments satisfy what is expected from the init method
 
-            #Type checking
-            self.checkType(arg1, type_arg1, "arg1")
-            
-            #...
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.__init__, err)
+        #Type checking
+        self.checkType(arg1, type_arg1, "arg1")
         
-        try:
-            #Initialize the object
-            pass
-        except BaseException as err:
-            self.fatalErrorInClass(self.__init__, "Failed construction of ...", err)
+        #Initialize the object
+        pass
     
     #########################################################################
     #Dunder methods:
@@ -110,15 +102,10 @@ class Base(BaseClass):
         Arguments and description of the method
         """
         #Used for type-checking only
-        try:
-            # Check that the arguments satisfy what is expected from the method
+        # Check that the arguments satisfy what is expected from the method
 
-            #Type checking
-            self.checkType(arg, TYPE, "arg")
-            
-            #...
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.absMeth1, err)
+        #Type checking
+        self.checkType(arg, TYPE, "arg")
     
 #########################################################################
 #Create selection table for the class used for run-time selection of type

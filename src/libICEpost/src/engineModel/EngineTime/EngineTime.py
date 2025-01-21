@@ -75,37 +75,29 @@ class EngineTime(BaseClass):
         
         """
         #Argument checking:
-        try:
-            self.checkType(IVC, float, "IVC")
-            self.checkType(EVO, float, "EVO")
-            self.checkType(speed, float, "speed")
-            
-            if not startTime is None:
-                self.checkType(startTime, float, "startTime")
-            else:
-                startTime = IVC
-                
-            if not endTime is None:
-                self.checkType(endTime, float, "endTime")
-            else:
-                endTime = EVO
-                
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.__init__, err)
+        self.checkType(IVC, float, "IVC")
+        self.checkType(EVO, float, "EVO")
+        self.checkType(speed, float, "speed")
         
-        try:
-            self.n = speed
-            self.omega = speed / 60.0 * 2.0 * math.pi
-            self.IVC = IVC
-            self.EVO = EVO
-            self.startTime = startTime
-            self.endTime = endTime
+        if not startTime is None:
+            self.checkType(startTime, float, "startTime")
+        else:
+            startTime = IVC
             
-            self.time = None
-            self.oldTime = None
-            
-        except BaseException as err:
-            self.fatalErrorInClass(self.__init__, "Construction failed", err)
+        if not endTime is None:
+            self.checkType(endTime, float, "endTime")
+        else:
+            endTime = EVO
+        
+        self.n = speed
+        self.omega = speed / 60.0 * 2.0 * math.pi
+        self.IVC = IVC
+        self.EVO = EVO
+        self.startTime = startTime
+        self.endTime = endTime
+        
+        self.time = None
+        self.oldTime = None
     
     ######################################
     #NOTE: overwrite in child class if necessary
@@ -181,13 +173,10 @@ class EngineTime(BaseClass):
         Returns:
             float|np.ndarray[float]: Time in seconds
         """
-        try:
-            if isinstance(CA, list):
-                return np.array([ca/self.dCAdt for ca in CA])
-            else:
-                return CA/self.dCAdt
-        except BaseException as err:
-            self.fatalErrorInClass(self.CA2Time, "Failed conversion from CA to time", err)
+        if isinstance(CA, list):
+            return np.array([ca/self.dCAdt for ca in CA])
+        else:
+            return CA/self.dCAdt
     
     ###################################
     #Time to CA:
@@ -201,13 +190,10 @@ class EngineTime(BaseClass):
         Returns:
             float|np.ndarray: time in CA
         """
-        try:
-            if isinstance(t, list):
-                return np.array([T*self.dCAdt for T in t])
-            else:
-                return t*self.dCAdt
-        except BaseException as err:
-            self.fatalErrorInClass(self.Time2CA, "Failed conversion from time to CA", err)
+        if isinstance(t, list):
+            return np.array([T*self.dCAdt for T in t])
+        else:
+            return t*self.dCAdt
     
     ###################################
     def isCombustion(self,CA:float|Iterable=None) -> bool|np.ndarray[bool]:
@@ -220,13 +206,10 @@ class EngineTime(BaseClass):
         Returns:
             bool|np.ndarray[bool]: If combustion started
         """
-        try:
-            if not CA is None:
-                self.checkType(CA, (float, Iterable), "CA")
-            else:
-                CA = self.time
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.isCombustion, err)
+        if not CA is None:
+            self.checkType(CA, (float, Iterable), "CA")
+        else:
+            CA = self.time
         
         if not self.startOfCombustion() is None:
             out = (CA > self.startOfCombustion())
@@ -252,13 +235,10 @@ class EngineTime(BaseClass):
         Returns:
             bool|np.ndarray[bool]: If at closed valves
         """
-        try:
-            if not CA is None:
-                self.checkType(CA, (float, Iterable), "CA")
-            else:
-                CA = self.time
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.isCombustion, err)
+        if not CA is None:
+            self.checkType(CA, (float, Iterable), "CA")
+        else:
+            CA = self.time
         
         if isinstance(CA, Iterable):
             out = (np.array(CA >= self.IVC) & np.array(CA <= self.EVO))

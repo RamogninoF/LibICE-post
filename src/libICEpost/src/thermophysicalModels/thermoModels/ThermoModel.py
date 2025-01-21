@@ -86,16 +86,12 @@ class ThermoModel(Utilities): #(BaseClass):
             density (float, optional): [kg/m^3]. Defaults to None.
         """
         
-        try:
-            #Mixture:
-            self.checkType(mixture, ThermoMixture, "mixture")
-            self._mixture = mixture
-            
-            #Initialize state:
-            self.initializeState(mass=mass,pressure=pressure,volume=volume,temperature=temperature,density=density)
-            
-        except BaseException as err:
-            self.fatalErrorInClass(self.__init__, f"Failed constructing instance of class {self.__class__.__name__}", err)
+        #Mixture:
+        self.checkType(mixture, ThermoMixture, "mixture")
+        self._mixture = mixture
+        
+        #Initialize state:
+        self.initializeState(mass=mass,pressure=pressure,volume=volume,temperature=temperature,density=density)
             
     #########################################################################
     #Operators:

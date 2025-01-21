@@ -44,16 +44,12 @@ class FixedCompositionExternalEGR(EgrModel):
             egr (float): The egr mass fraction.
         }
         """
-        try:
-            cls.checkType(dictionary,(dict, Dictionary),"dictionary")
-            #Cast to Dictionary
-            if isinstance(dictionary, dict):
-                dictionary = Dictionary(**dictionary)
-            
-            return cls(**dictionary)
-            
-        except BaseException as err:
-            cls.fatalErrorInClass(cls.fromDictionary, "Failed construction from dictionary", err)
+        cls.checkType(dictionary,(dict, Dictionary),"dictionary")
+        #Cast to Dictionary
+        if isinstance(dictionary, dict):
+            dictionary = Dictionary(**dictionary)
+        
+        return cls(**dictionary)
     
     #########################################################################
     #Constructor
@@ -67,20 +63,13 @@ class FixedCompositionExternalEGR(EgrModel):
         """
 
         #Argument checking:
-        try:
-            #Type checking
-            self.checkType(egr, float, "egr")
-            self.checkType(egrMixture, Mixture, "egrMixture")
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.__init__, err)
+        #Type checking
+        self.checkType(egr, float, "egr")
+        self.checkType(egrMixture, Mixture, "egrMixture")
         
-        try:
-            #Initialize the object
-            self._egr = egr
-            self._egrMixture = egrMixture.copy()
-            
-        except BaseException as err:
-            self.fatalErrorInClass(self.__init__, f"Failed construction of {self.__class__.__name__}", err)
+        #Initialize the object
+        self._egr = egr
+        self._egrMixture = egrMixture.copy()
     
     #########################################################################
     #Dunder methods:

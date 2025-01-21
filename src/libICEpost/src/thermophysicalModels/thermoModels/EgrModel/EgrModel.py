@@ -67,11 +67,7 @@ class EgrModel(BaseClass):
         {
         }
         """
-        try:
-            return cls()
-            
-        except BaseException as err:
-            cls.fatalErrorInClass(cls.fromDictionary, "Failed construction from dictionary", err)
+        return cls()
     
     #########################################################################
     #Constructor
@@ -79,12 +75,9 @@ class EgrModel(BaseClass):
         """
         No egr to be applied.
         """
-        try:
-            #Initialize the object
-            self._egrMixture = Mixture.empty()
-            self._egr = 0.0
-        except BaseException as err:
-            self.fatalErrorInClass(self.__init__, f"Failed construction of {self.__class__.__name__}", err)
+        #Initialize the object
+        self._egrMixture = Mixture.empty()
+        self._egr = 0.0
     
     #########################################################################
     #Dunder methods:

@@ -65,21 +65,13 @@ class Class(Utilites):
         arg1 (<type_arg1>): Description (default: default_val)
         """
         #Argument checking:
-        try:
-            # Check that the arguments satisfy what is expected from the init method
+        # Check that the arguments satisfy what is expected from the init method
 
-            #Type checking
-            self.checkType(arg1, type_arg1, "arg1")
-            
-            #...
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.__init__, err)
+        #Type checking
+        self.checkType(arg1, type_arg1, "arg1")
         
-        try:
-            #Initialize the object
-            pass
-        except BaseException as err:
-            self.fatalErrorInClass(self.__init__, "Failed construction of ...", err)
+        #Initialize the object
+        pass
     
     #########################################################################
     #Dunder methods:

@@ -49,16 +49,12 @@ class StoichiometricMixtureEGR(EgrModel):
             combustionEfficiency (float, optional): Combustion efficiency. Defaults to 1.0.
         }
         """
-        try:
-            cls.checkType(dictionary,(dict, Dictionary),"dictionary")
-            #Cast to Dictionary
-            if isinstance(dictionary, dict):
-                dictionary = Dictionary(**dictionary)
-            
-            return cls(**dictionary)
-            
-        except BaseException as err:
-            cls.fatalErrorInClass(cls.fromDictionary, "Failed construction from dictionary", err)
+        cls.checkType(dictionary,(dict, Dictionary),"dictionary")
+        #Cast to Dictionary
+        if isinstance(dictionary, dict):
+            dictionary = Dictionary(**dictionary)
+        
+        return cls(**dictionary)
     
     #########################################################################
     #Constructor
@@ -74,38 +70,31 @@ class StoichiometricMixtureEGR(EgrModel):
         """
 
         #Argument checking:
-        try:
-            # Check that the arguments satisfy what is expected from the init method
+        # Check that the arguments satisfy what is expected from the init method
 
-            #Type checking
-            self.checkType(air, Mixture, "air")
-            self.checkType(fuel, Mixture, "fuel")
-            self.checkType(egr, float, "egr")
-            self.checkType(combustionEfficiency, float, "combustionEfficiency")
-        except BaseException as err:
-            self.fatalErrorInArgumentChecking(self.__init__, err)
+        #Type checking
+        self.checkType(air, Mixture, "air")
+        self.checkType(fuel, Mixture, "fuel")
+        self.checkType(egr, float, "egr")
+        self.checkType(combustionEfficiency, float, "combustionEfficiency")
         
-        try:
-            #Initialize the object
-            self._air = air.copy()
-            self._fuel = fuel.copy()
-            
-            self._egr = egr
-            self._combustionEfficiency = combustionEfficiency
-            
-            #Compute stoichiometric combustion products
-            alphaSt = computeAlphaSt(air, fuel) #TODO pass oxidizer
-            yf = 1./(alphaSt + 1.)
-            react = air.copy()
-            react.dilute(fuel, yf, "mass")
-            prods = Stoichiometry(react).products
-            
-            #Impose combustion efficiency
-            self._egrMixture = prods
-            self._egrMixture = mixtureBlend([react, prods], [1. - combustionEfficiency, combustionEfficiency], "mass")
-            
-        except BaseException as err:
-            self.fatalErrorInClass(self.__init__, f"Failed construction of {self.__class__.__name__}", err)
+        #Initialize the object
+        self._air = air.copy()
+        self._fuel = fuel.copy()
+        
+        self._egr = egr
+        self._combustionEfficiency = combustionEfficiency
+        
+        #Compute stoichiometric combustion products
+        alphaSt = computeAlphaSt(air, fuel) #TODO pass oxidizer
+        yf = 1./(alphaSt + 1.)
+        react = air.copy()
+        react.dilute(fuel, yf, "mass")
+        prods = Stoichiometry(react).products
+        
+        #Impose combustion efficiency
+        self._egrMixture = prods
+        self._egrMixture = mixtureBlend([react, prods], [1. - combustionEfficiency, combustionEfficiency], "mass")
     
     #########################################################################
     #Dunder methods:

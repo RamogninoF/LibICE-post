@@ -52,26 +52,19 @@ class UserDefinedFilter(Filter):
             code (str): the code of the __call__(x,y) method
         }
         """
-        try:
-            #Create the dictionary for construction
-            Dict = {}
-            
-            entryList = ["function"]
-            for entry in entryList:
-                if not entry in dictionary:
-                    raise ValueError(f"Mandatory entry '{entry}' not found in dictionary.")
-                #Set the entry
-                Dict[entry] = dictionary[entry]
-            
-            #Constructing this class with the specific entries
-            out = cls\
-                (
-                    **Dict
-                )
-            return out
+        #Create the dictionary for construction
+        Dict = {}
         
-        except BaseException as err:
-            cls.fatalErrorInClass(cls.fromDictionary, "Failed construction from dictionary", err)
+        entryList = ["function"]
+        for entry in entryList:
+            if not entry in dictionary:
+                raise ValueError(f"Mandatory entry '{entry}' not found in dictionary.")
+            #Set the entry
+            Dict[entry] = dictionary[entry]
+        
+        #Constructing this class with the specific entries
+        out = cls(**Dict)
+        return out
     
     #########################################################################
     def __init__(self, function:FunctionType):

@@ -63,21 +63,17 @@ class StoichiometricReaction(Reaction):
                 The molecules in the products
         }
         """
-        try:
-            entryList = ["reactants", "products"]
-            for entry in entryList:
-                if not entry in dictionary:
-                    raise ValueError(f"Mandatory entry '{entry}' not found in dictionary.")
-            
-            out = cls\
-                (
-                    dictionary["reactants"],
-                    dictionary["products"]
-                )
-            return out
+        entryList = ["reactants", "products"]
+        for entry in entryList:
+            if not entry in dictionary:
+                raise ValueError(f"Mandatory entry '{entry}' not found in dictionary.")
         
-        except BaseException as err:
-            cls.fatalErrorInClass(cls.fromDictionary, "Failed construction from dictionary", err)
+        out = cls\
+            (
+                dictionary["reactants"],
+                dictionary["products"]
+            )
+        return out
     
     #########################################################################
     #Create oxidation reactions from Fuels database

@@ -504,7 +504,7 @@ class Tabulation(Utilities):
             slTab = np.ix_(*tuple(slices))
             self._data[slTab] = items
         except BaseException as err:
-            self.fatalErrorInClass("Failed setting items in Tabulation", err)
+            raise ValueError("Failed setting items in Tabulation")
         
         #Update interpolator
         self._createInterpolator()
