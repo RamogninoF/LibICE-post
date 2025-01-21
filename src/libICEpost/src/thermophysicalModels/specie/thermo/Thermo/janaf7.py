@@ -121,10 +121,8 @@ class janaf7(Thermo):
         """
         #Argument checking:
         super().__init__(Rgas)
-        self.checkType(cpLow, Iterable, entryName="cpLow")
-        self.checkType(cpHigh, Iterable, entryName="cpHigh")
-        [self.checkType(c, float, entryName=f"cpLow[{ii}]") for ii, c in enumerate(cpLow)]
-        [self.checkType(c, float, entryName=f"cpHigh[{ii}]") for ii, c in enumerate(cpHigh)]
+        self.checkArray(cpLow, float, entryName="cpLow")
+        self.checkArray(cpHigh, float, entryName="cpHigh")
         self.checkType(Tth, float, entryName="Tth")
         self.checkType(Tlow, float, entryName="Tlow")
         self.checkType(Thigh, float, entryName="Thigh")

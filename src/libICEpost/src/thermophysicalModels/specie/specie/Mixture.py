@@ -91,8 +91,7 @@ class Mixture(Utilities):
     #################################
     @Y.setter
     def Y(self, y:Iterable[float]):
-        self.checkType(y, Iterable, "y")
-        [self.checkType(s, float, f"y[{ii}]") for ii,s in enumerate(y)]
+        self.checkArray(y, float, "y")
         if not len(y) == len(self):
             raise ValueError("Inconsistent size of y with mixture composition.")
         self._Y = list(y[:])
@@ -109,8 +108,7 @@ class Mixture(Utilities):
     #################################
     @X.setter
     def X(self, x:Iterable[float]):
-        self.checkType(x, Iterable, "x")
-        [self.checkType(s, float, f"x[{ii}]") for ii,s in enumerate(x)]
+        self.checkArray(x, float, "x")
         if not len(x) == len(self):
             raise ValueError("Inconsistent size of x with mixture composition.")
         self._X = list(x[:])
@@ -398,10 +396,8 @@ class Mixture(Utilities):
             fracType (Literal[&quot;mass&quot;,&quot;mole&quot;], optional): Type for composition fractions. Defaults to "mass".
         """
         #Argument checking:
-        self.checkType(species, Iterable, entryName="species")
-        [self.checkType(s, Molecule, entryName=f"species[{ii}]") for ii,s in enumerate(species)]
-        self.checkType(composition, Iterable, entryName="composition")
-        [self.checkType(s, float, entryName=f"composition[{ii}]") for ii,s in enumerate(composition)]
+        self.checkArray(species, Molecule, "species")
+        self.checkArray(composition, float, "composition")
         
         fracType = _fracType(fracType)
         
@@ -583,8 +579,7 @@ class Mixture(Utilities):
         Returns:
             Mixture: The extracted submixture
         """
-        self.checkType(specieList, Iterable, "specieList")
-        [self.checkType(s, Molecule, f"specieList[{ii}]") for ii,s in enumerate(specieList)]
+        self.checkArray(specieList, Molecule, "specieList")
         
         output = None
         xOutput = 0.0

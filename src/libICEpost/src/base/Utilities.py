@@ -13,7 +13,7 @@ Last update:        12/06/2023
 
 from typing import Self
 
-from .Functions.typeChecking import *
+from .Functions.typeChecking import checkType, checkArray, checkMap
 from .Functions.runtimeWarning import runtimeWarning, runtimeError, printStack
 
 import numpy as np
@@ -32,6 +32,14 @@ class Utilities(object):
     @staticmethod
     def checkType(*args, **argv):
         return checkType(*args, **argv)
+    
+    @staticmethod
+    def checkArray(*args, **argv):
+        return checkArray(*args, **argv)
+    
+    @staticmethod
+    def checkMap(*args, **argv):
+        return checkMap(*args, **argv)
     
     #Errors
     @staticmethod

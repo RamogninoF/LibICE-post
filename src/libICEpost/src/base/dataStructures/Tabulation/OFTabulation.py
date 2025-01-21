@@ -386,8 +386,7 @@ class OFTabulation(Utilities):
         for variable in newRanges:
             range = newRanges[variable]
             
-            self.checkType(range, Iterable, f"{variable}")
-            [self.checkType(r, Iterable, f"{variable}[{ii}]") for ii,r in enumerate(range)]
+            self.checkArray(range, Iterable, f"{variable}")
             
             if not variable in self._inputVariables:
                 raise ValueError("Input variable {} not found in tabulation. Avaliable input variables are:\n\t" + "\n\t".join(self.inputVariables.keys()))
@@ -701,9 +700,8 @@ class OFTabulation(Utilities):
             entryNames = bidict()
         
         if not inputVariables is None:
-            self.checkType(inputVariables, Iterable, "inputVariables")
-            [self.checkType(iptVar, str, f"inputVariables[{ii}]") for ii,iptVar in enumerate(inputVariables)]
-        
+            self.checkArray(inputVariables, str, "inputVariables")
+            
         #Check directory:
         self.checkDir()
         
@@ -728,8 +726,7 @@ class OFTabulation(Utilities):
             if not "inputVariables" in tabProps:
                 raise ValueError("Entry 'inputVariables' not found in tableProperties. Cannot detect the input variables (and their ordering).")
             order = tabProps["inputVariables"]
-        self.checkType(order, Iterable, "order")
-        [self.checkType(o, str, f"order[{ii}]") for ii,o in enumerate(order)]
+        self.checkArray(order, str, "order")
         
         #Identify the ranges
         variables:dict[str,str] = dict()

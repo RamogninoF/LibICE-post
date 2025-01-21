@@ -371,8 +371,7 @@ class EngineModel(BaseClass):
         self.info["initialConditions"] = None
         
         #Function objects
-        self.checkType(functionObjects, Iterable, "functionObjects")
-        [self.checkType(fo, Callable, f"functionObjects[{ii}]")for ii,fo in enumerate(functionObjects)]
+        self.checkArray(functionObjects, Callable, "functionObjects")
         self.info["functionObjects"] = [fo for fo in functionObjects]
         
         #Pre-processing

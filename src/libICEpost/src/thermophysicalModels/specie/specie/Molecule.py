@@ -107,10 +107,8 @@ class Molecule(Utilities):
         
         #Check arguments:
         self.checkType(specieName, str, entryName="specieName")
-        self.checkType(atomicSpecie, Iterable, "atomicSpecie")
-        self.checkType(numberOfAtoms, Iterable, "numberOfAtoms")
-        [self.checkType(a, Atom, f"atomicSpecie[{ii}]") for ii, a in enumerate(atomicSpecie)]
-        [self.checkType(a, float, f"numberOfAtoms[{ii}]") for ii, a in enumerate(numberOfAtoms)]
+        self.checkArray(atomicSpecie, Atom, "atomicSpecie")
+        self.checkArray(numberOfAtoms, float, "numberOfAtoms")
         
         if not(len(atomicSpecie) == len(numberOfAtoms)):
             raise ValueError("Lists 'atomicSpecie' and 'numberOfAtoms' are not consistent.")

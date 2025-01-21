@@ -15,30 +15,25 @@ from collections.abc import Iterable
 import numpy as np
 import math
 
-from libICEpost.src.base.BaseClass import BaseClass, abstractmethod
+from libICEpost.src.base.BaseClass import BaseClass
 
 #############################################################################
 #                               MAIN CLASSES                                #
 #############################################################################
 class EngineTime(BaseClass):
     """
-    Base class for handling engine geometrical parameters during cycle.
-    
-    NOTE: Crank angles are defined with 0 CAD at FIRING TDC
-    
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Base class for handling engine timings during cycle.
     
     Attibutes:
-        
-        [Variable] | [Type]     | [Unit] | [Description]
-        -----------|------------|--------|-------------------------------------------
-        startTime  | float(None)| CA     | The start-time for post-processing.
-                   |            |        | If None, uses IVC
-        IVC        | float      | CA     | Inlet valve closing
-        EVO        | float      | CA     | Inlet valve closing
-        -----------|------------|--------|-------------------------------------------
-        n          | float      | rpm    | Rotational speed
-        omega      | float      | rad/s  | 
+        - IVC (float): Inlet valve closing [CA]
+        - EVO (float): Inlet valve closing [CA]
+        - n (float): Rotational speed [rpm]
+        - omega (float): Rotational speed [rad/s]
+        - time (float): The current time instant [CA]
+        - deltaT (float): Current time-step [CA]
+        - oldTime (float): The old time instant [CA]
+        - startTime (float): The start-time for post-processing [CA]
+        - endTime (float): The end-time for post-processing [CA]
     """
     
     time:float
@@ -60,19 +55,14 @@ class EngineTime(BaseClass):
     #Constructor:
     def __init__(self,speed, *, IVC:float, EVO:float, startTime:float=None, endTime:float=None):
         """
-        Construct from keyword arguments containing the following parameters:
+        Construct from keyword arguments.
         
-        [Variable]        | [Type] | [Default] | [Unit] | [Description]
-        ------------------|--------|-----------|--------|----------------------------------
-        startTime         | float  | None      | CA     | The start-time for post-processing.
-                          |        |           |        | If None, uses IVC
-        endTime           | float  | None      | CA     | The start-time for post-processing.
-                          |        |           |        | If None, uses EVO
-        IVC               | float  | -         | CA     | Inlet valve closing
-        EVO               | float  | -         | CA     | Inlet valve closing
-        ------------------|--------|-----------|--------|----------------------------------
-        speed             | float  | -         | rpm    | Rotational speed
-        
+        Args:
+            IVC (float): Inlet valve closing [CA]
+            EVO (float): Inlet valve closing [CA]
+            speed (float): Rotational speed [rpm]
+            startTime (float, optional): The start-time for post-processing [CA]. If None, set to IVC. Defaults to None.
+            endTime (float, optional): The end-time for post-processing [CA]. If None, set to EVO. Defaults to None.
         """
         #Argument checking:
         self.checkType(IVC, float, "IVC")
@@ -102,18 +92,18 @@ class EngineTime(BaseClass):
     ######################################
     #NOTE: overwrite in child class if necessary
     @property
-    def timings(self) -> dict[str:float]:
+    def timings(self) -> dict[str,float]:
         """
         A dictionary with the relevant timings (IVC, EVO, etc...)
 
         Returns:
-            dict[str:float]
+            dict[str,float]
         """
         return {"IVC":self.IVC, "EVO":self.EVO}
     
     #########################################################################
     @classmethod
-    def fromDictionary(cls, dictionary):
+    def fromDictionary(cls, dictionary:dict):
         """
         Construct from dicionary
         """
@@ -142,17 +132,18 @@ class EngineTime(BaseClass):
     
     ###################################
     #Call method used for iteration over time series:
-    def __call__(self, timeList:list[float]):
+    def __call__(self, timeList:Iterable[float]):
         """
         Iteration over time steries, from startTime to endTime.
 
         Args:
-            timeList (list[float]): list of times
+            timeList (Iterable[float]): list of times
 
         Yields:
             float: current time
         """
-        self.oldTime = max(self.startTime, timeList[0])
+        #Update start-time to be consistent with the avaliable data:
+        self.updateStartTime(timeList)
         
         for CA in timeList:
             if (CA > self.startTime) and (CA <= self.endTime):
@@ -163,51 +154,57 @@ class EngineTime(BaseClass):
     
     #########################################################################
     #CA to Time:
-    def CA2Time(self,CA:float|Iterable) -> float|np.ndarray[float]:
+    def CA2Time(self,CA:float|Iterable[float]) -> float|np.ndarray:
         """
         Converts CA to time [s]
 
         Args:
-            CA (float | Iterable): Time in CA
+            CA (float | Iterable[float]): Time in CA
 
         Returns:
-            float|np.ndarray[float]: Time in seconds
+            float|np.ndarray: Time in seconds
         """
-        if isinstance(CA, list):
-            return np.array([ca/self.dCAdt for ca in CA])
+        self.checkType(CA, (float, Iterable), "CA")
+        if isinstance(CA, Iterable) and not isinstance(CA, np.ndarray):
+            self.checkArray(CA, float, "CA")
+            return np.array(CA)/self.dCAdt
         else:
             return CA/self.dCAdt
     
     ###################################
     #Time to CA:
-    def Time2CA(self,t:float|Iterable) -> float|np.ndarray:
+    def Time2CA(self,t:float|Iterable[float]) -> float|np.ndarray:
         """
         Converts time [s] to CA
 
         Args:
-            t (float | Iterable): Time in seconds
+            t (float | Iterable[float]): Time in seconds
 
         Returns:
             float|np.ndarray: time in CA
         """
-        if isinstance(t, list):
-            return np.array([T*self.dCAdt for T in t])
+        self.checkType(t, (float, Iterable), "t")
+        if isinstance(t, Iterable) and not isinstance(t, np.ndarray):
+            self.checkArray(t, float, "t")
+            return np.array(t)*self.dCAdt
         else:
             return t*self.dCAdt
     
     ###################################
-    def isCombustion(self,CA:float|Iterable=None) -> bool|np.ndarray[bool]:
+    def isCombustion(self,CA:float|Iterable[float]=None) -> bool|np.ndarray:
         """
         Check if combustion has started.
 
         Args:
-            CA (float | Iterable | None): Cranc angle to check. If None, checks for self.time
+            CA (float | Iterable[float] | None): Crank angle to check. If None, checks for self.time
 
         Returns:
-            bool|np.ndarray[bool]: If combustion started
+            bool|np.ndarray: If combustion started
         """
         if not CA is None:
             self.checkType(CA, (float, Iterable), "CA")
+            if isinstance(CA, Iterable):
+                self.checkArray(CA, float, "CA")
         else:
             CA = self.time
         
@@ -225,18 +222,20 @@ class EngineTime(BaseClass):
         return None
     
     ###################################
-    def isClosedValves(self,CA:float|Iterable=None) -> bool|np.ndarray[bool]:
+    def isClosedValves(self,CA:float|Iterable[float]=None) -> bool|np.ndarray:
         """
         Check if at closed valves (after IVC and before EVO)
 
         Args:
-            CA (float | Iterable | None): Cranc angle to check. If None, checks for self.time
+            CA (float | Iterable[float] | None): Cranc angle to check. If None, checks for self.time
 
         Returns:
-            bool|np.ndarray[bool]: If at closed valves
+            bool|np.ndarray: If at closed valves
         """
         if not CA is None:
             self.checkType(CA, (float, Iterable), "CA")
+            if isinstance(CA, Iterable):
+                self.checkArray(CA, float, "CA")
         else:
             CA = self.time
         
@@ -254,10 +253,12 @@ class EngineTime(BaseClass):
         Args:
             timeList (Iterable[float]): The avaliable time series
         """
+        self.checkType(timeList, Iterable, "timeList")
+        
         timeList = np.array(timeList)
         self.startTime = timeList[timeList >= self.startTime][0]
         self.time = self.startTime
-        self.oldTime = None
+        self.oldTime = self.startTime
     
 #############################################################################
 EngineTime.createRuntimeSelectionTable()

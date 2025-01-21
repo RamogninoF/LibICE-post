@@ -136,8 +136,7 @@ class Tabulation(Utilities):
     
     @order.setter
     def order(self, order:Iterable[str]):
-        self.checkType(order, Iterable, "order")
-        [self.checkType(o, str, f"order[{ii}]") for ii,o in enumerate(order)]
+        self.checkArray(order, str, "order")
         
         if not len(order) == len(self.order):
             raise ValueError("Length of new order is inconsistent with number of variables in the table.")
@@ -225,9 +224,8 @@ class Tabulation(Utilities):
         data = np.array(data) #Cast to numpy
         
         #Ranges
-        self.checkType(ranges, dict,entryName="ranges")
-        [self.checkType(ranges[var], Iterable,entryName=f"ranges[{var}]") for var in ranges]
-        [self.checkType(ranges[var][ii], float,entryName=f"ranges[{var}][{ii}]") for var in ranges for ii,_ in enumerate(ranges[var])]
+        self.checkMap(ranges, str, Iterable, entryName="ranges")
+        [self.checkArray(ranges[var], float, f"ranges[{var}]") for var in ranges]
         
         #Check that ranges are in ascending order
         for r in ranges:
@@ -235,8 +233,7 @@ class Tabulation(Utilities):
                 raise ValueError(f"Range for variable '{r}' not sorted in ascending order.")
         
         #Order
-        self.checkType(order, list,entryName="order")
-        [self.checkType(var, str,entryName=f"order[{ii}]") for ii,var in enumerate(order)]
+        self.checkArray(order, str,entryName="order")
         
         #Order consistent with ranges
         if not(len(ranges) == len(order)):
@@ -397,7 +394,6 @@ class Tabulation(Utilities):
         """
         
         #Argument checking:
-        [self.checkType(val, float, f"args[{ii}]") for ii,val in enumerate(args)]
         if len(args) != self.ndim:
             raise ValueError("Number of entries not consistent with number of dimensions stored in the tabulation ({} expected, while {} found).".format(self.ndim, len(args)))
         
@@ -624,8 +620,7 @@ class Tabulation(Utilities):
             
             #Check arguments:
             ranges = ranges.update(argv)
-            self.checkType(ranges, dict, entryName="ranges")
-            [self.checkType(ranges[var], Iterable, entryName=f"ranges[{var}]") for var in ranges]
+            self.checkMap(ranges, str, Iterable, entryName="ranges")
             
             for rr in ranges:
                 for ii in ranges[rr]:

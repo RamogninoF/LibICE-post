@@ -99,8 +99,7 @@ class ConstantDissociationFraction(DissociationModel):
         """
         #Check arguments
         self.checkType(molecule, Molecule, "molecule")
-        self.checkType(products, Iterable, "products")
-        [self.checkType(p, Iterable, f"products[{ii}]") for ii,p in enumerate(products)]
+        self.checkArray(products, Molecule, "products")
         self.checkType(fraction, float, "fraction")
         self.checkType(fracType, str, "fracType")
         _fracType(fracType) #Check value

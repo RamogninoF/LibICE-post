@@ -72,10 +72,8 @@ class Reaction(BaseClass):
             products (Iterable[Molecule]): List of molecules in the products
         """
         #Argument checking:
-        self.checkType(reactants, Iterable, "reactants")
-        self.checkType(products, Iterable, "products")
-        [self.checkType(r, Molecule, f"reactants[{ii}]") for ii, r in enumerate(reactants)]
-        [self.checkType(r, Molecule, f"products[{ii}]") for ii, r in enumerate(products)]
+        self.checkArray(reactants, Molecule, "reactants")
+        self.checkArray(products, Molecule, "products")
         
         self._reactants = Mixture(reactants, [1.0/len(reactants)]*len(reactants))
         self._products = Mixture(products, [1.0/len(products)]*len(products))

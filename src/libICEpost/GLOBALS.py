@@ -5,13 +5,13 @@ Last update:        12/06/2023
 Global parameters of the pakage.
 """
 
-__CACHE_SIZE__ = 256
+__CACHE_SIZE__:int = 256
 """Size of the cache for cached functions"""
 
 __ERROR_RECURSION__ = 0
-"""The recursion level for"""
+"""The recursion level for errors"""
 
-__VERBOSITY_LEVEL__ = 1
+__VERBOSITY_LEVEL__:int = 1
 """
 Verbosity levels for warnings:
     0:  Do not display any runtime message
@@ -20,8 +20,11 @@ Verbosity levels for warnings:
     3:  Advanced debug verbosity (TODO)
 """
 
-__CUSTOM_ERROR_MESSAGE__ = False
+__CUSTOM_ERROR_MESSAGE__:bool = False
 """Use custom error messages?"""
 
-__DEBUG__ = True
+__TYPE_CHECKING__:bool = True
 """If need to perform type-checking"""
+
+__SAFE_ITERABLE_CHECKING__:bool = True
+"""If type-checking is enabled, check for all elements of an iterable? Otherwise, check only the first element"""

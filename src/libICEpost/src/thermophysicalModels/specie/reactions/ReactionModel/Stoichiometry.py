@@ -125,8 +125,7 @@ class Stoichiometry(ReactionModel):
         self.checkType(oxidizer, Molecule, "oxidizer")
         self._oxidizer = oxidizer
         if not dissociationModels is None:
-            self.checkType(dissociationModels, Iterable, "dissociationModels")
-            [self.checkType(dm, DissociationModel, f"dissociationModels[{ii}]") for ii,dm in enumerate(dissociationModels)]
+            self.checkArray(dissociationModels, DissociationModel, "dissociationModels")
         else:
             dissociationModels = []
             

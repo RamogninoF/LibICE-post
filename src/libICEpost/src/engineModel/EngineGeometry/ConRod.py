@@ -42,17 +42,7 @@ def pistonPosition(CA:float|Iterable[float], *, S:float, lam:float, delta:float)
         float|Iterable[float]: Piston position [m]
     """
     checkType(CA, (float, Iterable), "CA")
-    if isinstance(CA, Iterable):
-        [checkType(ca, float, f"CA[{ii}]") for ii,ca in enumerate(CA)]
-        #Check for vectorization
-        try:
-            return _pistonPos(CA, S, lam, delta)
-        except NotImplementedError:
-            #Vectorization not implemented, use list comprehension
-            return [_pistonPos(ca, S, lam, delta) for ca in CA]
-    else:
-        #Single value
-        return _pistonPos(CA, S, lam, delta)
+    return _pistonPos(CA, S, lam, delta)
 
 
 _pistonPosDerivative = lambda CA, S, lam, delta: 0.5 * S * \
@@ -75,17 +65,7 @@ def pistonPosDerivative(CA:float|Iterable[float], *, S:float, lam:float, delta:f
         float|Iterable[float]: ds/dCA [m/CA]
     """
     checkType(CA, (float, Iterable), "CA")
-    if isinstance(CA, Iterable):
-        [checkType(ca, float, f"CA[{ii}]") for ii,ca in enumerate(CA)]
-        #Check for vectorization
-        try:
-            return _pistonPosDerivative(CA, S, lam, delta)
-        except NotImplementedError:
-            #Vectorization not implemented, use list comprehension
-            return [_pistonPosDerivative(ca, S, lam, delta) for ca in CA]
-    else:
-        #Single value
-        return _pistonPosDerivative(CA, S, lam, delta)
+    return _pistonPosDerivative(CA, S, lam, delta)
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -339,7 +319,7 @@ class ConRodGeometry(EngineGeometry):
     
     #########################################################################
     #Piston position:
-    def s(self,CA:float|Iterable[float]) -> float|np.ndarray|Iterable[float]:
+    def s(self,CA:float|Iterable[float]) -> float|np.ndarray:
         """
         Returns the piston position at CA [m] (reference to TDC)
 
@@ -347,48 +327,49 @@ class ConRodGeometry(EngineGeometry):
             CA (float | Iterable[float]): Time in CA
 
         Returns:
-            float|Iterable[float]: Piston position [m]
+            float|np.ndarray: Piston position [m]
         """
         return pistonPosition(CA, S=self.S, lam=self.lam, delta=self.delta)
     
     ###################################
     #Instant. cylinder volume:
-    def V(self,CA:float|Iterable[float]) -> float|Iterable[float]:
+    def V(self,CA:float|Iterable[float]) -> float|np.ndarray:
         return self.Vmin + pistonPosition(CA, S=self.S, lam=self.lam, delta=self.delta) * self.cylArea
     
     ###################################
     #Time (in CA) derivative of cyl. position:
-    def dsdCA(self,CA:float|Iterable[float]) -> float|Iterable[float]:
+    def dsdCA(self,CA:float|Iterable[float]) -> float|np.ndarray:
         """
         Returns the time (in CA) derivative of instantaneous piston position at CA [m/CA].
         Args:
             CA (float | Iterable[float]): Time in CA
 
         Returns:
-            float|Iterable[float]: ds/dCA [m/CA]
+            float|np.ndarray: ds/dCA [m/CA]
         """
         return pistonPosDerivative(CA, S=self.S, lam=self.lam, delta=self.delta)
     
     ###################################
     #Time (in CA) derivative of cyl. volume:
-    def dVdCA(self,CA:float|Iterable[float]) -> float|Iterable[float]:
+    def dVdCA(self,CA:float|Iterable[float]) -> float|np.ndarray:
         return self.dsdCA(CA) * self.cylArea
     
     ###################################
     #Instant. liner area:
-    def linerArea(self,CA:float|Iterable[float]) -> float|Iterable[float]:
+    def linerArea(self,CA:float|Iterable[float]) -> float|np.ndarray:
         """
         Returns the liner area at CA [m^2].
         Args:
             CA (float | Iterable): Time in CA
 
         Returns:
-            float|Iterable[float]: [m^2]
+            float|np.ndarray: [m^2]
         """
+        checkType(CA, (float, Iterable), "CA")
         return (self.s(CA) + self.clearence) * pi * self.D
     
     ###################################
-    def A(self,CA:float|Iterable[float]) -> float|np.ndarray|Iterable[float]:
+    def A(self,CA:float|Iterable[float]) -> float|np.ndarray:
         return self.linerArea(CA) + self.pistonArea + self.headArea
 
     ###################################
