@@ -18,7 +18,7 @@ from libICEpost.src.base.BaseClass import BaseClass, abstractmethod
 from .....specie.thermo.Thermo import Thermo
 from .....specie.specie.Mixture import Mixture
 
-from libICEpost.Database import database
+from libICEpost.Database import database, _DatabaseClass
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -32,34 +32,38 @@ class ThermoMixing(BaseClass):
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
     Attributes:
+        ThermoType (str): Type of thermodynamic data for which it is implemented
+        Thermo (Thermo): The Thermo of the mixture
+        thermos (_DatabaseClass): Link to database of thermodynamic properties (database.chemistry.thermo.Thermo)
         ThermoType: str
-            Type of thermodynamic data for which it is implemented
-        
-        Thermo: EquationOfState
-            The thermodynamic data of the mixture
-
-        thermos: _Database
-            Link to database of equations of state (database.chemistry.thermo.EquationOfState)
 
     """
 
-    ThermoType:str
-    thermos = database.chemistry.thermo.Thermo
+    #Type of thermodynamic data for which it is implemented. To 
+    # be overriden by derived classes with the proper type (str).
+    @staticmethod
+    @abstractmethod
+    def ThermoType() -> str:
+        """The type of thermodynamic data to lookup for in the database"""
+    
+    thermos:_DatabaseClass = database.chemistry.thermo.Thermo
+    """Link to database of thermodynamic data"""
     
     #########################################################################
     #Properties
     @property
     def mix(self) -> Mixture:
+        """The mixture composition"""
         return self._mix
 
     #########################################################################
     #Constructor:
     def __init__(self, mix:Mixture):
         """
-        mix: Mixture
-            Mixture to which generate the equation of state.
-
         Base (virtual) class: does not support instantiation.
+        
+        Args:
+            mix (Mixture): Mixture to which generate the thermodynamic data.
         """
         Thermo.selectionTable().check(self.ThermoType)
         self._mix = mix.copy()

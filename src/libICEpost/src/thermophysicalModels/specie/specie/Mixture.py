@@ -157,6 +157,9 @@ class Mixture(Utilities):
             composition (Iterable[float]): The composition of the mixture.
             fracType (Literal[&quot;mass&quot;,&quot;mole&quot;], optional): Type of fractions used in the composition. Defaults to "mass".
         """
+        self._species = []
+        self._Y = []
+        self._X = []
         self.update(species=specieList, composition=composition, fracType=fracType)
     
     #########################################################################
@@ -413,6 +416,10 @@ class Mixture(Utilities):
         
         if not(len(species) == len(set(species))):
             raise ValueError("Found duplicate entries in 'specieList' list.")
+        
+        #Skip if the composition is the same:
+        if set((s,y) for s, y in zip(species, composition)) == set((s, y) for s, y in zip(self.species, (self.Y if fracType == _fracType.mass else self.X))):
+            return
         
         #Initialize data:
         self._species = [s for s in species]

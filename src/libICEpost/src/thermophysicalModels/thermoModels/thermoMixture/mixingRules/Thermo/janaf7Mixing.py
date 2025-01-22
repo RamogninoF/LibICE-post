@@ -12,6 +12,7 @@ Last update:        17/10/2023
 #####################################################################
 
 from .ThermoMixing import ThermoMixing
+from libICEpost import Dictionary
 
 from .....specie.specie.Mixture import Mixture
 from .....specie.thermo.Thermo import Thermo
@@ -22,15 +23,10 @@ from .....specie.thermo.Thermo import Thermo
 class janaf7Mixing(ThermoMixing):
     """
     Class handling mixing of multi-component mixture: thermodynamic data in janaf7 definition.
-    
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    
+
     Attributes:
-        ThermoType: str
-            Type of thermodynamic data for which it is implemented
-        
-        Thermo: Thermo
-            The Thermo of the mixture
+        ThermoType (str): Type of thermodynamic data for which it is implemented
+        Thermo (Thermo): The Thermo of the mixture
     """
     
     ThermoType = "janaf7"
@@ -130,28 +126,21 @@ class janaf7Mixing(ThermoMixing):
         """
         Create from dictionary.
         """
-        entryList = ["mixture"]
-        for entry in entryList:
-            if not entry in dictionary:
-                raise ValueError(f"Mandatory entry '{entry}' not found in dictionary.")
-        
-        out = cls\
-            (
-                dictionary["mixture"]
-            )
-        return out
+        dictionary = Dictionary(**dictionary)
+        return cls(dictionary.lookup("mixture"))
     
     #########################################################################
     #Constructor:
     def __init__(self, mix:Mixture):
         """
-        mix: Mixture
-            The mixture
         Construct from Mixture.
+        
+        Args:
+            mix (Mixture): Mixture to which generate the thermodynamic data.
         """
-        self._Thermo = self.janaf7(mix.copy())  #Start with a copy
+        self._Thermo = self.janaf7(mix.copy())  #Start with copy
         super().__init__(mix)
-        self._Thermo._mix = self._mix #Get in sync after first update
+        self._Thermo._mix = self._mix #Set the reference to the mixture
             
     #########################################################################
     #Operators:

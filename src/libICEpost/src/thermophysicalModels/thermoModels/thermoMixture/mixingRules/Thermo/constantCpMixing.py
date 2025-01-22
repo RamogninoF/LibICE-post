@@ -23,17 +23,16 @@ class constantCpMixing(ThermoMixing):
     """
     Class handling mixing of multi-component mixture: thermodynamic data in constantCp definition.
     
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    
     Attributes:
-        ThermoType: str
-            Type of thermodynamic data for which it is implemented
-        
-        Thermo: Thermo
-            The Thermo of the mixture
+        ThermoType (str): Type of thermodynamic data for which it is implemented
+        Thermo (Thermo): The Thermo of the mixture
     """
     
     ThermoType = "constantCp"
+    
+    _oldMix:Mixture
+    """The old mixture composition"""
+    
     #########################################################################
     @classmethod
     def fromDictionary(cls, dictionary):
@@ -86,7 +85,7 @@ class constantCpMixing(ThermoMixing):
         Returns:
             bool: If something changed
         """
-        #Update of base class
+        #Update mixture in base class
         super()._update(mix)
 
         if self.mix == self._oldMix:

@@ -43,9 +43,13 @@ class ThermoMixture(Utilities):
     """
     
     _mix:Mixture
+    """The composition of the mixture"""
     _EoS:EquationOfStateMixing
+    """The equation of state of the mixture"""
     _Thermo:ThermoMixing
+    """The thermodynamic model of the mixture"""
     _db:_DatabaseClass = database.chemistry.thermo
+    """Database of thermodynamic data"""
     
     #########################################################################
     #Properties:
@@ -102,7 +106,7 @@ class ThermoMixture(Utilities):
         self.checkMap(thermoType, str, str, "thermoType")
 
         #Copy the mixture
-        self._mix:Mixture = mixture.copy()
+        self._mix = mixture.copy()
         
         #Lookup the Thermo and EoS types
         thermoType = Dictionary(**thermoType)
@@ -114,9 +118,8 @@ class ThermoMixture(Utilities):
         self._Thermo = mixingRules.ThermoMixing.selector(ThermoType + "Mixing", thermoData.lookupOrDefault(ThermoType + "Dict", Dictionary()).update(mixture=self._mix))
         self._EoS = mixingRules.EquationOfStateMixing.selector(EoSType + "Mixing", thermoData.lookupOrDefault(EoSType + "Dict", Dictionary()).update(mixture=self._mix))
         
-        #Set the _Thermo and _EoS references to this one to be in sync
-        self._Thermo._mix = self._mix
-        self._EoS._mix = self._mix
+        self._Thermo._mix = self._mix #Set the reference to the mixture
+        self._EoS._mix = self._mix #Set the reference to the mixture
         
     #########################################################################
     #Operators:
@@ -157,7 +160,9 @@ class ThermoMixture(Utilities):
         """
         
         if not mixture is None:
-            self._mix.update(mixture.species, mixture.Y, fracType="mass")
+            self._mix.update(mixture.species, mixture.Y, fracType="mass") #Update mixture
+            self._Thermo.update(self.mix) #Update Thermo (even if it has same reference, better to update)
+            self._EoS.update(self.mix) #Update EoS (even if it has same reference, better to update)
         return self
     
     ################################
