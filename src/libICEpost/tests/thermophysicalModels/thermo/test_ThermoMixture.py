@@ -47,6 +47,23 @@ def test_update_mixture(thermoType, eosType, sample_mixture):
     assert thermo_mixture._Thermo.mix == new_mixture
     assert thermo_mixture._EoS.mix == new_mixture
 
+@pytest.mark.parametrize("thermoType, eosType", thermo_eos_pairs)
+def test_thermoMixture_str(thermoType, eosType, sample_mixture):
+    thermoTypeDict = {"Thermo": thermoType, "EquationOfState": eosType}
+    thermo_mixture = ThermoMixture(sample_mixture, thermoTypeDict)
+    assert thermoType in str(thermo_mixture)
+    assert eosType in str(thermo_mixture)
+    assert str(sample_mixture) in str(thermo_mixture)
+
+
+@pytest.mark.parametrize("thermoType, eosType", thermo_eos_pairs)
+def test_thermoMixture_repr(thermoType, eosType, sample_mixture):
+    thermoTypeDict = {"Thermo": thermoType, "EquationOfState": eosType}
+    thermo_mixture = ThermoMixture(sample_mixture, thermoTypeDict)
+    assert thermoType in repr(thermo_mixture)
+    assert eosType in repr(thermo_mixture)
+    assert repr(sample_mixture) in repr(thermo_mixture)
+
 def test_dcpdT(thermo_mixture):
     assert isinstance(thermo_mixture.dcpdT(101325, 300), float)
 
