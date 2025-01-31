@@ -57,7 +57,7 @@ def computeAlphaSt(air:Mixture, fuel:Mixture, *, oxidizer:Molecule=database.chem
     #3) Solve the balance
     
     #Identification of active fuels in fuel mixture
-    fuels = []
+    fuels:list[Molecule] = []
     for s in fuel:
         if s.specie.name in database.chemistry.specie.Fuels:
             fuels.append(s.specie)
@@ -77,7 +77,11 @@ def computeAlphaSt(air:Mixture, fuel:Mixture, *, oxidizer:Molecule=database.chem
                 oxReactions[f.name] = react
                 break
         if not found:
-            raise ValueError(f"Oxidation reaction not found in database 'rections.{ReactionType}' for the couple (fuel, oxidizer) = ({f.name, oxidizer.name})")
+            #Create oxidation reaction
+            oxReactions[f.name] = StoichiometricReaction.fromFuelOxidation(fuel=f, oxidizer=oxidizer)
+            #Add to the database for later use
+            reactions[ReactionType][oxReactions[f.name].name] = oxReactions[f.name]
+            # raise ValueError(f"Oxidation reaction not found in database 'rections.{ReactionType}' for the couple (fuel, oxidizer) = {f.name, oxidizer.name}")
     
     #If oxidizing agent is not in air, raise value error:
     if not oxidizer in air:

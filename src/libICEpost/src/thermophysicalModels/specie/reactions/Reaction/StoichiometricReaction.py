@@ -40,16 +40,17 @@ class StoichiometricReaction(Reaction):
     """
     
     #########################################################################
-    def __init__(self, reactants:Iterable[Molecule], products:Iterable[Molecule]):
+    def __init__(self, reactants:Iterable[Molecule], products:Iterable[Molecule], name:str=""):
         """
         Construct from reactants and products. The composition is automatically computed based on mass balances of atomic species.
 
         Args:
             reactants (Iterable[Molecule]): List of molecules in the products.
             products (Iterable[Molecule]): List of molecules in the reactants.
+            name (str): Name of the reaction. Default is "".
         """
         #Argument checking:
-        super().__init__(reactants, products)
+        super().__init__(reactants, products, name)
     
     #########################################################################
     @classmethod
@@ -97,7 +98,8 @@ class StoichiometricReaction(Reaction):
         
         return cls(
                     [fuel, oxidizer],
-                    prod
+                    prod,
+                    name=f"{fuel.name}-ox" if oxidizer.name == "O2" else f"{fuel.name}-ox ({oxidizer.name})"
                 )
         
     #########################################################################
@@ -122,7 +124,8 @@ class StoichiometricReaction(Reaction):
         
         return cls(
                     [oxidizer],
-                    prod
+                    prod,
+                    name=f"{oxidizer.name}-red"
                 )
     
     #########################################################################

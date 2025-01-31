@@ -17,6 +17,7 @@ from libICEpost import Dictionary
 
 from .ReactionModel import ReactionModel
 from ..Reaction.Reaction import Reaction
+from ..Reaction.StoichiometricReaction import StoichiometricReaction
 from libICEpost.src.thermophysicalModels.specie.specie.Mixture import Mixture, mixtureBlend
 from libICEpost.src.thermophysicalModels.specie.specie.Molecule import Molecule
 
@@ -204,6 +205,10 @@ class Stoichiometry(ReactionModel):
                     oxReactions[f.name] = react
                     break
             if not found:
+                #Create oxidation reaction
+                oxReactions[f.name] = StoichiometricReaction.fromFuelOxidation(fuel=f, oxidizer=self.oxidizer)
+                #Add to the database for later use
+                reactions[ReactionType][oxReactions[f.name].name] = oxReactions[f.name]
                 raise ValueError(f"Oxidation reaction not found in database 'rections.{self.ReactionType}' for the couple (fuel, oxidizer) = ({f.name, self.oxidizer.name})")
         
         #Identification of reacting compounds

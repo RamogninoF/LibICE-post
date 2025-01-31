@@ -40,6 +40,9 @@ class Reaction(BaseClass):
             The products
     """
     
+    name:str
+    """Name of the reaction"""
+    
     #########################################################################
     @property
     def reactants(self):
@@ -63,13 +66,14 @@ class Reaction(BaseClass):
         return self._reactants.MM/self._products.MM
     
     #########################################################################
-    def __init__(self, reactants:Iterable[Molecule], products:Iterable[Molecule]):
+    def __init__(self, reactants:Iterable[Molecule], products:Iterable[Molecule], name:str=""):
         """
         Construct from list of moleucles in reactants and products
         
         Args:
             reactants (Iterable[Molecule]): List of molecules in the reactants
             products (Iterable[Molecule]): List of molecules in the products
+            name (str): Name of the reaction
         """
         #Argument checking:
         self.checkArray(reactants, Molecule, "reactants")
@@ -77,6 +81,8 @@ class Reaction(BaseClass):
         
         self._reactants = Mixture(reactants, [1.0/len(reactants)]*len(reactants))
         self._products = Mixture(products, [1.0/len(products)]*len(products))
+        
+        self.name = name
         
         self.update()
     
