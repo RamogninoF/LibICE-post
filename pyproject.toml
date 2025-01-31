@@ -1,6 +1,6 @@
 [project]
 name = "libICEpost"
-version = "0.1.0"
+version = "0.9.0"
 
 authors = [
   { name="Federico Ramognino", email="federico.ramognino@polimi.it" },
@@ -10,7 +10,7 @@ readme = "README.md"
 
 requires-python = ">=3.11"
 dependencies = [
-  'chempy >= 0.9.0',
+  'chempy',
   'pyfoam',
   'tqdm',
   'colorama',
@@ -18,9 +18,6 @@ dependencies = [
   'bidict',
   'cantera',
   'numpy',
-  'plotly',
-  'dash',
-  'waitress'
 ]
 
 classifiers = [
@@ -29,11 +26,6 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
-
-[project.scripts]
-createLaminarFlameSpeedTable = "libICEpost.scripts.createLaminarFlameSpeedTable:main"
-createPremixedChemistryTable = "libICEpost.scripts.createPremixedChemistryTable:main"
-visualizeOFTable = "libICEpost.scripts.visualize_nd_table:main"
 
 [project.urls]
 Homepage = "https://github.com/RamogninoF/LibICE-post"
