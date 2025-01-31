@@ -112,7 +112,7 @@ class Dictionary(OrderedDict, Utilities):
             self.checkType(varType, (type, _SpecialGenericAlias), f"varType")
             
         if not entryName in self:
-            raise KeyError(f"Entry '{entryName}' not found in Dictionary. Available entries are:\n\t" + "\n\t".join([str(k) for k in self.keys()]))
+            raise KeyError(f"Entry '{entryName}' not found in Dictionary. Available entries are:\n\t" + f"\n\t".join([str(k) for k in self.keys()]))
         elif (not varType is None) and (not isinstance(self[entryName], varType)):
             raise TypeError(f"Entry '{entryName}' of wrong type. {varType.__name__ if not isinstance(varType, Iterable) else [v.__name__ for v in varType]} expected but {self[entryName].__class__.__name__} was found.")
         else:
