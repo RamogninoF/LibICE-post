@@ -19,11 +19,15 @@ from libICEpost.src.base.Functions.typeChecking import checkType
 import struct
 import os
 from typing import Iterable
-    
-# Import functions to read OF files:
-from PyFoam.RunDictionary.ParsedParameterFile import ParsedFileHeader,ParsedParameterFile
-from PyFoam.Basics.DataStructures import BinaryList
 
+# Import functions to read OF files:
+try:
+    from PyFoam.RunDictionary.ParsedParameterFile import ParsedFileHeader,ParsedParameterFile
+    from PyFoam.Basics.DataStructures import BinaryList
+except Exception as e:
+    if not isinstance(e, ImportError):
+        print("Error importing PyFoam. This might be an issue related to the PyFoam installation. Try performing the patching procedure running 'libICEpost-applyPatches' script.") 
+    raise e
 #############################################################################
 #                               MAIN FUNCTIONS                              #
 #############################################################################

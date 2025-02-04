@@ -1,0 +1,13 @@
+diff --git a/Infrastructure/Hardcoded.py "b/Infrastructure/Hardcoded.py"
+index 9f58e9c..9abaeef 100644
+--- a/Infrastructure/Hardcoded.py
++++ "b/Infrastructure/Hardcoded.py"
+@@ -45,7 +45,7 @@ def siteConfigDir():
+
+ def userDirectory():
+     """:return: the user directory"""
+-    return path.expanduser(path.join("~","."+_pyFoamDirName))
++    return path.expanduser(path.join("~","."+_pyFoamDirName)).encode('unicode_escape').decode() 
+
+ def userConfigFile():
+     """:return: The name of the user configuration File"""

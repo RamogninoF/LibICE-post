@@ -27,6 +27,9 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 
+[project.scripts]
+libICEpost-applyPatches = "libICEpost.scripts.applyPatches:main"
+
 [project.urls]
 Homepage = "https://github.com/RamogninoF/LibICE-post"
 Issues = "https://github.com/RamogninoF/LibICE-post/issues"

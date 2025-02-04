@@ -29,7 +29,15 @@ from typing import Iterable, Any, Literal, OrderedDict
 
 from dataclasses import dataclass
 
-from PyFoam.RunDictionary.ParsedParameterFile import FoamStringParser, ParsedParameterFile
+
+# Import functions to read OF files:
+try:
+    from PyFoam.RunDictionary.ParsedParameterFile import FoamStringParser, ParsedParameterFile
+except Exception as e:
+    if not isinstance(e, ImportError):
+        print("Error importing PyFoam. This might be an issue related to the PyFoam installation. Try performing the patching procedure running 'libICEpost-applyPatches' script.") 
+    raise e
+
 
 #####################################################################
 #                            AUXILIARY CLASSES                      #
