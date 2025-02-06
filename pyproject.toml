@@ -27,6 +27,9 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 
+[tool.setuptools.package-data]
+"*" = ["*.json", "*.patch"]
+
 [project.scripts]
 libICEpost-applyPatches = "libICEpost.scripts.applyPatches:main"
 
