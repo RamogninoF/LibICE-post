@@ -40,7 +40,7 @@ class janaf7(Thermo):
     
     #########################################################################
     
-    __WARNING__ = False
+    __WARNING__ = True
     """If True, a warning is displayed when the temperature is outside of the range of validity."""
     
     numCoeffs = 7
@@ -213,8 +213,8 @@ class janaf7(Thermo):
         Returns:
             Iterable[float]: The coefficients to be used for the computation of cp.
         """
-        if (T < self.Tlow) or (T > self.Thigh) and self.__class__.__WARNING__:
-            self.runtimeWarning("Temperature outside of range ["+ "{:.3f}".format(self.Tlow) + ","+ "{:.3f}".format(self.Thigh) + "] (T = "+ "{:.3f}".format(T) + " [K])")
+        if ((T < self.Tlow) or (T > self.Thigh)) and self.__class__.__WARNING__:
+            self.runtimeWarning("Temperature outside of range ["+ "{:.3f}".format(self.Tlow) + ","+ "{:.3f}".format(self.Thigh) + "] (T = "+ "{:.3f}".format(T) + " [K]). Set janaf7.__WARNING__ = False to suppress this warning.")
         
         if T < self.Tth:
             return self.cpLow
