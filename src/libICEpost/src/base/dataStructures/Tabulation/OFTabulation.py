@@ -164,7 +164,7 @@ class OFTabulation(Utilities):
         
         #Cast Iterables to lists so that PyFoam can write them
         for var in tabProp:
-            if isinstance(tabProp[var], Iterable):
+            if isinstance(tabProp[var], Iterable) and not isinstance(tabProp[var], str):
                 tabProp[var] = list(tabProp[var])
         
         return tabProp
