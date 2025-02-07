@@ -74,7 +74,7 @@ class TabulatedLFS(OFTabulation,LaminarFlameSpeedModel):
         files = cp.deepcopy(cls.__files)
         
         #Read table properties to see if EGR is present
-        with open(cls.path + "/tableProperties", "r") as file:
+        with open(path + "/tableProperties", "r") as file:
             tabProps = FoamStringParser(file.read(), noVectorOrTensor=True).getData()
             #Remove EGR entries if not found
             if not "egrValues" in tabProps:
@@ -85,7 +85,7 @@ class TabulatedLFS(OFTabulation,LaminarFlameSpeedModel):
             path=path,
             order=order,
             files=files,
-            inputNames={var:inputNames[var] for var in order},
+            inputNames={var:inputNames[ii] for ii,var in enumerate(order)},
             noRead=(None if readLaminarFlameThickness else ["deltaL"]),
             noWrite=noWrite,
             **kwargs)
