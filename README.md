@@ -6,7 +6,7 @@ Postprocessing of data sampled from internal combustion engines (Experimental, 1
 
 ### Requirements
 
-#### Conda
+#### <img src=https://img.icons8.com/fluent/512/anaconda--v2.png width="13" height="13" /> Conda
 
 Suggested to use [anaconda](https://www.anaconda.com/) python environment manager to use the library, so that the correct python version can be used in a dedicated environment. Currently working on python version 3.11.4.
 
@@ -17,15 +17,16 @@ Suggested to use [anaconda](https://www.anaconda.com/) python environment manage
 Scripts\conda.exe init
 ```
 
-#### Visual Studio Code
+#### <img src=https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Visual_Studio_Code_1.35_icon.svg/512px-Visual_Studio_Code_1.35_icon.svg.png width="13" height="13"/> Visual Studio Code
 Visual Studio Code (VS Code) is suggested, install it from [this link](https://code.visualstudio.com). No further action are necessary.
 
-#### GIT
+#### <img src=https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Git_icon.svg/2048px-Git_icon.svg.png  width="13" height="13"/> GIT
 GIT is necessary, install it from [this link](https://git-scm.com/downloads/win). Execute the installation program. No further action are necessary.
 
-### Installing from PyPI (__skip for ICEGroup__)
+### Installing from PyPI (_skip for ICEGroup_)
 
 Installation from PyPI repositories (not up-to-date):
+
 ```bash
 pip install libICEpost
 ```
@@ -34,7 +35,7 @@ pip install libICEpost
 
 #### Download
 
-In order to download the source code of _LibICEpost_ proceed as follow:  
+In order to download the source code of `libICEpost` proceed as follow:  
 1. Create a folder in your `C:\Users\your_name` folder called `LibICE_repo`, where the various libraries will be stored
 2. In that folder, create another folder called `LibICE-post`;
 3. Now open VS Code and with the `Open Folder` command open the folder you created;
@@ -47,7 +48,7 @@ In the terminal, copy the following command to download the repository
 git clone https://github.com/RamogninoF/LibICE-post.git
 ```
 
-#### Installing LibICEPost
+#### Installing `libICEpost`
 
 In the terminal insert the following:
 
