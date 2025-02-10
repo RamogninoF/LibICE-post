@@ -34,7 +34,7 @@ pip install libICEpost
 
 #### Download
 
-In order to download the source code of LibICEpost proceed as follow:  
+In order to download the source code of _LibICEpost_ proceed as follow:  
 1. Create a folder in your `C:\Users\your_name` folder called `LibICE_repo`, where the various libraries will be stored
 2. In that folder, create another folder called `LibICE-post`;
 3. Now open VS Code and with the `Open Folder` command open the folder you created;
