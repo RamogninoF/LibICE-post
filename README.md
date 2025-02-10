@@ -18,10 +18,10 @@ Scripts\conda.exe init
 ```
 
 #### <img src=https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Visual_Studio_Code_1.35_icon.svg/512px-Visual_Studio_Code_1.35_icon.svg.png width="13" height="13"/> Visual Studio Code
-Visual Studio Code (VS Code) is suggested, install it from [this link](https://code.visualstudio.com). No further action are necessary.
+Installation of [Visual Studio Code](https://code.visualstudio.com) (VS Code) is suggested. No further action are necessary.
 
 #### <img src=https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Git_icon.svg/2048px-Git_icon.svg.png  width="13" height="13"/> GIT
-GIT is necessary, install it from [this link](https://git-scm.com/downloads/win). Execute the installation program. No further action are necessary.
+[GIT](https://git-scm.com/downloads/win) is necessary, install it from . Execute the installation program. No further action are necessary.
 
 ### Installing from PyPI (_skip for ICEGroup_)
 
@@ -37,7 +37,7 @@ pip install libICEpost
 
 In order to download the source code of `libICEpost` proceed as follow:  
 1. Create a folder in your `C:\Users\your_name` folder called `LibICE_repo`, where the various libraries will be stored
-2. In that folder, create another folder called `LibICE-post`;
+2. In that folder, create another folder called `LibICE_post`;
 3. Now open VS Code and with the `Open Folder` command open the folder you created;
 4. You should find yourself in VS Code with the `Explorer` tab on the left that has as title the name of the folder you created.
 
@@ -53,6 +53,7 @@ git clone https://github.com/RamogninoF/LibICE-post.git
 In the terminal insert the following:
 
 ```bash
+conda activate
 cd LibICE-post
 pip install .
 ```
