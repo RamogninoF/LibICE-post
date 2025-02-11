@@ -17,6 +17,8 @@ from libICEpost import Dictionary
 from .....specie.specie.Mixture import Mixture
 from .....specie.thermo.Thermo import Thermo
 
+from libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7 import janaf7
+
 #############################################################################
 #                               MAIN CLASSES                                #
 #############################################################################
@@ -37,7 +39,7 @@ class janaf7Mixing(ThermoMixing):
     # set of coefficients. Hence, it is necessary to introduce a new class here defined consistenty
     # with Thermo implementation, and then use the properties of each component and averaging them.
 
-    class janaf7(Thermo):
+    class janaf7(janaf7):
         """
         Thermodynamic data of mixture with NASA-7 polinomial coefficients consistent with janaf7 class.
         """
@@ -85,21 +87,14 @@ class janaf7Mixing(ThermoMixing):
 
         ###################################
         def cp(self, p:float, T:float) -> float:
-            super().cp(p, T)
             return self._combineMethod("cp", p, T)
         
         ###################################
         def dcpdT(self, p:float, T:float) -> float:
-            super().dcpdT(p, T)
             return self._combineMethod("dcpdT", p, T)
         
         ###################################
         def hs(self, p:float, T:float) -> float:
-            #Argument checking
-            try:
-                super(self.__class__,self).hs(p,T)
-            except NotImplementedError:
-                pass
             return self._combineMethod("hs", p, T)
         
         ###################################
@@ -108,11 +103,6 @@ class janaf7Mixing(ThermoMixing):
         
         ###################################
         def ha(self, p:float, T:float) -> float:
-            #Argument checking
-            try:
-                super(self.__class__,self).ha(p,T)
-            except NotImplementedError:
-                pass
             return self._combineMethod("ha", p, T)
         
         ###################################
