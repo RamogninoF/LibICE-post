@@ -43,13 +43,13 @@ In order to download the source code of `libICEpost` proceed as follow:
 
 ![screenshot](./docs/imagesForMd/First_Explorer.png)
 
-> [!IMPORTANT]
+> [!IMPORTANT]  
 > Only for Windows user  
-
->Now open `Setting` (shortcut `Ctrl+,`), and input in the search bar:
->> select default profile
-
->find and select the Command Prompt as **Default Profile**, you should see a similar result as reported here:  
+> Open `Setting` (shortcut `Ctrl+,`), and input in the search bar:  
+> ```bash
+> select default profile
+> ```
+> Dind and select the Command Prompt as **Default Profile**, you should see a similar result as reported here:
 >> **Terminal > Integrated > Default Profile: Windows**  
 >> The default terminal profile on Windows.  
 >> Command Prompt
