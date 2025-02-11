@@ -101,7 +101,19 @@ Successfully installed libICEpost-0.9.7
 
 ## Usage
 
-- TODO
+Now that `libICEpost` is installed, you can start to use it. To do so, under `tutorials\sparkIgnition` you find a simple case intended to be used as base to understand the usage of this tool. Please duplicate the `sparkIgnition` folder in another location of your choice and the open the folder in VS Code and you should find yourself in this image.
+
+![screenshot](./docs/imagesForMd/Tutorial_1.png)
+
+Now from here you can open the `main.py` file in which you'll find the main script to postprocess te data by running it with `Run Python File` on the upper-right corner.
+
+![screenshot](./docs/imagesForMd/Tutorial_2.png)
+
+A terminal should open and two plots should appear.
+
+From this simple case setup you can explore and expand to run the postprocess you wish. A brief documentation (that will be expanded) is reported in each of the files under the `./dictionaries` folder. 
+
+In the `./data` folder, the data that has to be post-processed has to be included.
 
 Interactive documentation avaliable at [this page](https://libice-post.readthedocs.io/en/latest/).
 
