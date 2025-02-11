@@ -51,7 +51,7 @@ In order to download the source code of `libICEpost` proceed as follow:
 3. Now open VS Code and with the `Open Folder` command, under the `File` tab open the folder you just created;
 4. You should find yourself in VS Code with the `Explorer` bar on the left that has the name of the folder you created as title.
 
-![screenshot](./docs/ImagesForMd/First_Explorer.png)
+![screenshot](./docs/imagesForMd/First_Explorer.png)
 
 > [!NOTE]
 > Important only for Windows user  
@@ -109,7 +109,7 @@ Interactive documentation avaliable at [this page](https://libice-post.readthedo
 
 Sometimes, for Windows user, when reopening VS Code the following orange warning may appear in the terminal tab
 
-![screenshot](/docs/imagesForMd/ErrorRelaunch.png)
+![screenshot](./docs/imagesForMd/ErrorRelaunch.png)
 
 If this happens, please click on `Relaunch Terminal` with hovering (not clicking) on `cmd`. The next time you reopen the folder it should not happen again.
 
