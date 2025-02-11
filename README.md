@@ -51,7 +51,7 @@ In order to download the source code of `libICEpost` proceed as follow:
 3. Now open VS Code and with the `Open Folder` command, under the `File` tab open the folder you just created;
 4. You should find yourself in VS Code with the `Explorer` bar on the left that has the name of the folder you created as title.
 
-> [!NOTE]
+> [!IMPORTANT]
 > Important only for Windows user  
 
 Now the `Setting` tab (`Ctrl+,`), and input in the search bar:
