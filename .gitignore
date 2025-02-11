@@ -17,3 +17,4 @@ upload.sh
 /.idea/inspectionProfiles/Project_Default.xml
 /.idea/vcs.xml
 build/
+tutorials/**/output/
