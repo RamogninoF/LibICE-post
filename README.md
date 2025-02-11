@@ -8,7 +8,7 @@ Postprocessing of data sampled from internal combustion engines (Experimental, 1
 
 #### <img src=https://img.icons8.com/fluent/512/anaconda--v2.png width="13" height="13" /> Conda
 
-Suggested to use [anaconda](https://www.anaconda.com/) python environment manager to use the library, so that the correct python version can be used in a dedicated environment. Currently working on python version 3.11.4.
+Suggested to use [Anaconda](https://www.anaconda.com/) python environment manager to use the library, so that the correct python version can be used in a dedicated environment. Currently working on python version 3.11.4.
 
 > [!NOTE]  
 > When you install conda (eg. `C:\Users\your_name\anaconda3`), go in the installation directory, open a Windows terminal in that folder and execute the script:
@@ -17,11 +17,21 @@ Suggested to use [anaconda](https://www.anaconda.com/) python environment manage
 Scripts\conda.exe init
 ```
 
+Open a new terminal in the folder and execute the following line:
+
+```bash
+conda install python==3.11
+```
+
+to install Python 3.11, which is required.
 #### <img src=https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Visual_Studio_Code_1.35_icon.svg/512px-Visual_Studio_Code_1.35_icon.svg.png width="13" height="13"/> Visual Studio Code
-Installation of [Visual Studio Code](https://code.visualstudio.com) (VS Code) is suggested. No further action are necessary.
+Installation of [Visual Studio Code](https://code.visualstudio.com) (VS Code) is suggested. Follow the instructions to install the program. The following extension for Python has to be installed [Python Extension Pack](https://marketplace.visualstudio.com/items?itemName=donjayamanne.python-extension-pack). 
+
+> [!NOTE]
+> In VS Code the Python interpreter has to be selected. To do so, use `Ctrl+Maiusc+P`, search for `Python: Select Interpreter` and then select the available Python interpreter.
 
 #### <img src=https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Git_icon.svg/2048px-Git_icon.svg.png  width="13" height="13"/> GIT
-[GIT](https://git-scm.com/downloads/win) is necessary, install it from . Execute the installation program. No further action are necessary.
+[GIT](https://git-scm.com/downloads/win) is necessary to download the repository. Follow the instructions to install the program. No further action are necessary.
 
 ### Installing from PyPI (_skip for ICEGroup_)
 
@@ -36,13 +46,24 @@ pip install libICEpost
 #### Download
 
 In order to download the source code of `libICEpost` proceed as follow:  
-1. Create a folder in your `C:\Users\your_name` folder called `LibICE_repo`, where the various libraries will be stored
-2. In that folder, create another folder called `LibICE_post`;
-3. Now open VS Code and with the `Open Folder` command open the folder you created;
-4. You should find yourself in VS Code with the `Explorer` tab on the left that has as title the name of the folder you created.
+1. Create a new folder in your `C:\Users\your_name` repository called `LibICE_repo`, where the various libraries will be stored;
+2. In that folder (`LibICE_repo`), create another folder called `LibICE_post`;
+3. Now open VS Code and with the `Open Folder` command, under the `File` tab open the folder you just created;
+4. You should find yourself in VS Code with the `Explorer` bar on the left that has the name of the folder you created as title.
 
-Now open a new terminal with `Ctrl+shitf+ò` or the `New Terminal` command from the menu. A window on the bottom of VS Code should appear.  
-In the terminal, copy the following command to download the repository
+> [!NOTE]
+> Important only for Windows user  
+
+Now the `Setting` tab (`Ctrl+,`), and input in the search bar:
+> select default profile
+
+find and select the Command Prompt as **Default Profile**, you should see a similar result as reported here:  
+> **Terminal > Integrated > Default Profile: Windows**  
+> The default terminal profile on Windows.  
+> Command Prompt
+
+Now open a new terminal with `Ctrl+shitf+ò` or the `New Terminal` command from the `Terminal` menu. A window on the bottom of VS Code should have appeared.  
+In the terminal, copy the following command to download the repository.
 
 ```bash
 git clone https://github.com/RamogninoF/LibICE-post.git
