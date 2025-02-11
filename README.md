@@ -15,13 +15,12 @@ It is required to use [Anaconda](https://www.anaconda.com/) python environment m
 >```bash
 >Scripts\conda.exe init
 >```
->
->Open a new terminal in the folder and execute the following line:
->
->```bash
->conda install python==3.11
->```
 
+Open a new terminal in the folder and execute the following line:
+
+```bash
+conda install python==3.11
+```
 to install Python 3.11, which is required.
 #### <img src=https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Visual_Studio_Code_1.35_icon.svg/512px-Visual_Studio_Code_1.35_icon.svg.png width="13" height="13"/> Visual Studio Code
 Installation of [Visual Studio Code](https://code.visualstudio.com) (VS Code) is suggested. Follow the instructions to install the program. The following extension for Python has to be installed [Python Extension Pack](https://marketplace.visualstudio.com/items?itemName=donjayamanne.python-extension-pack). 
