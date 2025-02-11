@@ -3,84 +3,87 @@ import subprocess
 import os
 import platform
 
-def patchPackages(packages:list[str], patches:list[str]) -> None:
+def patchPackage(pack:str, patch:str) -> None:
     """
     Patch the given packages with the corresponding patch files.
     
     Args:
-        packages (list[str]): List of packages to patch
-        patches (list[str]): List of patch files to use for patching
+        pack (str): Package to patch
+        patch (str): Patch file to use for patching
     """
     patchCount = 0
-    for pack, patch in zip(packages, patches):
-        print(f"Patching {pack}")
-        result = subprocess.run([sys.executable, "-m", "pip", "show", pack], capture_output=True, text=True)
-        if result.returncode != 0:
-            print(f"Error: package not found")
-            continue
+    print(f"Patching {pack}")
+    result = subprocess.run([sys.executable, "-m", "pip", "show", pack], capture_output=True, text=True)
+    if result.returncode != 0:
+        raise ValueError(f"package not found")
 
-        # Get the package path
-        lines = result.stdout.split("\n")
-        path = None
-        for line in lines:
-            if line.startswith("Location:"):
-                path = line.split(":",1)[1].strip()
-                break
+    # Get the package path
+    lines = result.stdout.split("\n")
+    path = None
+    for line in lines:
+        if line.startswith("Location:"):
+            path = line.split(":",1)[1].strip()
+            break
 
-        if path is None:
-            print(f"Error: package path not found")
-            continue
-        else:
-            path = os.path.join(path,"PyFoam")
+    if path is None:
+        raise IOError(f"package path not found")
+    else:
+        path = os.path.join(path,"PyFoam")
+    
+    if not os.path.isdir(path):
+        raise IOError(f"package path not found")
         
-        if not os.path.isdir(path):
-            print(f"Error: package path not found")
-            continue
-            
-        print(f"Package path:", path)
+    print(f"Package path:", path)
 
-        # Patch the package
-        patchFile = os.path.join(os.path.dirname(__file__), "patch", patch)
-        print(f"Patching {pack} package with:", patchFile)
+    # Patch the package
+    patchFile = os.path.join(os.path.dirname(__file__), "patch", patch)
+    print(f"Patching {pack} package with:", patchFile)
 
-        if not os.path.isfile(patchFile):
-            print(f"Error: patch file not found")
-            continue
-        
-        result = subprocess.run(["patch", "-d", path, "-p1", "-i", patchFile], capture_output=True, text=True)
-        if result.returncode != 0:
-            print("Error: Patching failed")
-            print("Patch output:")
-            for line in result.stdout.split("\n"):
-                print("\t",line)
-            for line in result.stderr.split("\n"):
-                print("\t",line)
-            continue
+    if not os.path.isfile(patchFile):
+        raise IOError(f"patch file not found")
+    
+    result = subprocess.run(["patch", "-d", path, "-p1", "-i", patchFile], capture_output=True, text=True)
+    if result.returncode != 0:
+        out = "Patching failed\n"
+        out += "Patch output:\n"
+        for line in result.stdout.split("\n"):
+            out += "\t" + line + "\n"
+        for line in result.stderr.split("\n"):
+            out += "\t" + line + "\n"
+        raise RuntimeError(out)
 
-        print("Patch applied successfully")
-        
-        #Try importing the patched package
-        print("Checking import...", end="")
-        try:
-            __import__(pack)
-        except Exception as e:
-            print()
-            print(f"Error: Importing patched package failed")
-            print(e)
-            continue
-        print(" OK")
-        
-        print(f"Package {pack} patched successfully")
-        patchCount += 1
-
-    print(f"Succesfully patched {patchCount} packages out of {len(packages)}")
+    print("Patch applied successfully")
+    
+    #Try importing the patched package
+    print("Checking import...", end="")
+    try:
+        __import__(pack)
+    except Exception as e:
+        print(" Failed")
+        out = f"Importing patched package failed:\n{e}"
+        raise RuntimeError(out)
+    print(" OK")
+    
+    print(f"Package {pack} patched successfully")
     
 
-packages = [{"pack":"PyFoam", "OS":"Windows", "patch":"PyFoam.patch"}]
+packages = \
+    [
+        {"pack":"PyFoam", "OS":"Windows", "patch":"PyFoam.patch"},
+        {"pack":"PyFoam", "OS":"Windows", "patch":"PyFoam2.patch"},
+    ]
 def main():
     for p in packages:
+        count = 0
+        tot = 0
         if platform.system() == p["OS"]:
-            patchPackages([p["pack"]], [p["patch"]])
+            try:
+                tot += 1
+                patchPackage(p["pack"], p["patch"])
+                count += 1
+            except Exception as e:
+                print(e)
+        print("Successfully patched", count, "packages out of", tot)
             
 if __name__ == "__main__":
     main()

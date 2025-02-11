@@ -1,0 +1,15 @@
+diff --git a/Basics/TerminalFormatter.py b/Basics/TerminalFormatter.py
+index 82f43b3..b9d5b1a 100644
+--- "a/Basics/TerminalFormatter.py"
++++ "b/Basics/TerminalFormatter.py"
+@@ -7,10 +7,6 @@ from PyFoam.Infrastructure.Configuration import Configuration as config
+
+ def getTerminalCode(code):
+     result=""
+-    try:
+-        result=os.popen("tput "+code).read()
+-    except:
+-        pass
+     return result
+
+ class TerminalFormatter(object):
