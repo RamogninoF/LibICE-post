@@ -51,6 +51,8 @@ In order to download the source code of `libICEpost` proceed as follow:
 3. Now open VS Code and with the `Open Folder` command, under the `File` tab open the folder you just created;
 4. You should find yourself in VS Code with the `Explorer` bar on the left that has the name of the folder you created as title.
 
+![screenshot](./docs/ImagesForMd/First_Explorer.png)
+
 > [!NOTE]
 > Important only for Windows user  
 
@@ -69,21 +71,21 @@ In the terminal, copy the following command to download the repository.
 git clone https://github.com/RamogninoF/LibICE-post.git
 ```
 
+You should now see in the explorer bar that a new `LIBICE-POST` tab has appeared, like so
+
+![screenshot](./docs/imagesForMd/Second_Explorer.png)
+
 #### Installing `libICEpost`
 
-In the terminal insert the following:
+Now that `libICEPost` is downloaded, it has to be installed. In the terminal insert the following:
 
 ```bash
 conda activate
 cd LibICE-post
-pip install .
+pip install . -e
 ```
 
-Suggested to run `pip install` with `-e` option to install in editable mode, so that the changes are detected when pulling from the repository:
-
-```bash
-pip install -e .
-```
+Suggested to run `pip install` with `-e` option to install in editable mode, so that the changes are detected when pulling from the repository. You can choose not to put the `-e` option if you want.
 
 It might happen that spyder or VS Code cannot access the module when installed in editable mode (`ImportError: module libICEpost not found`). If so, install it with `editable_mode=strict` (highly suggested):
 
@@ -91,11 +93,25 @@ It might happen that spyder or VS Code cannot access the module when installed i
 pip install -e . --config-settings editable_mode=strict
 ```
 
+Follow the instruction on the terminal and you should see the following line as a result.
+
+```bash
+Successfully installed libICEpost-0.9.7
+```
+
 ## Usage
 
 - TODO
 
 Interactive documentation avaliable at [this page](https://libice-post.readthedocs.io/en/latest/).
+
+## Troubleshooting
+
+Sometimes, for Windows user, when reopening VS Code the following orange warning may appear in the terminal tab
+
+![screenshot](/docs/imagesForMd/ErrorRelaunch.png)
+
+If this happens, please click on `Relaunch Terminal` with hovering (not clicking) on `cmd`. The next time you reopen the folder it should not happen again.
 
 ## Contributing
 
