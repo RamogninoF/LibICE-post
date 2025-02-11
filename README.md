@@ -43,16 +43,16 @@ In order to download the source code of `libICEpost` proceed as follow:
 
 ![screenshot](./docs/imagesForMd/First_Explorer.png)
 
-> [!NOTE]
-> Important only for Windows user  
+> [!IMPORTANT]
+> Only for Windows user  
 
-Now open `Setting` (shortcut `Ctrl+,`), and input in the search bar:
-> select default profile
+>Now open `Setting` (shortcut `Ctrl+,`), and input in the search bar:
+>> select default profile
 
-find and select the Command Prompt as **Default Profile**, you should see a similar result as reported here:  
-> **Terminal > Integrated > Default Profile: Windows**  
-> The default terminal profile on Windows.  
-> Command Prompt
+>find and select the Command Prompt as **Default Profile**, you should see a similar result as reported here:  
+>> **Terminal > Integrated > Default Profile: Windows**  
+>> The default terminal profile on Windows.  
+>> Command Prompt
 
 Now open a new terminal with `Ctrl+shitf+ò` or the `New Terminal` command from the `Terminal` menu. A window on the bottom of VS Code should have appeared.  
 In the terminal, copy the following command to download the repository.
