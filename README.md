@@ -31,14 +31,6 @@ Installation of [Visual Studio Code](https://code.visualstudio.com) (VS Code) is
 #### <img src=https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Git_icon.svg/2048px-Git_icon.svg.png  width="13" height="13"/> GIT
 [GIT](https://git-scm.com/downloads/win) is necessary to download the repository. Follow the instructions to install the program. No further action are necessary.
 
-### Installing from PyPI (_skip for ICEGroup_)
-
-Installation from PyPI repositories (not up-to-date):
-
-```bash
-pip install libICEpost
-```
-
 ### Downloading and installing the source code of LibICEpost
 
 #### Download
@@ -122,6 +114,14 @@ Sometimes, for Windows user, when reopening VS Code the following orange warning
 ![screenshot](./docs/imagesForMd/ErrorRelaunch.png)
 
 If this happens, please click on `Relaunch Terminal` with hovering (not clicking) on `cmd`. The next time you reopen the folder it should not happen again.
+
+## Installing from PyPI (_skip for ICEGroup_)
+
+Installation from PyPI repositories (not up-to-date):
+
+```bash
+pip install libICEpost
+```
 
 ## Contributing
 
