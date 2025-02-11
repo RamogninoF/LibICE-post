@@ -8,20 +8,19 @@ Postprocessing of data sampled from internal combustion engines (Experimental, 1
 
 #### <img src=https://img.icons8.com/fluent/512/anaconda--v2.png width="13" height="13" /> Conda
 
-Suggested to use [Anaconda](https://www.anaconda.com/) python environment manager to use the library, so that the correct python version can be used in a dedicated environment. Currently working on python version 3.11.4.
+It is required to use [Anaconda](https://www.anaconda.com/) python environment manager to use the library, so that the correct python version can be used in a dedicated environment. Currently working on python version 3.11.4.
 
-> [!IMPORTANT]  
+> [!IMPORTANT FOR WINDOWS]  
 > When you install conda (eg. `C:\Users\your_name\anaconda3`), go in the installation directory, open a Windows terminal in that folder and execute the script:
-
-```bash
-Scripts\conda.exe init
-```
-
-Open a new terminal in the folder and execute the following line:
-
-```bash
-conda install python==3.11
-```
+>```bash
+>Scripts\conda.exe init
+>```
+>
+>Open a new terminal in the folder and execute the following line:
+>
+>```bash
+>conda install python==3.11
+>```
 
 to install Python 3.11, which is required.
 #### <img src=https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Visual_Studio_Code_1.35_icon.svg/512px-Visual_Studio_Code_1.35_icon.svg.png width="13" height="13"/> Visual Studio Code
