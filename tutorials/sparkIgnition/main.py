@@ -12,8 +12,8 @@ from libICEpost.src.engineModel.EngineModel.EngineModel import EngineModel
 from libICEpost.src.base.dataStructures.Dictionary import Dictionary
 
 #To disable the warning from the janaf7 module of out of bound temperature
-#from libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7 import janaf7
-#janaf7.__WARNING__ = False
+from libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7 import janaf7
+janaf7.__WARNING__ = False
 
 #Define function for simpify loading:
 def loadModel(path:str, controlDictName:str="controlDict.py") -> EngineModel|None:
@@ -65,8 +65,10 @@ from matplotlib import pyplot as plt
 #Setting plotting parameters
 plt.rcParams.setdefault
 
+#If you want to change some aspect of plots, such as
+#font size, line width, etc., you can do it here
 plt.rcParams.update({
-    # "text.usetex": True,
+    # "text.usetex": True, #LaTeX package required
     # "font.family": "serif",
     "font.monospace": ["Times"],
     "xtick.labelsize":22,
@@ -98,27 +100,29 @@ plt.tight_layout()
 #Output of the data to a csv file with comma as separator
 #Check if the "output" folder exists, if not it creates it
 #If it already exists, it removes it and creates a new one
+
+#To change the folder name
 output_folder = "output"
 if os.path.exists(output_folder) and os.path.isdir(output_folder):
-    # Remove the "output" folder
+    #Remove the "output" folder
     shutil.rmtree(output_folder)
     print(f"Removed folder: {output_folder}")
-    os.mkdir(output_folder)
-    print(f"Created folder: {output_folder}")
 else:
+    #Folder does not exist
     print(f"Folder does not exist: {output_folder}")
-    os.mkdir(output_folder)
-    print(f"Created folder: {output_folder}")
+#Create the folder
+os.mkdir(output_folder)
+print(f"Created folder: {output_folder}")
     
 model.data[:].to_csv(output_folder + "/Complete_processed_data.csv", sep=',', index=False)
 
 #Save the pressure-ROHR plot
 pressure_rohr_fig = axP.get_figure()
-pressure_rohr_fig.savefig(output_folder + "/pressure_rohr_plot.png")
+pressure_rohr_fig.savefig(output_folder + "/pressure_rohr_plot.png", dpi=300)
 
 #Save the p-V diagram plot
 pv_fig = ax.get_figure()
-pv_fig.savefig(output_folder + "/pv_plot.png")
+pv_fig.savefig(output_folder + "/pv_plot.png", dpi=300)
 
 #Show the plots in matplotlib windows, note that this will not end the script
 #until all matplotlib windows are closed
