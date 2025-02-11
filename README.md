@@ -56,7 +56,7 @@ In order to download the source code of `libICEpost` proceed as follow:
 > [!NOTE]
 > Important only for Windows user  
 
-Now the `Setting` tab (`Ctrl+,`), and input in the search bar:
+Now open `Setting` (shortcut `Ctrl+,`), and input in the search bar:
 > select default profile
 
 find and select the Command Prompt as **Default Profile**, you should see a similar result as reported here:  
