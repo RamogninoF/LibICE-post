@@ -12,8 +12,8 @@ from libICEpost.src.engineModel.EngineModel.EngineModel import EngineModel
 from libICEpost.src.base.dataStructures.Dictionary import Dictionary
 
 #To disable the warning from the janaf7 module of out of bound temperature
-from libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7 import janaf7
-janaf7.__WARNING__ = False
+#from libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7 import janaf7
+#janaf7.__WARNING__ = False
 
 #Define function for simpify loading:
 def loadModel(path:str, controlDictName:str="controlDict.py") -> EngineModel|None:
