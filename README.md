@@ -53,7 +53,7 @@ In order to download the source code of `libICEpost` proceed as follow:
 
 ![screenshot](./docs/ImagesForMd/First_Explorer.png)
 
-> [!IMPORTANT]
+> [!NOTE]
 > Important only for Windows user  
 
 Now the `Setting` tab (`Ctrl+,`), and input in the search bar:
