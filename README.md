@@ -10,7 +10,7 @@ Postprocessing of data sampled from internal combustion engines (Experimental, 1
 
 It is required to use [Anaconda](https://www.anaconda.com/) python environment manager to use the library, so that the correct python version can be used in a dedicated environment. Currently working on python version 3.11.4.
 
-> [!IMPORTANT FOR WINDOWS]  
+> [!IMPORTANT]  
 > When you install conda (eg. `C:\Users\your_name\anaconda3`), go in the installation directory, open a Windows terminal in that folder and execute the script:
 >```bash
 >Scripts\conda.exe init
