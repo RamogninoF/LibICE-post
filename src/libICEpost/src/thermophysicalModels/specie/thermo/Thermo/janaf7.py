@@ -40,7 +40,7 @@ class janaf7(Thermo):
     
     #########################################################################
     
-    __WARNING__ = False
+    __WARNING__ = True
     """If True, a warning is displayed when the temperature is outside of the range of validity."""
     
     numCoeffs = 7
