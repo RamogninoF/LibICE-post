@@ -13,6 +13,7 @@ Functions for warnings and error messages.
 #                               IMPORT                              #
 #####################################################################
 
+import sys
 import traceback
 import inspect
 
@@ -98,3 +99,15 @@ def runtimeError(Msg, verbosityLevel=1, stack=True):
     Print a runtime error message (Msg) and the call-stack.
     """
     baseRuntimeWarning(enf(enf("Runtime Error: ", "warning"), "bold"), Msg, verbosityLevel, stack)
+    
+
+#############################################################################
+#Decorator for printing helper
+def helpOnFail(func):
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            raise type(e)(str(e) + "\n" + f"help({func.__name__}):\n" + inspect.getdoc(func)).with_traceback(sys.exc_info()[2])
+            
+    return wrapper

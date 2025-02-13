@@ -51,6 +51,9 @@ from libICEpost.src.engineModel.HeatTransferModel.Woschni import Woschni
 #Database
 from libICEpost.Database.chemistry.specie.Mixtures import Mixtures, Mixture
 
+#Errors
+from libICEpost.src.base.Functions.runtimeWarning import helpOnFail
+
 #############################################################################
 #                                  FUNCTIONS                                #
 #############################################################################

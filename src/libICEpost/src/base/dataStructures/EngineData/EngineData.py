@@ -16,6 +16,7 @@ from typing import Self, Literal
 import os
 
 from libICEpost.src.base.Utilities import Utilities
+from libICEpost.src.base.Functions.runtimeWarning import helpOnFail
 
 import pandas as pd
 import numpy as np
@@ -132,6 +133,7 @@ class EngineData(Utilities):
     
     #########################################################################
     #Methods:
+    @helpOnFail
     def loadFile(
             self,
             fileName:str,
@@ -214,6 +216,7 @@ class EngineData(Utilities):
         return self
 
     #######################################
+    @helpOnFail
     def loadArray(
         self,
         data:collections.abc.Iterable,

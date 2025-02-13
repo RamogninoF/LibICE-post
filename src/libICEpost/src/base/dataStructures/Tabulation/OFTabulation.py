@@ -157,10 +157,16 @@ class OFTabulation(Utilities):
         The table properties dictionary (read-only).
         """
         #Additional data
-        tabProp = cp.deepcopy(self._baseTableProperties)
+        tabProp = {**self._baseTableProperties}
         
         #Sampling points
         tabProp.update(**{self._inputVariables[iv].name:self._inputVariables[iv].data for iv in self.order})
+        
+        #Fields
+        tabProp.update(fields=[self._data[f].file for f in self.fields])
+        
+        #Input variables
+        tabProp.update(inputVariables=[self._inputVariables[iv].name.replace("Values","") for iv in self.order])
         
         #Cast Iterables to lists so that PyFoam can write them
         for var in tabProp:
