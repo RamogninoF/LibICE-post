@@ -15,7 +15,7 @@ from libICEpost.src.base.dataStructures.Dictionary import Dictionary
 #from libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7 import janaf7
 #janaf7.__WARNING__ = False
 
-#Define function for simpify loading:
+#Define function for simplify loading:
 def loadModel(path:str, controlDictName:str="controlDict.py") -> EngineModel|None:
     """
     Convenient function for loading the engineModel from the constrolDict.py file at specific 'path'.
