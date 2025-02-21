@@ -11,7 +11,7 @@ data = \
         "p":\
         {
             #The format of the data to load
-            "format":"file",    #Retreive from file
+            "format":"file",    #Retrieve from file
             
             #The parameters to use
             "data":

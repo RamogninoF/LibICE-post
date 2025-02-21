@@ -1,4 +1,3 @@
-
 #The type of engine model
 engineModelType = "SparkIgnitionEngine"
 
