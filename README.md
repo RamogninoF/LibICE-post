@@ -91,11 +91,87 @@ Successfully installed libICEpost-0.9.7
 
 ## Usage
 
-Now that `libICEpost` is installed, you can start to use it. To do so, under `tutorials\sparkIgnition` you find a simple case intended to be used as base to understand the usage of this tool. Please duplicate the `sparkIgnition` folder in another location of your choice and the open the folder in VS Code and you should find yourself in this image.
+Now that `libICEpost` is installed, you can start to use it. To do so, under `LibICE-post\tutorials\sparkIgnition` you find a simple case intended to be used as base to understand the usage of this tool. Please duplicate the `sparkIgnition` folder in another location of your choice and the open that folder in VS Code. You should find yourself in this image.
 
 ![screenshot](./docs/imagesForMd/Tutorial_1.png)
 
-Now from here you can open the `main.py` file in which you'll find the main script to postprocess te data by running it with `Run Python File` on the upper-right corner.
+### Setting the `dictionaries`
+
+In the `dictionaries` folder you find four different Python scripts that will be used to compose the dictionary used by the post-processing tool. In particular these are:
+- `combustionProperties.py`, used to specify the initial mixture of the charge trapped inside the cylinder;
+-  `dataDict.py`, used to determine the pre-processing of the data that will be used in the tool;
+- `thermophysicalProperties.py`, used to choose the models to compute the various thermodynamic quantities;
+- `controlDict.py`, acts as wrapper of the previous three files and allows the specification of engine-specific features and the crank angle period of interest to be processed.
+
+The user is highly encouraged to read and understand each of these files as they greatly influence the results of the post-processing.
+
+Additional documentation will be provided in later releases.
+
+### Including the `data`
+
+The `data` folder contains the experimental/simulated data that will be imported by the tool to be processed. The minimum requirement is to have a in-cylinder pressure file (in this case the `p.cyl` file). It is not necessary that your data is formatted in the same way as the one in the tutorial case. You can specify the reading of a given format in the `dataDict.py` script. In the proposed case the reading of pressure is performed as follow in `dataDict.py`:
+```Python
+#Pressure (mandatory)
+"p":\ #specify how the variables will be called in runtime
+{
+    #The format of the data to load
+    "format":"file",    #Retrieve from file
+    
+    #The parameters to use
+    "data":
+    {
+        #Name of the file
+        "fileName":"p.Cyl",
+        
+        #Options to apply (scaling, shifting, etc.)
+        "opts":\
+            {
+                #"delimiter":",",   #Delimiter in file, in this case there was no delimiter !
+                # "varScale":1.0,   #Scaling variable
+                # "varOff":0.0,     #Offset to variable
+                # "CAscale":1.0,    #Scaling CA
+                # "CAoff":0.0,      #Offset to CA
+            }
+    }
+},
+```
+
+As specified before, the pressure is the only mandatory data needed as import. However, other quantities can and have to specified, such as the mass at IVC, the wall temperatures and others. The user can decide to specify any variable of interest by reading those from files, by considering them constant or by defining a specific function.
+
+### Running the `main.py` script
+
+After having set-up the files in the `dictionaries` folder and having made sure to include in the `data` folder the required quantities, you can open the `main.py` file in which you'll find the main script to postprocess the data.
+
+The `main.py` script is mainly divided of two parts: data processing and post-processing. The former is composed of the loading of the model from the various dictionaries stored in the `./dictionaries/` directory, plus the call to the processing of the data.
+
+```python
+#Load the model
+model = loadModel("./dictionaries/")
+
+#Process the data in the engine model
+model.process()
+```
+
+The following part of the code is intended to post-process the data that was processed by the tool. Here you can define some specific plots you want to see like a p-V diagram, which is already impelemented as part of the `model` class:
+
+```python
+#Plotting p-V diagram
+ax = model.plotPV(label="CFD", timingsParams={"markersize":120, "linewidth":2})
+plt.tight_layout()
+```
+
+It is possible to produce user-defined plots with the `model.data.plot()` function, like done here:
+```python
+#Plotting ROHR vs CA diagram
+model.data.plot(x = "CA", y="ROHR", label="CFD", legend=True, c="k", figsize=(10,10))
+plt.xlabel("Crank angle [CA]")
+plt.ylabel("Rate of heat release [J/deg]")
+plt.tight_layout()
+```
+
+You can change the `x` and `y` axes as you wish, paying attention that they are defined in the `model.data` structure.
+
+To launch the script use the `Run Python File` command on the upper-right corner.
 
 ![screenshot](./docs/imagesForMd/Tutorial_2.png)
 
@@ -103,9 +179,9 @@ A terminal should open and two plots should appear.
 
 From this simple case setup you can explore and expand to run the postprocess you wish. A brief documentation (that will be expanded) is reported in each of the files under the `./dictionaries` folder. 
 
-In the `./data` folder, the data that has to be post-processed has to be included.
+In the `./data` folder, the data that has to be processed has to be included.
 
-Interactive documentation avaliable at [this page](https://libice-post.readthedocs.io/en/latest/).
+Additional documentation can be found in `./LibICE-post/docs/references`
 
 ## Troubleshooting
 
@@ -125,7 +201,8 @@ pip install libICEpost
 
 ## Contributing
 
-Interested in contributing? Check out the contributing guidelines. Please note that this project is released with a Code of Conduct. By contributing to this project, you agree to abide by its terms.
+- Federico Ramognino - Code development (all of it)
+- Alberto Ballerini - Testing and documentation
 
 ## License
 
