@@ -8,7 +8,7 @@ authors = [
 description = "Postprocessing of data sampled from internal combustion engines (Experimental, 1D/0D (Gasdyn), 3D (LibICE), etc.)"
 readme = "README.md"
 
-requires-python = "=3.11"
+requires-python = "==3.11"
 dependencies = [
   'chempy',
   'pyfoam',
