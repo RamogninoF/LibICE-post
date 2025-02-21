@@ -257,7 +257,7 @@ def heatTransferCoeffOptimizer(model:EngineModel, *, heatTransferModel:str, free
                     self.model.time.isCombustion(self.model.data["CA"])])
                 e1 = abs(cumHrMax - avEn*self.combustionEfficiency)/(avEn*self.combustionEfficiency)
             print(f"e1: {e1:.2%} (w = {self.weights[0]:.2%})")
-            #2) |ROHR| before start of combustion minimuzed
+            #2) |ROHR| before start of combustion minimized
             rohrMot = self.model.data["ROHR"][
                 self.model.time.isClosedValves(self.model.data["CA"]) &
                 np.invert(self.model.time.isCombustion(self.model.data["CA"]))]
