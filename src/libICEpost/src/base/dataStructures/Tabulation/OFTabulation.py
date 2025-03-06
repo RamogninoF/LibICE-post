@@ -356,6 +356,8 @@ class OFTabulation(Utilities):
             #TODO: check consistency
             raise NotImplementedError("Adding field from Tabulation not yet implemented.")
             table = data.copy()
+        else:
+            raise TypeError(f"Cannot add field '{variable}' from data of type {data.__class__.__name__}")
         
         #Store
         self._data[variable] = _TableData(file=file, table=table)
@@ -463,10 +465,18 @@ class OFTabulation(Utilities):
             cls.checkType(order, Iterable, "order")
             [cls.checkType(var, Iterable, f"order[{ii}]") for ii,var in enumerate(order)]
         
+        #Create an empty table:
+        tab = cls(ranges=dict(), data=dict(), path=path, order=[], noWrite=noWrite, **kwargs)
+        
+        #Read ranges from tableProperties
+        tab._readTableProperties(entryNames=inputNames, inputVariables=inputVariables)
+        
         #Files
         if not files is None:
             cls.checkType(files, Iterable, "files")
             [cls.checkType(var, str, f"files[{ii}]") for ii,var in enumerate(files)]
+        elif "fields" in tab._baseTableProperties:
+            files = tab._baseTableProperties["fields"]
         else:
             files = os.listdir(f"{path}/constant/")
         
@@ -482,12 +492,6 @@ class OFTabulation(Utilities):
                 cls.checkType(n, str, f"noRead[{ii}]")
         else:
             noRead = []
-        
-        #Create an empty table:
-        tab = cls(ranges=dict(), data=dict(), path=path, order=[], noWrite=noWrite, **kwargs)
-        
-        #Read ranges from tableProperties
-        tab._readTableProperties(entryNames=inputNames, order=order, inputVariables=inputVariables)
         
         #Renaming fields
         if not outputNames is None:
@@ -694,7 +698,7 @@ class OFTabulation(Utilities):
     
     #########################################################################
     #Provate methods:
-    def _readTableProperties(self, *, entryNames:dict[str,str]=None, order:Iterable[str]=None, inputVariables:Iterable[str]=None):
+    def _readTableProperties(self, *, entryNames:dict[str,str]=None, inputVariables:Iterable[str]=None):
         """
         Read information stored in file 'path/tableProperties'. By convention, 
         the ranges variables are those ending with 'Values'. Use 'entryNames' to
@@ -703,8 +707,7 @@ class OFTabulation(Utilities):
         Args:
             entryNames (dict[str,str], optional): Used to (optionally) change the names 
                 of input-variables in the tabulation. Defaults to None.
-            order (Iterable[str], optional): Nesting order of the input-variables used to access the tabulation. In case not given, lookup for entry 'inputVariables' in 'tableProperties' file.
-            inputVariables (Iterable[str], optional): Used to retrieve fields in the 'tableProperties' file that give the ranges of the input variables. By default, lookup for all the entries with pattern '<variableName>Values', and associate them with input-variable <variableName>. Defaults to None.
+            inputVariables (Iterable[str], optional): Input variables in the correct nesting order used to access the tabulation.  In case not given, lookup for entry 'inputVariables' in 'tableProperties' file.
         """
         #Cast entryNames to bi-direction map
         if not entryNames is None:
@@ -723,44 +726,41 @@ class OFTabulation(Utilities):
         with open(self.path + "/tableProperties", "r") as file:
             tabProps = OrderedDict(**(FoamStringParser(file.read(), noVectorOrTensor=True).getData()))
         
-        #Check that all inputs are present if inputVariables is given
-        if not inputVariables is None:
-            for ii, var in enumerate(inputVariables):
-                if not var in tabProps:
-                    raise ValueError(f"Entry {var} (inputVariables[{ii}]) not found in tableProperties file. Avaliable entries are:" + "\n\t".join(tabProps.keys()))
-        else:
-            #Extract fields enging with "Values"
-            inputVariables = [var for var in tabProps if var.endswith("Values")]
-            
-            #Update entryNames
-            entryNames.update(**{var:var.replace("Values", "") for var in inputVariables if not var in entryNames})
-        
-        #Order
-        if order is None:
+        #Input variables and order
+        if inputVariables is None:
             if not "inputVariables" in tabProps:
                 raise ValueError("Entry 'inputVariables' not found in tableProperties. Cannot detect the input variables (and their ordering).")
-            order = tabProps["inputVariables"]
-        self.checkArray(order, str, "order")
+            inputVariables = tabProps["inputVariables"]
+        self.checkArray(inputVariables, str, "inputVariables")
+        
+        order = inputVariables[:]
+        
+        #Check that all input arrays are present
+        for ii, var in enumerate(inputVariables):
+            if not var + "Values" in tabProps:
+                raise ValueError(f"Entry {var} (inputVariables[{var + 'Values'}]) not found in tableProperties file. Avaliable entries are:" + "\n\t".join(tabProps.keys()))
+        
+        entryNames.update(**{var:var + "Values" for var in inputVariables if not var in entryNames})
         
         #Identify the ranges
         variables:dict[str,str] = dict()
         ranges:dict[str,list[float]] = dict()
         for ii,var in enumerate(order):
             # Check that it is in tableProperties
-            if not var in tabProps:
+            if not entryNames[var] in tabProps:
                 raise ValueError(f"Cannot find range for variable {var} in tableProperties. Avaliable entries are:" + "\n\t".join(tabProps.keys()))
             
             # Variable name
             varName = var
             if var in entryNames:
                 varName = entryNames[var]
-                order[ii] = entryNames[var]
-          
+                order[ii] = var
+
             #Append range
-            variables[varName] = var
-            ranges[varName] = tabProps.pop(var)
-            if not isinstance(ranges[varName], Iterable):
-                raise TypeError(f"Error reading ranges from tableProperties: '{var}' range is not an Iterable class ({type(ranges[varName]).__name__}).")
+            variables[var] = varName
+            ranges[var] = tabProps.pop(varName)
+            if not isinstance(ranges[var], Iterable):
+                raise TypeError(f"Error reading ranges from tableProperties: '{varName}' range is not an Iterable class ({type(ranges[varName]).__name__}).")
         
         if not len(order) == len(ranges):
             raise ValueError(f"Length of 'order' does not match number of input-variables in 'tableProperties' entry ({len(order)}!={len(ranges)})")
