@@ -77,7 +77,7 @@ class janaf7Mixing(ThermoMixing):
             weigths = []
             for specie in self._mix:
                 if not specie.specie.name in janaf7Mixing.thermos[janaf7Mixing.ThermoType]:
-                    raise ValueError(f"Thermo.{janaf7Mixing.ThermoType} data not found in database for specie {specie['specie'].name}.\n{janaf7Mixing.thermos}")
+                    raise ValueError(f"Thermo.{janaf7Mixing.ThermoType} data not found in database for specie {specie.specie.name}.\n{janaf7Mixing.thermos}")
                 th = janaf7Mixing.thermos[janaf7Mixing.ThermoType][specie.specie.name]
                 
                 weigths.append(self._mix.Y[self._mix.index(specie.specie)])
