@@ -201,7 +201,7 @@ def makeEquilibriumMechanism(path:str, species:Iterable[str], *, overwrite:bool=
     
     #Check path
     if not overwrite and os.path.isfile(path):
-        raise IOError("Path '{}' exists. Set 'overwrite' to True to overwrite.")
+        raise IOError(f"Path '{path}' exists. Set 'overwrite' to True to overwrite.")
     
     #Load the databases
     from libICEpost.Database.chemistry.thermo.Thermo.janaf7 import janaf7_db, janaf7

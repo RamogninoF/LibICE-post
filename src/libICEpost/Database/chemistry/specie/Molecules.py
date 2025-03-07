@@ -15,6 +15,9 @@ Chemical specie
 
 from libICEpost.src.thermophysicalModels.specie.specie.Molecule import Molecule
 
+from libICEpost.Database import database
+from libICEpost.Database.chemistry.specie.periodicTable import periodicTable
+
 import json
 
 import libICEpost.Database as Database
@@ -33,9 +36,6 @@ def fromJson(fileName, typeName="Molecules"):
     """
     Add molecules to the database from a json file.
     """
-
-    from libICEpost.Database import database
-    from libICEpost.Database.chemistry.specie.periodicTable import periodicTable
     Molecules = database.chemistry.specie.Molecules
     Fuels = database.chemistry.specie.Fuels
 
