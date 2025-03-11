@@ -201,7 +201,7 @@ def makeEquilibriumMechanism(path:str, species:Iterable[str], *, overwrite:bool=
     
     #Check path
     if not overwrite and os.path.isfile(path):
-        raise IOError("Path '{}' exists. Set 'overwrite' to True to overwrite.")
+        raise IOError(f"Path '{path}' exists. Set 'overwrite' to True to overwrite.")
     
     #Load the databases
     from libICEpost.Database.chemistry.thermo.Thermo.janaf7 import janaf7_db, janaf7
@@ -251,34 +251,47 @@ def makeEquilibriumMechanism(path:str, species:Iterable[str], *, overwrite:bool=
     
 #############################################################################
 @lru_cache(maxsize=__CACHE_SIZE__)
-def computeLHV(fuel:Molecule|str) -> float:
+def computeLHV(fuel:Molecule|str|Mixture, *, fatal=True) -> float:
     """
     Compute the lower heating value (LHV) of a molecule. This must be stored in 
     the database of fuels (database.chemistry.specie.Fuels), so that it has an 
     oxidation reaction in the corresponding database (database.chemistry.reactions.StoichiometricReaction).
     
-    Attributes:
-        fuel (Molecule|str): A fuel molecule or its name. This will be looked-up 
-        in the database of oxidation reactions.
-    
+    Args:
+        fuel (Molecule|str|Mixture): Either the molecule, the name of the molecule, or a Mixture in case of multi-component fuel.
+        fatal (bool, optional): Raise error if fuel not found in database? Defaults to True.
+        
     Returns:
         float: The LHV [J/kg]
     """
-    checkType(fuel, (str, Molecule), "fuel")
-    if isinstance(fuel, str):
-        from libICEpost.Database.chemistry.specie.Molecules import Fuels
-        fuel = Fuels[fuel]
-    
-    from libICEpost.Database.chemistry.reactions.StoichiometricReaction import StoichiometricReaction_db
+    from libICEpost.Database.chemistry.reactions.StoichiometricReaction import StoichiometricReaction_db, StoichiometricReaction
     from libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.ThermoMixture import ThermoMixture
+    from libICEpost.Database.chemistry.specie.Molecules import Fuels
     
-    oxReact = StoichiometricReaction_db[fuel.name + "-ox"]
+    checkType(fuel, (str, Molecule, Mixture), "fuel")
     
-    reactants = ThermoMixture(oxReact.reactants,thermoType={"Thermo":"janaf7", "EquationOfState":"PerfectGas"})
-    products = ThermoMixture(oxReact.products,thermoType={"Thermo":"janaf7", "EquationOfState":"PerfectGas"})
-    
-    return (reactants.Thermo.hf() - products.Thermo.hf())/oxReact.reactants.Y[oxReact.reactants.specie.index(fuel)]
+    #From Molecule or str
+    if isinstance(fuel, Molecule):
+        if isinstance(fuel, str):
+            fuel = Fuels[fuel]
 
+        #If fuel is not in the database, return 0 and raise warning
+        if not fuel.name + "-ox" in StoichiometricReaction_db:
+            if fatal:
+                raise ValueError(f"Fuel '{fuel.name}' not found in database. Cannot compute LHV.")
+            return 0.0
+        oxReact:StoichiometricReaction = StoichiometricReaction_db[fuel.name + "-ox"]
+        
+        reactants = ThermoMixture(oxReact.reactants,thermoType={"Thermo":"janaf7", "EquationOfState":"PerfectGas"})
+        products = ThermoMixture(oxReact.products,thermoType={"Thermo":"janaf7", "EquationOfState":"PerfectGas"})
+        
+        return (reactants.Thermo.hf() - products.Thermo.hf())/oxReact.reactants.Y[oxReact.reactants.index(fuel)]
+
+    #From Mixture
+    elif isinstance(fuel, Mixture):
+        # LHV = sum(Yi*LHVi)
+        return sum([computeLHV(f.specie, fatal=fatal)*f.Y for f in fuel])
+    
 #############################################################################
 @lru_cache(maxsize=__CACHE_SIZE__)
 def computeMixtureEnergy(mixture:Mixture, oxidizer:Molecule=database.chemistry.specie.Molecules.O2) -> float:

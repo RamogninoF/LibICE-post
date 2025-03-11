@@ -192,6 +192,11 @@ Sometimes, for Windows user, when reopening VS Code the following orange warning
 
 If this happens, please click on `Relaunch Terminal` with hovering (not clicking) on `cmd`. The next time you reopen the folder it should not happen again.
 
+### Installation
+- **Ubuntu 18.04**: Installation may fail when compiling CANTERA due to missing BLAS library. If so, install an older version of CANTERA:
+```bash
+pip install cantera==3.0.0
+```
 ## Installing from PyPI (_skip for ICEGroup_)
 
 Installation from PyPI repositories (not up-to-date):

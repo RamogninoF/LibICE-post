@@ -128,7 +128,7 @@ class janaf7(Thermo):
         self.checkType(Thigh, float, entryName="Thigh")
         
         if not(len(cpLow) == self.numCoeffs) or not(len(cpHigh) == self.numCoeffs):
-            raise ValueError("Required lists of 7 coefficients for 'cpLow' and 'cpHigh'.")
+            raise ValueError("Required lists of 7 coefficients for 'cpLow' and 'cpHigh', but received lists of length " + str(len(cpLow)) + " and " + str(len(cpHigh)) + ".")
         
         self._cpLow = cpLow[:]
         self._cpHigh = cpHigh[:]
