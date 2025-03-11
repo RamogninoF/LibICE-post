@@ -91,17 +91,17 @@ Successfully installed libICEpost-0.9.7
 
 ## Usage
 
-Now that `libICEpost` is installed, you can start to use it. To do so, under `LibICE-post\tutorials\sparkIgnition` you find a simple case intended to be used as base to understand the usage of this tool. Please duplicate the `sparkIgnition` folder in another location of your choice and the open that folder in VS Code. You should find yourself in this image.
+Now that `libICEpost` is installed, you can start to use it. To do so, under [`LibICE-post\tutorials\sparkIgnition`](./tutorials/sparkIgnition) you find a simple case intended to be used as base to understand the usage of this tool. Please duplicate the `sparkIgnition` folder in another location of your choice and the open that folder in VS Code. You should find yourself in this image.
 
 ![screenshot](./docs/imagesForMd/Tutorial_1.png)
 
 ### Setting the `dictionaries`
 
-In the `dictionaries` folder you find four different Python scripts that will be used to compose the dictionary used by the post-processing tool. In particular these are:
-- `combustionProperties.py`, used to specify the initial mixture of the charge trapped inside the cylinder;
--  `dataDict.py`, used to determine the pre-processing of the data that will be used in the tool;
-- `thermophysicalProperties.py`, used to choose the models to compute the various thermodynamic quantities;
-- `controlDict.py`, acts as wrapper of the previous three files and allows the specification of engine-specific features and the crank angle period of interest to be processed.
+In the [`dictionaries`](./tutorials/sparkIgnition/dictionaries) folder you find four different Python scripts that will be used to compose the dictionary used by the post-processing tool. In particular these are:
+- [`combustionProperties.py`](./tutorials/sparkIgnition/dictionaries/combustionProperties.py), used to specify the initial mixture of the charge trapped inside the cylinder;
+-  [`dataDict.py`](./tutorials/sparkIgnition/dictionaries/dataDict.py), used to determine the pre-processing of the data that will be used in the tool;
+- [`thermophysicalProperties.py`](./tutorials/sparkIgnition/dictionaries/thermophysicalProperties.py) used to choose the models to compute the various thermodynamic quantities;
+- [`controlDict.py`](./tutorials/sparkIgnition/dictionaries/controlDict.py), acts as wrapper of the previous three files and allows the specification of engine-specific features and the crank angle period of interest to be processed.
 
 The user is highly encouraged to read and understand each of these files as they greatly influence the results of the post-processing.
 
@@ -109,7 +109,8 @@ Additional documentation will be provided in later releases.
 
 ### Including the `data`
 
-The `data` folder contains the experimental/simulated data that will be imported by the tool to be processed. The minimum requirement is to have a in-cylinder pressure file (in this case the `p.cyl` file). It is not necessary that your data is formatted in the same way as the one in the tutorial case. You can specify the reading of a given format in the `dataDict.py` script. In the proposed case the reading of pressure is performed as follow in `dataDict.py`:
+The [`data`](./tutorials/sparkIgnition/data) folder contains the experimental/simulated data that will be imported by the tool to be processed. The minimum requirement is to have a in-cylinder pressure file (in this case the `p.cyl` file). It is not necessary that your data is formatted in the same way as the one in the tutorial case. You can specify the reading of a given format in the `dataDict.py` script. In the proposed case the reading of pressure is performed as follow in `dataDict.py`:
+
 ```Python
 #Pressure (mandatory)
 "p":\ #specify how the variables will be called in runtime
@@ -140,9 +141,9 @@ As specified before, the pressure is the only mandatory data needed as import. H
 
 ### Running the `main.py` script
 
-After having set-up the files in the `dictionaries` folder and having made sure to include in the `data` folder the required quantities, you can open the `main.py` file in which you'll find the main script to postprocess the data.
+After having set-up the files in the [`dictionaries`](./tutorials/sparkIgnition/dictionaries) folder and having made sure to include in the [`data`](./tutorials/sparkIgnition/data) folder the required quantities, you can open the `main.py` file in which you'll find the main script to postprocess the data.
 
-The `main.py` script is mainly divided of two parts: data processing and post-processing. The former is composed of the loading of the model from the various dictionaries stored in the `./dictionaries/` directory, plus the call to the processing of the data.
+The `main.py` script is mainly divided of two parts: data processing and post-processing. The former is composed of the loading of the model from the various dictionaries stored in the [`dictionaries`](./tutorials/sparkIgnition/dictionaries)directory, plus the call to the processing of the data.
 
 ```python
 #Load the model
@@ -177,11 +178,11 @@ To launch the script use the `Run Python File` command on the upper-right corner
 
 A terminal should open and two plots should appear.
 
-From this simple case setup you can explore and expand to run the postprocess you wish. A brief documentation (that will be expanded) is reported in each of the files under the `./dictionaries` folder. 
+From this simple case setup you can explore and expand to run the postprocess you wish. A brief documentation (that will be expanded) is reported in each of the files under the [`dictionaries`](./tutorials/sparkIgnition/dictionaries) folder. 
 
-In the `./data` folder, the data that has to be processed has to be included.
+In the [`data`](./tutorials/sparkIgnition/data) folder, the data that has to be processed has to be included.
 
-Additional documentation can be found in `./LibICE-post/docs/references`
+Additional documentation can be found in [`references`](./docs/references)
 
 ## Troubleshooting
 
