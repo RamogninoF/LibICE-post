@@ -119,3 +119,10 @@ def test_checkType_checkForNone_true():
     reset_globals()
     with pytest.raises(TypeError):
         checkType(5, type(None), checkForNone=True)
+
+def test_checkType_allowNone():
+    reset_globals()
+    checkType(None, bool, allowNone=True)
+    
+    with pytest.raises(TypeError):
+        checkType(None, bool, allowNone=False)

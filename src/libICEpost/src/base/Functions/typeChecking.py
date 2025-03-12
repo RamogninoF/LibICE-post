@@ -27,7 +27,12 @@ from typing import _SpecialGenericAlias, Iterable, Mapping
 #############################################################################
 
 #Check type of an instance:
-def checkType(entry:Any, Type:type|Iterable[type|_SpecialGenericAlias], entryName:str|None=None, *, intAsFloat:bool=True, checkForNone:bool=False, **kwargs) -> None:
+def checkType(entry:Any, Type:type|Iterable[type|_SpecialGenericAlias], 
+              entryName:str|None=None, *, 
+              intAsFloat:bool=True, 
+              checkForNone:bool=False, 
+              allowNone:bool=False,
+              **kwargs) -> None:
     """
     Check the type of an instance.
 
@@ -37,6 +42,7 @@ def checkType(entry:Any, Type:type|Iterable[type|_SpecialGenericAlias], entryNam
         entryName (str, optional): Name of the entry to be checked (used as info when raising TypeError).
         intAsFloat (bool, optional): Treat int as floats for type-checking (default is True).
         checkForNone (bool, optional): If False, no type checking is performed on Type==NoneType (default is False).
+        allowNone (bool, optional): If True, None is allowed as a valid value (default is False).
         **kwargs: Additional keyword arguments to discard.
 
     Raises:
@@ -62,6 +68,10 @@ def checkType(entry:Any, Type:type|Iterable[type|_SpecialGenericAlias], entryNam
     #Check Type for type|Iterable|_SpecialGenericAlias
     if not(isinstance(Type, (type, Iterable, _SpecialGenericAlias))):
         raise TypeError("Wrong type for entry 'Type': 'type' or 'Iterable[type]' expected but '{}' was found.".format(Type.__class__.__name__))
+    
+    #Check if None is allowed
+    if allowNone and (entry is None):
+        return
     
     #If Type is Iterable, check all elements for type|_SpecialGenericAlias
     if isinstance(Type, Iterable):
