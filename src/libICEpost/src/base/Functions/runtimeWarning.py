@@ -13,6 +13,7 @@ Functions for warnings and error messages.
 #                               IMPORT                              #
 #####################################################################
 
+from functools import wraps
 import sys
 import traceback
 import inspect
@@ -104,10 +105,12 @@ def runtimeError(Msg, verbosityLevel=1, stack=True):
 #############################################################################
 #Decorator for printing helper
 def helpOnFail(func):
+    @wraps(func)
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
         except Exception as e:
-            raise type(e)(str(e) + "\n" + f"help({func.__name__}):\n" + inspect.getdoc(func)).with_traceback(sys.exc_info()[2])
+            e.add_note(f"help({func.__name__}):\n" + inspect.getdoc(func))
+            raise e
             
     return wrapper
