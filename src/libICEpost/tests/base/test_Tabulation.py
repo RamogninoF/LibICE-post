@@ -1,0 +1,703 @@
+import pytest
+import numpy as np
+from pandas import DataFrame
+from libICEpost.src.base.dataStructures.Tabulation.Tabulation import Tabulation, toPandas
+
+def test_tabulation_constructor():
+    """
+    Test the Tabulation constructor with valid 3D data.
+    """
+    data = np.array([[[100, 101, 102, 103],
+                      [110, 111, 112, 113],
+                      [120, 121, 122, 123]],
+                     [[200, 201, 202, 203],
+                      [210, 211, 212, 213],
+                      [220, 221, 222, 223]]])
+    ranges = {
+        "x": np.linspace(0, 1, 2),
+        "y": np.linspace(0, 1, 3),
+        "z": np.linspace(0, 1, 4)
+    }
+    order = ["x", "y", "z"]
+    
+    tab = Tabulation(data, ranges, order)
+    
+    assert tab.shape == (2, 3, 4)
+    assert tab.ndim == 3
+    assert tab.size == 24
+    assert tab.order == order
+    assert np.array_equal(tab.data, data)
+    for i, key in enumerate(order):
+        assert np.array_equal(tab.ranges[key], ranges[key])
+
+def test_tabulation_getitem():
+    """
+    Test the __getitem__ method of the Tabulation class.
+    """
+    data = np.array([[[100, 101, 102, 103],
+                      [110, 111, 112, 113],
+                      [120, 121, 122, 123]],
+                     [[200, 201, 202, 203],
+                      [210, 211, 212, 213],
+                      [220, 221, 222, 223]]])
+    ranges = {
+        "x": np.linspace(0, 1, 2),
+        "y": np.linspace(0, 1, 3),
+        "z": np.linspace(0, 1, 4)
+    }
+    order = ["x", "y", "z"]
+    
+    tab = Tabulation(data, ranges, order)
+    
+    # Test single index access
+    assert tab[0] == 100
+    assert tab[23] == 223
+    
+    # Test multi-index access
+    assert tab[0, 0, 0] == 100
+    assert tab[1, 2, 3] == 223
+    
+    assert np.array_equal(tab[0, :, :],data[0, :, :])
+    assert np.array_equal(tab[[0,1], :, :],data[[0,1], :, :])
+    
+    # Test slicing
+    assert np.array_equal(tab[0:12], data.flatten()[:12])
+    assert np.array_equal(tab[12:], data.flatten()[12:])
+    assert np.array_equal(tab[0:12:2], data.flatten()[:12:2])
+    
+    # Test negative slicing
+    assert np.array_equal(tab[-1], data.flatten()[-1])
+    
+    # Test invalid index access
+    with pytest.raises((IndexError, ValueError)):
+        tab[24]
+    with pytest.raises((IndexError, ValueError)):
+        tab[2, 3, 4]
+
+def test_tabulation_getInput():
+    """
+    Test the getInput method of the Tabulation class.
+    """
+    data = np.array([[[100, 101, 102, 103],
+                      [110, 111, 112, 113],
+                      [120, 121, 122, 123]],
+                     [[200, 201, 202, 203],
+                      [210, 211, 212, 213],
+                      [220, 221, 222, 223]]])
+    ranges = {
+        "x": np.linspace(0, 1, 2),
+        "y": np.linspace(0, 1, 3),
+        "z": np.linspace(0, 1, 4)
+    }
+    order = ["x", "y", "z"]
+    
+    tab = Tabulation(data, ranges, order)
+    
+    # Test single index access
+    assert tab.getInput(0) == {"x": 0.0, "y": 0.0, "z": 0.0}
+    assert tab.getInput(23) == {"x": 1.0, "y": 1.0, "z": 1.0}
+    
+    # Test multi-index access
+    assert tab.getInput((0, 0, 0)) == {"x": 0.0, "y": 0.0, "z": 0.0}
+    assert tab.getInput((1, 2, 3)) == {"x": 1.0, "y": 1.0, "z": 1.0}
+    
+    # Test invalid index access
+    with pytest.raises((IndexError, ValueError)):
+        tab.getInput(24)
+    with pytest.raises((IndexError, ValueError)):
+        tab.getInput((2, 3, 4))
+
+def test_tabulation_constructor_with_1d_data():
+    """
+    Test the Tabulation constructor with 1D data.
+    """
+    data = np.random.rand(24)
+    ranges = {
+        "x": np.linspace(0, 1, 2),
+        "y": np.linspace(0, 1, 3),
+        "z": np.linspace(0, 1, 4)
+    }
+    order = ["x", "y", "z"]
+    
+    tab = Tabulation(data, ranges, order)
+    
+    assert tab.shape == (2, 3, 4)
+    assert tab.ndim == 3
+    assert tab.size == 24
+    assert tab.order == order
+    assert np.array_equal(tab.data.flatten(), data)
+    for i, key in enumerate(order):
+        assert np.array_equal(tab.ranges[key], ranges[key])
+
+def test_tabulation_constructor_invalid_data_shape():
+    """
+    Test the Tabulation constructor with invalid data shape.
+    """
+    data = np.random.rand(2, 3)
+    ranges = {
+        "x": np.linspace(0, 1, 2),
+        "y": np.linspace(0, 1, 3),
+        "z": np.linspace(0, 1, 4)
+    }
+    order = ["x", "y", "z"]
+    
+    with pytest.raises(ValueError):
+        Tabulation(data, ranges, order)
+
+def test_tabulation_constructor_invalid_ranges():
+    """
+    Test the Tabulation constructor with invalid ranges.
+    """
+    data = np.random.rand(2, 3, 4)
+    ranges = {
+        "x": np.linspace(0, 1, 2),
+        "y": np.linspace(0, 1, 3)
+    }
+    order = ["x", "y", "z"]
+    
+    with pytest.raises(ValueError):
+        Tabulation(data, ranges, order)
+
+def test_tabulation_constructor_invalid_order():
+    """
+    Test the Tabulation constructor with invalid order.
+    """
+    data = np.random.rand(2, 3, 4)
+    ranges = {
+        "x": np.linspace(0, 1, 2),
+        "y": np.linspace(0, 1, 3),
+        "z": np.linspace(0, 1, 4)
+    }
+    order = ["x", "y"]
+    
+    with pytest.raises(ValueError):
+        Tabulation(data, ranges, order)
+
+def test_tabulation_from_pandas():
+    """
+    Test the Tabulation constructor from a pandas DataFrame.
+    """
+    
+    def f(x, y, z):
+        return x*10**2 + y*10**1 + z*10**0
+    
+    x, y, z = np.meshgrid(np.linspace(0, 1, 2),
+                          np.linspace(0, 2, 3),
+                          np.linspace(0, 3, 4),
+                          indexing="ij")
+    data = {
+        "x": x.flatten(),
+        "y": y.flatten(),
+        "z": z.flatten(),
+        "output": f(x, y, z).flatten()
+    }
+    df = DataFrame(data)
+    order = ["x", "y", "z"]
+    
+    tab = Tabulation.from_pandas(df, order, "output")
+    
+    assert tab.shape == (2, 3, 4)
+    assert tab.ndim == 3
+    assert tab.size == 24
+    assert tab.order == order
+    assert np.array_equal(tab.data.flatten(), data["output"])
+    for key in order:
+        assert np.array_equal(tab.ranges[key], np.unique(data[key]))
+
+def test_tabulation_from_pandas_invalid_dataframe():
+    """
+    Test the Tabulation constructor from a pandas DataFrame with invalid data.
+    """
+    data = {
+        "x": np.tile(np.linspace(0, 1, 2), 12),
+        "y": np.repeat(np.linspace(0, 1, 3), 8),
+        "output": np.random.rand(24)
+    }
+    df = DataFrame(data)
+    order = ["x", "y", "z"]
+    
+    with pytest.raises(ValueError):
+        Tabulation.from_pandas(df, order, "output")
+
+def test_to_pandas():
+    """
+    Test the toPandas function to convert a Tabulation to a pandas DataFrame.
+    """
+    data = np.array([[[100, 101, 102, 103],
+                      [110, 111, 112, 113],
+                      [120, 121, 122, 123]],
+                     [[200, 201, 202, 203],
+                      [210, 211, 212, 213],
+                      [220, 221, 222, 223]]])
+    ranges = {
+        "x": np.linspace(0, 1, 2),
+        "y": np.linspace(0, 1, 3),
+        "z": np.linspace(0, 1, 4)
+    }
+    order = ["x", "y", "z"]
+    
+    tab = Tabulation(data, ranges, order)
+    df = toPandas(tab)
+    
+    assert isinstance(df, DataFrame)
+    assert df.shape == (24, 4)
+    assert set(df.columns) == {"x", "y", "z", "output"}
+    assert np.array_equal(df["output"].values, data.flatten())
+    for key in order:
+        assert np.array_equal(np.unique(df[key].values), ranges[key])
+    #Assert that all combinations of datapoints are present
+    assert len(df) == len(df.drop_duplicates(subset=["x", "y", "z"]))
+
+def test_tabulation_order_setter():
+    """
+    Test the order setter of the Tabulation class.
+    """
+    data = np.array([[[100, 101, 102, 103],
+                      [110, 111, 112, 113],
+                      [120, 121, 122, 123]],
+                     [[200, 201, 202, 203],
+                      [210, 211, 212, 213],
+                      [220, 221, 222, 223]]])
+    ranges = {
+        "x": np.linspace(0, 1, 2),
+        "y": np.linspace(0, 1, 3),
+        "z": np.linspace(0, 1, 4)
+    }
+    order = ["x", "y", "z"]
+    
+    tab = Tabulation(data, ranges, order)
+    
+    # Change order
+    new_order = ["z", "y", "x"]
+    tab.order = new_order
+    
+    assert tab.order == new_order
+    assert tab.shape == (4, 3, 2)
+    assert np.array_equal(tab.data, data.transpose(2, 1, 0))
+    for i, key in enumerate(new_order):
+        assert np.array_equal(tab.ranges[key], ranges[key])
+    
+    #Assert getitem
+    assert tab[0] == 100
+    assert tab[(3, 2, 1)] == 223
+
+    #Assert getInput
+    assert tab.getInput(0) == {"z": 0.0, "y": 0.0, "x": 0.0}
+    assert tab.getInput(23) == {"z": 1.0, "y": 1.0, "x": 1.0}
+    
+    with pytest.raises(ValueError):
+        tab.order = ["x", "y"]
+    
+    with pytest.raises(ValueError):
+        tab.order = ["x", "y", "z", "w"]
+
+def test_tabulation_computeIndex():
+    """
+    Test the _computeIndex method of the Tabulation class.
+    """
+    data = np.array([[[100, 101, 102, 103],
+                      [110, 111, 112, 113],
+                      [120, 121, 122, 123]],
+                     [[200, 201, 202, 203],
+                      [210, 211, 212, 213],
+                      [220, 221, 222, 223]]])
+    ranges = {
+        "x": np.linspace(0, 1, 2),
+        "y": np.linspace(0, 1, 3),
+        "z": np.linspace(0, 1, 4)
+    }
+    order = ["x", "y", "z"]
+    
+    tab = Tabulation(data, ranges, order)
+    
+    # Test single index access
+    assert tab._computeIndex(0) == (0, 0, 0)
+    assert tab._computeIndex(23) == (1, 2, 3)
+    
+    # Test multi-index access
+    assert tab._computeIndex([0, 1, 2]) == [(0, 0, 0), (0, 0, 1), (0, 0, 2)]
+    
+    # Test slice access
+    assert tab._computeIndex(slice(0, 3)) == [(0, 0, 0), (0, 0, 1), (0, 0, 2)]
+    
+    # Test invalid index access
+    with pytest.raises(ValueError):
+        tab._computeIndex(24)
+
+def test_tabulation_setitem():
+    """
+    Test the __setitem__ method of the Tabulation class.
+    """
+    data = np.array([[[100, 101, 102, 103],
+                      [110, 111, 112, 113],
+                      [120, 121, 122, 123]],
+                     [[200, 201, 202, 203],
+                      [210, 211, 212, 213],
+                      [220, 221, 222, 223]]])
+    ranges = {
+        "x": np.linspace(0, 1, 2),
+        "y": np.linspace(0, 1, 3),
+        "z": np.linspace(0, 1, 4)
+    }
+    order = ["x", "y", "z"]
+    
+    tab = Tabulation(data, ranges, order)
+    
+    # Test single index set
+    tab[0] = 999
+    assert tab[0] == 999
+    
+    tab[23] = 888
+    assert tab[23] == 888
+    
+    # Test multi-index set
+    tab[0, 0, 0] = 777
+    assert tab[0, 0, 0] == 777
+    
+    tab[1, 2, 3] = 666
+    assert tab[1, 2, 3] == 666
+    
+    # Test slicing set
+    tab[0:12] = np.arange(12)
+    assert np.array_equal(tab[0:12], np.arange(12))
+    
+    tab[12:] = np.arange(12, 24)
+    assert np.array_equal(tab[12:], np.arange(12, 24))
+    
+    # Test invalid index set
+    with pytest.raises((IndexError, ValueError)):
+                tab[24] = 555
+    with pytest.raises((IndexError, ValueError)):
+                tab[2, 3, 4] = 444
+
+def test_tabulation_slice():
+    """
+    Test the slice method of the Tabulation class.
+    """
+    data = np.array([[[100, 101, 102, 103],
+                      [110, 111, 112, 113],
+                      [120, 121, 122, 123]],
+                     [[200, 201, 202, 203],
+                      [210, 211, 212, 213],
+                      [220, 221, 222, 223]]])
+    ranges = {
+        "x": np.linspace(0, 1, 2),
+        "y": np.linspace(0, 2, 3),
+        "z": np.linspace(0, 3, 4)
+    }
+    order = ["x", "y", "z"]
+    
+    tab = Tabulation(data, ranges, order)
+    
+    # Test slicing with slices
+    sliced_tab = tab.slice(slices=[slice(0, 1), slice(0, 2), slice(0, 3)])
+    assert sliced_tab.shape == (1, 2, 3)
+    assert np.array_equal(sliced_tab.data, data[0:1, 0:2, 0:3])
+    
+    # Test slicing with ranges
+    sliced_tab = tab.slice(ranges={"x": [0.0], "y": [0.0, 1.0], "z": [0.0, 1.0, 2.0]})
+    assert sliced_tab.shape == (1, 2, 3)
+    assert np.array_equal(sliced_tab.data, data[0:1, 0:2, 0:3])
+    
+    # Test slicing with keyword arguments
+    sliced_tab = tab.slice(x=[0.0], y=[0.0, 1.0], z=[0.0, 1.0, 2.0])
+    assert sliced_tab.shape == (1, 2, 3)
+    assert np.array_equal(sliced_tab.data, data[0:1, 0:2, 0:3])
+    
+    # Test slicing with keyword arguments
+    sliced_tab = tab.slice(x=[0.0])
+    assert sliced_tab.shape == (1, 3, 4)
+    assert np.array_equal(sliced_tab.data, data[0:1, :, :])
+    
+    # Test invalid slicing
+    with pytest.raises((ValueError, IndexError)):
+        tab.slice(slices=[slice(0, 1), slice(0, 2)])
+    with pytest.raises(ValueError):
+        tab.slice(ranges={"x": [0.0], "y": [0.0, 0.3]})
+
+def test_tabulation_squeeze():
+    """
+    Test the squeeze method of the Tabulation class.
+    """
+    data = np.array([[[100], [110], [120]], [[200], [210], [220]]])
+    ranges = {
+        "x": np.linspace(0, 1, 2),
+        "y": np.linspace(0, 1, 3),
+        "z": np.linspace(0, 0, 1)
+    }
+    order = ["x", "y", "z"]
+    
+    tab = Tabulation(data, ranges, order)
+    
+    squeezed_tab = tab.squeeze(inplace=False)
+    
+    assert tab != squeezed_tab
+    
+    assert squeezed_tab.shape == (2, 3)
+    assert squeezed_tab.ndim == 2
+    assert squeezed_tab.size == 6
+    assert squeezed_tab.order == ["x", "y"]
+    assert np.array_equal(squeezed_tab.data, data.squeeze())
+    for key in squeezed_tab.order:
+        assert np.array_equal(squeezed_tab.ranges[key], ranges[key])
+        
+def test_tabulation_equality():
+    """
+    Test the equality operator of the Tabulation class.
+    """
+    data1 = np.array([[[100, 101, 102, 103],
+                       [110, 111, 112, 113],
+                       [120, 121, 122, 123]],
+                      [[200, 201, 202, 203],
+                       [210, 211, 212, 213],
+                       [220, 221, 222, 223]]])
+    ranges1 = {
+        "x": np.linspace(0, 1, 2),
+        "y": np.linspace(0, 1, 3),
+        "z": np.linspace(0, 1, 4)
+    }
+    order1 = ["x", "y", "z"]
+    
+    tab1 = Tabulation(data1, ranges1, order1)
+    
+    data2 = np.array([[[100, 101, 102, 103],
+                       [110, 111, 112, 113],
+                       [120, 121, 122, 123]],
+                      [[200, 201, 202, 203],
+                       [210, 211, 212, 213],
+                       [220, 221, 222, 223]]])
+    ranges2 = {
+        "x": np.linspace(0, 1, 2),
+        "y": np.linspace(0, 1, 3),
+        "z": np.linspace(0, 1, 4)
+    }
+    order2 = ["x", "y", "z"]
+    
+    tab2 = Tabulation(data2, ranges2, order2)
+    
+    assert tab1 == tab2
+    
+    data3 = np.array([[[100, 101, 102, 103],
+                       [110, 111, 112, 113],
+                       [120, 121, 122, 123]],
+                      [[200, 201, 202, 203],
+                       [210, 211, 212, 213],
+                       [220, 221, 222, 224]]])  # Different data
+    tab3 = Tabulation(data3, ranges2, order2)
+    
+    assert tab1 != tab3
+    
+    ranges4 = {
+        "x": np.linspace(0, 1, 2),
+        "y": np.linspace(0, 1, 3),
+        "z": np.linspace(0, 2, 4)  # Different ranges
+    }
+    tab4 = Tabulation(data1, ranges4, order2)
+    
+    assert tab1 != tab4
+    
+    order5 = ["z", "x", "y"]  # Different order
+    tab5 = tab1.copy()
+    tab5.order = order5
+    
+    assert tab1 != tab5
+    
+    # Error cases
+    with pytest.raises(NotImplementedError):
+        tab1 == 1
+    with pytest.raises(NotImplementedError):
+        "string" == tab1
+
+def test_tabulation_concat():
+    """
+    Test the concat method of the Tabulation class.
+    """
+    data1 = np.array([[[100, 101, 102, 103],
+                       [110, 111, 112, 113],
+                       [120, 121, 122, 123]],
+                      [[200, 201, 202, 203],
+                       [210, 211, 212, 213],
+                       [220, 221, 222, 223]]])
+    ranges1 = {
+        "x": np.linspace(0, 1, 2),
+        "y": np.linspace(0, 1, 3),
+        "z": np.linspace(0, 1, 4)
+    }
+    order1 = ["x", "y", "z"]
+    
+    tab1 = Tabulation(data1, ranges1, order1)
+    
+    data2 = np.array([[[300, 301, 302, 303],
+                       [310, 311, 312, 313],
+                       [320, 321, 322, 323]],
+                      [[400, 401, 402, 403],
+                       [410, 411, 412, 413],
+                       [420, 421, 422, 423]]])
+    ranges2 = {
+        "x": np.linspace(2, 3, 2),
+        "y": np.linspace(0, 1, 3),
+        "z": np.linspace(0, 1, 4)
+    }
+    order2 = ["x", "y", "z"]
+    
+    tab2 = Tabulation(data2, ranges2, order2)
+    
+    # Test concatenation
+    tab_concat = tab1.concat(tab2, inplace=False)
+    
+    assert tab_concat.shape == (4, 3, 4)
+    assert tab_concat.ndim == 3
+    assert tab_concat.size == 48
+    assert tab_concat.order == order1
+    assert np.array_equal(tab_concat.data[:2], data1)
+    assert np.array_equal(tab_concat.data[2:], data2)
+    
+    # Test in-place concatenation
+    tab1.concat(tab2, inplace=True)
+    
+    assert tab1.shape == (4, 3, 4)
+    assert tab1.ndim == 3
+    assert tab1.size == 48
+    assert tab1.order == order1
+    assert np.array_equal(tab1.data[:2], data1)
+    assert np.array_equal(tab1.data[2:], data2)
+    
+    # Test concatenation with overlapping regions
+    data3 = np.array([[[500, 501, 502, 503],
+                       [510, 511, 512, 513],
+                       [520, 521, 522, 523]],
+                      [[600, 601, 602, 603],
+                       [610, 611, 612, 613],
+                       [620, 621, 622, 623]]])
+    ranges3 = {
+        "x": np.linspace(0, 1, 2),
+        "y": np.linspace(0, 1, 3),
+        "z": np.linspace(0, 1, 4)
+    }
+    order3 = ["x", "y", "z"]
+    
+    tab3 = Tabulation(data3, ranges3, order3)
+    
+    with pytest.raises(ValueError):
+        tab1.concat(tab3, inplace=False)
+    
+    tab_concat = tab1.concat(tab3, inplace=False, overwrite=True)
+    
+    assert tab_concat.shape == (4, 3, 4)
+    assert tab_concat.ndim == 3
+    assert tab_concat.size == 48
+    assert tab_concat.order == order1
+    assert np.array_equal(tab_concat.data[:2], data3)
+    assert np.array_equal(tab_concat.data[2:], data2)
+    
+    #Test concatentation with fill_value
+    data4 = [600, 601]
+    ranges4 = {
+        "x": [0,1],
+        "y": [2],
+        "z": [1]
+    }
+    
+    tab4 = Tabulation(data4, ranges4, order3)
+    
+    tab_concat = tab3.concat(tab4, fillValue=0)
+    
+    assert tab_concat.shape == (2, 4, 4)
+    assert tab_concat.ndim == 3
+    assert tab_concat.size == 32
+    assert tab_concat.order == order1
+    assert (tab_concat.slice(y=ranges4["y"],z=set(ranges3["z"]).difference(set(ranges4["z"]))).data == 0).all()
+    
+    with pytest.raises(ValueError):
+        tab3.concat(tab4) #No fill value
+
+def test_tabulation_insertDimension():
+    """
+    Test the insertDimension method of the Tabulation class.
+    """
+    data = np.array([[[100, 101, 102, 103],
+                      [110, 111, 112, 113],
+                      [120, 121, 122, 123]],
+                     [[200, 201, 202, 203],
+                      [210, 211, 212, 213],
+                      [220, 221, 222, 223]]])
+    ranges = {
+        "x": np.linspace(0, 1, 2),
+        "y": np.linspace(0, 1, 3),
+        "z": np.linspace(0, 1, 4)
+    }
+    order = ["x", "y", "z"]
+    
+    tab = Tabulation(data, ranges, order)
+    
+    # Insert new dimension
+    tab.insertDimension("w", 0.5, 1, inplace=True)
+    
+    assert tab.order == ["x", "w", "y", "z"]
+    assert tab.shape == (2, 1, 3, 4)
+    assert tab.ndim == 4
+    assert tab.size == 24
+    assert np.array_equal(tab.ranges["w"], [0.5])
+    assert np.array_equal(tab.data, data.reshape(2, 1, 3, 4))
+    
+    # Test invalid index
+    with pytest.raises(ValueError):
+        tab.insertDimension("v", 0.5, 5, inplace=True)
+    
+    # Test invalid field type
+    with pytest.raises(TypeError):
+        tab.insertDimension(123, 0.5, 1, inplace=True)
+    
+    # Test invalid value type
+    with pytest.raises(TypeError):
+        tab.insertDimension("v", "invalid", 1, inplace=True)
+    
+    # Test invalid index type
+    with pytest.raises(TypeError):
+        tab.insertDimension("v", 0.5, "invalid", inplace=True)
+        
+    #Test example from documentation
+    tab2 = Tabulation(data, ranges, order)
+    
+    tab3 = tab2.insertDimension("w", 0.5, 1, inplace=False)
+    tab2.insertDimension("w", 1.0, 1, inplace=True)
+    tab2.concat(tab, inplace=True)
+    
+    assert tab2.shape == (2, 2, 3, 4)
+    assert tab2.ndim == 4
+    assert tab2.size == 48
+    assert tab2.order == ["x", "w", "y", "z"]
+    assert np.array_equal(tab2.ranges["w"], [0.5, 1.0])
+    assert np.array_equal(tab2.data, np.concatenate([data.reshape(2, 1, 3, 4), data.reshape(2, 1, 3, 4)], axis=1))
+    
+def test_tabulation_plot():
+    """
+    Test the plot method of the Tabulation class.
+    """
+    data = np.array([[[100, 101, 102, 103],
+                      [110, 111, 112, 113],
+                      [120, 121, 122, 123]],
+                     [[200, 201, 202, 203],
+                      [210, 211, 212, 213],
+                      [220, 221, 222, 223]]])
+    ranges = {
+        "x": np.linspace(0, 1, 2),
+        "y": np.linspace(0, 1, 3),
+        "z": np.linspace(0, 1, 4)
+    }
+    order = ["x", "y", "z"]
+    
+    tab = Tabulation(data, ranges, order)
+    
+    # Test plot method
+    ax = tab.plot(x="x", c="z", iso={"y": 0.5})
+    
+    from matplotlib import pyplot as plt
+    ax = plt.subplot()
+    ax = tab.plot(x="x", c="y", iso={"z": 1.0}, ax=ax, xlabel="X", ylabel="Y", title="Title", colorMap="viridis")
+    
+    with pytest.raises(ValueError):
+        tab.plot(x="x", c="z", iso={"z": 1.0})
+    
+    with pytest.raises(ValueError):
+        tab.plot(x="y", c="z", iso={"x": 0.5})
