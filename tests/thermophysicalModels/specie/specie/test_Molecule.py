@@ -1,6 +1,6 @@
 import pytest
-from .....src.thermophysicalModels.specie.specie.Molecule import Molecule, constants
-from .....src.thermophysicalModels.specie.specie.Atom import Atom
+from libICEpost.src.thermophysicalModels.specie.specie.Molecule import Molecule, constants
+from libICEpost.src.thermophysicalModels.specie.specie.Atom import Atom
 
 def test_molecule_initialization():
     atom1 = Atom("H", 1.008)

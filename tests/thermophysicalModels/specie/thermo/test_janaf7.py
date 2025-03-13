@@ -1,5 +1,5 @@
 import pytest
-from .....src.thermophysicalModels.specie.thermo.Thermo.janaf7 import janaf7
+from libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7 import janaf7
 
 Rgas = 8.314
 cpLow = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0]

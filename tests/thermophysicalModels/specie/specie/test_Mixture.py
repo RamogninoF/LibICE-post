@@ -1,7 +1,7 @@
 import pytest
-from .....src.thermophysicalModels.specie.specie.Mixture import Mixture, mixtureBlend, constants, MixtureItem
-from .....src.thermophysicalModels.specie.specie.Molecule import Molecule
-from .....src.thermophysicalModels.specie.specie.Atom import Atom
+from libICEpost.src.thermophysicalModels.specie.specie.Mixture import Mixture, mixtureBlend, constants, MixtureItem
+from libICEpost.src.thermophysicalModels.specie.specie.Molecule import Molecule
+from libICEpost.src.thermophysicalModels.specie.specie.Atom import Atom
 
 def test_mixture_initialization():
     atom1 = Atom("H", 1.008)
