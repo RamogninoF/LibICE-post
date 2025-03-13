@@ -992,8 +992,9 @@ class Tabulation(Utilities):
         """
         return self.concat(table, inplace=False, fillValue=None, overwrite=False)
     
-    def __iadd__(self, table:Tabulation) -> None:
+    def __iadd__(self, table:Tabulation) -> Tabulation:
         """
         Concatenate two tables in-place. Alias for 'concat'.
         """
         self.concat(table, inplace=True, fillValue=None, overwrite=False)
+        return self

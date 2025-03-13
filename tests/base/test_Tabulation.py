@@ -628,6 +628,60 @@ def test_tabulation_concat():
     with pytest.raises(ValueError):
         tab3.concat(tab4) #No fill value
 
+
+#Test concatenation with __add__ and __iadd__
+@pytest.mark.filterwarnings("error::libICEpost.src.base.dataStructures.Tabulation.Tabulation.TabulationAccessWarning")
+def test_tabulation_add():
+    """
+    Test the __add__ and __iadd__ methods of the Tabulation class.
+    """
+    data1 = np.array([[[100, 101, 102, 103],
+                       [110, 111, 112, 113],
+                       [120, 121, 122, 123]],
+                      [[200, 201, 202, 203],
+                       [210, 211, 212, 213],
+                       [220, 221, 222, 223]]])
+    ranges1 = {
+        "x": np.linspace(0, 1, 2),
+        "y": np.linspace(0, 1, 3),
+        "z": np.linspace(0, 1, 4)
+    }
+    order1 = ["x", "y", "z"]
+    
+    tab1 = Tabulation(data1, ranges1, order1)
+    
+    data2 = np.array([[[300, 301, 302, 303],
+                       [310, 311, 312, 313],
+                       [320, 321, 322, 323]],
+                      [[400, 401, 402, 403],
+                       [410, 411, 412, 413],
+                       [420, 421, 422, 423]]])
+    ranges2 = {
+        "x": np.linspace(2, 3, 2),
+        "y": np.linspace(0, 1, 3),
+        "z": np.linspace(0, 1, 4)
+    }
+    order2 = ["x", "y", "z"]
+    
+    tab2 = Tabulation(data2, ranges2, order2)
+    
+    tab3 = tab1 + tab2
+    assert tab3.shape == (4, 3, 4)
+    assert tab3.ndim == 3
+    assert tab3.size == 48
+    assert tab3.order == order1
+    assert np.array_equal(tab3.data[:2], data1)
+    assert np.array_equal(tab3.data[2:], data2)
+    
+    tab1 += tab2
+    assert tab1.shape == (4, 3, 4)
+    assert tab1.ndim == 3
+    assert tab1.size == 48
+    assert tab1.order == order1
+    assert np.array_equal(tab1.data[:2], data1)
+    assert np.array_equal(tab1.data[2:], data2)
+    assert tab1 == tab3
+
 @pytest.mark.filterwarnings("error::libICEpost.src.base.dataStructures.Tabulation.Tabulation.TabulationAccessWarning")
 def test_tabulation_insertDimension():
     """
