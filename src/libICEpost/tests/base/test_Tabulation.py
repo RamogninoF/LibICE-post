@@ -882,7 +882,7 @@ def test_concat_function():
     tab3 = Tabulation(data3, ranges3, order3)
     
     # Test concatenation of multiple tables
-    tab_concat = concat([tab1, tab2, tab3])
+    tab_concat = concat(tab1, tab2, tab3)
     
     assert tab_concat.shape == (6, 3, 4)
     assert tab_concat.ndim == 3

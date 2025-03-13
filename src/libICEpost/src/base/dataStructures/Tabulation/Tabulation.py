@@ -20,7 +20,7 @@ import pandas as pd
 import numpy as np
 from pandas import DataFrame
 
-from libICEpost.src.base.Functions.typeChecking import checkType, checkArray
+from libICEpost.src.base.Functions.typeChecking import checkType, checkArray, checkMap
 from libICEpost.src.base.Utilities import Utilities
 from scipy.interpolate import RegularGridInterpolator
 
@@ -76,6 +76,405 @@ def toPandas(table:Tabulation) -> DataFrame:
 
 #Alias
 to_pandas = toPandas
+
+#############################################################################
+def getInput(table:Tabulation, index:int|Iterable[int]) -> dict[str,float]:
+    """
+    Get the input values at a slice of the table.
+
+    Args:
+        table (Tabulation): The table to access.
+        index (int | Iterable[int]): The index to access.
+        
+    Returns:
+        dict[str:float]: A tuple with a dictionary mapping the names of input-variables to corresponding values
+    """
+    checkType(table, Tabulation, "table")
+    ranges = table.ranges
+    
+    if isinstance(index, (int, np.integer)): #Single index
+        # Convert to access by list
+        return {table.order[ii]:ranges[table.order[ii]][id] for ii,id in enumerate(table._computeIndex(index))}
+    elif isinstance(index, Iterable): #List of indexes
+        output = {}
+        for ii,id in enumerate(index):
+            table.checkType(id, (int, np.integer), f"index[{ii}]")
+            if id >= len(ranges[table.order[ii]]):
+                raise IndexError(f"index[{ii}] {id} out of range for variable {table.order[ii]} ({id} >= {len(ranges[table.order[ii]])})")
+
+            # Input variables
+            output[table.order[ii]] = ranges[table.order[ii]][id]
+        
+        return output
+    else:
+        raise TypeError(f"Cannot access table with index of type {index.__class__.__name__}")
+
+#############################################################################
+def insertDimension(table:Tabulation, field:str, value:float, index:int, inplace:bool=False) -> Tabulation|None:
+    """
+    Insert an axis to the dimension-set of the table with a single value. 
+    This is useful to merge two tables with respect to an additional field.
+    
+    Args:
+        table (Tabulation): The table to modify.
+        field (str): The name of the field to insert.
+        value (float): The value for the range of the corresponding field.
+        index (int): The index where to insert the field in nesting order.
+        inplace (bool, optional): If True, the operation is performed in-place. Defaults to False.
+        
+    Returns:
+        Tabulation|None: The table with the inserted dimension if inplace is False, None otherwise.
+        
+    Example:
+        Create a table with two fields:
+        ```
+        >>> tab1 = Tabulation([1, 2, 3, 4], {"x":[0, 1], "y":[0, 1]}, ["x", "y"])
+        >>> tab1.insertDimension("z", 0.0, 1)
+        >>> tab1.ranges
+        {"x":[0, 1], "z":[0.0], "y":[0, 1]}
+        ```
+        Create a second table with the same fields:
+        ```
+        >>> tab2 = Tabulation([5, 6, 7, 8], {"x":[0, 1], "y":[0, 1]}, ["x", "y"])
+        >>> tab2.insertDimension("z", 1.0, 1)
+        >>> tab2.ranges
+        {"x":[0, 1], "z":[1.0], "y":[0, 1]}
+        ```
+        
+        Concatenate the two tables:
+        ```
+        >>> tab1.concat(tab2, inplace=True)
+        >>> tab1.ranges
+        {"x":[0, 1], "z":[0.0, 1.0], "y":[0, 1]}
+        ```
+    """
+    if not inplace:
+        tab = table.copy()
+        tab.insertDimension(field, value, index, inplace=True)
+        return tab
+    
+    #Check arguments
+    table.checkType(field, str, "field")
+    table.checkType(value, float, "value")
+    table.checkType(index, int, "index")
+    table.checkType(inplace, bool, "inplace")
+    
+    #Check index
+    if not (0 <= index <= table.ndim):
+        raise ValueError(f"Index out of range. Must be between 0 and {table.ndim}.")
+    #Insert field
+    table._order.insert(index, field)
+    table._ranges[field] = [value]
+    table._data = table._data.reshape([len(table._ranges[f]) for f in table.order])
+
+#############################################################################
+def concat(table:Tabulation, *tables:tuple[Tabulation], inplace:bool=False, fillValue:float=None, overwrite:bool=False) -> Tabulation|None:
+    """
+    Extend the table with the data of other tables. The tables must have the same fields but 
+    not necessarily in the same order. The data of the second table is appended to the data 
+    of the first table, preserving the order of the fields.
+    
+    If fillValue is not given, the ranges of the second table must be consistent with those
+    of the first table in the fields that are not concatenated. If fillValue is given, the
+    missing sampling points are filled with the given value.
+    
+    Args:
+        table (Tabulation): The table to which the data is appended.
+        *tables (tuple[Tabulation]): The tables to append.
+        inplace (bool, optional): If True, the operation is performed in-place. Defaults to False.
+        fillValue (float, optional): The value to fill missing sampling points. Defaults to None.
+        overwrite (bool, optional): If True, overwrite the data of the first table with the data 
+            of the second table in overlapping regions. Otherwise raise an error. Defaults to False.
+    
+    Returns:
+        Tabulation|None: The concatenated table if inplace is False, None otherwise.
+    """
+    #Check arguments
+    checkType(table, Tabulation, "table")
+    checkArray(tables, Tabulation, "tables")
+    checkType(inplace, bool, "inplace")
+    checkType(overwrite, bool, "overwrite")
+    if not fillValue is None:
+        checkType(fillValue, float, "fillValue")
+    
+    if not inplace:
+        tab = table.copy()
+        tab.concat(*tables, inplace=True, fillValue=fillValue, overwrite=overwrite)
+        return tab
+    
+    for ii, tab in enumerate(tables):
+        #Check compatibility
+        if not (sorted(table.order) == sorted(tab.order)):
+            raise ValueError(f"Tables must have the same fields to concatenate (table[{ii}] incompatible).")
+        
+        #Cast the two tables to dataframes
+        df1 = toPandas(table)
+        df1.set_index(table.order, inplace=True)
+        df2 = toPandas(tab)[table.order + ["output"]]
+        df2.set_index(table.order, inplace=True)
+        
+        #Check for overlapping regions between sampling points of the two tables
+        sp1 = set(df1.index.values)
+        sp2 = set(df2.index.values)
+        if (not overwrite) and (len(sp1.intersection(sp2)) > 0):
+            raise ValueError("Overlapping regions between the two tables. Set 'overwrite' to True to overwrite the data in the overlapping regions.")
+        
+        #Merge second to first
+        merged = pd.concat([df1.drop(axis=0, index=sp2.intersection(sp1)), df2], axis=0, sort=True)
+        
+        #New ranges
+        index = merged.index
+        newRanges = {f:sorted(index.get_level_values(f).unique()) for f in table.order}
+        
+        #Check for missing sampling points
+        samplingPoints = itertools.product(*[newRanges[f] for f in table.order])
+        for sp in samplingPoints:
+            if not sp in merged.index:
+                if fillValue is None:
+                    raise ValueError("Missing sampling point in the second table. Cannot concatenate without 'fillValue' argument.")
+                merged.loc[sp] = fillValue
+        
+        #Sort
+        merged.sort_index(inplace=True)
+        
+        #Create new table
+        table._ranges = newRanges
+        table._data = merged["output"].values.reshape([len(newRanges[f]) for f in table.order])
+
+#############################################################################
+def squeeze(table:Tabulation, *, inplace:bool=False) -> Tabulation|None:
+    """
+    Remove dimensions with only 1 data-point.
+    
+    Args:
+        table (Tabulation): The table to squeeze.
+        inplace (bool, optional): If True, the operation is performed in-place. Defaults to False.
+    
+    Returns:
+        Tabulation|None: The squeezed tabulation if inplace is False, None otherwise.
+    """
+    if not inplace:
+        tab = table.copy()
+        tab.squeeze(inplace=True)
+        return tab
+    
+    #Find dimensions with more than one data-point
+    dimsToKeep = []
+    for ii, dim in enumerate(table.shape):
+        if dim > 1:
+            dimsToKeep.append(ii)
+    
+    #Extract data
+    table._order = list(map(table.order.__getitem__, dimsToKeep))
+    table._ranges = {var:table._ranges[var] for var in table._order}
+    table._data = table._data.squeeze()
+    
+    #Update interpolator
+    table._createInterpolator()
+
+#########################################################################
+def sliceTable(table:Tabulation, *, slices:Iterable[slice|Iterable[int]|int]=None, ranges:dict[str,float|Iterable[float]]=None, **argv) -> Tabulation:
+    """
+    Extract a table with sliced datase. Can access in two ways:
+        1) by slicer
+        2) sub-set of interpolation points. Keyword arguments also accepred.
+    Args:
+        table (Tabulation): The table
+        ranges (dict[str,float|Iterable[float]], optional): Ranges of sliced table. Defaults to None.
+        slices (Iterable[slice|Iterable[int]|int]): The slicers for each input-variable.
+    Returns:
+        Tabulation: The sliced table.
+    """
+    #Update ranges with keyword arguments
+    ranges = dict() if ranges is None else ranges
+    ranges.update(argv)
+    if len(ranges) == 0:
+        ranges = None
+    
+    if (slices is None) and (ranges is None):
+        raise ValueError("Must provide either 'slices' or 'ranges' to slice the table.")
+    elif not(slices is None) and not(ranges is None):
+        raise ValueError("Cannot provide both 'slices' and 'ranges' to slice the table.")
+    
+    #Swith access
+    if not slices is None: #By slices
+        slices = list(slices) #Cast to list (mutable)
+        
+        #Check types
+        table.checkType(slices, Iterable, "slices")
+        if not(len(slices) == len(table.order)):
+            raise IndexError("Given {} slices, while table has {} fields ({}).".format(len(slices), len(table.order), table.order))
+        
+        for ii, ss in enumerate(slices):
+            if isinstance(ss, slice):
+                #Convert to list of indexes
+                slices[ii] = list(range(*ss.indices(table.shape[ii])))
+                
+            elif isinstance(ss,(int, np.integer)):
+                if ss >= table.shape[ii]:
+                    raise IndexError(f"Index out of range for slices[{ii}] ({ss} >= {table.shape[ii]})")
+            
+            elif isinstance(ss, Iterable):
+                table.checkArray(ss, (int, np.integer), f"slices[{ii}]")
+                slices[ii] = sorted(ss) #Sort
+                for jj,ind in enumerate(ss): #Check range
+                    if ind >= table.shape[ii]:
+                        table.checkType(ind, int, f"slices[{ii}][{jj}]")
+                        raise IndexError(f"Index out of range for variable {ii}:{table.order[ii]} ({ind} >= {table.shape[ii]})")
+            else:
+                raise TypeError("Type mismatch. Attempting to slice with entry of type '{}'.".format(ss.__class__.__name__))
+        
+        #Create ranges:
+        order = table.order
+        ranges =  dict()
+        for ii,  Slice in enumerate(slices):
+            ranges[order[ii]] = [table.ranges[order[ii]][ss] for ss in Slice]
+        
+        #Create slicing table:
+        slTab = np.ix_(*tuple(slices))
+        data = table.data[slTab]
+        
+        return Tabulation(data, ranges, order)
+    
+    elif not ranges is None: #By ranges
+        #Start from the original ranges
+        newRanges = table.ranges
+        
+        #Check arguments:
+        table.checkMap(ranges, str, Iterable, entryName="ranges")
+        
+        for rr in ranges:
+            for ii in ranges[rr]:
+                if not(ii in table.ranges[rr]):
+                    raise ValueError(f"Sampling value '{ii}' not found in range for field '{rr}' with points:\n{table.ranges[rr]}")
+        
+        #Update ranges
+        newRanges.update(**ranges)
+        
+        #Create slicers to access by index
+        slices = []
+        for ii, item in enumerate(table.order):
+            slices.append(np.where(np.isin(table.ranges[item], newRanges[item]))[0])
+        
+        #Slice by index
+        return table.slice(slices=tuple(slices))
+
+#############################################################################
+#Plot:
+def plotTable(   table:Tabulation, 
+            x:str, c:str, iso:dict[str,float], 
+            *,
+            ax:plt.Axes=None,
+            colorMap:str="turbo",
+            xlabel:str=None,
+            ylabel:str=None,
+            clabel:str=None,
+            title:str=None,
+            xlim:tuple[float]=(None, None),
+            ylim:tuple[float]=(None, None),
+            clim:tuple[float]=(None, None),
+            figsize:tuple[float]=(8, 6),
+            **kwargs) -> plt.Axes:
+    """
+    Plot a table in a 2D plot with a color-map.
+    
+    Args:
+        x (str): The x-axis field.
+        c (str): The color field.
+        iso (dict[str,float]): The iso-values to plot.
+        ax (plt.Axes, optional): The axis to plot on. Defaults to None.
+        colorMap (str, optional): The color-map to use. Defaults to "turbo".
+        xlabel (str, optional): The x-axis label. Defaults to None.
+        ylabel (str, optional): The y-axis label. Defaults to None.
+        clabel (str, optional): The color-bar label. Defaults to None.
+        title (str, optional): The title of the plot. Defaults to None.
+        xlim (tuple[float], optional): The x-axis limits. Defaults to (None, None).
+        ylim (tuple[float], optional): The y-axis limits. Defaults to (None, None).
+        clim (tuple[float], optional): The color-bar limits. Defaults to (None, None).
+        figsize (tuple[float], optional): The size of the figure. Defaults to (8, 6).
+        **kwargs: Additional arguments to pass to the plot
+    
+    Returns:
+        plt.Axes: The axis of the plot.
+    """
+    
+    #Check arguments
+    checkType(table, Tabulation, "table")
+    checkType(x, str, "x")
+    checkType(c, str, "c")
+    checkMap(iso, str, float, "iso")
+    checkType(ax, plt.Axes, "ax", allowNone=True)
+    checkType(colorMap, str, "colorMap")
+    checkType(xlabel, str, "xlabel", allowNone=True)
+    checkType(ylabel, str, "ylabel", allowNone=True)
+    checkType(clabel, str, "clabel", allowNone=True)
+    checkType(title, str, "title", allowNone=True)
+    checkType(xlim, tuple, "xlim")
+    checkType(ylim, tuple, "ylim")
+    checkType(clim, tuple, "clim")
+    checkType(figsize, tuple, "figsize")
+    
+    #Check fields
+    if not x in table.order:
+        raise ValueError(f"Field '{x}' not found in table.")
+    if not c in table.order:
+        raise ValueError(f"Field '{c}' not found in table.")
+    
+    #Check iso-values
+    for f in iso:
+        if not f in table.order:
+            raise ValueError(f"Field '{f}' not found in table.")
+        if not iso[f] in table.ranges[f]:
+            raise ValueError(f"Iso-value for field '{f}' not found in the table.")
+    
+    if not (set(table.order) == set(iso.keys()).union({x, c})):
+        raise ValueError("Iso-values must be given for all but x and c fields.")
+    
+    #Create the axis
+    if ax is None:
+        fig, ax = plt.subplots(figsize=figsize)
+    
+    #Default plot style
+    if not any(s in kwargs for s in ["marker", "m"]):
+        kwargs.update(marker="o")
+    if not any(s in kwargs for s in ["linestyle", "ls"]):
+        kwargs.update(linestyle="--")
+    
+    #Slice the data-set
+    tab = table.slice(ranges={f:[iso[f]] for f in iso})
+    
+    #Update color-bar limits
+    if clim[0] is None:
+        clim = (tab.ranges[c].min(), clim[1])
+    if clim[1] is None:
+        clim = (clim[0], tab.ranges[c].max())
+    
+    #Plot
+    cmap = mpl.colormaps[colorMap]
+    norm = mcolors.Normalize(vmin=clim[0], vmax=clim[1])
+    sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
+    sm.set_array([])
+    
+    for ii, val in enumerate(tab.ranges[c]):
+        data = tab.slice(ranges={c:[val]})
+        ax.plot(
+            data.ranges[x],
+            data.data.flatten(),
+            color=cmap(norm(val)),
+            **kwargs)
+    
+    #Color-bar
+    cbar = plt.colorbar(sm, ax=ax)
+    cbar.set_label(clabel if not clabel is None else c)
+    
+    #Labels
+    ax.set_xlabel(xlabel if not xlabel is None else x)
+    ax.set_ylabel(ylabel)
+    ax.set_title(title if not title is None else " - ".join([f"{f}={iso[f]}" for f in iso]))
+    ax.set_xlim(xlim)
+    ax.set_ylim(ylim)
+    
+    return ax
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -353,31 +752,6 @@ class Tabulation(Utilities):
         self._interpolator = RegularGridInterpolator(tuple(ranges), tab, **opts)
     
     #######################################
-    def _indexList(self) -> list[list[int]]:
-        """Compute the list of indexes for unwinding the nested loops.
-        
-        Example:
-            shape = (2, 3, 4)
-            output = \
-                [
-                    [0, 0, 0],
-                    [0, 0, 1],
-                    [0, 0, 2],
-                    [0, 0, 3],
-                    [0, 0, 4],
-                    [0, 1, 0],
-                    [0, 1, 1],
-                    ...
-                    
-                    [1, 2, 3]
-                ]
-
-        Returns:
-            list[list[int]]
-        """
-        return np.indices(self.shape).reshape(self.ndim, -1).T.tolist()
-    
-    #######################################
     def _computeIndex(self, index:int|Iterable[int]|slice) -> tuple[int]|Iterable[tuple[int,...]]:
         """
         Compute the location of an index inside the table. Getting the index, returns a list of the indices of each input-variable.
@@ -414,6 +788,26 @@ class Tabulation(Utilities):
 
         return out
         
+    #########################################################################
+    #Public member functions:
+    getInput = getInput
+    append = merge = concat = concat
+    insertDimension = insertDimension
+    slice = sliceTable
+    squeeze = squeeze
+    
+    def copy(self):
+        """
+        Create a copy of the tabulation.
+        """
+        return Tabulation(self.data, self.ranges, self.order, outOfBounds=self.outOfBounds)
+    
+    #Conversion
+    toPandas = to_pandas = toPandas
+    
+    #Plotting
+    plot = plotTable
+    
     #########################################################################
     #Dunder methods
     
@@ -506,37 +900,6 @@ class Tabulation(Utilities):
         return self._data[index]
     
     #######################################
-    def getInput(self, index:int|Iterable[int]) -> dict[str,float]:
-        """
-        Get the input values at a slice of the table.
-
-        Args:
-            index (int | Iterable[int]): The index to access.
-            
-        Returns:
-            dict[str:float]: A tuple with a dictionary mapping the names of input-variables to corresponding values
-        """
-        ranges = self.ranges
-        
-        if isinstance(index, (int, np.integer)): #Single index
-            # Convert to access by list
-            return {self.order[ii]:ranges[self.order[ii]][id] for ii,id in enumerate(self._computeIndex(index))}
-        elif isinstance(index, Iterable): #List of indexes
-            output = {}
-            for ii,id in enumerate(index):
-                self.checkType(id, (int, np.integer), f"index[{ii}]")
-                if id >= len(ranges[self.order[ii]]):
-                    raise IndexError(f"index[{ii}] {id} out of range for variable {self.order[ii]} ({id} >= {len(ranges[self.order[ii]])})")
-
-                # Input variables
-                output[self.order[ii]] = ranges[self.order[ii]][id]
-            
-            return output
-        else:
-            raise TypeError(f"Cannot access with index of type {index.__class__.__name__}")
-    
-    
-    #######################################
     def __setitem__(self, index:int|Iterable[int]|slice|tuple[int|Iterable[int]|slice], value:float|np.ndarray[float]) -> None:
         """
         Set the interpolation values at a slice of the table through np.ndarray.__setitem__ but:
@@ -610,199 +973,7 @@ class Tabulation(Utilities):
         for ii in range(self.size):
             yield self[ii]
     
-    #########################################################################
-    #Public member functions:
-    def squeeze(self, inplace:bool=False) -> Tabulation|None:
-        """
-        Remove dimensions with only 1 data-point.
-        
-        Args:
-            inplace (bool, optional): If True, the operation is performed in-place. Defaults to False.
-        
-        Returns:
-            Tabulation|None: The squeezed tabulation if inplace is False, None otherwise.
-        """
-        if not inplace:
-            tab = self.copy()
-            tab.squeeze(inplace=True)
-            return tab
-        
-        #Find dimensions with more than one data-point
-        dimsToKeep = []
-        for ii, dim in enumerate(self.shape):
-            if dim > 1:
-                dimsToKeep.append(ii)
-        
-        #Extract data
-        self._order = list(map(self.order.__getitem__, dimsToKeep))
-        self._ranges = {var:self._ranges[var] for var in self._order}
-        self._data = self._data.squeeze()
-        
-        #Update interpolator
-        self._createInterpolator()
-    
     #######################################
-    def slice(self, *, slices:Iterable[slice|Iterable[int]|int]=None, ranges:dict[str,float|Iterable[float]]=None, **argv) -> Tabulation:
-        """
-        Extract a table with sliced datase. Can access in two ways:
-            1) by slicer
-            2) sub-set of interpolation points. Keyword arguments also accepred.
-
-        Args:
-            ranges (dict[str,float|Iterable[float]], optional): Ranges of sliced table. Defaults to None.
-            slices (Iterable[slice|Iterable[int]|int]): The slicers for each input-variable.
-
-        Returns:
-            Tabulation: The sliced table.
-        """
-        #Update ranges with keyword arguments
-        ranges = dict() if ranges is None else ranges
-        ranges.update(argv)
-        if len(ranges) == 0:
-            ranges = None
-        
-        if (slices is None) and (ranges is None):
-            raise ValueError("Must provide either 'slices' or 'ranges' to slice the table.")
-        elif not(slices is None) and not(ranges is None):
-            raise ValueError("Cannot provide both 'slices' and 'ranges' to slice the table.")
-        
-        #Swith access
-        if not slices is None: #By slices
-            slices = list(slices) #Cast to list (mutable)
-            
-            #Check types
-            self.checkType(slices, Iterable, "slices")
-            if not(len(slices) == len(self.order)):
-                raise IndexError("Given {} slices, while table has {} fields ({}).".format(len(slices), len(self.order), self.order))
-            
-            for ii, ss in enumerate(slices):
-                if isinstance(ss, slice):
-                    #Convert to list of indexes
-                    slices[ii] = list(range(*ss.indices(self.shape[ii])))
-                    
-                elif isinstance(ss,(int, np.integer)):
-                    if ss >= self.shape[ii]:
-                        raise IndexError(f"Index out of range for slices[{ii}] ({ss} >= {self.shape[ii]})")
-                
-                elif isinstance(ss, Iterable):
-                    self.checkArray(ss, (int, np.integer), f"slices[{ii}]")
-                    slices[ii] = sorted(ss) #Sort
-                    for jj,ind in enumerate(ss): #Check range
-                        if ind >= self.shape[ii]:
-                            self.checkType(ind, int, f"slices[{ii}][{jj}]")
-                            raise IndexError(f"Index out of range for variable {ii}:{self.order[ii]} ({ind} >= {self.shape[ii]})")
-                else:
-                    raise TypeError("Type mismatch. Attempting to slice with entry of type '{}'.".format(ss.__class__.__name__))
-            
-            #Create ranges:
-            order = self.order
-            ranges =  dict()
-            for ii,  Slice in enumerate(slices):
-                ranges[order[ii]] = [self.ranges[order[ii]][ss] for ss in Slice]
-            
-            #Create slicing table:
-            slTab = np.ix_(*tuple(slices))
-            data = self.data[slTab]
-            
-            return Tabulation(data, ranges, order)
-        
-        elif not ranges is None: #By ranges
-            #Start from the original ranges
-            newRanges = self.ranges
-            
-            #Check arguments:
-            self.checkMap(ranges, str, Iterable, entryName="ranges")
-            
-            for rr in ranges:
-                for ii in ranges[rr]:
-                    if not(ii in self.ranges[rr]):
-                        raise ValueError(f"Sampling value '{ii}' not found in range for field '{rr}' with points:\n{self.ranges[rr]}")
-            
-            #Update ranges
-            newRanges.update(**ranges)
-            
-            #Create slicers to access by index
-            slices = []
-            for ii, item in enumerate(self.order):
-                slices.append(np.where(np.isin(self.ranges[item], newRanges[item]))[0])
-            
-            #Slice by index
-            return self.slice(slices=tuple(slices))
-    
-    #######################################
-    def concat(self, table:Tabulation, *, inplace:bool=False, fillValue:float=None, overwrite:bool=False) -> Tabulation|None:
-        """
-        Extend the table with the data of another table. The tables must have the same fields but 
-        not necessarily in the same order. The data of the second table is appended to the data 
-        of the first table, preserving the order of the fields.
-        
-        If fillValue is not given, the ranges of the second table must be consistent with those
-        of the first table in the fields that are not concatenated. If fillValue is given, the
-        missing sampling points are filled with the given value.
-        
-        Args:
-            table (Tabulation): The table to concatenate.
-            inplace (bool, optional): If True, the operation is performed in-place. Defaults to False.
-            fillValue (float, optional): The value to fill missing sampling points. Defaults to None.
-            overwrite (bool, optional): If True, overwrite the data of the first table with the data 
-                of the second table in overlapping regions. Otherwise raise an error. Defaults to False.
-        
-        Returns:
-            Tabulation|None: The concatenated table if inplace is False, None otherwise.
-        """
-        #Check arguments
-        self.checkType(table, Tabulation, "table")
-        self.checkType(inplace, bool, "inplace")
-        self.checkType(overwrite, bool, "overwrite")
-        if not fillValue is None:
-            self.checkType(fillValue, float, "fillValue")
-        
-        if not inplace:
-            tab = self.copy()
-            tab.concat(table, inplace=True, fillValue=fillValue, overwrite=overwrite)
-            return tab
-        
-        #Check compatibility
-        if not (sorted(self.order) == sorted(table.order)):
-            raise ValueError("Tables must have the same fields to concatenate.")
-        
-        #Cast the two tables to dataframes
-        df1 = toPandas(self)
-        df1.set_index(self.order, inplace=True)
-        df2 = toPandas(table)[self.order + ["output"]]
-        df2.set_index(self.order, inplace=True)
-        
-        #Check for overlapping regions between sampling points of the two tables
-        sp1 = set(df1.index.values)
-        sp2 = set(df2.index.values)
-        if (not overwrite) and (len(sp1.intersection(sp2)) > 0):
-            raise ValueError("Overlapping regions between the two tables. Set 'overwrite' to True to overwrite the data in the overlapping regions.")
-        
-        #Merge second to first
-        merged = pd.concat([df1.drop(axis=0, index=sp2.intersection(sp1)), df2], axis=0, sort=True)
-        
-        #New ranges
-        index = merged.index
-        newRanges = {f:sorted(index.get_level_values(f).unique()) for f in self.order}
-        
-        #Check for missing sampling points
-        samplingPoints = itertools.product(*[newRanges[f] for f in self.order])
-        for sp in samplingPoints:
-            if not sp in merged.index:
-                if fillValue is None:
-                    raise ValueError("Missing sampling point in the second table. Cannot concatenate without 'fillValue' argument.")
-                merged.loc[sp] = fillValue
-        
-        #Sort
-        merged.sort_index(inplace=True)
-        
-        #Create new table
-        self._ranges = newRanges
-        self._data = merged["output"].values.reshape([len(newRanges[f]) for f in self.order])
-    
-    #Aliases
-    append = merge = concat
-    
     def __add__(self, table:Tabulation) -> Tabulation:
         """
         Concatenate two tables. Alias for 'concat'.
@@ -814,217 +985,3 @@ class Tabulation(Utilities):
         Concatenate two tables in-place. Alias for 'concat'.
         """
         self.concat(table, inplace=True, fillValue=None, overwrite=False)
-    
-    #########################################################################
-    def insertDimension(self, field:str, value:float, index:int, inplace:bool=False) -> Tabulation|None:
-        """
-        Insert an axis to the dimension-set of the table with a single value. 
-        This is useful to merge two tables with respect to an additional field.
-        
-        Args:
-            field (str): The name of the field to insert.
-            value (float): The value for the range of the corresponding field.
-            index (int): The index where to insert the field in nesting order.
-            inplace (bool, optional): If True, the operation is performed in-place. Defaults to False.
-            
-        Returns:
-            Tabulation|None: The table with the inserted dimension if inplace is False, None otherwise.
-            
-        Example:
-            Create a table with two fields:
-            ```
-            >>> tab1 = Tabulation([1, 2, 3, 4], {"x":[0, 1], "y":[0, 1]}, ["x", "y"])
-            >>> tab1.insertDimension("z", 0.0, 1)
-            >>> tab1.ranges
-            {"x":[0, 1], "z":[0.0], "y":[0, 1]}
-            ```
-            Create a second table with the same fields:
-            ```
-            >>> tab2 = Tabulation([5, 6, 7, 8], {"x":[0, 1], "y":[0, 1]}, ["x", "y"])
-            >>> tab2.insertDimension("z", 1.0, 1)
-            >>> tab2.ranges
-            {"x":[0, 1], "z":[1.0], "y":[0, 1]}
-            ```
-            
-            Concatenate the two tables:
-            ```
-            >>> tab1.concat(tab2, inplace=True)
-            >>> tab1.ranges
-            {"x":[0, 1], "z":[0.0, 1.0], "y":[0, 1]}
-            ```
-        """
-        if not inplace:
-            tab = self.copy()
-            tab.insertDimension(field, value, index, inplace=True)
-            return tab
-        
-        #Check arguments
-        self.checkType(field, str, "field")
-        self.checkType(value, float, "value")
-        self.checkType(index, int, "index")
-        self.checkType(inplace, bool, "inplace")
-        
-        #Check index
-        if not (0 <= index <= self.ndim):
-            raise ValueError(f"Index out of range. Must be between 0 and {self.ndim}.")
-
-        #Insert field
-        self._order.insert(index, field)
-        self._ranges[field] = [value]
-        self._data = self._data.reshape([len(self._ranges[f]) for f in self.order])
-    
-    #########################################################################
-    #Plot:
-    def plot(   self, 
-                x:str, c:str, iso:dict[str,float], 
-                *,
-                ax:plt.Axes=None,
-                colorMap:str="turbo",
-                xlabel:str=None,
-                ylabel:str=None,
-                clabel:str=None,
-                title:str=None,
-                xlim:tuple[float]=(None, None),
-                ylim:tuple[float]=(None, None),
-                clim:tuple[float]=(None, None),
-                figsize:tuple[float]=(8, 6),
-                **kwargs) -> plt.Axes:
-        """
-        Plot the table in a 2D plot with a color-map.
-        
-        Args:
-            x (str): The x-axis field.
-            c (str): The color field.
-            iso (dict[str,float]): The iso-values to plot.
-            ax (plt.Axes, optional): The axis to plot on. Defaults to None.
-            colorMap (str, optional): The color-map to use. Defaults to "turbo".
-            xlabel (str, optional): The x-axis label. Defaults to None.
-            ylabel (str, optional): The y-axis label. Defaults to None.
-            clabel (str, optional): The color-bar label. Defaults to None.
-            title (str, optional): The title of the plot. Defaults to None.
-            xlim (tuple[float], optional): The x-axis limits. Defaults to (None, None).
-            ylim (tuple[float], optional): The y-axis limits. Defaults to (None, None).
-            clim (tuple[float], optional): The color-bar limits. Defaults to (None, None).
-            figsize (tuple[float], optional): The size of the figure. Defaults to (8, 6).
-            **kwargs: Additional arguments to pass to the plot
-        
-        Returns:
-            plt.Axes: The axis of the plot.
-        """
-        
-        #Check arguments
-        self.checkType(x, str, "x")
-        self.checkType(c, str, "c")
-        self.checkMap(iso, str, float, "iso")
-        self.checkType(ax, plt.Axes, "ax", allowNone=True)
-        self.checkType(colorMap, str, "colorMap")
-        self.checkType(xlabel, str, "xlabel", allowNone=True)
-        self.checkType(ylabel, str, "ylabel", allowNone=True)
-        self.checkType(clabel, str, "clabel", allowNone=True)
-        self.checkType(title, str, "title", allowNone=True)
-        self.checkType(xlim, tuple, "xlim")
-        self.checkType(ylim, tuple, "ylim")
-        self.checkType(clim, tuple, "clim")
-        self.checkType(figsize, tuple, "figsize")
-        
-        #Check fields
-        if not x in self.order:
-            raise ValueError(f"Field '{x}' not found in table.")
-        if not c in self.order:
-            raise ValueError(f"Field '{c}' not found in table.")
-        
-        #Check iso-values
-        for f in iso:
-            if not f in self.order:
-                raise ValueError(f"Field '{f}' not found in table.")
-            if not iso[f] in self.ranges[f]:
-                raise ValueError(f"Iso-value for field '{f}' not found in the table.")
-        
-        if not (set(self.order) == set(iso.keys()).union({x, c})):
-            raise ValueError("Iso-values must be given for all but x and c fields.")
-        
-        #Create the axis
-        if ax is None:
-            fig, ax = plt.subplots(figsize=figsize)
-        
-        #Default plot style
-        if not any(s in kwargs for s in ["marker", "m"]):
-            kwargs.update(marker="o")
-        if not any(s in kwargs for s in ["linestyle", "ls"]):
-            kwargs.update(linestyle="--")
-        
-        #Slice the data-set
-        tab = self.slice(ranges={f:[iso[f]] for f in iso})
-        
-        #Update color-bar limits
-        if clim[0] is None:
-            clim = (tab.ranges[c].min(), clim[1])
-        if clim[1] is None:
-            clim = (clim[0], tab.ranges[c].max())
-        
-        #Plot
-        cmap = mpl.colormaps[colorMap]
-        norm = mcolors.Normalize(vmin=clim[0], vmax=clim[1])
-        sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
-        sm.set_array([])
-        
-        for ii, val in enumerate(tab.ranges[c]):
-            data = tab.slice(ranges={c:[val]})
-            ax.plot(
-                data.ranges[x],
-                data.data.flatten(),
-                color=cmap(norm(val)),
-                **kwargs)
-        
-        #Color-bar
-        cbar = plt.colorbar(sm, ax=ax)
-        cbar.set_label(clabel if not clabel is None else c)
-        
-        #Labels
-        ax.set_xlabel(xlabel if not xlabel is None else x)
-        ax.set_ylabel(ylabel)
-        ax.set_title(title if not title is None else " - ".join([f"{f}={iso[f]}" for f in iso]))
-        ax.set_xlim(xlim)
-        ax.set_ylim(ylim)
-        
-        return ax
-        
-    #########################################################################
-    def copy(self):
-        """
-        Create a copy of the tabulation.
-        """
-        return Tabulation(self.data, self.ranges, self.order, outOfBounds=self.outOfBounds)
-    
-    #########################################################################
-    #Conversion
-    toPandas = to_pandas = toPandas
-
-#############################################################################
-#                             AUXILIARY FUNCTIONS                           #
-#############################################################################
-def concat(tables:Iterable[Tabulation], **kwargs) -> Tabulation:
-        """
-        Concatenate a list of tables.
-
-        Args:
-            tables (Iterable[Tabulation]): Tables to merge
-            **kwargs: Keyword arguments for the Tabulation.concat method.
-
-        Returns:
-            Tabulation: The merged table
-        """
-        #Argument checking:
-        checkArray(tables, Tabulation, entryName="tables")
-        
-        #First table
-        output = tables[0].copy()
-        
-        #Always inplace
-        kwargs.update(inplace=True)
-        
-        #Append all
-        for tab in tables[1:]:
-            output.concat(tab, **kwargs)
-            
-        return output
