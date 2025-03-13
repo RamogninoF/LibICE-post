@@ -74,6 +74,9 @@ def toPandas(table:Tabulation) -> DataFrame:
 
     return df
 
+#Alias
+to_pandas = toPandas
+
 #############################################################################
 #                               MAIN CLASSES                                #
 #############################################################################
@@ -144,6 +147,9 @@ class Tabulation(Utilities):
         
         #Create data and return
         return cls(data_sorted[field].values, ranges, order, **kwargs)
+    
+    #Alias
+    fromPandas = from_pandas
     
     #########################################################################
     #Properties:
@@ -983,13 +989,16 @@ class Tabulation(Utilities):
         
         return ax
         
-
     #########################################################################
     def copy(self):
         """
         Create a copy of the tabulation.
         """
         return Tabulation(self.data, self.ranges, self.order, outOfBounds=self.outOfBounds)
+    
+    #########################################################################
+    #Conversion
+    toPandas = to_pandas = toPandas
 
 #############################################################################
 #                             AUXILIARY FUNCTIONS                           #
