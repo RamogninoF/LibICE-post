@@ -20,16 +20,16 @@ import pandas as pd
 import numpy as np
 from pandas import DataFrame
 
-from libICEpost.src.base.Functions.typeChecking import checkType, checkArray, checkMap
+from libICEpost.src.base.Functions.typeChecking import checkType, checkArray
 from libICEpost.src.base.Utilities import Utilities
 from scipy.interpolate import RegularGridInterpolator
 
 import matplotlib as mpl
 import matplotlib.colors as mcolors
 from matplotlib import pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 
 import itertools
+import warnings
 
 #####################################################################
 #                            AUXILIARY CLASSES                      #
@@ -39,6 +39,10 @@ class _OoBMethod(StrEnum):
     extrapolate = "extrapolate"
     nan = "nan"
     fatal = "fatal"
+
+class TabulationAccessWarning(Warning):
+    """Warning from Tabulation access"""
+    pass
 
 #############################################################################
 #                           AUXILIARY FUNCTIONS                             #
@@ -408,30 +412,50 @@ class Tabulation(Utilities):
     #Dunder methods
     
     #Interpolation
-    def __call__(self, *args:tuple[float|np.ndarray[float]], outOfBounds:str=None) -> float|np.ndarray[float]:
+    def __call__(self, *args:tuple[float,...]|tuple[tuple[float,...],...], outOfBounds:str=None) -> float|np.ndarray[float]:
         """
-        Multi-linear interpolation from the tabulation. The number of arguments to be given
-        must be the same of the dimensions of the table.
+        Multi-linear interpolation from the tabulation. The input data must be consistent with the number of input-variables stored in the tabulation.
 
         Args:
-            *args:tuple[float]: The input data. Length must be consistent with number of input-variables.
+            *args (tuple[float,...] | Iterable[tuple[float,...]]): The input data to interpolate.
+            - If tuple[float,...] is given, returns float.
+            - If tuple[tuple[float,...]] is given, returns np.ndarray[float], where each entry is the result of the interpolation.
             outOfBounds (str, optional): Overwrite the out-of-bounds method before interpolation. Defaults to None.
 
         Returns:
             float: The return value.
         """
+        #Check arguments
+        self.checkType(args, (tuple, Iterable), "args")
         
-        #Argument checking:
-        if len(args) != self.ndim:
-            raise ValueError("Number of entries not consistent with number of dimensions stored in the tabulation ({} expected, while {} found).".format(self.ndim, len(args)))
+        #Check for single entry
+        if not isinstance(args[0], Iterable):
+            args = [args]
         
+        #Pre-processing: check for dimension and extract active dimensions
         entries = []
-        for ii, f in enumerate(self.order):
-            #Check for dimension:
-            if len(self._ranges[f]) > 1:
-                entries.append(args[ii])
-            else:
-                self.__class__.runtimeWarning("Field '{}' with only one data-point, cannot interpolate along that dimension. Entry for that field will be ignored.".format(f))
+        self.checkArray(args, Iterable, "args")
+        for ii, entry in enumerate(args):
+            self.checkArray(entry, float, f"args[{ii}]")
+            
+            #Check for dimension
+            if len(entry) != self.ndim:
+                raise ValueError("Number of entries not consistent with number of dimensions stored in the tabulation ({} expected, while {} found).".format(self.ndim, len(entry)))
+            
+            #extract active dimensions
+            entries.append([])
+            for ii, f in enumerate(self.order):
+                #Check for dimension:
+                if len(self._ranges[f]) > 1:
+                    entries[-1].append(entry[ii])
+                else:
+                    if entry[ii] != self._ranges[f][0]:
+                        warnings.warn(
+                            TabulationAccessWarning(
+                                f"Field '{f}' with only one data-point, cannot " +
+                                "interpolate along that dimension. Entry for that " +
+                                "field will be ignored.")
+                            )
         
         #Update out-of-bounds
         if not outOfBounds is None:
@@ -985,13 +1009,13 @@ def concat(tables:Iterable[Tabulation], **kwargs) -> Tabulation:
         checkArray(tables, Tabulation, entryName="tables")
         
         #First table
-        output = tables[0]
+        output = tables[0].copy()
         
         #Always inplace
         kwargs.update(inplace=True)
         
         #Append all
-        for tab in output[1:]:
-            tab.concat(output, **kwargs)
+        for tab in tables[1:]:
+            output.concat(tab, **kwargs)
             
-        return tab
+        return output

@@ -1,8 +1,9 @@
 import pytest
 import numpy as np
 from pandas import DataFrame
-from libICEpost.src.base.dataStructures.Tabulation.Tabulation import Tabulation, toPandas
+from libICEpost.src.base.dataStructures.Tabulation.Tabulation import Tabulation, toPandas, TabulationAccessWarning, concat
 
+@pytest.mark.filterwarnings("error::libICEpost.src.base.dataStructures.Tabulation.Tabulation.TabulationAccessWarning")
 def test_tabulation_constructor():
     """
     Test the Tabulation constructor with valid 3D data.
@@ -30,6 +31,7 @@ def test_tabulation_constructor():
     for i, key in enumerate(order):
         assert np.array_equal(tab.ranges[key], ranges[key])
 
+@pytest.mark.filterwarnings("error::libICEpost.src.base.dataStructures.Tabulation.Tabulation.TabulationAccessWarning")
 def test_tabulation_getitem():
     """
     Test the __getitem__ method of the Tabulation class.
@@ -74,6 +76,7 @@ def test_tabulation_getitem():
     with pytest.raises((IndexError, ValueError)):
         tab[2, 3, 4]
 
+@pytest.mark.filterwarnings("error::libICEpost.src.base.dataStructures.Tabulation.Tabulation.TabulationAccessWarning")
 def test_tabulation_getInput():
     """
     Test the getInput method of the Tabulation class.
@@ -107,6 +110,7 @@ def test_tabulation_getInput():
     with pytest.raises((IndexError, ValueError)):
         tab.getInput((2, 3, 4))
 
+@pytest.mark.filterwarnings("error::libICEpost.src.base.dataStructures.Tabulation.Tabulation.TabulationAccessWarning")
 def test_tabulation_constructor_with_1d_data():
     """
     Test the Tabulation constructor with 1D data.
@@ -129,6 +133,7 @@ def test_tabulation_constructor_with_1d_data():
     for i, key in enumerate(order):
         assert np.array_equal(tab.ranges[key], ranges[key])
 
+@pytest.mark.filterwarnings("error::libICEpost.src.base.dataStructures.Tabulation.Tabulation.TabulationAccessWarning")
 def test_tabulation_constructor_invalid_data_shape():
     """
     Test the Tabulation constructor with invalid data shape.
@@ -144,6 +149,7 @@ def test_tabulation_constructor_invalid_data_shape():
     with pytest.raises(ValueError):
         Tabulation(data, ranges, order)
 
+@pytest.mark.filterwarnings("error::libICEpost.src.base.dataStructures.Tabulation.Tabulation.TabulationAccessWarning")
 def test_tabulation_constructor_invalid_ranges():
     """
     Test the Tabulation constructor with invalid ranges.
@@ -158,6 +164,7 @@ def test_tabulation_constructor_invalid_ranges():
     with pytest.raises(ValueError):
         Tabulation(data, ranges, order)
 
+@pytest.mark.filterwarnings("error::libICEpost.src.base.dataStructures.Tabulation.Tabulation.TabulationAccessWarning")
 def test_tabulation_constructor_invalid_order():
     """
     Test the Tabulation constructor with invalid order.
@@ -173,6 +180,7 @@ def test_tabulation_constructor_invalid_order():
     with pytest.raises(ValueError):
         Tabulation(data, ranges, order)
 
+@pytest.mark.filterwarnings("error::libICEpost.src.base.dataStructures.Tabulation.Tabulation.TabulationAccessWarning")
 def test_tabulation_from_pandas():
     """
     Test the Tabulation constructor from a pandas DataFrame.
@@ -204,6 +212,7 @@ def test_tabulation_from_pandas():
     for key in order:
         assert np.array_equal(tab.ranges[key], np.unique(data[key]))
 
+@pytest.mark.filterwarnings("error::libICEpost.src.base.dataStructures.Tabulation.Tabulation.TabulationAccessWarning")
 def test_tabulation_from_pandas_invalid_dataframe():
     """
     Test the Tabulation constructor from a pandas DataFrame with invalid data.
@@ -219,6 +228,7 @@ def test_tabulation_from_pandas_invalid_dataframe():
     with pytest.raises(ValueError):
         Tabulation.from_pandas(df, order, "output")
 
+@pytest.mark.filterwarnings("error::libICEpost.src.base.dataStructures.Tabulation.Tabulation.TabulationAccessWarning")
 def test_to_pandas():
     """
     Test the toPandas function to convert a Tabulation to a pandas DataFrame.
@@ -248,6 +258,7 @@ def test_to_pandas():
     #Assert that all combinations of datapoints are present
     assert len(df) == len(df.drop_duplicates(subset=["x", "y", "z"]))
 
+@pytest.mark.filterwarnings("error::libICEpost.src.base.dataStructures.Tabulation.Tabulation.TabulationAccessWarning")
 def test_tabulation_order_setter():
     """
     Test the order setter of the Tabulation class.
@@ -291,6 +302,7 @@ def test_tabulation_order_setter():
     with pytest.raises(ValueError):
         tab.order = ["x", "y", "z", "w"]
 
+@pytest.mark.filterwarnings("error::libICEpost.src.base.dataStructures.Tabulation.Tabulation.TabulationAccessWarning")
 def test_tabulation_computeIndex():
     """
     Test the _computeIndex method of the Tabulation class.
@@ -324,6 +336,7 @@ def test_tabulation_computeIndex():
     with pytest.raises(ValueError):
         tab._computeIndex(24)
 
+@pytest.mark.filterwarnings("error::libICEpost.src.base.dataStructures.Tabulation.Tabulation.TabulationAccessWarning")
 def test_tabulation_setitem():
     """
     Test the __setitem__ method of the Tabulation class.
@@ -370,6 +383,7 @@ def test_tabulation_setitem():
     with pytest.raises((IndexError, ValueError)):
                 tab[2, 3, 4] = 444
 
+@pytest.mark.filterwarnings("error::libICEpost.src.base.dataStructures.Tabulation.Tabulation.TabulationAccessWarning")
 def test_tabulation_slice():
     """
     Test the slice method of the Tabulation class.
@@ -415,6 +429,7 @@ def test_tabulation_slice():
     with pytest.raises(ValueError):
         tab.slice(ranges={"x": [0.0], "y": [0.0, 0.3]})
 
+@pytest.mark.filterwarnings("error::libICEpost.src.base.dataStructures.Tabulation.Tabulation.TabulationAccessWarning")
 def test_tabulation_squeeze():
     """
     Test the squeeze method of the Tabulation class.
@@ -441,6 +456,7 @@ def test_tabulation_squeeze():
     for key in squeezed_tab.order:
         assert np.array_equal(squeezed_tab.ranges[key], ranges[key])
         
+@pytest.mark.filterwarnings("error::libICEpost.src.base.dataStructures.Tabulation.Tabulation.TabulationAccessWarning")
 def test_tabulation_equality():
     """
     Test the equality operator of the Tabulation class.
@@ -508,6 +524,7 @@ def test_tabulation_equality():
     with pytest.raises(NotImplementedError):
         "string" == tab1
 
+@pytest.mark.filterwarnings("error::libICEpost.src.base.dataStructures.Tabulation.Tabulation.TabulationAccessWarning")
 def test_tabulation_concat():
     """
     Test the concat method of the Tabulation class.
@@ -611,6 +628,7 @@ def test_tabulation_concat():
     with pytest.raises(ValueError):
         tab3.concat(tab4) #No fill value
 
+@pytest.mark.filterwarnings("error::libICEpost.src.base.dataStructures.Tabulation.Tabulation.TabulationAccessWarning")
 def test_tabulation_insertDimension():
     """
     Test the insertDimension method of the Tabulation class.
@@ -670,6 +688,7 @@ def test_tabulation_insertDimension():
     assert np.array_equal(tab2.ranges["w"], [0.5, 1.0])
     assert np.array_equal(tab2.data, np.concatenate([data.reshape(2, 1, 3, 4), data.reshape(2, 1, 3, 4)], axis=1))
     
+@pytest.mark.filterwarnings("error::libICEpost.src.base.dataStructures.Tabulation.Tabulation.TabulationAccessWarning")
 def test_tabulation_plot():
     """
     Test the plot method of the Tabulation class.
@@ -701,3 +720,186 @@ def test_tabulation_plot():
     
     with pytest.raises(ValueError):
         tab.plot(x="y", c="z", iso={"x": 0.5})
+
+@pytest.mark.filterwarnings("error::libICEpost.src.base.dataStructures.Tabulation.Tabulation.TabulationAccessWarning")
+def test_tabulation_interpolation():
+    """
+    Test the interpolation (__call__) method of the Tabulation class.
+    """
+    data = np.array([[[100, 101, 102, 103],
+                      [110, 111, 112, 113],
+                      [120, 121, 122, 123]],
+                     [[200, 201, 202, 203],
+                      [210, 211, 212, 213],
+                      [220, 221, 222, 223]]])
+    ranges = {
+        "x": np.linspace(0, 1, 2),
+        "y": np.linspace(0, 1, 3),
+        "z": np.linspace(0, 1, 4)
+    }
+    order = ["x", "y", "z"]
+    
+    tab = Tabulation(data, ranges, order)
+    
+    # Test interpolation at known points
+    assert tab(0.0, 0.0, 0.0) == 100
+    assert tab(1.0, 1.0, 1.0) == 223
+    assert tab(1.0, 1.0, 0.0) == 220
+    
+    # Test interpolation at midpoints
+    assert np.isclose(tab(0.5, 0.5, 0.5), 161.5)
+    assert np.isclose(tab(0.5, 0.5, 0.0), 160.0)
+    
+    # Test interpolation with out-of-bounds method
+    assert np.isnan(tab(1.5, 1.5, 1.5, outOfBounds="nan"))
+    assert tab(1.5, 1.5, 1.5, outOfBounds="extrapolate") > 223
+    
+    with pytest.raises(ValueError):
+        tab(1.5, 1.5, 1.5, outOfBounds="fatal")
+    
+    # Test invalid number of arguments
+    with pytest.raises(ValueError):
+        tab(0.0, 0.0)
+    with pytest.raises(ValueError):
+        tab(0.0, 0.0, 0.0, 0.0)
+    
+    #Interpolation with multiple points
+    assert np.array_equal(tab((0,0,0), (1,1,1)), np.array([100, 223]))
+    out = tab((0,0,0), (1,1,2), outOfBounds="nan")
+    assert np.isnan(out[1])
+    assert np.array_equal(out[0], 100)
+    
+    #Interpolation with a field that has a single value
+    tab2 = tab.slice(z=[0.0])
+    assert np.array_equal(tab2(0.0, 0.0, 0.0), 100)
+    with pytest.warns(TabulationAccessWarning):
+        assert np.array_equal(tab2(0.0, 0.0, 2.0), 100)
+    
+    #Interpolation with a field that has a single value and multiple points
+    assert np.array_equal(tab2((0,0,0), (1,1,0)), np.array([100, 220]))
+    with pytest.warns(TabulationAccessWarning):
+        assert np.array_equal(tab2((0,0,0), (1,1,1)), np.array([100, 220]))
+        
+@pytest.mark.filterwarnings("error::libICEpost.src.base.dataStructures.Tabulation.Tabulation.TabulationAccessWarning")
+def test_tabulation_interpolator_property():
+    """
+    Test the interpolator property of the Tabulation class.
+    """
+    data = np.array([[[100, 101, 102, 103],
+                      [110, 111, 112, 113],
+                      [120, 121, 122, 123]],
+                     [[200, 201, 202, 203],
+                      [210, 211, 212, 213],
+                      [220, 221, 222, 223]]])
+    ranges = {
+        "x": np.linspace(0, 1, 2),
+        "y": np.linspace(0, 1, 3),
+        "z": np.linspace(0, 1, 4)
+    }
+    order = ["x", "y", "z"]
+    
+    tab = Tabulation(data, ranges, order)
+    
+    
+    interpolator = tab.interpolator
+    from scipy.interpolate import RegularGridInterpolator
+    assert isinstance(interpolator, RegularGridInterpolator)
+    assert np.isclose(interpolator((0.5, 0.5, 0.5)), 161.5)
+    assert np.isclose(interpolator((0.5, 0.5, 0.0)), 160.0)
+    
+    # Test interpolator with out-of-bounds method
+    tab.outOfBounds = "nan"
+    assert interpolator is not tab.interpolator
+    interpolator = tab.interpolator
+    assert np.isnan(interpolator((1.5, 1.5, 1.5)))
+    
+    tab.outOfBounds = "extrapolate"
+    assert interpolator is not tab.interpolator
+    interpolator = tab.interpolator
+    assert interpolator((1.5, 1.5, 1.5)) > 223
+    
+    tab.outOfBounds = "fatal"
+    assert interpolator is not tab.interpolator
+    interpolator = tab.interpolator
+    with pytest.raises(ValueError):
+        interpolator((1.5, 1.5, 1.5))
+
+    #Test changing the data
+    tab[:] = tab[:] + 1
+    assert interpolator is not tab.interpolator
+    interpolator = tab.interpolator
+    assert np.isclose(interpolator((0.5, 0.5, 0.5)), 162.5)
+    assert np.isclose(interpolator((0.5, 0.5, 0.0)), 161.0)
+
+@pytest.mark.filterwarnings("error::libICEpost.src.base.dataStructures.Tabulation.Tabulation.TabulationAccessWarning")
+def test_concat_function():
+    """
+    Test the concat function for merging multiple Tabulation instances.
+    """
+    data1 = np.array([[[100, 101, 102, 103],
+                       [110, 111, 112, 113],
+                       [120, 121, 122, 123]],
+                      [[200, 201, 202, 203],
+                       [210, 211, 212, 213],
+                       [220, 221, 222, 223]]])
+    ranges1 = {
+        "x": np.linspace(0, 1, 2),
+        "y": np.linspace(0, 1, 3),
+        "z": np.linspace(0, 1, 4)
+    }
+    order1 = ["x", "y", "z"]
+    
+    tab1 = Tabulation(data1, ranges1, order1)
+    
+    data2 = np.array([[[300, 301, 302, 303],
+                       [310, 311, 312, 313],
+                       [320, 321, 322, 323]],
+                      [[400, 401, 402, 403],
+                       [410, 411, 412, 413],
+                       [420, 421, 422, 423]]])
+    ranges2 = {
+        "x": np.linspace(2, 3, 2),
+        "y": np.linspace(0, 1, 3),
+        "z": np.linspace(0, 1, 4)
+    }
+    order2 = ["x", "y", "z"]
+    
+    tab2 = Tabulation(data2, ranges2, order2)
+    
+    data3 = np.array([[[500, 501, 502, 503],
+                       [510, 511, 512, 513],
+                       [520, 521, 522, 523]],
+                      [[600, 601, 602, 603],
+                       [610, 611, 612, 613],
+                       [620, 621, 622, 623]]])
+    ranges3 = {
+        "x": np.linspace(4, 5, 2),
+        "y": np.linspace(0, 1, 3),
+        "z": np.linspace(0, 1, 4)
+    }
+    order3 = ["x", "y", "z"]
+    
+    tab3 = Tabulation(data3, ranges3, order3)
+    
+    # Test concatenation of multiple tables
+    tab_concat = concat([tab1, tab2, tab3])
+    
+    assert tab_concat.shape == (6, 3, 4)
+    assert tab_concat.ndim == 3
+    assert tab_concat.size == 72
+    assert tab_concat.order == order1
+    assert np.array_equal(tab_concat.data[:2], data1)
+    assert np.array_equal(tab_concat.data[2:4], data2)
+    assert np.array_equal(tab_concat.data[4:], data3)
+    
+    #Check that the original tables are not modified
+    assert tab1.shape == (2, 3, 4)
+    assert tab2.shape == (2, 3, 4)
+    assert tab3.shape == (2, 3, 4)
+    assert tab1.order == order1
+    assert tab2.order == order2
+    assert tab3.order == order3
+    assert np.array_equal(tab1.data, data1)
+    assert np.array_equal(tab2.data, data2)
+    assert np.array_equal(tab3.data, data3)
+
