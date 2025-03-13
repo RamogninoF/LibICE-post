@@ -199,7 +199,7 @@ def concat(table:Tabulation, *tables:tuple[Tabulation], inplace:bool=False, fill
     
     if not inplace:
         tab = table.copy()
-        tab.concat(*tables, inplace=True, fillValue=fillValue, overwrite=overwrite)
+        concat(tab, *tables, inplace=True, fillValue=fillValue, overwrite=overwrite)
         return tab
     
     for ii, tab in enumerate(tables):
@@ -240,6 +240,9 @@ def concat(table:Tabulation, *tables:tuple[Tabulation], inplace:bool=False, fill
         #Create new table
         table._ranges = newRanges
         table._data = merged["output"].values.reshape([len(newRanges[f]) for f in table.order])
+
+#Alias
+merge = concat
 
 #############################################################################
 def squeeze(table:Tabulation, *, inplace:bool=False) -> Tabulation|None:
@@ -475,6 +478,43 @@ def plotTable(   table:Tabulation,
     ax.set_ylim(ylim)
     
     return ax
+
+#############################################################################
+def tableIndex(table:Tabulation, index:int|Iterable[int]|slice) -> tuple[int]|Iterable[tuple[int,...]]:
+    """
+    Compute the location of an index inside a table. Getting the index, returns a list of the indices of each input-variable.
+    
+    Args:
+        table (Tabulation): The table to access.
+        index (int | Iterable[int] | slice): The index to access.
+    
+    Returns:
+        tuple[int] | Iterable[tuple[int,...]]: The index/indices:
+            - If int is given, returns tuple[int].
+            - If slice or Iterable[int] is given, returns Iterable[tuple[int,...]].
+        
+    Example:
+        >>> self.shape
+        (2, 3, 4)
+        >>> self._computeIndex(12)
+        (1, 0, 0)
+        >>> self._computeIndex([0, 1, 2])
+        [(0, 0, 0), (0, 0, 1), (0, 0, 2)]
+        >>> self._computeIndex(slice(0, 3))
+        [(0, 0, 0), (0, 0, 1), (0, 0, 2)]
+    """
+    # If slice, convert to list of index
+    if isinstance(index, slice):
+        index = list(range(*index.indices(table.size)))
+        index = np.array(index, dtype=np.intp)
+    
+    #Compute index
+    out = np.unravel_index(index, table.shape)
+    
+    #Check if out is a tuple of array, if so reshape
+    if isinstance(out[0], np.ndarray):
+        out = [tuple(row) for row in np.transpose(out)]
+    return out
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -752,41 +792,7 @@ class Tabulation(Utilities):
         self._interpolator = RegularGridInterpolator(tuple(ranges), tab, **opts)
     
     #######################################
-    def _computeIndex(self, index:int|Iterable[int]|slice) -> tuple[int]|Iterable[tuple[int,...]]:
-        """
-        Compute the location of an index inside the table. Getting the index, returns a list of the indices of each input-variable.
-        
-        Args:
-            index (int | Iterable[int] | slice): The index to access.
-        
-        Returns:
-            tuple[int] | Iterable[tuple[int,...]]: The index/indices:
-                - If int is given, returns tuple[int].
-                - If slice or Iterable[int] is given, returns Iterable[tuple[int,...]].
-            
-        Example:
-            >>> self.shape
-            (2, 3, 4)
-            >>> self._computeIndex(12)
-            (1, 0, 0)
-            >>> self._computeIndex([0, 1, 2])
-            [(0, 0, 0), (0, 0, 1), (0, 0, 2)]
-            >>> self._computeIndex(slice(0, 3))
-            [(0, 0, 0), (0, 0, 1), (0, 0, 2)]
-        """
-        # If slice, convert to list of index
-        if isinstance(index, slice):
-            index = list(range(*index.indices(self.size)))
-            index = np.array(index, dtype=np.intp)
-        
-        #Compute index
-        out = np.unravel_index(index, self.shape)
-        
-        #Check if out is a tuple of array, if so reshape
-        if isinstance(out[0], np.ndarray):
-            out = [tuple(row) for row in np.transpose(out)]
-
-        return out
+    _computeIndex = tableIndex
         
     #########################################################################
     #Public member functions:
@@ -972,6 +978,12 @@ class Tabulation(Utilities):
         """
         for ii in range(self.size):
             yield self[ii]
+    
+    def __len__(self) -> int:
+        """
+        Returns the number of data-points stored in the table.
+        """
+        return self.size
     
     #######################################
     def __add__(self, table:Tabulation) -> Tabulation:
