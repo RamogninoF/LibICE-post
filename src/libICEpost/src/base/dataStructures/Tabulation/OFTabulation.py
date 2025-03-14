@@ -13,7 +13,6 @@ Last update:        12/06/2023
 
 from __future__ import annotations
 
-import copy as cp
 import numpy as np
 import pandas as pd
 import os
@@ -21,11 +20,12 @@ import shutil
 
 from bidict import bidict
 
+from libICEpost.src.base.dataStructures.Tabulation.Tabulation import Tabulation, tableIndex
+from libICEpost.src.base.Functions.typeChecking import checkType, checkArray
 from libICEpost.src.base.Utilities import Utilities
-from .Tabulation import Tabulation
 from libICEpost.src.base.Functions.functionsForOF import readOFscalarList, writeOFscalarList
 
-from typing import Iterable, Any, Literal, OrderedDict
+from typing import Iterable, Any, OrderedDict
 
 from dataclasses import dataclass
 
@@ -38,11 +38,9 @@ except Exception as e:
         print("Error importing PyFoam. This might be an issue related to the PyFoam installation. Try performing the patching procedure running 'libICEpost-applyPatches' script.") 
     raise e
 
-
 #####################################################################
 #                            AUXILIARY CLASSES                      #
 #####################################################################
-
 @dataclass
 class _TableData(object):
     """Dataclass storing the data for a tabulation"""
@@ -78,31 +76,280 @@ class _InputProps(object):
 #############################################################################
 def toPandas(table:OFTabulation) -> pd.DataFrame:
     """
-    Convert an instance of OFTabulation to a pandas.DataFrame with all the points stored in the tabulation.
+    Convert an instance of OFTabulation to a pandas.DataFrame with all 
+    the points stored in the tabulation.
 
     Args:
         table (OFTabulation): The OpenFOAM tabulation to convert to a dataframe.
 
     Returns:
-        pd.DataFrame: A dataframe with all the points stored in the tabulation. Columns for input and output variables
+        pd.DataFrame: A dataframe with all the points stored in the tabulation. 
+        Columns for input and output variables
     """
-    Utilities.checkType(table, OFTabulation, "table")
+    checkType(table, OFTabulation, "table")
     
     # Create the dataframe
-    df = pd.DataFrame({**{f:[0.0]*table.size for f in table.fields}, **{f:[0.0]*table.size for f in table.inputVariables}})
+    df = pd.DataFrame(**{f:[float("nan")]*table.size for f in table.fields}, **{f:[0.0]*table.size for f in table.ranges})
     
     #Sort the columns to have first the input variables in order
     df = df[table.order + table.fields]
     
-    #Fill input variables
-    ranges = table.ranges
-    df.iloc[:,:len(table._order)] = [[ranges[table._order[rr]][id] for rr,id in enumerate(table._computeIndex(ii))] for ii in range(len(table))]
-    
-    #Filling the outputs
-    for tab in table._data:
-        df.loc[:,tab] = table._data[tab].table._data.flatten() if not table._data[tab].table is None else float('nan')
+    #Populate
+    for ii, item in enumerate(table):
+        input = table.getInput(ii)
+        df.loc[ii, list(input.keys())] = [input[it] for it in input.keys()]
+        df.loc[ii, "output"] = item
     
     return df
+
+#Aliases
+to_pandas = toPandas
+
+#############################################################################
+def concat(table:OFTabulation, *tables:tuple[OFTabulation], inplace:bool=False, **kwargs):
+    """
+    Extend the table with the data of other tables. The tables must have the same fields but 
+    not necessarily in the same order. The data of the second table is appended to the data 
+    of the first table, preserving the order of the fields.
+    
+    If fillValue is not given, the ranges of the second table must be consistent with those
+    of the first table in the fields that are not concatenated. If fillValue is given, the
+    missing sampling points are filled with the given value.
+    
+    Args:
+        table (OFTabulation): The table to which the data is appended.
+        *tables (tuple[OFTabulation]): The tables to append.
+        inplace (bool, optional): If True, the operation is performed in-place. Defaults to False.
+        fillValue (float, optional): The value to fill missing sampling points. Defaults to None.
+        overwrite (bool, optional): If True, overwrite the data of the first table with the data 
+            of the second table in overlapping regions. Otherwise raise an error. Defaults to False.
+    
+    Returns:
+        OFTabulation|None: The concatenated table if inplace is False, None otherwise.
+    """
+    #Check arguments
+    checkType(table, OFTabulation, "table")
+    checkArray(tables, OFTabulation, "tables")
+    checkType(inplace, bool, "inplace")
+    
+    if not inplace:
+        table = table.copy()
+        concat(table, *tables, inplace=True, **kwargs)
+        return table
+    
+    for ii, tab in enumerate(tables):
+        #Check compatibility
+        if not (sorted(table.order) == sorted(tab.order)):
+            raise ValueError(f"Tables must have the same fields to concatenate (table[{ii}] incompatible).")
+        
+        #Check fields
+        if not (table.fields == tab.fields):
+            raise ValueError(f"Tables must have the same fields to concatenate (table[{ii}] incompatible).")
+        
+        #Merge the ranges
+        ranges = {f:np.unique(np.concatenate([table.ranges[f], tab.ranges[f]])) for f in table.order}
+        table._inputVariables = {f:_InputProps(name=table._inputVariables[f].name, data=ranges[f]) for f in table.order}
+        
+        #Merge the tables
+        for f in table.fields:
+            #Check that either both tables are loaded or none
+            if (table.tables[f] is None) != (tab.tables[f] is None):
+                raise ValueError(f"Table '{f}' not loaded in one of the tables to concatenate.")
+            
+            #Concatenate the tables
+            if table._data[f].table is not None:
+                table._data[f].table.concat(tab.tables[f], inplace=True, **kwargs)
+
+#Aliases
+merge = concat
+
+#############################################################################
+def writeOFTable(table:OFTabulation, path:str=None, binary:bool=False):
+    """
+    Write the tabulation.
+    Directory structure as follows: 
+    ```   
+    path                         
+    |-tableProperties            
+    |-constant                 
+    | |-variable1              
+    | |-variable2              
+    | |-...                    
+    |-system                   
+      |-controlDict            
+    ```
+    Args:
+        table (OFTabulation): The tabulation to write.
+        path (str, optional): Path where to save the table. In case not give, self.path is used. Defaults to None.
+        binary (bool, optional): Writing in binary? Defaults to False.
+    """
+    if not path is None:
+        checkType(path, str, "path")
+    
+    path = table.path if path is None else path
+    if path is None:
+        raise ValueError("Cannot save tabulation: path was not defined ('table.path' and 'path' are None)")
+    
+    if table.noWrite:
+        raise IOError("Trying to write tabulation when opered in read-only mode. Set 'noWrite' to False to write files.")
+    
+    #Remove if found
+    if os.path.isdir(path):
+        table.runtimeWarning(f"Overwriting table at '{path}'", stack=False)
+        shutil.rmtree(path)
+    
+    #Create path
+    os.makedirs(path)
+    os.makedirs(path + "/constant")
+    os.makedirs(path + "/system")
+    
+    #Table properties:
+    tablePros = ParsedParameterFile(path + "/tableProperties", noHeader=True, dontRead=True, createZipped=False)
+    tablePros.content = table.tableProperties
+    tablePros.writeFile()
+    
+    #Tables:
+    for table in table.tables:
+        if not(table.tables[table] is None): #Check if the table was defined
+            writeOFscalarList(
+                table.tables[table].data.flatten(), 
+                path=path + "/constant/" + table.files[table],
+                binary=binary)
+    
+    #Control dict
+    controlDict = ParsedParameterFile(path + "/system/controlDict", dontRead=True, createZipped=False)
+    controlDict.header = \
+        {
+            "class":"dictionary",
+            "version":2.0,
+            "object":"controlDict",
+            "location":path + "/system/",
+            "format": "ascii"
+        }
+    controlDict.content = \
+        {
+            "startTime"        :    0,
+            "endTime"          :    1,
+            "deltaT"           :    1,
+            "application"      :    "dummy",
+            "startFrom"        :    "startTime",
+            "stopAt"           :    "endTime",
+            "writeControl"     :    "adjustableRunTime",
+            "writeInterval"    :    1,
+            "purgeWrite"       :    0,
+            "writeFormat"      :    "binary" if binary else "ascii",
+            "writePrecision"   :    6,
+            "writeCompression" :    "uncompressed",
+            "timeFormat"       :    "general",
+            "timePrecision"    :    6,
+            "adjustTimeStep"   :    "no",
+            "maxCo"            :    1,
+            "runTimeModifiable":    "no",
+        }
+    controlDict.writeFile()
+    
+#############################################################################
+def sliceOFTable(table:OFTabulation, *, slices:Iterable[slice|Iterable[int]|int]=None, ranges:dict[str,float|Iterable[float]]=None, **argv) -> OFTabulation:
+    """
+    Extract a table with sliced datase. Can access in two ways:
+        1) by slicer
+        2) sub-set of interpolation points. Keyword arguments also accepred.
+        
+    For safety, the new table will not be writable and the path will be set to None.
+    
+    Args:
+        table (Tabulation): The table
+        slices (Iterable[slice|Iterable[int]|int], optional): The slices to extract the table. Defaults to None.
+        ranges (dict[str,float|Iterable[float]], optional): The ranges to extract the table. Defaults to None.
+        **argv: Keyword arguments to pass to the ranges.
+    Returns:
+        OFTabulation: The sliced table.
+    """
+    #Update ranges with keyword arguments
+    ranges = dict() if ranges is None else ranges
+    ranges.update(argv)
+    if len(ranges) == 0:
+        ranges = None
+    
+    if (slices is None) and (ranges is None):
+        raise ValueError("Must provide either 'slices' or 'ranges' to slice the table.")
+    elif not(slices is None) and not(ranges is None):
+        raise ValueError("Cannot provide both 'slices' and 'ranges' to slice the table.")
+    
+    #Swith access
+    if not slices is None: #By slices
+        slices = list(slices) #Cast to list (mutable)
+        
+        #Check types
+        table.checkType(slices, Iterable, "slices")
+        if not(len(slices) == len(table.order)):
+            raise IndexError("Given {} slices, while table has {} fields ({}).".format(len(slices), len(table.order), table.order))
+        
+        for ii, ss in enumerate(slices):
+            if isinstance(ss, slice):
+                #Convert to list of indexes
+                slices[ii] = list(range(*ss.indices(table.shape[ii])))
+                
+            elif isinstance(ss,(int, np.integer)):
+                if ss >= table.shape[ii]:
+                    raise IndexError(f"Index out of range for slices[{ii}] ({ss} >= {table.shape[ii]})")
+            
+            elif isinstance(ss, Iterable):
+                table.checkArray(ss, (int, np.integer), f"slices[{ii}]")
+                slices[ii] = sorted(ss) #Sort
+                for jj,ind in enumerate(ss): #Check range
+                    if ind >= table.shape[ii]:
+                        table.checkType(ind, int, f"slices[{ii}][{jj}]")
+                        raise IndexError(f"Index out of range for variable {ii}:{table.order[ii]} ({ind} >= {table.shape[ii]})")
+            else:
+                raise TypeError("Type mismatch. Attempting to slice with entry of type '{}'.".format(ss.__class__.__name__))
+        
+        #Create ranges:
+        order = table.order
+        ranges =  dict()
+        for ii,  Slice in enumerate(slices):
+            ranges[order[ii]] = [table.ranges[order[ii]][ss] for ss in Slice]
+        
+        #Create a copy of the table
+        newTable = table.copy()
+        newTable._inputVariables = {f:_InputProps(name=table._inputVariables[f].name, data=ranges[f]) for f in table.order}
+        
+        #Set not to write
+        newTable.noWrite = True
+        newTable.path = None
+        
+        #Slice the tables
+        for var in table.fields:
+            if not table.tables[var] is None:
+                newTable.tables[var] = table.tables[var].slice(slices=slices)
+            
+        return newTable
+    
+    elif not ranges is None: #By ranges
+        #Start from the original ranges
+        newRanges = table.ranges
+        
+        #Check arguments:
+        table.checkMap(ranges, str, Iterable, entryName="ranges")
+        
+        for rr in ranges:
+            for ii in ranges[rr]:
+                if not(ii in table.ranges[rr]):
+                    raise ValueError(f"Sampling value '{ii}' not found in range for field '{rr}' with points:\n{table.ranges[rr]}")
+        
+        #Update ranges
+        newRanges.update(**ranges)
+        
+        #Create slicers to access by index
+        slices = []
+        for ii, item in enumerate(table.order):
+            slices.append(np.where(np.isin(table.ranges[item], newRanges[item]))[0])
+        
+        #Slice by index
+        return table.slice(slices=tuple(slices))
+
+#############################################################################
+
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -114,8 +361,6 @@ class OFTabulation(Utilities):
     The tabulation is a multi-input multi-output, i.e., it access through a 
     set of input variables (IV) to a set of tabulated variables (TV):
         [IV1, IV2, IV3, ...] -> [TV1, TV2, TV3, ...]
-        
-    #TODO: allow writing in binary mode
     """
     
     #########################################################################
@@ -160,13 +405,13 @@ class OFTabulation(Utilities):
         tabProp = {**self._baseTableProperties}
         
         #Sampling points
-        tabProp.update(**{self._inputVariables[iv].name:self._inputVariables[iv].data for iv in self.order})
+        tabProp.update(**{self._inputVariables[iv].name + "Values":self._inputVariables[iv].data for iv in self.order})
         
         #Fields
         tabProp.update(fields=[self._data[f].file for f in self.fields])
         
         #Input variables
-        tabProp.update(inputVariables=[self._inputVariables[iv].name.replace("Values","") for iv in self.order])
+        tabProp.update(inputVariables=[self._inputVariables[iv].name for iv in self.order])
         
         #Cast Iterables to lists so that PyFoam can write them
         for var in tabProp:
@@ -218,14 +463,14 @@ class OFTabulation(Utilities):
     @order.setter
     def order(self, order:Iterable[str]):
         self.checkType(order, Iterable, "order")
-        if not len(order) == len(self.order):
-            raise ValueError(f"Incompatible length of new ordering list ({len(order)})!={len(self.order)}")
-        for item in order:
-            if not item in self.inputVariables:
-                raise ValueError(f"Variable '{item}' not found among input variables of tabulation ({self.order})")
+        if not set(order) == set(self.order):
+            raise ValueError("New order must contain the same fields as the previous one.")
         
-        #TODO
-        raise NotImplementedError("Reordering not yet implemented.")
+        self._order = list(order)
+        #Reorder all the tables
+        for var in self.fields:
+            if not self._data[var].table is None:
+                self._data[var].table.order = order
         
     ################################
     @property
@@ -392,26 +637,6 @@ class OFTabulation(Utilities):
         
         self._inputVariables[variable] = name
     
-    ################################
-    def resample(self, **newRanges:dict[str,Iterable[float]]) -> None:
-        """Resample the input-variables space. Useful for under-sampling or extending the tabulation.
-
-        Args:
-            newRanges (dict[str,Iterable[float]]): The new ranges of input-variables to resample.
-        """
-        for variable in newRanges:
-            range = newRanges[variable]
-            
-            self.checkArray(range, Iterable, f"{variable}")
-            
-            if not variable in self._inputVariables:
-                raise ValueError("Input variable {} not found in tabulation. Avaliable input variables are:\n\t" + "\n\t".join(self.inputVariables.keys()))
-        
-        if not variable in self._names:
-            raise ValueError("Variable not stored in the tabulation. Avaliable variables are:\n\t" + "\n\t".join(self.names.keys()))
-        
-        raise NotImplementedError("Resampling not yet implemented")
-    
     #########################################################################
     #Class methods:
     @classmethod
@@ -516,12 +741,12 @@ class OFTabulation(Utilities):
     #########################################################################
     #Constructor:
     def __init__(
-        self, 
+        self,
         ranges:dict[str,Iterable[float]], 
         data:dict[str,Iterable[float]], 
         *, path:str=None, 
         order:Iterable[str], 
-        files:Iterable[str]=None, 
+        files:dict[str,str]=None, 
         inputNames:dict[str,str]=None, 
         outputNames:dict[str,str]=None, 
         noWrite:bool=True, 
@@ -542,32 +767,32 @@ class OFTabulation(Utilities):
             tablePropertiesParameters (dict[str,Any], optional): Additional parameters to store in the tableProperties. Defaults to None.
             **kwargs: Optional keyword arguments of Tabulation.__init__ method of each Tabulation object.
         """
-        #Argument checking
-        #TODO
-        
-        if not (len(order) == len(ranges)):
-            raise ValueError(f"Length of 'order' does not match number of input-variables in 'ranges' entry ({len(order)}!={len(ranges)})")
-        for var in ranges:
-            if not var in order:
-                raise ValueError(f"Input-variable '{var}' not found in 'order' entry.")
+        if set(ranges.keys()) != set(order):
+            raise ValueError("Inconsistent order of input-variables and ranges.")
         
         #Check if names of input variables are given
         if not inputNames is None:
-            self.checkType(inputNames, dict, "inputNames")
+            self.checkMap(inputNames, str, str, "inputNames")
+            if any([not f in ranges for f in inputNames]):
+                raise ValueError("Some input variables not found in 'ranges' entry")
         else:
             inputNames = dict()
         inputNames = {variable:inputNames[variable] if variable in inputNames else variable for variable in ranges}
         
         #Check if names of output variables are given
         if not outputNames is None:
-            self.checkType(outputNames, dict, "outputNames")
+            self.checkMap(outputNames, str, str, "outputNames")
+            if any([not f in data for f in outputNames]):
+                raise ValueError("Some output variables not found in 'data' entry.")
         else:
             outputNames = dict()
         outputNames = {variable:outputNames[variable] if variable in outputNames else variable for variable in data}
         
         #Check if files are given
         if not files is None:
-            self.checkType(files, dict, "files")
+            self.checkMap(files, str, str, "files")
+            if any([not f in data for f in files]):
+                raise ValueError("Some files not found in 'data' entry.")
         else:
             files = dict()
         files = {variable:files[variable] if variable in files else variable for variable in data}
@@ -592,112 +817,68 @@ class OFTabulation(Utilities):
         
         #Add order to the table properties
         self._baseTableProperties.update(inputVariables=[inputNames[var] for var in self._order])
-        
+    
     #########################################################################
-    # Dunder methods:   
-    def __getitem__(self, index:int|Iterable[int]) -> dict[str,float|None]:
+    #Check that all required files are present in tabulation:
+    def checkDir(self):
         """
-        Get an element in the table.
-
-        Args:
-            index (int | Iterable[int]): The index to access.
+        Check if all information required to read the tabulation are consistent and present in 'path'. Looking for:
+            path
+            path/constant
+            path/tableProperties
+        """
+        if (self.path is None):
+            raise ValueError("The table directory was not initialized.")
+        
+        #Folders:
+        if not(os.path.exists(self.path)):
+            raise IOError("Folder not found '{}', cannot read the tabulation.".format(self.path))
+        
+        if not(os.path.exists(self.path + "/constant")):
+            raise IOError("Folder not found '{}', cannot read the tabulation.".format(self.path + "/constant"))
+        
+        #tableProperties:
+        if not(os.path.exists(self.path + "/tableProperties")):
+            raise IOError("File not found '{}', cannot read the tabulation.".format(self.path + "/tableProperties"))
             
-        Returns:
-            dict[str,float|None]: A dictionary with the values of input and output variables.
+    #########################################################################
+    # Methods:
+    def copy(self):
         """
-        ranges = self.ranges
+        Return a copy of the tabulation. For safety, the new table will not be writable and the path will be set to None.
+        """
+        return self.__class__(
+            ranges=self.ranges, 
+            data={var:self._data[var].table.copy() for var in self.fields}, 
+            path=None, 
+            order=self.order, 
+            noWrite=True, 
+            tablePropertiesParameters=self._baseTableProperties)
+    
+    #####################################
+    slice = sliceOFTable
+    concat = merge = append = concat
+    
+    toPandas = to_pandas = toPandas
+    write = writeOFTable    #Write the table
+    
+    #####################################
+    #Clear the table:
+    def clear(self):
+        """
+        Clear the tabulation.
+        """
+        self._path = None
+        self._noWrite = True
+        self._baseTableProperties = dict()
+        self._order = []
+        self._data = dict()
+        self._inputVariables = dict()
         
-        if isinstance(index, (int, np.integer)):
-            # Convert to access by list
-            return self[self._computeIndex(index)]
-        elif isinstance(index, Iterable):
-            output:dict[str, float] = {}
-            for ii,id in enumerate(index):
-                self.checkType(id, (int, np.integer), f"index[{ii}]")
-                if id >= len(ranges[self.order[ii]]):
-                    raise IndexError(f"index[{ii}] {id} out of range for variable {self.order[ii]} ({id} >= {len(ranges[self.order[ii]])})")
-
-                # Input variables
-                output[self.order[ii]] = ranges[self.order[ii]][id]
-             
-            #Output variables
-            for var in self._data:
-                output[var] =  None if self._data[var] is None else self._data[var].table[index][1]
-            return output
-        else:
-            raise TypeError(f"Cannot access with index of type {index.__class__.__name__}")
-    
-    #####################################
-    #Allow iteration
-    def __iter__(self):
-        """
-        Iterator
-
-        Returns:
-            Self
-        """
-        for ii in range(self.size):
-            yield self[ii]
-    
-    #####################################
-    #Allow iteration
-    def __len__(self) -> int:
-        """The size of the table"""
-        return int(self.size)
-    
-    #####################################
-    #Interpolate in a table
-    def __call__(self, table:str, *args, **kwargs):
-        """
-        Interpolate from a specific table stored in the tabulation.
-
-        Args:
-            table (str): The name of the table to use to interpolate the data.
-            *args: Passed to the '__call__' method of the Tabulation instance to interpolate.
-            **kwargs: Passed to the '__call__' method of the Tabulation instance to interpolate.
-
-        Returns:
-            float|np.ndarray[float]: The interpolated data from the specified table.
-        """
-        self.checkType(table, str, "table")
-        if not table in self.fields:
-            raise ValueError(f"Field '{table}' not found in tabulation. Avaliable fields are:\n\t" + "\n\t".join(self.fields))
-        if self._data[table].table is None:
-            raise ValueError(f"Table for field '{table}' not yet loaded (None).")
-        
-        return self._data[table].table(*args, **kwargs)
+        return self
     
     #########################################################################
-    def __eq__(self, value:OFTabulation) -> bool:
-        if not isinstance(value, OFTabulation):
-            return False
-        
-        #Shape
-        if self.shape != value.shape:
-            return False
-        
-        #Input variables
-        if self._inputVariables != value._inputVariables:
-            return False
-        
-        #Order
-        if self._order != value._order:
-            return False
-        
-        #Tables
-        if self._data != value._data:
-            return False
-        
-        #Meta-data
-        if self._path != value._path:
-            return False
-        if self._baseTableProperties != value._baseTableProperties:
-            return False
-        
-        return True
-    
-    #########################################################################
-    #Provate methods:
+    #Private methods:
     def _readTableProperties(self, *, entryNames:dict[str,str]=None, inputVariables:Iterable[str]=None):
         """
         Read information stored in file 'path/tableProperties'. By convention, 
@@ -802,274 +983,103 @@ class OFTabulation(Utilities):
         return self
     
     #######################################
-    def _computeIndex(self, index:int) -> tuple[int]:
-        """
-        Compute the location of an index inside the table. Getting the index, returns a list of the indices of each input-variable.
-        
-        Args:
-            index (int): The index to access in the flattened dataset.
-        
-        Returns:
-            list[int]
-
-        Returns:
-            list[int]: The corresponding index in the nested dataset.
-            
-        Example:
-            >>> self.shape
-            (2, 3, 4)
-            >>> self._computeIndex(12)
-            (0, 0, 1)
-        """
-        id = [0]*self.ndim
-        for ii in range(self.ndim-1):
-            size = np.prod(self.shape[ii+1:])
-            while index >= size:
-                id[ii] += 1
-                index -= size
-        id[-1] = index
-        return tuple(id)
+    _computeIndex = tableIndex
     
     #########################################################################
-    #Check that all required files are present in tabulation:
-    def checkDir(self):
+    # Dunder methods:   
+    def __getitem__(self, index:int|Iterable[int]|slice) -> dict[str,float]|dict[str,np.ndarray[float]]:
         """
-        Check if all information required to read the tabulation are consistent and present in 'path'. Looking for:
-            path
-            path/constant
-            path/tableProperties
-        """
-        if (self.path is None):
-            raise ValueError("The table directory was not initialized.")
-        
-        #Folders:
-        if not(Utilities.os.path.exists(self.path)):
-            raise IOError("Folder not found '{}', cannot read the tabulation.".format(self.path))
-        
-        if not(Utilities.os.path.exists(self.path + "/constant")):
-            raise IOError("Folder not found '{}', cannot read the tabulation.".format(self.path + "/constant"))
-        
-        #tableProperties:
-        if not(Utilities.os.path.exists(self.path + "/tableProperties")):
-            raise IOError("File not found '{}', cannot read the tabulation.".format(self.path + "/tableProperties"))
-            
-    #########################################################################
-    # Methods:
-    
-    #Merge with other table
-    # def mergeTable(self, fieldName, secondTable):
-    #     """
-    #     fieldName:  str
-    #         Field to use to append second table
-            
-    #     secondTable: Tabulation
-    #         Tabulation containing the data to introduce
-        
-    #     Introduce additional data to the tabulation.
-    #     """
-    #     #Check arguments:
-    #     try:
-    #         Utilities.checkType(fieldName, str, entryName="fieldName")
-    #         Utilities.checkType(secondTable, self.__class__, entryName="secondTable")
-            
-    #         if not fieldName in self.varOrder:
-    #             raise ValueError("Field '{}' not found in table.".format(fieldName))
-            
-    #         if not fieldName in secondTable.varOrder:
-    #             raise ValueError("Field '{}' not found in 'secondTable'.".format(fieldName))
-            
-    #         if self.varOrder != secondTable.varOrder:
-    #             raise ValueError("Tabulation field orders not compatible.\Tabulation fields:\n{}\nFields of tabulation to append:\n{}".format(secondTable.varOrder, self.varOrder))
-            
-    #         #Check if fields already present:
-    #         for item in secondTable.tableProperties[fieldName]:
-    #             if item in self.tableProperties[fieldName]:
-    #                 raise ValueError("Value '{}' already present in range of field '{}'.".format(item, self.tableProperties[fieldName]))
-            
-    #         #Check compatibility:
-    #         otherFields = [f for f in self.varOrder if f != fieldName]
-    #         otherRanges = {f:self.tableProperties[f] for f in otherFields}
-    #         otherRangesSecond = {f:secondTable.tableProperties[f] for f in otherFields}
-    #         if otherRanges != otherRangesSecond:
-    #             raise ValueError("Table ranges of other fields not compatible.\nTable ranges:\n{}\Ranges of table to append:\n{}".format(otherRanges, otherRangesSecond))
-            
-    #     except BaseException as err:
-    #         self.fatalErrorInArgumentChecking(self.mergeTable, err)
-        
-    #     #Append data:
-    #     self.tableProperties[fieldName] += secondTable.tableProperties[fieldName]
-    #     self.tableProperties[fieldName] = sorted(self.tableProperties[fieldName])
-        
-    #     for table in self.tables:
-    #         if self.tables[table] is None:
-    #             self.tables[table] = secondTable.tables[table]
-            
-    #         elif not(self.tables[table] is None) and not(secondTable.tables[table] is None):
-    #             self.tables[table].mergeTable(fieldName, secondTable.tables[table])
-            
-    #     return self
-    
-    #####################################
-    def slice(self, slices:Iterable[slice|Iterable[int]|int]) -> OFTabulation:
-        """Extract a tabulation with sliced dataset. New table is
-        initialized without associated directory (path = None) and 
-        in read-only mode (noWrite = True).
+        Get an element in the table.
 
         Args:
-            slices (Iterable[slice | Iterable[int] | int]): A slicer
-
-        Returns:
-            OFTabulation: The sliced tabulation.
-        """
-        #Check arguments:
-        self.checkType(slices, Iterable, "slices")
-        if not(len(slices) == len(self.order)):
-            raise IndexError("Given {} ranges, while table has {} fields ({}).".format(len(slices), len(self.order), self.order))
-        
-        for ii, ss in enumerate(slices):
-            if isinstance(ss, slice):
-                # Ok
-                pass
-                
-            elif isinstance(ss,int):
-                if ss >= self.size:
-                    raise IndexError(f"Index out of range for slices[{ii}] ({ss} >= {self.size})")
+            index (int | Iterable[int] | slice | Iterable[slice]): Either:
+                - An index to access the table (flattened).
+                - A tuple of the x,y,z,... indices to access the table.
+                - A slice to access the table (flattened).
+                - A tuple of slices to access the table.
             
-            elif isinstance(ss,Iterable):
-                for jj,ind in enumerate(ss):
-                    if ind >= len(self.ranges[self.order[ii]]):
-                        self.checkType(ind, int, f"slices[{ii}][{jj}]")
-                        raise IndexError(f"Index out of range for variable {ii}:{self.order[ii]} ({ind} >= {len(self.ranges[self.order[ii]])})")
-            else:
-                raise TypeError("Type mismatch. Attempting to slice with entry of type '{}'.".format(ss.__class__.__name__))
-        
-        #Create ranges:
-        order = self.order
-        ranges =  dict()
-        for ii,  Slice in enumerate(slices):
-            ranges[order[ii]] = [self.ranges[order[ii]][ss] for ss in Slice]
-        
-        #Create sliced table:
-        newTable = OFTabulation(
-            ranges=ranges, 
-            order=order, 
-            data={var:np.zeros(1,len(ranges[var])) for var in order}, 
-            tablePropertiesParameters=self._baseTableProperties, 
-            names=self.names, 
-            files=self.files)
-        
-        #Set values
-        for field in self.fields:
-            newTable.setTable(variable=field, table=(self.tables[field][slices] if not self.tables[field] is None else None))
-        
-        return newTable
+        Returns:
+            dict[str,float]|dict[str,np.ndarray[float]]: The data stored in the table.
+            - If a single index is given, a dictionary with the output variables at that index.
+            - If slice|Iterable[slice] is given, a dictionary with the output variables at that slice.
+        """
+        return {var:(self._data[var].table[index] if (not self._data[var].table is None) else None) for var in self._data}
     
     #####################################
-    def toPandas(self) -> pd.DataFrame:
+    #Allow iteration
+    def __iter__(self):
         """
-        Convert to a pandas.DataFrame with all the points stored in the tabulation. Columns for input and output variables.
+        Iterator
 
         Returns:
-            pd.DataFrame
+            Self
         """
-        return toPandas(self)
+        for ii in range(self.size):
+            yield self[ii]
     
     #####################################
-    #Write the table:
-    def write(self, path:str=None, binary:bool=False):
-        """
-        Write the tabulation.
-        Directory structure as follows: \\
-           path                         \\
-           |-tableProperties            \\
-           |---constant                 \\
-           |   |-variable1              \\
-           |   |-variable2              \\
-           |   |-...                    \\
-           |---system                   \\
-               |-controlDict            \\
-        
-        Args:
-            path (str, optional): Path where to save the table. In case not give, self.path is used. Defaults to None.
-            binary (bool, optional): Writing in binary? Defaults to False.
-        """
-        if not path is None:
-            self.checkType(path, str, "path")
-        
-        path = self.path if path is None else path
-        if path is None:
-            raise ValueError("Cannot save tabulation: path was not defined ('self.path' and 'path' are None)")
-        
-        if self.noWrite:
-            raise IOError("Trying to write tabulation when opered in read-only mode. Set 'noWrite' to False to write files.")
-        
-        #Remove if found
-        if os.path.isdir(path):
-            self.runtimeWarning(f"Overwriting table at '{path}'", stack=False)
-            shutil.rmtree(path)
-        
-        #Create path
-        os.makedirs(path)
-        os.makedirs(path + "/constant")
-        os.makedirs(path + "/system")
-        
-        #Table properties:
-        tablePros = ParsedParameterFile(path + "/tableProperties", noHeader=True, dontRead=True, createZipped=False)
-        tablePros.content = self.tableProperties
-        tablePros.writeFile()
-        
-        #Tables:
-        for table in self.tables:
-            if not(self.tables[table] is None): #Check if the table was defined
-                writeOFscalarList(
-                    self.tables[table].data.flatten(), 
-                    path=path + "/constant/" + self.files[table],
-                    binary=binary)
-        
-        #Control dict
-        controlDict = ParsedParameterFile(path + "/system/controlDict", dontRead=True, createZipped=False)
-        controlDict.header = \
-            {
-                "class":"dictionary",
-                "version":2.0,
-                "object":"controlDict",
-                "location":path + "/system/",
-                "format": "ascii"
-            }
-        controlDict.content = \
-            {
-                "startTime"        :    0,
-                "endTime"          :    1,
-                "deltaT"           :    1,
-                "application"      :    "dummy",
-                "startFrom"        :    "startTime",
-                "stopAt"           :    "endTime",
-                "writeControl"     :    "adjustableRunTime",
-                "writeInterval"    :    1,
-                "purgeWrite"       :    0,
-                "writeFormat"      :    "binary" if binary else "ascii",
-                "writePrecision"   :    6,
-                "writeCompression" :    "uncompressed",
-                "timeFormat"       :    "general",
-                "timePrecision"    :    6,
-                "adjustTimeStep"   :    "no",
-                "maxCo"            :    1,
-                "runTimeModifiable":    "no",
-            }
-        controlDict.writeFile()
-        
-        
+    #Allow iteration
+    def __len__(self) -> int:
+        """The size of the table"""
+        return int(self.size)
+    
     #####################################
-    #Clear the table:
-    def clear(self):
+    #Interpolate in a table
+    def __call__(self, table:str, *args, **kwargs):
         """
-        Clear the tabulation.
+        Interpolate from a specific table stored in the tabulation.
+
+        Args:
+            table (str): The name of the table to use to interpolate the data.
+            *args: Passed to the '__call__' method of the Tabulation instance to interpolate.
+            **kwargs: Passed to the '__call__' method of the Tabulation instance to interpolate.
+
+        Returns:
+            float|np.ndarray[float]: The interpolated data from the specified table.
         """
-        self._path:str|None = None
-        self._noWrite:bool = True
-        self._tableProperties:dict[str,Any] = dict()
-        self._order:list[str] = []
-        self._data:dict[str,_TableData] = dict()
-        self._inputVariables:dict[str,_InputProps] = dict()
+        self.checkType(table, str, "table")
+        if not table in self.fields:
+            raise ValueError(f"Field '{table}' not found in tabulation. Avaliable fields are:\n\t" + "\n\t".join(self.fields))
+        if self._data[table].table is None:
+            raise ValueError(f"Table for field '{table}' not yet loaded (None).")
         
+        return self._data[table].table(*args, **kwargs)
+    
+    #####################################
+    def __eq__(self, value:OFTabulation) -> bool:
+        if not isinstance(value, OFTabulation):
+            return False
+        
+        #Shape
+        if self.shape != value.shape:
+            return False
+        
+        #Input variables
+        if self._inputVariables != value._inputVariables:
+            return False
+        
+        #Order
+        if self._order != value._order:
+            return False
+        
+        #Tables
+        if self._data != value._data:
+            return False
+        
+        #Removed check of metadata
+        
+        return True
+
+    #####################################
+    def __add__(self, table:OFTabulation) -> OFTabulation:
+        """
+        Concatenate two tables. Alias for 'concat'.
+        """
+        return self.concat(table, inplace=False, fillValue=None, overwrite=False)
+    
+    def __iadd__(self, table:OFTabulation) -> OFTabulation:
+        """
+        Concatenate two tables in-place. Alias for 'concat'.
+        """
+        self.concat(table, inplace=True, fillValue=None, overwrite=False)
         return self
