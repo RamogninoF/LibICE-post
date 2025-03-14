@@ -31,6 +31,8 @@ from matplotlib import pyplot as plt
 import itertools
 import warnings
 
+from .BaseTabulation import BaseTabulation
+
 #####################################################################
 #                            AUXILIARY CLASSES                      #
 #####################################################################
@@ -76,38 +78,6 @@ def toPandas(table:Tabulation) -> DataFrame:
 
 #Alias
 to_pandas = toPandas
-
-#############################################################################
-def getInput(table:Tabulation, index:int|Iterable[int]) -> dict[str,float]:
-    """
-    Get the input values at a slice of the table.
-
-    Args:
-        table (Tabulation): The table to access.
-        index (int | Iterable[int]): The index to access.
-        
-    Returns:
-        dict[str:float]: A tuple with a dictionary mapping the names of input-variables to corresponding values
-    """
-    checkType(table, Tabulation, "table")
-    ranges = table.ranges
-    
-    if isinstance(index, (int, np.integer)): #Single index
-        # Convert to access by list
-        return {table.order[ii]:ranges[table.order[ii]][id] for ii,id in enumerate(table._computeIndex(index))}
-    elif isinstance(index, Iterable): #List of indexes
-        output = {}
-        for ii,id in enumerate(index):
-            table.checkType(id, (int, np.integer), f"index[{ii}]")
-            if id >= len(ranges[table.order[ii]]):
-                raise IndexError(f"index[{ii}] {id} out of range for variable {table.order[ii]} ({id} >= {len(ranges[table.order[ii]])})")
-
-            # Input variables
-            output[table.order[ii]] = ranges[table.order[ii]][id]
-        
-        return output
-    else:
-        raise TypeError(f"Cannot access table with index of type {index.__class__.__name__}")
 
 #############################################################################
 def insertDimension(table:Tabulation, field:str, value:float, index:int, inplace:bool=False) -> Tabulation|None:
@@ -480,56 +450,16 @@ def plotTable(   table:Tabulation,
     return ax
 
 #############################################################################
-def tableIndex(table:Tabulation, index:int|Iterable[int]|slice) -> tuple[int]|Iterable[tuple[int,...]]:
-    """
-    Compute the location of an index inside a table. Getting the index, returns a list of the indices of each input-variable.
-    
-    Args:
-        table (Tabulation): The table to access.
-        index (int | Iterable[int] | slice): The index to access.
-    
-    Returns:
-        tuple[int] | Iterable[tuple[int,...]]: The index/indices:
-            - If int is given, returns tuple[int].
-            - If slice or Iterable[int] is given, returns Iterable[tuple[int,...]].
-        
-    Example:
-        >>> self.shape
-        (2, 3, 4)
-        >>> self._computeIndex(12)
-        (1, 0, 0)
-        >>> self._computeIndex([0, 1, 2])
-        [(0, 0, 0), (0, 0, 1), (0, 0, 2)]
-        >>> self._computeIndex(slice(0, 3))
-        [(0, 0, 0), (0, 0, 1), (0, 0, 2)]
-    """
-    # If slice, convert to list of index
-    if isinstance(index, slice):
-        index = list(range(*index.indices(table.size)))
-        index = np.array(index, dtype=np.intp)
-    
-    #Compute index
-    out = np.unravel_index(index, table.shape)
-    
-    #Check if out is a tuple of array, if so reshape
-    if isinstance(out[0], np.ndarray):
-        out = [tuple(row) for row in np.transpose(out)]
-    return out
-
-#############################################################################
 #                               MAIN CLASSES                                #
 #############################################################################
 #Class used for storing and handling a generic tabulation:
-class Tabulation(Utilities):
+class Tabulation(BaseTabulation):
     """
     Class used for storing and handling a tabulation from a structured grid in an n-dimensional space of input-variables. 
     """
     
     _ranges:dict[str,np.ndarray]
     """The sampling points for each input-variable"""
-    
-    _order:list[str]
-    """The order in which the input variables are nested"""
     
     _data:np.ndarray
     """The n-dimensional dataset of the table"""
@@ -606,28 +536,11 @@ class Tabulation(Utilities):
         self._createInterpolator()
     
     ####################################
-    @property
-    def order(self) -> list[str]:
-        """
-        The order in which variables are nested.
-
-        Returns:
-            list[str]
-        """
-        return self._order[:]
-    
-    @order.setter
+    @BaseTabulation.order.setter
     def order(self, order:Iterable[str]):
-        self.checkArray(order, str, "order")
-        
-        if not len(order) == len(self.order):
-            raise ValueError("Length of new order is inconsistent with number of variables in the table.")
-        
-        if not sorted(self.order) == sorted(order):
-            raise ValueError("Variables for new ordering are inconsistent with variables in the table.")
-        
-        self._data = self._data.transpose(*[self.order.index(o) for o in order])
-        self._order = order
+        oldOrder = self.order
+        BaseTabulation.order.fset(self, order)
+        self._data = self._data.transpose(*[oldOrder.index(o) for o in order])
         
         #Update interpolator
         self._createInterpolator()
@@ -791,12 +704,8 @@ class Tabulation(Utilities):
         
         self._interpolator = RegularGridInterpolator(tuple(ranges), tab, **opts)
     
-    #######################################
-    _computeIndex = tableIndex
-        
     #########################################################################
     #Public member functions:
-    getInput = getInput
     append = merge = concat = concat
     insertDimension = insertDimension
     slice = sliceTable
@@ -967,34 +876,17 @@ class Tabulation(Utilities):
         
         return True
     
-    #####################################
-    #Allow iteration
-    def __iter__(self):
-        """
-        Iterator
-
-        Returns:
-            Self
-        """
-        for ii in range(self.size):
-            yield self[ii]
-    
-    def __len__(self) -> int:
-        """
-        Returns the number of data-points stored in the table.
-        """
-        return self.size
-    
     #######################################
-    def __add__(self, table:Tabulation) -> Tabulation:
+    def __str__(self):
         """
-        Concatenate two tables. Alias for 'concat'.
+        String representation of the tabulation.
         """
-        return self.concat(table, inplace=False, fillValue=None, overwrite=False)
+        string = super().__str__()
+        string += self.to_pandas().to_string()
+        return string
     
-    def __iadd__(self, table:Tabulation) -> Tabulation:
+    def __repr__(self):
         """
-        Concatenate two tables in-place. Alias for 'concat'.
+        Representation of the tabulation.
         """
-        self.concat(table, inplace=True, fillValue=None, overwrite=False)
-        return self
+        return super().__repr__() + f"data={self.data})"
