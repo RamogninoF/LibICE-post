@@ -1,5 +1,6 @@
 import pytest
 import numpy as np
+import pandas as pd
 import os
 import shutil
 from libICEpost.src.base.dataStructures.Tabulation.OFTabulation import OFTabulation
@@ -258,3 +259,209 @@ def test_OFTabulation_slice():
         table.slice(ranges={"x": [0.0, 3.0], "y": [0.0]})
     with pytest.raises(TypeError):
         table.slice(slices="a")
+
+def test_OFTabulation_insertDimension():
+    ranges = {
+        "x": [0.0, 1.0, 2.0],
+        "y": [0.0, 1.0]
+    }
+    data = {
+        "z": [0.0, 1.0, 2.0, 3.0, 4.0, 5.0]
+    }
+    order = ["x", "y"]
+    
+    table = OFTabulation(ranges=ranges, data=data, order=order)
+    
+    # Insert dimension
+    new_table = table.insertDimension(variable="w", value=0.5, index=0)
+    assert new_table.shape == (1, 3, 2)
+    assert new_table.size == 6
+    assert new_table.order == ["w", "x", "y"]
+    assert new_table.fields == ["z"]
+    assert np.array_equal(new_table.ranges["w"], np.array([0.5]))
+    assert np.array_equal(new_table.ranges["x"], np.array([0.0, 1.0, 2.0]))
+    assert np.array_equal(new_table.ranges["y"], np.array([0.0, 1.0]))
+    assert np.array_equal(new_table.tables["z"].data.flatten(), np.array([0.0, 1.0, 2.0, 3.0, 4.0, 5.0]))
+    
+    # Insert dimension in-place
+    table.insertDimension(variable="w", value=0.5, index=0, inplace=True)
+    assert table.shape == (1, 3, 2)
+    assert table.size == 6
+    assert table.order == ["w", "x", "y"]
+    assert table.fields == ["z"]
+    assert np.array_equal(table.ranges["w"], np.array([0.5]))
+    assert np.array_equal(table.ranges["x"], np.array([0.0, 1.0, 2.0]))
+    assert np.array_equal(table.ranges["y"], np.array([0.0, 1.0]))
+    assert np.array_equal(table.tables["z"].data.flatten(), np.array([0.0, 1.0, 2.0, 3.0, 4.0, 5.0]))
+    
+    # Assert wrong input
+    with pytest.raises(IndexError):
+        table.insertDimension(variable="w", value=0.5, index=4)
+    with pytest.raises(TypeError):
+        table.insertDimension(variable="w", value="a", index=0)
+    with pytest.raises(TypeError):
+        table.insertDimension(variable=0.5, value=0.5, index=0)
+
+def test_OFTabulation_toPandas():
+    ranges = {
+        "x": [0.0, 1.0, 2.0],
+        "y": [0.0, 1.0]
+    }
+    data = {
+        "z": [0.0, 1.0, 2.0, 3.0, 4.0, 5.0]
+    }
+    order = ["x", "y"]
+    
+    table = OFTabulation(ranges=ranges, data=data, order=order)
+    
+    # Convert to pandas DataFrame
+    df = table.toPandas()
+    
+    assert df.shape == (6, 3)
+    assert list(df.columns) == ["x", "y", "z"]
+    assert np.array_equal(df["x"].values, np.array([0.0, 0.0, 1.0, 1.0, 2.0, 2.0]))
+    assert np.array_equal(df["y"].values, np.array([0.0, 1.0, 0.0, 1.0, 0.0, 1.0]))
+    assert np.array_equal(df["z"].values, np.array([0.0, 1.0, 2.0, 3.0, 4.0, 5.0]))
+
+def test_OFTabulation_fromPandas():
+    data = {
+        "x": [0.0, 0.0, 1.0, 1.0, 2.0, 2.0],
+        "y": [0.0, 1.0, 0.0, 1.0, 0.0, 1.0],
+        "z": [0.0, 1.0, 2.0, 3.0, 4.0, 5.0]
+    }
+    df = pd.DataFrame(data)
+    order = ["x", "y"]
+    
+    table = OFTabulation.fromPandas(df, order)
+    
+    assert table.shape == (3, 2)
+    assert table.size == 6
+    assert table.order == order
+    assert table.fields == ["z"]
+    assert np.array_equal(table.ranges["x"], np.array([0.0, 1.0, 2.0]))
+    assert np.array_equal(table.ranges["y"], np.array([0.0, 1.0]))
+    assert np.array_equal(table.tables["z"].data.flatten(), np.array([0.0, 1.0, 2.0, 3.0, 4.0, 5.0]))
+
+    #Try with different order
+    order2 = ["y", "x"]
+    table = OFTabulation.fromPandas(df, order2)
+    
+    assert table.shape == (2, 3)
+    assert table.size == 6
+    assert table.order == order2
+    assert table.fields == ["z"]
+    assert np.array_equal(table.ranges["x"], np.array([0.0, 1.0, 2.0]))
+    assert np.array_equal(table.ranges["y"], np.array([0.0, 1.0]))
+    assert np.array_equal(table.tables["z"].data.flatten(), np.array([0.0, 2.0, 4.0, 1.0, 3.0, 5.0]))
+
+    # Assert wrong input
+    with pytest.raises(ValueError):
+        OFTabulation.fromPandas(df, ["x", "y", "z"])
+    with pytest.raises(ValueError):
+        OFTabulation.fromPandas(df, ["x"])
+    with pytest.raises(ValueError):
+        OFTabulation.fromPandas(df, ["a", "b"])
+
+@pytest.mark.filterwarnings("error::libICEpost.src.base.dataStructures.Tabulation.Tabulation.TabulationAccessWarning")
+def test_OFTabulation_call():
+    ranges = {
+        "x": [0.0, 1.0, 2.0],
+        "y": [0.0, 1.0]
+    }
+    data = {
+        "z": [0.0, 1.0, 2.0, 3.0, 4.0, 5.0]
+    }
+    order = ["x", "y"]
+    
+    table = OFTabulation(ranges=ranges, data=data, order=order)
+    
+    # Interpolate values
+    assert table("z", 0.0, 0.0) == 0.0
+    assert table("z", 1.0, 1.0) == 3.0
+    assert table("z", 2.0, 0.0) == 4.0
+    assert np.array_equal(table("z", [0, 1], [2, 1]), [1, 5])
+    assert np.isnan(table("z", 0.0, 5.0, outOfBounds="nan"))
+    
+    # Assert wrong input
+    with pytest.raises(ValueError):
+        table("a", 0.0, 0.0)
+    with pytest.raises(ValueError):
+        table("z", 3.0, 0.0)
+    with pytest.raises(ValueError):
+        table("z", 0.0, 2.0)
+    with pytest.raises(ValueError):
+        table("z", [0, 0], [5, 0])
+
+def test_OFTabulation_access_methods():
+    ranges = {
+        "x": [0.0, 1.0, 2.0],
+        "y": [0.0, 1.0]
+    }
+    data = {
+        "z": [0.0, 1.0, 2.0, 3.0, 4.0, 5.0]
+    }
+    order = ["x", "y"]
+    
+    table = OFTabulation(ranges=ranges, data=data, order=order)
+    
+    # Test setFile
+    table.setFile("z", "new_file")
+    assert table.files["z"] == "new_file"
+    
+    # Test setTable
+    new_data = [5.0, 4.0, 3.0, 2.0, 1.0, 0.0]
+    new_table = OFTabulation(ranges=ranges, data={"z": new_data}, order=order)
+    table.setTable("z", new_table.tables["z"])
+    assert np.array_equal(table.tables["z"].data.flatten(), np.array(new_data))
+    
+    # Test addField
+    table.addField(data=[10.0, 20.0, 30.0, 40.0, 50.0, 60.0], field="w")
+    assert "w" in table.fields
+    assert np.array_equal(table.tables["w"].data.flatten(), np.array([10.0, 20.0, 30.0, 40.0, 50.0, 60.0]))
+    
+    # Test delField
+    table.delField("w")
+    assert "w" not in table.fields
+    
+    # Test setName
+    table.setName("x", "X")
+    assert table.names["x"] == "X"
+    
+    # Test outOfBounds
+    table.outOfBounds("z", "nan")
+    assert table.outOfBounds("z") == "nan"
+    
+    # Assert wrong input
+    with pytest.raises(ValueError):
+        table.setFile("a", "file")
+    with pytest.raises(ValueError):
+        table.setTable("a", new_table.tables["z"])
+    with pytest.raises(ValueError):
+        table.addField(data=[10.0, 20.0], field="w")
+    with pytest.raises(ValueError):
+        table.addField(data=table.tables["z"].data, field="z")
+    with pytest.raises(ValueError):
+        table.delField("a")
+    with pytest.raises(ValueError):
+        table.setName("a", "A")
+    with pytest.raises(KeyError):
+        table.outOfBounds("a", "nan")
+    with pytest.raises(ValueError):
+        table.outOfBounds("z", "clamp")
+
+def test_OFTabulation_str_repr():
+    ranges = {
+        "x": [0.0, 1.0, 2.0],
+        "y": [0.0, 1.0]
+    }
+    data = {
+        "z": [0.0, 1.0, 2.0, 3.0, 4.0, 5.0]
+    }
+    order = ["x", "y"]
+    
+    table = OFTabulation(ranges=ranges, data=data, order=order)
+    
+    # Test __str__
+    str_table = str(table)
+    # Test __repr__
+    repr_table = repr(table)

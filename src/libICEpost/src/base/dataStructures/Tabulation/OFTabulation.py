@@ -103,7 +103,8 @@ def toPandas(table:OFTabulation) -> pd.DataFrame:
     for ii, item in enumerate(table):
         input = table.getInput(ii)
         df.loc[ii, list(input.keys())] = [input[it] for it in input.keys()]
-        df.loc[ii, "output"] = item
+        for jj, f in enumerate(table.fields):
+            df.loc[ii, f] = item[f]
     
     return df
 
@@ -404,7 +405,7 @@ def insertDimension(table:OFTabulation, *, variable:str, value:float, index:int,
     #Insert the new variable in the tables
     for var in table.fields:
         if not table.tables[var] is None:
-            table.tables[var].insertDimension(value=value, index=index, inplace=True)
+            table._data[var].table.insertDimension(variable=variable, value=value, index=index, inplace=True)
 
 #############################################################################
 def squeeze(table:OFTabulation, *, inplace:bool=False) -> OFTabulation|None:
@@ -607,110 +608,6 @@ class OFTabulation(BaseTabulation):
         return len(self.order)
     
     #########################################################################
-    #Setters:
-    def setFile(self, variable:str, file:str) -> None:
-        """Set the name of the file where to save the table of a variable.
-
-        Args:
-            variable (str): The variable to set the file-name of.
-            file (str): The name of the file.
-        """
-        self.checkType(variable, str, "variable")
-        self.checkType(file, str, "name")
-        
-        if not variable in self._data:
-            raise ValueError("Variable not stored in the tabulation. Avaliable variables are:\n\t" + "\n\t".join(self.names.keys()))
-        
-        self._data[variable].file = file
-    
-    ################################
-    def setTable(self, variable:str, table:Tabulation|None) -> None:
-        """Set the name of the file where to save the table of a variable.
-
-        Args:
-            variable (str): The variable to set the file-name of.
-            file (str): The name of the file.
-        """
-        self.checkType(variable, str, "variable")
-        
-        #If table is not None
-        if not table is None:
-            self.checkType(table, Tabulation, "table")
-        
-            if not variable in self._data:
-                raise ValueError("Variable not stored in the tabulation. Avaliable variables are:\n\t" + "\n\t".join(self.names.keys()))
-            
-            #TODO: check consistency of table
-            raise NotImplementedError("Setting of table not yet implemented")
-        
-        self._data[variable].table = table
-    
-    ################################
-    def addField(self, data:Iterable[float]|float|int|Tabulation=None, *, variable:str, file:str=None, **kwargs):
-        """Add a new tabulated field (output variable).
-
-        Args:
-            variable (str): The name of the variable.
-            data (Iterable | list[float] | float | Tabulation, optional): The data used to construct the tabulation. Defaults to None.
-            file (str, optional): The name of the file for I/O. Defaults to None (same as 'variable' value).
-            **kwargs: Keyword arguments for construction of each Tabulation object.
-        """
-        self.checkType(variable, str, "variable")
-        self.checkType(file, str, "file")
-        
-        if variable in self._data:
-            raise ValueError("Variable already stored in the tabulation.")
-        
-        if isinstance(data, Iterable):
-            #Construct from list of values
-            if not (len(data) == self.size):
-                raise ValueError(f"Length of data not compatible with sampling points ({len(data)} != {self.size})")
-            table = Tabulation(data, ranges=self.ranges, order=self.order, **kwargs)
-            
-        elif isinstance(data, (float, int)):
-            #Uniform
-            table = Tabulation(np.array([data]*self.size), ranges=self.ranges, order=self.order, **kwargs)
-        elif isinstance(data, Tabulation):
-            #TODO: check consistency
-            raise NotImplementedError("Adding field from Tabulation not yet implemented.")
-            table = data.copy()
-        else:
-            raise TypeError(f"Cannot add field '{variable}' from data of type {data.__class__.__name__}")
-        
-        #Store
-        self._data[variable] = _TableData(file=file, table=table)
-    
-    ################################
-    def delField(self, variable:str):
-        """Set the name of the file where to save the table of a variable.
-
-        Args:
-            variable (str): The variable to set the file-name of.
-        """
-        self.checkType(variable, str, "variable")
-        
-        if not variable in self._data:
-            raise ValueError("Variable not stored in the tabulation. Avaliable variables are:\n\t" + "\n\t".join(self.names.keys()))
-        
-        del self._data[variable]
-    
-    ################################
-    def setName(self, variable:str, name:str) -> None:
-        """Set the name of a input-variable to use in the 'tableProperties' dictionary.
-
-        Args:
-            variable (str): The input-variable to set the name of.
-            name (str): The name of the input-variable.
-        """
-        self.checkType(variable, str, "variable")
-        self.checkType(name, str, "name")
-        
-        if not variable in self._names:
-            raise ValueError("Variable not stored in the tabulation. Avaliable variables are:\n\t" + "\n\t".join(self.names.keys()))
-        
-        self._inputVariables[variable] = name
-    
-    #########################################################################
     #Class methods:
     @classmethod
     def fromFile(cls, 
@@ -748,9 +645,10 @@ class OFTabulation(BaseTabulation):
             noRead (Iterable[str], optional): Do not read the data of the given variables. Defaults to None.
             verbose (bool, optional): Print information. Defaults to True.
             **kwargs: Optional keyword arguments of Tabulation.__init__ method of each Tabulation object.
-
+            
         Kwargs:
             outOfBounds (Literal['fatal', 'clamp', 'extrapolate'], optional): Option to perform in case of out-of-bounds data (TODO).
+        
         Returns:
             OFTabulation: The tabulation loaded from files.
         """
@@ -790,16 +688,48 @@ class OFTabulation(BaseTabulation):
             if not(f in noRead):
                 tab._readTable(fileName=files[f], tableName=outputNames[f], verbose=verbose, **kwargs)
             else:
-                tab.addField(data=None, variable=outputNames[f], file=files[f], **kwargs)
+                tab.addField(data=None, field=outputNames[f], file=files[f], **kwargs)
         
         return tab
     
     ##################################
     @classmethod
-    def from_pandas(cls, data, order, *args, **kwargs):
-        #TODO: implement
-        raise NotImplementedError("Method not yet implemented.")
-    
+    def from_pandas(cls, data:pd.DataFrame, order:Iterable[str], **kwargs):
+        """
+        Construct a tabulation from a pandas DataFrame.
+
+        Args:
+            data (pd.DataFrame): The data to construct the tabulation.
+            order (Iterable[str]): The order of the input-variables.
+            **kwargs: Optional keyword arguments of OFTabulation.__init__ method.
+        
+        Kwargs:
+            outOfBounds (Literal['fatal', 'clamp', 'extrapolate'], optional): Option to perform in case of out-of-bounds data (TODO).
+        
+        Returns:
+            OFTabulation: The tabulation constructed from the pandas DataFrame.
+        """
+        checkType(data, pd.DataFrame, "data")
+        checkArray(order, str, "order")
+        
+        #Check if all variables are present
+        if not all([var in data.columns for var in order]):
+            raise ValueError("Some input variables not found in the DataFrame.")
+        
+        #Determine the fields
+        fields = [var for var in data.columns if not var in order]
+        if len(fields) == 0:
+            raise ValueError("No fields found in the DataFrame.")
+        
+        #Sort the dataframe to match the nesting order of the tabulation
+        data_sorted = data.sort_values(by=order, ascending=True, ignore_index=True)
+        
+        #Extract the data
+        ranges = {var:data[var].unique() for var in order}
+        data = {var:data_sorted[var].values for var in fields}
+        
+        return cls(ranges=ranges, data=data, order=order, **kwargs)
+        
     #Aliases
     fromPandas = from_pandas
     
@@ -831,6 +761,10 @@ class OFTabulation(BaseTabulation):
             noWrite (bool, optional): Forbid writing (prevent overwrite). Defaults to True.
             tablePropertiesParameters (dict[str,Any], optional): Additional parameters to store in the tableProperties. Defaults to None.
             **kwargs: Optional keyword arguments of Tabulation.__init__ method of each Tabulation object.
+        
+        Kwargs:
+            outOfBounds (Literal['fatal', 'clamp', 'extrapolate'], optional): Option to perform in case of out-of-bounds data (TODO).
+        
         """
         if set(ranges.keys()) != set(order):
             raise ValueError("Inconsistent order of input-variables and ranges.")
@@ -873,7 +807,7 @@ class OFTabulation(BaseTabulation):
         
         #Add tables
         for variable in data:
-            self.addField(data[variable], variable=outputNames[variable], file=files[variable], **kwargs)
+            self.addField(data[variable], field=outputNames[variable], file=files[variable], **kwargs)
         
         #Additional parameters
         self._path = path
@@ -949,6 +883,139 @@ class OFTabulation(BaseTabulation):
         self._inputVariables = dict()
         
         return self
+    
+    #########################################################################
+    #Access (setter/getter):
+    def setFile(self, field:str, file:str) -> None:
+        """Set the name of the file where to save the table of a field.
+
+        Args:
+            field (str): The field to set the file-name of.
+            file (str): The name of the file.
+        """
+        self.checkType(field, str, "field")
+        self.checkType(file, str, "name")
+        
+        if not field in self._data:
+            raise ValueError("Field not stored in the tabulation. Avaliable field are:\n\t" + "\n\t".join(self.names.keys()))
+        
+        self._data[field].file = file
+    
+    ################################
+    def setTable(self, field:str, table:Tabulation|None) -> None:
+        """Overwrite the table of a field.
+
+        Args:
+            field (str): The field to set the file-name of.
+            file (str): The name of the file.
+        """
+        self.checkType(field, str, "field")
+        if not field in self._data:
+            raise ValueError("Field not stored in the tabulation. Avaliable field are:\n\t" + "\n\t".join(self.names.keys()))
+            
+        #If table is not None
+        if not table is None:
+            self.checkType(table, Tabulation, "table")
+
+            #check consistency of table
+            if not table.order == self.order:
+                raise ValueError("Inconsistent order of input-variables between the tabulation and the table to set.")
+            for rr in table.ranges:
+                if not np.allclose(table.ranges[rr], self.ranges[rr]):
+                    raise ValueError(f"Inconsistent ranges for variable '{rr}' between the tabulation and the table to set.")
+            table = table.copy()
+            
+        #Set the table
+        self._data[field].table = table
+    
+    ################################
+    def addField(self, data:Iterable[float]|float|int|Tabulation|None, *, field:str, file:str=None, **kwargs):
+        """Add a new tabulated field (output variable).
+
+        Args:
+            field (str): The name of the variable.
+            data (Iterable | list[float] | float | Tabulation): The data used to construct the tabulation. Defaults to None.
+            file (str, optional): The name of the file for I/O. Defaults to None (same as 'field' value).
+            **kwargs: Keyword arguments for construction of each Tabulation object.
+        """
+        self.checkType(field, str, "variable")
+        self.checkType(file, str, "file", allowNone=True)
+        
+        if field in self._data:
+            raise ValueError("Field already stored in the tabulation.")
+        
+        if file is None:
+            file = field
+        
+        elif isinstance(data, Tabulation):
+            #Check consistency
+            if not data.order == self.order:
+                raise ValueError("Inconsistent order of input-variables between the tabulation and the table to set.")
+            for rr in data.ranges:
+                if not np.allclose(data.ranges[rr], self.ranges[rr]):
+                    raise ValueError(f"Inconsistent ranges for variable '{rr}' between the tabulation and the table to set.")
+            table = Tabulation(data, ranges=self.ranges, order=self.order, **kwargs)
+        if isinstance(data, (float, int)): #Uniform data
+            table = Tabulation(np.array([data]*self.size), ranges=self.ranges, order=self.order, **kwargs)
+        elif isinstance(data, Iterable): #Construct from list of values
+            if not (len(data) == self.size):
+                raise ValueError(f"Length of data not compatible with sampling points ({len(data)} != {self.size})")
+            table = Tabulation(data, ranges=self.ranges, order=self.order, **kwargs)
+        else:
+            raise TypeError(f"Cannot add field '{field}' from data of type {data.__class__.__name__}")
+        
+        #Store
+        self._data[field] = _TableData(file=file, table=table)
+    
+    ################################
+    def delField(self, field:str):
+        """
+        Delete a field from the tabulation.
+
+        Args:
+            field (str): The field to delete.
+        """
+        self.checkType(field, str, "field")
+        
+        if not field in self._data:
+            raise ValueError("Variable not stored in the tabulation. Avaliable field are:\n\t" + "\n\t".join(self.names.keys()))
+        
+        del self._data[field]
+    
+    ################################
+    def setName(self, variable:str, name:str) -> None:
+        """
+        Set the name of a input-variable to use in the 'tableProperties' dictionary.
+
+        Args:
+            variable (str): The input-variable to set the name of.
+            name (str): The name of the input-variable.
+        """
+        self.checkType(variable, str, "variable")
+        self.checkType(name, str, "name")
+        
+        if not variable in self._inputVariables:
+            raise ValueError("Variable not stored in the tabulation. Avaliable variables are:\n\t" + "\n\t".join(self.names.keys()))
+        
+        self._inputVariables[variable].name = name
+    
+    ################################
+    def outOfBounds(self, field:str, method:str=None) -> str|None:
+        """Get/set the out-of-bounds method for a field.
+        
+        Args:
+            field (str): The field to get/set the out-of-bounds method.
+            method (str, optional): The method to set. Defaults to None.
+            
+        Returns:
+            str|None: The out-of-bounds method for the field if method is not None, None otherwise.
+        """
+        checkType(field, str, "field", allowNone=True)
+        checkType(method, str, "method", allowNone=True)
+        if not method is None:
+            self._data[field].table.outOfBounds = method
+        else:
+            return self._data[field].table.outOfBounds
     
     #########################################################################
     #Private methods:
@@ -1058,7 +1125,7 @@ class OFTabulation(BaseTabulation):
             raise IOError(f"Size of table stored in '{tabPath}' is not consistent with the size of the tabulation ({len(tab)} != {self.size}).")
         
         #Add the tabulation
-        self.addField(data=tab, variable=tableName, file=fileName)
+        self.addField(data=tab, field=tableName, file=fileName)
         
         return self
     
