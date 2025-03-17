@@ -191,30 +191,30 @@ class BaseTabulation(Utilities, metaclass=ABCMeta):
     getInput = getInput
     
     @abstractmethod
-    def insertDimension(self, field:str, value:float, index:int, inplace:bool=False) -> BaseTabulation|None:
+    def insertDimension(self, variable:str, value:float, index:int, inplace:bool=False) -> BaseTabulation|None:
         """
         Insert an axis to the dimension-set of the table with a single value. 
-        This is useful to merge two tables with respect to an additional field.
+        This is useful to merge two tables with respect to an additional variable.
         
         Args:
             table (BaseTabulation): The table to modify.
-            field (str): The name of the field to insert.
-            value (float): The value for the range of the corresponding field.
-            index (int): The index where to insert the field in nesting order.
+            variable (str): The name of the variable to insert.
+            value (float): The value for the range of the corresponding variable.
+            index (int): The index where to insert the variable in nesting order.
             inplace (bool, optional): If True, the operation is performed in-place. Defaults to False.
             
         Returns:
             BaseTabulation|None: The table with the inserted dimension if inplace is False, None otherwise.
             
         Example:
-            Create a table with two fields:
+            Create a table with two variables:
             ```
             >>> tab1 = Tabulation([1, 2, 3, 4], {"x":[0, 1], "y":[0, 1]}, ["x", "y"])
             >>> tab1.insertDimension("z", 0.0, 1)
             >>> tab1.ranges
             {"x":[0, 1], "z":[0.0], "y":[0, 1]}
             ```
-            Create a second table with the same fields:
+            Create a second table with the same variables:
             ```
             >>> tab2 = Tabulation([5, 6, 7, 8], {"x":[0, 1], "y":[0, 1]}, ["x", "y"])
             >>> tab2.insertDimension("z", 1.0, 1)

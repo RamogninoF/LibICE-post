@@ -80,30 +80,30 @@ def toPandas(table:Tabulation) -> DataFrame:
 to_pandas = toPandas
 
 #############################################################################
-def insertDimension(table:Tabulation, field:str, value:float, index:int, inplace:bool=False) -> Tabulation|None:
+def insertDimension(table:Tabulation, variable:str, value:float, index:int, inplace:bool=False) -> Tabulation|None:
     """
     Insert an axis to the dimension-set of the table with a single value. 
-    This is useful to merge two tables with respect to an additional field.
+    This is useful to merge two tables with respect to an additional variable.
     
     Args:
         table (Tabulation): The table to modify.
-        field (str): The name of the field to insert.
-        value (float): The value for the range of the corresponding field.
-        index (int): The index where to insert the field in nesting order.
+        variable (str): The name of the variable to insert.
+        value (float): The value for the range of the corresponding variable.
+        index (int): The index where to insert the variable in nesting order.
         inplace (bool, optional): If True, the operation is performed in-place. Defaults to False.
         
     Returns:
         Tabulation|None: The table with the inserted dimension if inplace is False, None otherwise.
         
     Example:
-        Create a table with two fields:
+        Create a table with two variable:
         ```
         >>> tab1 = Tabulation([1, 2, 3, 4], {"x":[0, 1], "y":[0, 1]}, ["x", "y"])
         >>> tab1.insertDimension("z", 0.0, 1)
         >>> tab1.ranges
         {"x":[0, 1], "z":[0.0], "y":[0, 1]}
         ```
-        Create a second table with the same fields:
+        Create a second table with the same variables:
         ```
         >>> tab2 = Tabulation([5, 6, 7, 8], {"x":[0, 1], "y":[0, 1]}, ["x", "y"])
         >>> tab2.insertDimension("z", 1.0, 1)
@@ -120,25 +120,25 @@ def insertDimension(table:Tabulation, field:str, value:float, index:int, inplace
     """
     if not inplace:
         tab = table.copy()
-        tab.insertDimension(field, value, index, inplace=True)
+        tab.insertDimension(variable, value, index, inplace=True)
         return tab
     
     #Check arguments
-    table.checkType(field, str, "field")
+    table.checkType(variable, str, "variable")
     table.checkType(value, float, "value")
     table.checkType(index, int, "index")
     table.checkType(inplace, bool, "inplace")
     
     #Check if variable already exists
-    if field in table.order:
-        raise ValueError(f"Variable '{field}' already exists in the table.")
+    if variable in table.order:
+        raise ValueError(f"Variable '{variable}' already exists in the table.")
     
     #Check index
     if not (0 <= index <= table.ndim):
         raise ValueError(f"Index out of range. Must be between 0 and {table.ndim}.")
-    #Insert field
-    table._order.insert(index, field)
-    table._ranges[field] = [value]
+    #Insert variable
+    table._order.insert(index, variable)
+    table._ranges[variable] = [value]
     table._data = table._data.reshape([len(table._ranges[f]) for f in table.order])
     table._createInterpolator()
 
