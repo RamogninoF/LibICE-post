@@ -423,11 +423,21 @@ def test_tabulation_slice():
     assert sliced_tab.shape == (1, 3, 4)
     assert np.array_equal(sliced_tab.data, data[0:1, :, :])
     
+    #Check that all ranges are still ndarray
+    for key in sliced_tab.ranges:
+        assert isinstance(sliced_tab.ranges[key], np.ndarray)
+    
     # Test invalid slicing
     with pytest.raises((ValueError, IndexError)):
         tab.slice(slices=[slice(0, 1), slice(0, 2)])
     with pytest.raises(ValueError):
         tab.slice(ranges={"x": [0.0], "y": [0.0, 0.3]})
+
+    # Test inplace slicing
+    tab.slice(slices=[slice(0, 1), slice(0, 2), slice(0, 3)], inplace=True)
+    assert tab.shape == (1, 2, 3)
+    assert np.array_equal(tab.data, data[0:1, 0:2, 0:3])
+    
 
 @pytest.mark.filterwarnings("error::libICEpost.src.base.dataStructures.Tabulation.Tabulation.TabulationAccessWarning")
 def test_tabulation_squeeze():
@@ -957,3 +967,68 @@ def test_concat_function():
     assert np.array_equal(tab2.data, data2)
     assert np.array_equal(tab3.data, data3)
 
+def test_Tabulation_str_repr():
+    data1 = np.array([[[100, 101, 102, 103],
+                       [110, 111, 112, 113],
+                       [120, 121, 122, 123]],
+                      [[200, 201, 202, 203],
+                       [210, 211, 212, 213],
+                       [220, 221, 222, 223]]])
+    ranges1 = {
+        "x": np.linspace(0, 1, 2),
+        "y": np.linspace(0, 1, 3),
+        "z": np.linspace(0, 1, 4)
+    }
+    order1 = ["x", "y", "z"]
+    
+    tab1 = Tabulation(data1, ranges1, order1)
+    
+    print(tab1)
+    print(repr(tab1))
+    
+@pytest.mark.filterwarnings("error::libICEpost.src.base.dataStructures.Tabulation.Tabulation.TabulationAccessWarning")
+def test_tabulation_copy():
+    """
+    Test the copy method of the Tabulation class.
+    """
+    data = np.array([[[100, 101, 102, 103],
+                      [110, 111, 112, 113],
+                      [120, 121, 122, 123]],
+                     [[200, 201, 202, 203],
+                      [210, 211, 212, 213],
+                      [220, 221, 222, 223]]])
+    ranges = {
+        "x": np.linspace(0, 1, 2),
+        "y": np.linspace(0, 1, 3),
+        "z": np.linspace(0, 1, 4)
+    }
+    order = ["x", "y", "z"]
+    
+    tab = Tabulation(data, ranges, order)
+    tab_copy = tab.copy()
+    
+    assert tab == tab_copy
+    assert tab is not tab_copy
+    assert tab._data is not tab_copy._data
+    assert tab._interpolator is not tab_copy._interpolator
+    assert tab._order is not tab_copy._order
+    assert tab._ranges is not tab_copy._ranges
+    
+    #Check the types
+    assert isinstance(tab_copy, Tabulation)
+    assert isinstance(tab_copy.data, np.ndarray)
+    assert isinstance(tab_copy.ranges, dict)
+    assert isinstance(tab_copy.order, list)
+    for r in tab_copy.ranges.values():
+        assert isinstance(r, np.ndarray)
+    for o in tab_copy.order:
+        assert isinstance(o, str)
+    
+    # Modify the copy and ensure the original is not affected
+    tab_copy[0] = 999
+    assert tab[0] != 999
+    assert tab_copy[0] == 999
+    
+    tab_copy.order = ["z", "y", "x"]
+    assert tab.order != tab_copy.order
+    assert tab_copy.order == ["z", "y", "x"]

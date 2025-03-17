@@ -129,6 +129,10 @@ def insertDimension(table:Tabulation, field:str, value:float, index:int, inplace
     table.checkType(index, int, "index")
     table.checkType(inplace, bool, "inplace")
     
+    #Check if variable already exists
+    if field in table.order:
+        raise ValueError(f"Variable '{field}' already exists in the table.")
+    
     #Check index
     if not (0 <= index <= table.ndim):
         raise ValueError(f"Index out of range. Must be between 0 and {table.ndim}.")
@@ -136,6 +140,7 @@ def insertDimension(table:Tabulation, field:str, value:float, index:int, inplace
     table._order.insert(index, field)
     table._ranges[field] = [value]
     table._data = table._data.reshape([len(table._ranges[f]) for f in table.order])
+    table._createInterpolator()
 
 #############################################################################
 def concat(table:Tabulation, *tables:tuple[Tabulation], inplace:bool=False, fillValue:float=None, overwrite:bool=False) -> Tabulation|None:
@@ -210,6 +215,7 @@ def concat(table:Tabulation, *tables:tuple[Tabulation], inplace:bool=False, fill
         #Create new table
         table._ranges = newRanges
         table._data = merged["output"].values.reshape([len(newRanges[f]) for f in table.order])
+        table._createInterpolator()
 
 #Alias
 merge = concat
@@ -246,7 +252,7 @@ def squeeze(table:Tabulation, *, inplace:bool=False) -> Tabulation|None:
     table._createInterpolator()
 
 #########################################################################
-def sliceTable(table:Tabulation, *, slices:Iterable[slice|Iterable[int]|int]=None, ranges:dict[str,float|Iterable[float]]=None, **argv) -> Tabulation:
+def sliceTable(table:Tabulation, *, slices:Iterable[slice|Iterable[int]|int]=None, ranges:dict[str,float|Iterable[float]]=None, inplace=False, **argv) -> Tabulation|None:
     """
     Extract a table with sliced datase. Can access in two ways:
         1) by slicer
@@ -255,9 +261,19 @@ def sliceTable(table:Tabulation, *, slices:Iterable[slice|Iterable[int]|int]=Non
         table (Tabulation): The table
         ranges (dict[str,float|Iterable[float]], optional): Ranges of sliced table. Defaults to None.
         slices (Iterable[slice|Iterable[int]|int]): The slicers for each input-variable.
+        inplace (bool, optional): If True, the operation is performed in-place. Defaults to False.
     Returns:
-        Tabulation: The sliced table.
+        Tabulation|None: The sliced table if inplace is False, None otherwise.
     """
+    checkType(table, Tabulation, "table")
+    checkType(inplace, bool, "inplace")
+    
+    #Code implemented for inplace
+    if not inplace:
+        tab = table.copy()
+        tab.slice(slices=slices, ranges=ranges, inplace=True, **argv)
+        return tab
+    
     #Update ranges with keyword arguments
     ranges = dict() if ranges is None else ranges
     ranges.update(argv)
@@ -271,10 +287,12 @@ def sliceTable(table:Tabulation, *, slices:Iterable[slice|Iterable[int]|int]=Non
     
     #Swith access
     if not slices is None: #By slices
-        slices = list(slices) #Cast to list (mutable)
+        checkType(slices, Iterable, "slices")
+        if isinstance(slices, str):
+            raise TypeError("Type mismatch. Attempting to slice with entry of type 'str'.")
         
+        slices = list(slices) #Cast to list (mutable)
         #Check types
-        table.checkType(slices, Iterable, "slices")
         if not(len(slices) == len(table.order)):
             raise IndexError("Given {} slices, while table has {} fields ({}).".format(len(slices), len(table.order), table.order))
         
@@ -288,11 +306,11 @@ def sliceTable(table:Tabulation, *, slices:Iterable[slice|Iterable[int]|int]=Non
                     raise IndexError(f"Index out of range for slices[{ii}] ({ss} >= {table.shape[ii]})")
             
             elif isinstance(ss, Iterable):
-                table.checkArray(ss, (int, np.integer), f"slices[{ii}]")
+                checkArray(ss, (int, np.integer), f"slices[{ii}]")
                 slices[ii] = sorted(ss) #Sort
                 for jj,ind in enumerate(ss): #Check range
                     if ind >= table.shape[ii]:
-                        table.checkType(ind, int, f"slices[{ii}][{jj}]")
+                        checkType(ind, int, f"slices[{ii}][{jj}]")
                         raise IndexError(f"Index out of range for variable {ii}:{table.order[ii]} ({ind} >= {table.shape[ii]})")
             else:
                 raise TypeError("Type mismatch. Attempting to slice with entry of type '{}'.".format(ss.__class__.__name__))
@@ -301,13 +319,16 @@ def sliceTable(table:Tabulation, *, slices:Iterable[slice|Iterable[int]|int]=Non
         order = table.order
         ranges =  dict()
         for ii,  Slice in enumerate(slices):
-            ranges[order[ii]] = [table.ranges[order[ii]][ss] for ss in Slice]
+            ranges[order[ii]] = np.array(table.ranges[order[ii]][Slice])
         
         #Create slicing table:
         slTab = np.ix_(*tuple(slices))
         data = table.data[slTab]
         
-        return Tabulation(data, ranges, order)
+        #Update table
+        table._data = data
+        table._ranges = ranges
+        table._createInterpolator()
     
     elif not ranges is None: #By ranges
         #Start from the original ranges
@@ -330,7 +351,7 @@ def sliceTable(table:Tabulation, *, slices:Iterable[slice|Iterable[int]|int]=Non
             slices.append(np.where(np.isin(table.ranges[item], newRanges[item]))[0])
         
         #Slice by index
-        return table.slice(slices=tuple(slices))
+        table.slice(slices=tuple(slices), inplace=True)
 
 #############################################################################
 #Plot:
