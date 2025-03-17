@@ -483,3 +483,32 @@ def test_OFTabulation_str_repr():
     str_table = str(table)
     # Test __repr__
     repr_table = repr(table)
+
+@pytest.mark.filterwarnings("error::libICEpost.src.base.dataStructures.Tabulation.Tabulation.TabulationAccessWarning")
+def test_tabulation_plot():
+    """
+    Test the plot method of the Tabulation class.
+    """
+    ranges = {
+        "x": [0.0, 1.0, 2.0],
+        "y": [0.0, 1.0]
+    }
+    data = {
+        "z": [0.0, 1.0, 2.0, 3.0, 4.0, 5.0]
+    }
+    order = ["x", "y"]
+    
+    table = OFTabulation(ranges=ranges, data=data, order=order)
+    
+    # Test plot method
+    ax = table.plot(field="z", x="x", c="y", iso={"y": 1.0})
+    
+    from matplotlib import pyplot as plt
+    ax = plt.subplot()
+    ax = table.plot(field="z", x="x", c="y", iso={"y": 1.0}, ax=ax, xlabel="X", ylabel="Y", title="Title", colorMap="viridis")
+    
+    with pytest.raises(ValueError):
+        table.plot(field="z", x="x", c="y", iso={"z": 1.0})
+    
+    with pytest.raises(ValueError):
+        table.plot(field="z", x="y", c="y", iso={"x": 0.5})

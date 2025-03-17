@@ -17,6 +17,7 @@ import numpy as np
 import pandas as pd
 import os
 import shutil
+import matplotlib.pyplot as plt
 
 from bidict import bidict
 
@@ -437,6 +438,28 @@ def squeeze(table:OFTabulation, *, inplace:bool=False) -> OFTabulation|None:
     
     #Squeeze the input variables
     table._inputVariables = {f:table._inputVariables[f] for f in table.order}
+
+#############################################################################
+def plotOFTable(table:OFTabulation, field:str, **kwargs) -> plt.Axes:
+    """
+    Plot a field of a tabulation.
+
+    Args:
+        table (OFTabulation): The tabulation to plot.
+        field (str): The field to plot.
+        **kwargs: Keyword arguments to pass to the 'plot' method of the Tabulation object.
+        
+    Returns:
+        plt.Axes: The axis where the plot is drawn.
+    """
+    if not field in table.fields:
+        raise ValueError(f"Field '{field}' not found in the tabulation. Avaliable fields are:\n\t" + "\n\t".join(table.fields))
+    
+    #Set y-label if not given
+    if not "ylabel" in kwargs:
+        kwargs["ylabel"] = field
+    
+    return table.tables[field].plot(**kwargs)
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -864,10 +887,7 @@ class OFTabulation(BaseTabulation):
     insertDimension = insertDimension
     squeeze = squeeze
     
-    #TODO
-    def plot(self, *args, **kwargs):
-        raise NotImplementedError("Plotting not yet implemented.")
-    
+    plot = plotOFTable
     
     #####################################
     #Clear the table:

@@ -373,6 +373,7 @@ def plotTable(   table:Tabulation,
     Plot a table in a 2D plot with a color-map.
     
     Args:
+        table (Tabulation): The table to plot.
         x (str): The x-axis field.
         c (str): The color field.
         iso (dict[str,float]): The iso-values to plot.
