@@ -784,7 +784,12 @@ def test_tabulation_plot():
     
     with pytest.raises(ValueError):
         tab.plot(x="y", c="z", iso={"x": 0.5})
-
+    
+    # Test plotting with equivalent keyword arguments
+    ax = tab.plot(x="x", c="z", iso={"y": 0.5}, xLabel="X", yLabel="Y", cmap="viridis")
+    with pytest.raises(ValueError):
+        tab.plot(x="x", c="z", iso={"y": 0.5}, xLabel="X", yLabel="Y", cmap="viridis", xlabel="viridis")
+        
 @pytest.mark.filterwarnings("error::libICEpost.src.base.dataStructures.Tabulation.Tabulation.TabulationAccessWarning")
 def test_tabulation_interpolation():
     """

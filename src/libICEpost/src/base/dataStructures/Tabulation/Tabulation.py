@@ -209,7 +209,7 @@ def concat(table:Tabulation, *tables:Tabulation, inplace:bool=False, fillValue:f
         raise ValueError("Missing sampling points in the concatenated tables. Cannot concatenate without 'fillValue' argument.")
     
     #Create new table
-    table._ranges = ranges
+    table._ranges = {v:np.array(ranges[v]) for v in order}
     table._data = data
     table._createInterpolator()
 
@@ -374,20 +374,67 @@ def plotTable(   table:Tabulation,
         c (str): The color field.
         iso (dict[str,float]): The iso-values to plot.
         ax (plt.Axes, optional): The axis to plot on. Defaults to None.
-        colorMap (str, optional): The color-map to use. Defaults to "turbo".
-        xlabel (str, optional): The x-axis label. Defaults to None.
-        ylabel (str, optional): The y-axis label. Defaults to None.
-        clabel (str, optional): The color-bar label. Defaults to None.
+        colorMap (str, optional): The color-map to use. Defaults to "turbo". Equivalent keys are [`cmap`, `colormap`]
+        xlabel (str, optional): The x-axis label. Defaults to None. Equivalent keys are [`x_label`, `xLabel`]
+        ylabel (str, optional): The y-axis label. Defaults to None. Equivalent keys are [`y_label`, `yLabel`]
+        clabel (str, optional): The color-bar label. Defaults to None. Equivalent keys are [`c_label`, `cLabel`]
         title (str, optional): The title of the plot. Defaults to None.
-        xlim (tuple[float], optional): The x-axis limits. Defaults to (None, None).
-        ylim (tuple[float], optional): The y-axis limits. Defaults to (None, None).
-        clim (tuple[float], optional): The color-bar limits. Defaults to (None, None).
+        xlim (tuple[float], optional): The x-axis limits. Defaults to (None, None). Equivalent keys are [`x_lim`, `xLim`]
+        ylim (tuple[float], optional): The y-axis limits. Defaults to (None, None). Equivalent keys are [`y_lim`, `yLim`]
+        clim (tuple[float], optional): The color-bar limits. Defaults to (None, None). Equivalent keys are [`c_lim`, `cLim`]
         figsize (tuple[float], optional): The size of the figure. Defaults to (8, 6).
         **kwargs: Additional arguments to pass to the plot
     
     Returns:
         plt.Axes: The axis of the plot.
     """
+    #Check for equivalent keys
+    equivalentKeys = {
+        "cmap":"colorMap",
+        "colormap":"colorMap",
+        "xlabel":"xlabel",
+        "x_label":"xlabel",
+        "xLabel":"xlabel",
+        "ylabel":"ylabel",
+        "y_label":"ylabel",
+        "yLabel":"ylabel",
+        "clabel":"clabel",
+        "c_label":"clabel",
+        "cLabel":"clabel",
+        "xlim":"xlim",
+        "x_lim":"xlim",
+        "xLim":"xlim",
+        "ylim":"ylim",
+        "y_lim":"ylim",
+        "yLim":"ylim",
+        "clim":"clim",
+        "c_lim":"clim",
+        "cLim":"clim",
+    }
+    fullkwargs = {**kwargs}
+    if xlabel is not None: fullkwargs["xlabel"] = xlabel
+    if ylabel is not None: fullkwargs["ylabel"] = ylabel
+    if clabel is not None: fullkwargs["clabel"] = clabel
+    if any(x is not None for x in xlim): fullkwargs["xlim"] = xlim
+    if any(x is not None for x in ylim): fullkwargs["ylim"] = ylim
+    if any(x is not None for x in clim): fullkwargs["clim"] = clim
+    
+    foundKeys = set(fullkwargs.keys()).intersection(equivalentKeys.keys())
+    #Check for multiple entries that are equivalent
+    backMap:dict[str,list] = {v:[] for v in equivalentKeys.values()}
+    for key in foundKeys:
+        backMap[equivalentKeys[key]].append(key)
+    for key in backMap:
+        if len(backMap[key]) > 1:
+            raise ValueError(f"Key '{key}' found multiple times in kwargs: {backMap[key]}")
+    
+    #Merge equivalent keys
+    for key in backMap:
+        if len(backMap[key]) == 0:
+            continue
+        kwarg = backMap[key][0]
+        if kwarg in kwargs: kwargs.pop(kwarg) #Remove from kwargs
+        locals()[key] = fullkwargs[kwarg] #Set local variable
     
     #Check arguments
     checkType(table, Tabulation, "table")
