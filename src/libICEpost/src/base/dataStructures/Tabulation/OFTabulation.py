@@ -1050,6 +1050,35 @@ class OFTabulation(BaseTabulation):
         else:
             return self._data[field].table.outOfBounds
     
+    ################################
+    def setRange(self, variable:str, range:Iterable[float]) -> None:
+        """
+        Set the range of a variable.
+
+        Args:
+            variable (str): The variable to set the range of.
+            range (Iterable[float]): The range of the variable.
+        """
+        self.checkType(variable, str, "variable")
+        self.checkArray(range, float, "range")
+        
+        if not variable in self._inputVariables:
+            raise ValueError("Variable not stored in the tabulation. Avaliable variables are:\n\t" + "\n\t".join(self.names.keys()))
+        
+        if not len(range) == self._inputVariables[variable].numel:
+            raise ValueError(f"Length of range not compatible with sampling points ({len(range)} != {self._inputVariables[variable].numel})")
+
+        if not len(range) == len(set(range)):
+            raise ValueError(f"New range contains duplicated values.")
+        
+        if not list(range) == sorted(range):
+            raise ValueError(f"New range for variable '{variable}' not sorted in ascending order.")
+        
+        self._inputVariables[variable].data = range
+        for var in self.fields:
+            if not self._data[var].table is None:
+                self._data[var].table.setRange(variable=variable, range=range)
+    
     #########################################################################
     #Private methods:
     def _readTableProperties(self, *, inputNames:dict[str,str]=None, inputVariables:Iterable[str]=None, fields:Iterable[str]=None) -> Iterable[str]:

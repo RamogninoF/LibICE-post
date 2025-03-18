@@ -1047,3 +1047,34 @@ def test_tabulation_copy():
     tab_copy.order = ["z", "y", "x"]
     assert tab.order != tab_copy.order
     assert tab_copy.order == ["z", "y", "x"]
+
+def test_tabulation_setRange():
+    data = np.array([[[100, 101, 102, 103],
+                      [110, 111, 112, 113],
+                      [120, 121, 122, 123]],
+                     [[200, 201, 202, 203],
+                      [210, 211, 212, 213],
+                      [220, 221, 222, 223]]])
+    ranges = {
+        "x": np.linspace(0, 1, 2),
+        "y": np.linspace(0, 1, 3),
+        "z": np.linspace(0, 1, 4)
+    }
+    order = ["x", "y", "z"]
+    
+    tab = Tabulation(data, ranges, order)
+    
+    tab.setRange("x", [0, 2])
+    
+    assert np.array_equal(tab.ranges["x"], [0, 2])
+    assert isinstance(tab.ranges["x"], np.ndarray)
+    assert tab(2,0,0) == 200
+    
+    with pytest.raises(ValueError):
+        tab.setRange("x", [0, 1, 2])
+    with pytest.raises(ValueError):
+        tab.setRange("x", [0, 0])
+    with pytest.raises(ValueError):
+        tab.setRange("x", [2, 0])
+    with pytest.raises(ValueError):
+        tab.setRange("k", [0, 2])

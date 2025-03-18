@@ -512,3 +512,28 @@ def test_tabulation_plot():
     
     with pytest.raises(ValueError):
         table.plot(field="z", x="y", c="y", iso={"x": 0.5})
+        
+def test_OFTabulation_setRange():
+    ranges = {
+        "x": [0.0, 1.0, 2.0],
+        "y": [0.0, 1.0]
+    }
+    data = {
+        "z": [0.0, 1.0, 2.0, 3.0, 4.0, 5.0]
+    }
+    order = ["x", "y"]
+    
+    table = OFTabulation(ranges=ranges, data=data, order=order)
+    
+    # Test setRange
+    table.setRange("x", [0.0, 2.0, 4.0])
+    assert np.array_equal(table.ranges["x"], np.array([0.0, 2.0, 4.0]))
+    
+    with pytest.raises(ValueError):
+        table.setRange("x", [0, 1, 2, 3])
+    with pytest.raises(ValueError):
+        table.setRange("x", [0, 0, 3])
+    with pytest.raises(ValueError):
+        table.setRange("x", [2, 0, 3])
+    with pytest.raises(ValueError):
+        table.setRange("k", [0, 1, 2, 3])

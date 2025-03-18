@@ -788,6 +788,33 @@ class Tabulation(BaseTabulation):
     #Plotting
     plot = plotTable
     
+    #Access
+    def setRange(self, variable:str, range:Iterable[float]) -> None:
+        """
+        Change the range of an input variable in the tabulation.
+        
+        Args:
+            field (str): The variable to modify.
+            range (Iterable[float]): The new range for the variable.
+        """
+        self.checkType(variable, str, "variable")
+        self.checkArray(range, float, "range")
+        
+        if not variable in self.order:
+            raise ValueError(f"Variable '{variable}' not found in the tabulation.")
+        
+        if not len(range) == len(self._ranges[variable]):
+            raise ValueError(f"Length of new range for variable '{variable}' not consistent with the current range.")
+        
+        if not len(set(range)) == len(range):
+            raise ValueError(f"New range for variable '{variable}' contains duplicates.")
+        
+        if not list(range) == sorted(range):
+            raise ValueError(f"New range for variable '{variable}' not sorted in ascending order.")
+        
+        self._ranges[variable] = np.array(range)
+        self._createInterpolator()
+    
     #########################################################################
     #Dunder methods
     
