@@ -113,7 +113,7 @@ def toPandas(table:OFTabulation) -> pd.DataFrame:
 to_pandas = toPandas
 
 #############################################################################
-def concat(table:OFTabulation, *tables:tuple[OFTabulation], inplace:bool=False, **kwargs):
+def concat(table:OFTabulation, *tables:OFTabulation, inplace:bool=False, verbose:bool=True, **kwargs):
     """
     Extend the table with the data of other tables. The tables must have the same fields but 
     not necessarily in the same order. The data of the second table is appended to the data 
@@ -125,8 +125,12 @@ def concat(table:OFTabulation, *tables:tuple[OFTabulation], inplace:bool=False, 
     
     Args:
         table (OFTabulation): The table to which the data is appended.
-        *tables (tuple[OFTabulation]): The tables to append.
+        *tables (OFTabulation): The tables to append.
         inplace (bool, optional): If True, the operation is performed in-place. Defaults to False.
+        verbose (bool, optional): Print information. Defaults to True.
+        **kwargs: Keyword arguments to pass to the 'concat' method of the Tabulation objects.
+    
+    Keyword Args:
         fillValue (float, optional): The value to fill missing sampling points. Defaults to None.
         overwrite (bool, optional): If True, overwrite the data of the first table with the data 
             of the second table in overlapping regions. Otherwise raise an error. Defaults to False.
@@ -144,7 +148,9 @@ def concat(table:OFTabulation, *tables:tuple[OFTabulation], inplace:bool=False, 
         concat(table, *tables, inplace=True, **kwargs)
         return table
     
+    if verbose: print("Concatenating tables...")
     for ii, tab in enumerate(tables):
+        if verbose: print(f"\tTable {ii+1}: ")
         #Check compatibility
         if not (sorted(table.order) == sorted(tab.order)):
             raise ValueError(f"Tables must have the same fields to concatenate (table[{ii}] incompatible).")
@@ -154,11 +160,14 @@ def concat(table:OFTabulation, *tables:tuple[OFTabulation], inplace:bool=False, 
             raise ValueError(f"Tables must have the same fields to concatenate (table[{ii}] incompatible).")
         
         #Merge the ranges
+        if verbose: print("\tRanges")
         ranges = {f:np.unique(np.concatenate([table.ranges[f], tab.ranges[f]])) for f in table.order}
         table._inputVariables = {f:_InputProps(name=table._inputVariables[f].name, data=ranges[f]) for f in table.order}
         
         #Merge the tables
+        if verbose: print("\tFields:")
         for f in table.fields:
+            if verbose: print(f"\t\t{f}")
             #Check that either both tables are loaded or none
             if (table.tables[f] is None) != (tab.tables[f] is None):
                 raise ValueError(f"Table '{f}' not loaded in one of the tables to concatenate.")
@@ -370,7 +379,7 @@ def sliceOFTable(table:OFTabulation, *, slices:Iterable[slice|Iterable[int]|int]
         table.slice(slices=tuple(slices), inplace=True)
 
 #############################################################################
-def insertDimension(table:OFTabulation, *, variable:str, value:float, index:int, inplace:bool=False) -> OFTabulation|None:
+def insertDimension(table:OFTabulation, *, variable:str, value:float, index:int=None, inplace:bool=False) -> OFTabulation|None:
     """
     Insert a new dimension in the table by adding a new field with constant value.
     
@@ -378,7 +387,7 @@ def insertDimension(table:OFTabulation, *, variable:str, value:float, index:int,
         table (OFTabulation): The table to insert the dimension.
         variable (str): The name of the input variable to insert.
         value (float): The value to assign to the new field.
-        index (int): The index where to insert the new field.
+        index (int, optional): The index where to insert the new field. Defaults to None (append at the end).
         inplace (bool, optional): If True, the operation is performed in-place. Defaults to False.
     
     Returns:
@@ -387,8 +396,11 @@ def insertDimension(table:OFTabulation, *, variable:str, value:float, index:int,
     #Check arguments
     table.checkType(variable, str, "field")
     table.checkType(value, (float, int), "value")
-    table.checkType(index, int, "index")
+    table.checkType(index, int, "index", allowNone=True)
     table.checkType(inplace, bool, "inplace")
+    
+    if index is None:
+        index = len(table.order)
     
     if not inplace:
         table = table.copy()

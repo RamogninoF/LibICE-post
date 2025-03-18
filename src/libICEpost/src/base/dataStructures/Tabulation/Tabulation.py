@@ -63,24 +63,19 @@ def toPandas(table:Tabulation) -> DataFrame:
     checkType(table, Tabulation, "table")
     
     # Create the dataframe
-    df = DataFrame({"output":[0.0]*table.size, **{f:[0.0]*table.size for f in table.ranges}})
-    
-    #Sort the columns to have first the input variables in order
-    df = df[table.order + ["output"]]
+    df = DataFrame({"output":table._data.flatten(), **{f:[0.0]*table.size for f in table.ranges}}, columns=table.order+["output"])
     
     #Populate
-    for ii, item in enumerate(table):
-        input = table.getInput(ii)
-        df.loc[ii, list(input.keys())] = [input[it] for it in input.keys()]
-        df.loc[ii, "output"] = item
-
+    inputs = itertools.product(*[table.ranges[f] for f in table.order])
+    for ii, ipt in enumerate(inputs):
+        df.iloc[ii,:-1] = list(ipt)
     return df
 
 #Alias
 to_pandas = toPandas
 
 #############################################################################
-def insertDimension(table:Tabulation, variable:str, value:float, index:int, inplace:bool=False) -> Tabulation|None:
+def insertDimension(table:Tabulation, variable:str, value:float, index:int=None, inplace:bool=False) -> Tabulation|None:
     """
     Insert an axis to the dimension-set of the table with a single value. 
     This is useful to merge two tables with respect to an additional variable.
@@ -89,7 +84,7 @@ def insertDimension(table:Tabulation, variable:str, value:float, index:int, inpl
         table (Tabulation): The table to modify.
         variable (str): The name of the variable to insert.
         value (float): The value for the range of the corresponding variable.
-        index (int): The index where to insert the variable in nesting order.
+        index (int, optional): The index where to insert the variable in nesting order. If None, the variable is appended at the end. Defaults to None.
         inplace (bool, optional): If True, the operation is performed in-place. Defaults to False.
         
     Returns:
@@ -126,8 +121,11 @@ def insertDimension(table:Tabulation, variable:str, value:float, index:int, inpl
     #Check arguments
     table.checkType(variable, str, "variable")
     table.checkType(value, float, "value")
-    table.checkType(index, int, "index")
+    table.checkType(index, int, "index", allowNone=True)
     table.checkType(inplace, bool, "inplace")
+    
+    if index is None:
+        index = len(table.order)
     
     #Check if variable already exists
     if variable in table.order:
@@ -143,7 +141,7 @@ def insertDimension(table:Tabulation, variable:str, value:float, index:int, inpl
     table._createInterpolator()
 
 #############################################################################
-def concat(table:Tabulation, *tables:tuple[Tabulation], inplace:bool=False, fillValue:float=None, overwrite:bool=False) -> Tabulation|None:
+def concat(table:Tabulation, *tables:Tabulation, inplace:bool=False, fillValue:float=None, overwrite:bool=False) -> Tabulation|None:
     """
     Extend the table with the data of other tables. The tables must have the same fields but 
     not necessarily in the same order. The data of the second table is appended to the data 
@@ -155,7 +153,7 @@ def concat(table:Tabulation, *tables:tuple[Tabulation], inplace:bool=False, fill
     
     Args:
         table (Tabulation): The table to which the data is appended.
-        *tables (tuple[Tabulation]): The tables to append.
+        *tables (Tabulation): The tables to append.
         inplace (bool, optional): If True, the operation is performed in-place. Defaults to False.
         fillValue (float, optional): The value to fill missing sampling points. Defaults to None.
         overwrite (bool, optional): If True, overwrite the data of the first table with the data 
@@ -178,43 +176,69 @@ def concat(table:Tabulation, *tables:tuple[Tabulation], inplace:bool=False, fill
         return tab
     
     for ii, tab in enumerate(tables):
+        order = table.order
         #Check compatibility
-        if not (sorted(table.order) == sorted(tab.order)):
+        if not (set(order) == set(tab.order)):
             raise ValueError(f"Tables must have the same fields to concatenate (table[{ii}] incompatible).")
         
         #Cast the two tables to dataframes
         df1 = toPandas(table)
-        df1.set_index(table.order, inplace=True)
-        df2 = toPandas(tab)[table.order + ["output"]]
-        df2.set_index(table.order, inplace=True)
+        df2 = toPandas(tab)
+        if not order == tab.order:
+            df2.columns = df1.columns
+            df2.sort_values(by=order, inplace=True, ignore_index=True)
         
         #Check for overlapping regions between sampling points of the two tables
-        sp1 = set(df1.index.values)
-        sp2 = set(df2.index.values)
-        if (not overwrite) and (len(sp1.intersection(sp2)) > 0):
-            raise ValueError("Overlapping regions between the two tables. Set 'overwrite' to True to overwrite the data in the overlapping regions.")
+        sp1 = set(tuple(data[1].to_list()) for data in df1[order].iterrows())
+        sp2 = set(tuple(data[1].to_list()) for data in df2[order].iterrows())
+        if len(sp1.intersection(sp2)) > 0:
+            if not overwrite:
+                raise ValueError("Overlapping regions between the two tables. Set 'overwrite' to True to overwrite the data in the overlapping regions.")
+            
+            dropIndex = df1.where(df1[order].isin(df2[order]).all(axis=1)).dropna().index
+            df1.drop(axis=0, index=dropIndex, inplace=True)
         
         #Merge second to first
-        merged = pd.concat([df1.drop(axis=0, index=sp2.intersection(sp1)), df2], axis=0, sort=True)
+        merged = pd.concat([df1, df2], axis=0)
+        merged.sort_values(by=order, inplace=True, ignore_index=True)
         
         #New ranges
-        index = merged.index
-        newRanges = {f:sorted(index.get_level_values(f).unique()) for f in table.order}
+        newRanges = {f:sorted(set(table.ranges[f]).union(set(tab.ranges[f]))) for f in order}
         
         #Check for missing sampling points
-        samplingPoints = itertools.product(*[newRanges[f] for f in table.order])
-        for sp in samplingPoints:
-            if not sp in merged.index:
-                if fillValue is None:
-                    raise ValueError("Missing sampling point in the second table. Cannot concatenate without 'fillValue' argument.")
-                merged.loc[sp] = fillValue
+        samplingPoints = itertools.product(*[newRanges[f] for f in order])
+        toFill:list[int,tuple[float]] = []
+        missing = 0
+        for ii, sp in enumerate(samplingPoints):
+            if (ii - missing) == len(merged): #Finished the table, all leftover points are missing
+                toFill.append((ii, sp))
+                missing += 1
+                break
+            if not np.array_equal(merged.iloc[ii-missing,:len(order)], sp):
+                toFill.append((ii, sp))
+                missing += 1
         
-        #Sort
-        merged.sort_index(inplace=True)
+        #Add remaining missing points
+        for ii, sp in enumerate(samplingPoints):
+            toFill.append((ii+len(merged)+1, sp))
+            missing += 1
+        
+        if fillValue is None and len(toFill) > 0:
+            raise ValueError(f"Missing sampling point in the second table. Cannot concatenate without 'fillValue' argument.")
+        
+        #Fill missing points
+        for ii, sp in toFill:
+            merged = pd.concat(
+                [
+                    merged.iloc[:ii],
+                    pd.DataFrame({f:[v] for f, v in zip(df1.columns, list(sp) + [fillValue])}, columns=df1.columns),
+                    merged.iloc[ii:]
+                ]
+                )
         
         #Create new table
         table._ranges = newRanges
-        table._data = merged["output"].values.reshape([len(newRanges[f]) for f in table.order])
+        table._data = merged.iloc[:,-1].values.reshape([len(newRanges[f]) for f in order])
         table._createInterpolator()
 
 #Alias

@@ -191,7 +191,7 @@ class BaseTabulation(Utilities, metaclass=ABCMeta):
     getInput = getInput
     
     @abstractmethod
-    def insertDimension(self, variable:str, value:float, index:int, inplace:bool=False) -> BaseTabulation|None:
+    def insertDimension(self, variable:str, value:float, index:int=None, inplace:bool=False) -> BaseTabulation|None:
         """
         Insert an axis to the dimension-set of the table with a single value. 
         This is useful to merge two tables with respect to an additional variable.
@@ -200,7 +200,7 @@ class BaseTabulation(Utilities, metaclass=ABCMeta):
             table (BaseTabulation): The table to modify.
             variable (str): The name of the variable to insert.
             value (float): The value for the range of the corresponding variable.
-            index (int): The index where to insert the variable in nesting order.
+            index (int, optional): The index where to insert the variable in nesting order. If None, append the variable at the end. Defaults to None.
             inplace (bool, optional): If True, the operation is performed in-place. Defaults to False.
             
         Returns:
@@ -246,7 +246,7 @@ class BaseTabulation(Utilities, metaclass=ABCMeta):
         """
     
     @abstractmethod
-    def concat(self, *tables:tuple[Self,...], inplace:bool=False, fillValue:float=None, overwrite:bool=False) -> Self|None:
+    def concat(self, *tables:BaseTabulation, inplace:bool=False, fillValue:float=None, overwrite:bool=False) -> Self|None:
         """
         Extend the table with the data of other tables. The tables must have the same fields but 
         not necessarily in the same order. The data of the second table is appended to the data 
@@ -257,7 +257,7 @@ class BaseTabulation(Utilities, metaclass=ABCMeta):
         missing sampling points are filled with the given value.
         
         Args:
-            *tables (tuple[Self]): The tables to append.
+            *tables (BaseTabulation): The tables to append.
             inplace (bool, optional): If True, the operation is performed in-place. Defaults to False.
             fillValue (float, optional): The value to fill missing sampling points. Defaults to None.
             overwrite (bool, optional): If True, overwrite the data of the first table with the data 
