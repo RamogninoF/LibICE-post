@@ -148,11 +148,11 @@ def concat(table:OFTabulation, *tables:OFTabulation, inplace:bool=False, verbose
         concat(table, *tables, inplace=True, **kwargs)
         return table
     
-    if verbose: print("Concatenating tables...")
+    order = table.order
+    ranges = table.ranges
     for ii, tab in enumerate(tables):
-        if verbose: print(f"\tTable {ii+1}: ")
         #Check compatibility
-        if not (sorted(table.order) == sorted(tab.order)):
+        if not (sorted(order) == sorted(tab.order)):
             raise ValueError(f"Tables must have the same fields to concatenate (table[{ii}] incompatible).")
         
         #Check fields
@@ -160,21 +160,22 @@ def concat(table:OFTabulation, *tables:OFTabulation, inplace:bool=False, verbose
             raise ValueError(f"Tables must have the same fields to concatenate (table[{ii}] incompatible).")
         
         #Merge the ranges
-        if verbose: print("\tRanges")
-        ranges = {f:np.unique(np.concatenate([table.ranges[f], tab.ranges[f]])) for f in table.order}
-        table._inputVariables = {f:_InputProps(name=table._inputVariables[f].name, data=ranges[f]) for f in table.order}
+        ranges = {f:np.unique(np.concatenate([ranges[f], tab.ranges[f]])) for f in order}
+    table._inputVariables = {f:_InputProps(name=table._inputVariables[f].name, data=ranges[f]) for f in order}
+    
+    if verbose: print("Concatenating tables...")
+    for f in table.fields:
+        #Get the tables
+        tabs = [table._data[f].table] + [tab._data[f].table for tab in tables]
         
-        #Merge the tables
-        if verbose: print("\tFields:")
-        for f in table.fields:
-            if verbose: print(f"\t\t{f}")
-            #Check that either both tables are loaded or none
-            if (table.tables[f] is None) != (tab.tables[f] is None):
-                raise ValueError(f"Table '{f}' not loaded in one of the tables to concatenate.")
-            
-            #Concatenate the tables
-            if table._data[f].table is not None:
-                table._data[f].table.concat(tab.tables[f], inplace=True, **kwargs)
+        #Check if all tables are loaded and concatenate
+        if verbose: print(f"\tField '{f}'")
+        if not all([tab is None for tab in tabs]):
+            if not any([tab is None for tab in tabs]):
+                table._data[f].table.concat(*[tab._data[f].table for tab in tables], inplace=True, **kwargs)
+            else:
+                raise ValueError(f"Table '{f}' not loaded in {sum([1 for tab in tabs if tab is None])} tables to concatenate.")
+
 
 #Aliases
 merge = concat

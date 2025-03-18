@@ -175,71 +175,43 @@ def concat(table:Tabulation, *tables:Tabulation, inplace:bool=False, fillValue:f
         concat(tab, *tables, inplace=True, fillValue=fillValue, overwrite=overwrite)
         return tab
     
+    order = table.order
+    ranges = table.ranges
     for ii, tab in enumerate(tables):
-        order = table.order
         #Check compatibility
         if not (set(order) == set(tab.order)):
-            raise ValueError(f"Tables must have the same fields to concatenate (table[{ii}] incompatible).")
+            raise ValueError(f"Tables must have the same input variables to concatenate (table[{ii}] incompatible).")
         
-        #Cast the two tables to dataframes
-        df1 = toPandas(table)
-        df2 = toPandas(tab)
-        if not order == tab.order:
-            df2.columns = df1.columns
-            df2.sort_values(by=order, inplace=True, ignore_index=True)
-        
-        #Check for overlapping regions between sampling points of the two tables
-        sp1 = set(tuple(data[1].to_list()) for data in df1[order].iterrows())
-        sp2 = set(tuple(data[1].to_list()) for data in df2[order].iterrows())
-        if len(sp1.intersection(sp2)) > 0:
-            if not overwrite:
-                raise ValueError("Overlapping regions between the two tables. Set 'overwrite' to True to overwrite the data in the overlapping regions.")
+        #Merge ranges
+        ranges = {f:sorted(set(ranges[f]).union(set(tab.ranges[f]))) for f in order}
+    
+    data = np.zeros([len(ranges[f]) for f in order])*float("nan") #Create empty data
+    if not fillValue is None: data *= fillValue #Fill with value
+    written = np.zeros_like(data, dtype=bool) #Check if data has been written
+    for tab in [table, *tables]:
+        r = {f:list(tab.ranges[f]) for f in order}
+        o = tab.order
+        for jj in itertools.product(*[range(len(ranges[f])) for f in order]):
+            #Get index of jj in the table
+            index = [
+                r[f].index(ranges[f][jj[order.index(f)]]) if ranges[f][jj[order.index(f)]] in r[f] else None 
+                for ii, f in enumerate(o)]
+            if None in index:
+                continue #Not in this table
             
-            dropIndex = df1.where(df1[order].isin(df2[order]).all(axis=1)).dropna().index
-            df1.drop(axis=0, index=dropIndex, inplace=True)
-        
-        #Merge second to first
-        merged = pd.concat([df1, df2], axis=0)
-        merged.sort_values(by=order, inplace=True, ignore_index=True)
-        
-        #New ranges
-        newRanges = {f:sorted(set(table.ranges[f]).union(set(tab.ranges[f]))) for f in order}
-        
-        #Check for missing sampling points
-        samplingPoints = itertools.product(*[newRanges[f] for f in order])
-        toFill:list[int,tuple[float]] = []
-        missing = 0
-        for ii, sp in enumerate(samplingPoints):
-            if (ii - missing) == len(merged): #Finished the table, all leftover points are missing
-                toFill.append((ii, sp))
-                missing += 1
-                break
-            if not np.array_equal(merged.iloc[ii-missing,:len(order)], sp):
-                toFill.append((ii, sp))
-                missing += 1
-        
-        #Add remaining missing points
-        for ii, sp in enumerate(samplingPoints):
-            toFill.append((ii+len(merged)+1, sp))
-            missing += 1
-        
-        if fillValue is None and len(toFill) > 0:
-            raise ValueError(f"Missing sampling point in the second table. Cannot concatenate without 'fillValue' argument.")
-        
-        #Fill missing points
-        for ii, sp in toFill:
-            merged = pd.concat(
-                [
-                    merged.iloc[:ii],
-                    pd.DataFrame({f:[v] for f, v in zip(df1.columns, list(sp) + [fillValue])}, columns=df1.columns),
-                    merged.iloc[ii:]
-                ]
-                )
-        
-        #Create new table
-        table._ranges = newRanges
-        table._data = merged.iloc[:,-1].values.reshape([len(newRanges[f]) for f in order])
-        table._createInterpolator()
+            if not overwrite and written[jj]:
+                raise ValueError(f"Data already written at index {jj}. Cannot overwrite.")
+            data[*jj] = tab._data[*index]
+            written[*jj] = True
+    
+    #Check for missing sampling points
+    if fillValue is None and not np.all(written):
+        raise ValueError("Missing sampling points in the concatenated tables. Cannot concatenate without 'fillValue' argument.")
+    
+    #Create new table
+    table._ranges = ranges
+    table._data = data
+    table._createInterpolator()
 
 #Alias
 merge = concat

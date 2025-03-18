@@ -966,6 +966,16 @@ def test_concat_function():
     assert np.array_equal(tab1.data, data1)
     assert np.array_equal(tab2.data, data2)
     assert np.array_equal(tab3.data, data3)
+    
+    #Concatenation with table with different order
+    tab2.order = ["z", "x", "y"]
+    tab_concat2 = concat(tab1, tab2, tab3)
+    
+    assert tab_concat2.shape == tab_concat.shape
+    assert tab_concat2.ndim == tab_concat.ndim
+    assert tab_concat2.size == tab_concat.size
+    assert tab_concat2.order == order1
+    assert np.array_equal(tab_concat2.data, tab_concat.data)
 
 def test_Tabulation_str_repr():
     data1 = np.array([[[100, 101, 102, 103],
