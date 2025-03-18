@@ -18,3 +18,4 @@ upload.sh
 /.idea/vcs.xml
 build/
 tutorials/**/output/
+testing/
