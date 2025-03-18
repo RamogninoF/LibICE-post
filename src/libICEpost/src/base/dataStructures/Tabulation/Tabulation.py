@@ -16,16 +16,22 @@ from __future__ import annotations
 from typing import Iterable, Literal
 from enum import StrEnum
 
-import copy as cp
+import pandas as pd
 import numpy as np
 from pandas import DataFrame
 
+from libICEpost.src.base.Functions.typeChecking import checkType, checkArray, checkMap
 from libICEpost.src.base.Utilities import Utilities
 from scipy.interpolate import RegularGridInterpolator
 
 import matplotlib as mpl
+import matplotlib.colors as mcolors
 from matplotlib import pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
+
+import itertools
+import warnings
+
+from .BaseTabulation import BaseTabulation
 
 #####################################################################
 #                            AUXILIARY CLASSES                      #
@@ -35,6 +41,10 @@ class _OoBMethod(StrEnum):
     extrapolate = "extrapolate"
     nan = "nan"
     fatal = "fatal"
+
+class TabulationAccessWarning(Warning):
+    """Warning from Tabulation access"""
+    pass
 
 #############################################################################
 #                           AUXILIARY FUNCTIONS                             #
@@ -50,35 +60,428 @@ def toPandas(table:Tabulation) -> DataFrame:
     Returns:
         DataFrame
     """
-    Utilities.checkType(table, Tabulation, "table")
+    checkType(table, Tabulation, "table")
     
     # Create the dataframe
-    df = DataFrame({"output":[0.0]*table.size, **{f:[0.0]*table.size for f in table.inputVariables}})
+    df = DataFrame({"output":[0.0]*table.size, **{f:[0.0]*table.size for f in table.ranges}})
     
     #Sort the columns to have first the input variables in order
     df = df[table.order + ["output"]]
     
     #Populate
     for ii, item in enumerate(table):
-        df.loc[ii, list(item[0].keys())] = [item[0][it] for it in item[0].keys()]
-        df.loc[ii, "output"] = item[1]
+        input = table.getInput(ii)
+        df.loc[ii, list(input.keys())] = [input[it] for it in input.keys()]
+        df.loc[ii, "output"] = item
 
     return df
+
+#Alias
+to_pandas = toPandas
+
+#############################################################################
+def insertDimension(table:Tabulation, variable:str, value:float, index:int, inplace:bool=False) -> Tabulation|None:
+    """
+    Insert an axis to the dimension-set of the table with a single value. 
+    This is useful to merge two tables with respect to an additional variable.
+    
+    Args:
+        table (Tabulation): The table to modify.
+        variable (str): The name of the variable to insert.
+        value (float): The value for the range of the corresponding variable.
+        index (int): The index where to insert the variable in nesting order.
+        inplace (bool, optional): If True, the operation is performed in-place. Defaults to False.
+        
+    Returns:
+        Tabulation|None: The table with the inserted dimension if inplace is False, None otherwise.
+        
+    Example:
+        Create a table with two variable:
+        ```
+        >>> tab1 = Tabulation([1, 2, 3, 4], {"x":[0, 1], "y":[0, 1]}, ["x", "y"])
+        >>> tab1.insertDimension("z", 0.0, 1)
+        >>> tab1.ranges
+        {"x":[0, 1], "z":[0.0], "y":[0, 1]}
+        ```
+        Create a second table with the same variables:
+        ```
+        >>> tab2 = Tabulation([5, 6, 7, 8], {"x":[0, 1], "y":[0, 1]}, ["x", "y"])
+        >>> tab2.insertDimension("z", 1.0, 1)
+        >>> tab2.ranges
+        {"x":[0, 1], "z":[1.0], "y":[0, 1]}
+        ```
+        
+        Concatenate the two tables:
+        ```
+        >>> tab1.concat(tab2, inplace=True)
+        >>> tab1.ranges
+        {"x":[0, 1], "z":[0.0, 1.0], "y":[0, 1]}
+        ```
+    """
+    if not inplace:
+        tab = table.copy()
+        tab.insertDimension(variable, value, index, inplace=True)
+        return tab
+    
+    #Check arguments
+    table.checkType(variable, str, "variable")
+    table.checkType(value, float, "value")
+    table.checkType(index, int, "index")
+    table.checkType(inplace, bool, "inplace")
+    
+    #Check if variable already exists
+    if variable in table.order:
+        raise ValueError(f"Variable '{variable}' already exists in the table.")
+    
+    #Check index
+    if not (0 <= index <= table.ndim):
+        raise ValueError(f"Index out of range. Must be between 0 and {table.ndim}.")
+    #Insert variable
+    table._order.insert(index, variable)
+    table._ranges[variable] = [value]
+    table._data = table._data.reshape([len(table._ranges[f]) for f in table.order])
+    table._createInterpolator()
+
+#############################################################################
+def concat(table:Tabulation, *tables:tuple[Tabulation], inplace:bool=False, fillValue:float=None, overwrite:bool=False) -> Tabulation|None:
+    """
+    Extend the table with the data of other tables. The tables must have the same fields but 
+    not necessarily in the same order. The data of the second table is appended to the data 
+    of the first table, preserving the order of the fields.
+    
+    If fillValue is not given, the ranges of the second table must be consistent with those
+    of the first table in the fields that are not concatenated. If fillValue is given, the
+    missing sampling points are filled with the given value.
+    
+    Args:
+        table (Tabulation): The table to which the data is appended.
+        *tables (tuple[Tabulation]): The tables to append.
+        inplace (bool, optional): If True, the operation is performed in-place. Defaults to False.
+        fillValue (float, optional): The value to fill missing sampling points. Defaults to None.
+        overwrite (bool, optional): If True, overwrite the data of the first table with the data 
+            of the second table in overlapping regions. Otherwise raise an error. Defaults to False.
+    
+    Returns:
+        Tabulation|None: The concatenated table if inplace is False, None otherwise.
+    """
+    #Check arguments
+    checkType(table, Tabulation, "table")
+    checkArray(tables, Tabulation, "tables")
+    checkType(inplace, bool, "inplace")
+    checkType(overwrite, bool, "overwrite")
+    if not fillValue is None:
+        checkType(fillValue, float, "fillValue")
+    
+    if not inplace:
+        tab = table.copy()
+        concat(tab, *tables, inplace=True, fillValue=fillValue, overwrite=overwrite)
+        return tab
+    
+    for ii, tab in enumerate(tables):
+        #Check compatibility
+        if not (sorted(table.order) == sorted(tab.order)):
+            raise ValueError(f"Tables must have the same fields to concatenate (table[{ii}] incompatible).")
+        
+        #Cast the two tables to dataframes
+        df1 = toPandas(table)
+        df1.set_index(table.order, inplace=True)
+        df2 = toPandas(tab)[table.order + ["output"]]
+        df2.set_index(table.order, inplace=True)
+        
+        #Check for overlapping regions between sampling points of the two tables
+        sp1 = set(df1.index.values)
+        sp2 = set(df2.index.values)
+        if (not overwrite) and (len(sp1.intersection(sp2)) > 0):
+            raise ValueError("Overlapping regions between the two tables. Set 'overwrite' to True to overwrite the data in the overlapping regions.")
+        
+        #Merge second to first
+        merged = pd.concat([df1.drop(axis=0, index=sp2.intersection(sp1)), df2], axis=0, sort=True)
+        
+        #New ranges
+        index = merged.index
+        newRanges = {f:sorted(index.get_level_values(f).unique()) for f in table.order}
+        
+        #Check for missing sampling points
+        samplingPoints = itertools.product(*[newRanges[f] for f in table.order])
+        for sp in samplingPoints:
+            if not sp in merged.index:
+                if fillValue is None:
+                    raise ValueError("Missing sampling point in the second table. Cannot concatenate without 'fillValue' argument.")
+                merged.loc[sp] = fillValue
+        
+        #Sort
+        merged.sort_index(inplace=True)
+        
+        #Create new table
+        table._ranges = newRanges
+        table._data = merged["output"].values.reshape([len(newRanges[f]) for f in table.order])
+        table._createInterpolator()
+
+#Alias
+merge = concat
+
+#############################################################################
+def squeeze(table:Tabulation, *, inplace:bool=False) -> Tabulation|None:
+    """
+    Remove dimensions with only 1 data-point.
+    
+    Args:
+        table (Tabulation): The table to squeeze.
+        inplace (bool, optional): If True, the operation is performed in-place. Defaults to False.
+    
+    Returns:
+        Tabulation|None: The squeezed tabulation if inplace is False, None otherwise.
+    """
+    if not inplace:
+        tab = table.copy()
+        tab.squeeze(inplace=True)
+        return tab
+    
+    #Find dimensions with more than one data-point
+    dimsToKeep = []
+    for ii, dim in enumerate(table.shape):
+        if dim > 1:
+            dimsToKeep.append(ii)
+    
+    #Extract data
+    table._order = list(map(table.order.__getitem__, dimsToKeep))
+    table._ranges = {var:table._ranges[var] for var in table._order}
+    table._data = table._data.squeeze()
+    
+    #Update interpolator
+    table._createInterpolator()
+
+#########################################################################
+def sliceTable(table:Tabulation, *, slices:Iterable[slice|Iterable[int]|int]=None, ranges:dict[str,float|Iterable[float]]=None, inplace=False, **argv) -> Tabulation|None:
+    """
+    Extract a table with sliced datase. Can access in two ways:
+        1) by slicer
+        2) sub-set of interpolation points. Keyword arguments also accepred.
+    Args:
+        table (Tabulation): The table
+        ranges (dict[str,float|Iterable[float]], optional): Ranges of sliced table. Defaults to None.
+        slices (Iterable[slice|Iterable[int]|int]): The slicers for each input-variable.
+        inplace (bool, optional): If True, the operation is performed in-place. Defaults to False.
+    Returns:
+        Tabulation|None: The sliced table if inplace is False, None otherwise.
+    """
+    checkType(table, Tabulation, "table")
+    checkType(inplace, bool, "inplace")
+    
+    #Code implemented for inplace
+    if not inplace:
+        tab = table.copy()
+        tab.slice(slices=slices, ranges=ranges, inplace=True, **argv)
+        return tab
+    
+    #Update ranges with keyword arguments
+    ranges = dict() if ranges is None else ranges
+    ranges.update(argv)
+    if len(ranges) == 0:
+        ranges = None
+    
+    if (slices is None) and (ranges is None):
+        raise ValueError("Must provide either 'slices' or 'ranges' to slice the table.")
+    elif not(slices is None) and not(ranges is None):
+        raise ValueError("Cannot provide both 'slices' and 'ranges' to slice the table.")
+    
+    #Swith access
+    if not slices is None: #By slices
+        checkType(slices, Iterable, "slices")
+        if isinstance(slices, str):
+            raise TypeError("Type mismatch. Attempting to slice with entry of type 'str'.")
+        
+        slices = list(slices) #Cast to list (mutable)
+        #Check types
+        if not(len(slices) == len(table.order)):
+            raise IndexError("Given {} slices, while table has {} fields ({}).".format(len(slices), len(table.order), table.order))
+        
+        for ii, ss in enumerate(slices):
+            if isinstance(ss, slice):
+                #Convert to list of indexes
+                slices[ii] = list(range(*ss.indices(table.shape[ii])))
+                
+            elif isinstance(ss,(int, np.integer)):
+                if ss >= table.shape[ii]:
+                    raise IndexError(f"Index out of range for slices[{ii}] ({ss} >= {table.shape[ii]})")
+            
+            elif isinstance(ss, Iterable):
+                checkArray(ss, (int, np.integer), f"slices[{ii}]")
+                slices[ii] = sorted(ss) #Sort
+                for jj,ind in enumerate(ss): #Check range
+                    if ind >= table.shape[ii]:
+                        checkType(ind, int, f"slices[{ii}][{jj}]")
+                        raise IndexError(f"Index out of range for variable {ii}:{table.order[ii]} ({ind} >= {table.shape[ii]})")
+            else:
+                raise TypeError("Type mismatch. Attempting to slice with entry of type '{}'.".format(ss.__class__.__name__))
+        
+        #Create ranges:
+        order = table.order
+        ranges =  dict()
+        for ii,  Slice in enumerate(slices):
+            ranges[order[ii]] = np.array(table.ranges[order[ii]][Slice])
+        
+        #Create slicing table:
+        slTab = np.ix_(*tuple(slices))
+        data = table.data[slTab]
+        
+        #Update table
+        table._data = data
+        table._ranges = ranges
+        table._createInterpolator()
+    
+    elif not ranges is None: #By ranges
+        #Start from the original ranges
+        newRanges = table.ranges
+        
+        #Check arguments:
+        table.checkMap(ranges, str, Iterable, entryName="ranges")
+        
+        for rr in ranges:
+            for ii in ranges[rr]:
+                if not(ii in table.ranges[rr]):
+                    raise ValueError(f"Sampling value '{ii}' not found in range for field '{rr}' with points:\n{table.ranges[rr]}")
+        
+        #Update ranges
+        newRanges.update(**ranges)
+        
+        #Create slicers to access by index
+        slices = []
+        for ii, item in enumerate(table.order):
+            slices.append(np.where(np.isin(table.ranges[item], newRanges[item]))[0])
+        
+        #Slice by index
+        table.slice(slices=tuple(slices), inplace=True)
+
+#############################################################################
+#Plot:
+def plotTable(   table:Tabulation, 
+            x:str, c:str, iso:dict[str,float], 
+            *,
+            ax:plt.Axes=None,
+            colorMap:str="turbo",
+            xlabel:str=None,
+            ylabel:str=None,
+            clabel:str=None,
+            title:str=None,
+            xlim:tuple[float]=(None, None),
+            ylim:tuple[float]=(None, None),
+            clim:tuple[float]=(None, None),
+            figsize:tuple[float]=(8, 6),
+            **kwargs) -> plt.Axes:
+    """
+    Plot a table in a 2D plot with a color-map.
+    
+    Args:
+        table (Tabulation): The table to plot.
+        x (str): The x-axis field.
+        c (str): The color field.
+        iso (dict[str,float]): The iso-values to plot.
+        ax (plt.Axes, optional): The axis to plot on. Defaults to None.
+        colorMap (str, optional): The color-map to use. Defaults to "turbo".
+        xlabel (str, optional): The x-axis label. Defaults to None.
+        ylabel (str, optional): The y-axis label. Defaults to None.
+        clabel (str, optional): The color-bar label. Defaults to None.
+        title (str, optional): The title of the plot. Defaults to None.
+        xlim (tuple[float], optional): The x-axis limits. Defaults to (None, None).
+        ylim (tuple[float], optional): The y-axis limits. Defaults to (None, None).
+        clim (tuple[float], optional): The color-bar limits. Defaults to (None, None).
+        figsize (tuple[float], optional): The size of the figure. Defaults to (8, 6).
+        **kwargs: Additional arguments to pass to the plot
+    
+    Returns:
+        plt.Axes: The axis of the plot.
+    """
+    
+    #Check arguments
+    checkType(table, Tabulation, "table")
+    checkType(x, str, "x")
+    checkType(c, str, "c")
+    checkMap(iso, str, float, "iso")
+    checkType(ax, plt.Axes, "ax", allowNone=True)
+    checkType(colorMap, str, "colorMap")
+    checkType(xlabel, str, "xlabel", allowNone=True)
+    checkType(ylabel, str, "ylabel", allowNone=True)
+    checkType(clabel, str, "clabel", allowNone=True)
+    checkType(title, str, "title", allowNone=True)
+    checkType(xlim, tuple, "xlim")
+    checkType(ylim, tuple, "ylim")
+    checkType(clim, tuple, "clim")
+    checkType(figsize, tuple, "figsize")
+    
+    #Check fields
+    if not x in table.order:
+        raise ValueError(f"Field '{x}' not found in table.")
+    if not c in table.order:
+        raise ValueError(f"Field '{c}' not found in table.")
+    
+    #Check iso-values
+    for f in iso:
+        if not f in table.order:
+            raise ValueError(f"Field '{f}' not found in table.")
+        if not iso[f] in table.ranges[f]:
+            raise ValueError(f"Iso-value for field '{f}' not found in the table.")
+    
+    if not (set(table.order) == set(iso.keys()).union({x, c})):
+        raise ValueError("Iso-values must be given for all but x and c fields.")
+    
+    #Create the axis
+    if ax is None:
+        fig, ax = plt.subplots(figsize=figsize)
+    
+    #Default plot style
+    if not any(s in kwargs for s in ["marker", "m"]):
+        kwargs.update(marker="o")
+    if not any(s in kwargs for s in ["linestyle", "ls"]):
+        kwargs.update(linestyle="--")
+    
+    #Slice the data-set
+    tab = table.slice(ranges={f:[iso[f]] for f in iso})
+    
+    #Update color-bar limits
+    if clim[0] is None:
+        clim = (tab.ranges[c].min(), clim[1])
+    if clim[1] is None:
+        clim = (clim[0], tab.ranges[c].max())
+    
+    #Plot
+    cmap = mpl.colormaps[colorMap]
+    norm = mcolors.Normalize(vmin=clim[0], vmax=clim[1])
+    sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
+    sm.set_array([])
+    
+    for ii, val in enumerate(tab.ranges[c]):
+        data = tab.slice(ranges={c:[val]})
+        ax.plot(
+            data.ranges[x],
+            data.data.flatten(),
+            color=cmap(norm(val)),
+            **kwargs)
+    
+    #Color-bar
+    cbar = plt.colorbar(sm, ax=ax)
+    cbar.set_label(clabel if not clabel is None else c)
+    
+    #Labels
+    ax.set_xlabel(xlabel if not xlabel is None else x)
+    ax.set_ylabel(ylabel)
+    ax.set_title(title if not title is None else " - ".join([f"{f}={iso[f]}" for f in iso]))
+    ax.set_xlim(xlim)
+    ax.set_ylim(ylim)
+    
+    return ax
 
 #############################################################################
 #                               MAIN CLASSES                                #
 #############################################################################
 #Class used for storing and handling a generic tabulation:
-class Tabulation(Utilities):
+class Tabulation(BaseTabulation):
     """
     Class used for storing and handling a tabulation from a structured grid in an n-dimensional space of input-variables. 
     """
     
     _ranges:dict[str,np.ndarray]
     """The sampling points for each input-variable"""
-    
-    _order:list[str]
-    """The order in which the input variables are nested"""
     
     _data:np.ndarray
     """The n-dimensional dataset of the table"""
@@ -92,21 +495,52 @@ class Tabulation(Utilities):
     #########################################################################
     #Class methods:
     @classmethod
-    def from_pandas(cls, data:DataFrame, order:Iterable[str]) -> Tabulation:
-        """_summary_
-
-        Args:
-            data (DataFrame): _description_
-            order (Iterable[str]): _description_
-
-        Raises:
-            NotImplementedError: _description_
-
-        Returns:
-            Tabulation: _description_
+    def from_pandas(cls, data:DataFrame, order:Iterable[str], field:str, **kwargs) -> Tabulation:
         """
-        #Construct from a data-frame with n+1 columns where n is len(order).
-        raise NotImplementedError("Construction from DataFrame not implemented.")
+        Construct a tabulation from a pandas.DataFrame with n+x columns where n is len(order).
+        
+        Args:
+            data (DataFrame): The data-frame to use.
+            order (Iterable[str]): The order in which the input variables are nested.
+            field (str): The name of the field containing the output values.
+            **kwargs: Additional arguments to pass to the constructor.
+            
+        Returns:
+            Tabulation: The tabulation.
+        """
+        #Argument checking:
+        cls.checkType(data, DataFrame, "data")
+        cls.checkArray(order, str, "order")
+        cls.checkType(field, str, "field")
+        if not len(data.columns) > len(order):
+            raise ValueError("DataFrame must have n+x columns, where n is the number of input variables.")
+        for f in order:
+            if not f in data.columns:
+                raise ValueError(f"Field '{f}' not found in DataFrame.")
+        if not field in data.columns:
+            raise ValueError(f"Field '{field}' not found in DataFrame.")
+        
+        #Create ranges:
+        ranges = {}
+        for f in order:
+            ranges[f] = np.array(sorted(data[f].unique()))
+        
+        #Sort data in the correct order
+        data_sorted = data.sort_values(by=order, ascending=True, ignore_index=True)
+        
+        #Check that all combinations of input variables are present and in the correct order
+        samplingPoints = itertools.product(*[ranges[f] for f in order])
+        
+        for ii, sp in enumerate(samplingPoints):
+            for jj, f in enumerate(order):
+                if not data_sorted.iloc[ii][f] == sp[jj]:
+                    raise ValueError(f"Data not consistent with sampling points. Expected {sp} at index {ii} for field '{f}'.")
+        
+        #Create data and return
+        return cls(data_sorted[field].values, ranges, order, **kwargs)
+    
+    #Alias
+    fromPandas = from_pandas
     
     #########################################################################
     #Properties:
@@ -124,28 +558,11 @@ class Tabulation(Utilities):
         self._createInterpolator()
     
     ####################################
-    @property
-    def order(self) -> list[str]:
-        """
-        The order in which variables are nested.
-
-        Returns:
-            list[str]
-        """
-        return self._order
-    
-    @order.setter
+    @BaseTabulation.order.setter
     def order(self, order:Iterable[str]):
-        self.checkArray(order, str, "order")
-        
-        if not len(order) == len(self.order):
-            raise ValueError("Length of new order is inconsistent with number of variables in the table.")
-        
-        if not all(sorted(self.order) == sorted(order)):
-            raise ValueError("Variables for new ordering are inconsistent with variables in the table.")
-        
-        self._data = self._data.transpose(axes=[self.order.index(o) for o in order])
-        self._order = order
+        oldOrder = self.order
+        BaseTabulation.order.fset(self, order)
+        self._data = self._data.transpose(*[oldOrder.index(o) for o in order])
         
         #Update interpolator
         self._createInterpolator()
@@ -156,7 +573,7 @@ class Tabulation(Utilities):
         """
         Get a dict containing the data ranges in the tabulation (read-only).
         """
-        return cp.deepcopy(self._ranges)
+        return {r:self._ranges[r].copy() for r in self._ranges}
     
     #######################################
     #Get data:
@@ -165,16 +582,15 @@ class Tabulation(Utilities):
         """
         The data-structure storing the sampling points (read-only).
         """
-        return cp.deepcopy(self._data)
+        return self._data.copy()
     
     #######################################
     #Get interpolator:
     @property
     def interpolator(self) -> RegularGridInterpolator:
         """
-        Returns a copy of the stored data structure
+        Returns the interpolator.
         """
-        self._createInterpolator()
         return self._interpolator
     
     #######################################
@@ -183,7 +599,7 @@ class Tabulation(Utilities):
         """
         Returns the number of dimentsions of the table.
         """
-        return len(self.order)
+        return self._data.ndim
     
     #######################################
     @property
@@ -191,7 +607,7 @@ class Tabulation(Utilities):
         """
         The shape, i.e., how many sampling points are used for each input-variable.
         """
-        return tuple([len(self._ranges[o]) for o in self.order])
+        return self._data.shape
     
     #######################################
     @property
@@ -199,7 +615,7 @@ class Tabulation(Utilities):
         """
         Returns the number of data-points stored in the table.
         """
-        return np.prod([len(self._ranges[o]) for o in self.order])
+        return self._data.size
     
     #########################################################################
     #Constructor:
@@ -211,14 +627,20 @@ class Tabulation(Utilities):
 
         Args:
             data (Iterable[float]|Iterable): Data structure containing the interpulation values at 
-                sampling points of the tabulation. If 1-dimensional array is given, data are stored 
-                as a list by recursively looping over the ranges stored in 'ranges', following variable
-                hierarchy set in 'order'. If n-dimensional array is given, shape must be consistent 
-                with 'ranges'.
+                sampling points of the tabulation.
+                - If 1-dimensional array is given, data are stored as a list by recursively looping over the ranges stored in 'ranges', following variable
+                hierarchy set in 'order'. 
+                - If n-dimensional array is given, shape must be consistent with 'ranges'.
             ranges (dict[str,Iterable[float]]): Sampling points used in the tabulation for each input variable.
             order (Iterable[str]): Order in which the input variables are nested.
             outOfBounds (Literal[&quot;extrapolate&quot;, &quot;nan&quot;, &quot;fatal&quot;], optional): Ho to handle out-of-bound access to the tabulation. Defaults to "fatal".
+        
+        Raises:
+            TypeError: If data is a DataFrame. Use 'from_pandas' method to create a Tabulation from a DataFrame.
         """
+        if isinstance(data, DataFrame):
+            raise TypeError("Use 'from_pandas' method to create a Tabulation from a DataFrame.")
+        
         #Argument checking:
         self.checkType(data, Iterable, entryName="data")
         data = np.array(data) #Cast to numpy
@@ -229,7 +651,7 @@ class Tabulation(Utilities):
         
         #Check that ranges are in ascending order
         for r in ranges:
-            if not all(ranges[r] == sorted(ranges[r])):
+            if not (list(ranges[r]) == sorted(ranges[r])):
                 raise ValueError(f"Range for variable '{r}' not sorted in ascending order.")
         
         #Order
@@ -254,9 +676,9 @@ class Tabulation(Utilities):
             if not(data.shape == tuple([len(ranges[o]) for o in order])):
                 raise ValueError("Shape of 'data' is not consistent with the data-set given in 'ranges'.")
         
-        #Using a copy
-        ranges = cp.deepcopy(ranges)
-        order = cp.deepcopy(order)
+        #Storing copy
+        ranges = {r:list(ranges[r][:]) for r in ranges}
+        order = list(order[:])
         
         #Casting to np.array:
         for r in ranges:
@@ -269,7 +691,7 @@ class Tabulation(Utilities):
         
         #Reshape if given list:
         if len(data.shape) == 1:
-            self._data = self._data.reshape(self.shape)
+            self._data = self._data.reshape([len(ranges[o]) for o in order])
         
         #Options
         self._outOfBounds = _OoBMethod(outOfBounds)
@@ -289,7 +711,7 @@ class Tabulation(Utilities):
                 ranges.append(range_ii)
         
         #Remove empty directions
-        tab = self.data.squeeze()
+        tab = self._data.squeeze()
         
         #Extrapolation method:
         opts = {"bounds_error":False}
@@ -304,106 +726,73 @@ class Tabulation(Utilities):
         
         self._interpolator = RegularGridInterpolator(tuple(ranges), tab, **opts)
     
-    #######################################
-    def _indexList(self) -> list[list[int]]:
-        """Compute the list of indexes for unwinding the nested loops.
-        
-        Example:
-            shape = (2, 3, 4)
-            output = \
-                [
-                    [0, 0, 0],
-                    [0, 0, 1],
-                    [0, 0, 2],
-                    [0, 0, 3],
-                    [0, 0, 4],
-                    [0, 1, 0],
-                    [0, 1, 1],
-                    ...
-                    
-                    [1, 2, 3]
-                ]
-
-        Returns:
-            list[list[int]]
-        """
-        #The size of the table
-        size = self.size
-        
-        indexList = []
-        counterList = [0]*len(self.shape)
-        
-        indexList.append(cp.copy(counterList))
-        for ii in range(1,size):
-            #Incremento:
-            counterList[-1] += 1
-            #Controllo i riporti:
-            for jj in range(len(counterList)-1,-1,-1):  #Reversed order
-                if counterList[jj] == self.shape[jj]:  #Riporto
-                    counterList[jj] = 0
-                    counterList[jj-1] += 1
-            #Aggiungo a lista:
-            indexList.append(cp.copy(counterList))
-        
-        return indexList
+    #########################################################################
+    #Public member functions:
+    append = merge = concat = concat
+    insertDimension = insertDimension
+    slice = sliceTable
+    squeeze = squeeze
     
-    #######################################
-    def _computeIndex(self, index:int) -> tuple[int]:
+    def copy(self):
         """
-        Compute the location of an index inside the table. Getting the index, returns a list of the indices of each input-variable.
-        
-        Args:
-            index (int): The index to access in the flattened dataset.
-        
-        Returns:
-            list[int]
-
-        Returns:
-            list[int]: The corresponding index in the nested dataset.
-            
-        Example:
-            >>> self.shape
-            (2, 3, 4)
-            >>> self._computeIndex(12)
-            (0, 0, 1)
+        Create a copy of the tabulation.
         """
-        id = [0]*self.ndim
-        for ii in range(self.ndim-1):
-            size = np.prod(self.shape[ii+1:])
-            while index >= size:
-                id[ii] += 1
-                index -= size
-        id[-1] = index
-        return tuple(id)
+        return Tabulation(self.data, self.ranges, self.order, outOfBounds=self.outOfBounds)
+    
+    #Conversion
+    toPandas = to_pandas = toPandas
+    
+    #Plotting
+    plot = plotTable
     
     #########################################################################
     #Dunder methods
     
     #Interpolation
-    def __call__(self, *args:tuple[float|np.ndarray[float]], outOfBounds:str=None) -> float|np.ndarray[float]:
+    def __call__(self, *args:tuple[float,...]|tuple[tuple[float,...],...], outOfBounds:str=None) -> float|np.ndarray[float]:
         """
-        Multi-linear interpolation from the tabulation. The number of arguments to be given
-        must be the same of the dimensions of the table.
+        Multi-linear interpolation from the tabulation. The input data must be consistent with the number of input-variables stored in the tabulation.
 
         Args:
-            *args:tuple[float]: The input data. Length must be consistent with number of input-variables.
+            *args (tuple[float,...] | Iterable[tuple[float,...]]): The input data to interpolate.
+            - If tuple[float,...] is given, returns float.
+            - If tuple[tuple[float,...]] is given, returns np.ndarray[float], where each entry is the result of the interpolation.
             outOfBounds (str, optional): Overwrite the out-of-bounds method before interpolation. Defaults to None.
 
         Returns:
             float: The return value.
         """
+        #Check arguments
+        self.checkType(args, (tuple, Iterable), "args")
         
-        #Argument checking:
-        if len(args) != self.ndim:
-            raise ValueError("Number of entries not consistent with number of dimensions stored in the tabulation ({} expected, while {} found).".format(self.ndim, len(args)))
+        #Check for single entry
+        if not isinstance(args[0], Iterable):
+            args = [args]
         
+        #Pre-processing: check for dimension and extract active dimensions
         entries = []
-        for ii, f in enumerate(self.order):
-            #Check for dimension:
-            if len(self._ranges[f]) > 1:
-                entries.append(args[ii])
-            else:
-                self.__class__.runtimeWarning("Field '{}' with only one data-point, cannot interpolate along that dimension. Entry for that field will be ignored.".format(f))
+        self.checkArray(args, Iterable, "args")
+        for ii, entry in enumerate(args):
+            self.checkArray(entry, float, f"args[{ii}]")
+            
+            #Check for dimension
+            if len(entry) != self.ndim:
+                raise ValueError("Number of entries not consistent with number of dimensions stored in the tabulation ({} expected, while {} found).".format(self.ndim, len(entry)))
+            
+            #extract active dimensions
+            entries.append([])
+            for ii, f in enumerate(self.order):
+                #Check for dimension:
+                if len(self._ranges[f]) > 1:
+                    entries[-1].append(entry[ii])
+                else:
+                    if entry[ii] != self._ranges[f][0]:
+                        warnings.warn(
+                            TabulationAccessWarning(
+                                f"Field '{f}' with only one data-point, cannot " +
+                                "interpolate along that dimension. Entry for that " +
+                                "field will be ignored.")
+                            )
         
         #Update out-of-bounds
         if not outOfBounds is None:
@@ -424,83 +813,68 @@ class Tabulation(Utilities):
             return returnValue
     
     #######################################
-    def __getitem__(self, index:int|Iterable[int]) -> tuple[dict[str,float],float]:
+    def __getitem__(self, index:int|Iterable[int]|slice) -> float|np.ndarray[float]:
         """
         Get an element in the table.
 
         Args:
-            index (int | Iterable[int]): The index to access.
+            index (int | Iterable[int] | slice | Iterable[slice]): Either:
+                - An index to access the table (flattened).
+                - A tuple of the x,y,z,... indices to access the table.
+                - A slice to access the table (flattened).
+                - A tuple of slices to access the table.
             
         Returns:
-            tuple[dict[str:float],float]: A tuple with a dictionary mapping the names of input-variables to corresponding values, and a float with the value of the sampling point.
+            float | Iterable[float]: The value at the index/indices:
+                - If int|Iterable[int] is given, returns float.
+                - If slice|Iterable[slice] is given, returns np.ndarray[float].
         """
-        ranges = self.ranges
-        
-        if isinstance(index, (int, np.integer)):
-            # Convert to access by list
-            return self[self._computeIndex(index)]
-        elif isinstance(index, Iterable):
-            output = {}
-            for ii,id in enumerate(index):
-                self.checkType(id, (int, np.integer), f"index[{ii}]")
-                if id >= len(ranges[self.order[ii]]):
-                    raise IndexError(f"index[{ii}] {id} out of range for variable {self.order[ii]} ({id} >= {len(ranges[self.order[ii]])})")
-
-                # Input variables
-                output[self.order[ii]] = ranges[self.order[ii]][id]
-            
-            return output,self._data[index]
-        else:
-            raise TypeError(f"Cannot access with index of type {index.__class__.__name__}")
+        # If not list of index/slice, flatten access
+        if isinstance(index, (int, np.integer, slice)):
+            return self._data.flatten()[index]
+        elif isinstance(index, tuple) and all(isinstance(i, (int, np.integer)) for i in index):
+            return self._data.flatten()[np.ravel_multi_index(index, self.shape)]
+        return self._data[index]
     
     #######################################
-    def __setitem__(self, slices:tuple[slice|Iterable[int]|int], items:float|np.ndarray[float]):
+    def __setitem__(self, index:int|Iterable[int]|slice|tuple[int|Iterable[int]|slice], value:float|np.ndarray[float]) -> None:
         """
-        Set the interpolation values at a slice of the table.
-
-        Args:
-            slices (tuple[slice|Iterable[int]|int]): The slicers for each input-variable.
-            items (float | np.ndarray[float]): The value to set.
+        Set the interpolation values at a slice of the table through np.ndarray.__setitem__ but:
+        - If int|Iterable[int]|slice is given, set the value at the index/indices in the flattened dataset.
+        - If tuple[int|Iterable[int]|slice] is given, set the value at the index/indices in the nested dataset.
         """
-        #Argument checking:
-        self.checkType(items, (Iterable, float), "items")
-        self.checkType(slices, tuple, "slices")
-        
-        if not(len(slices) == len(self.order)):
-            raise IndexError("Given {} ranges, while table has {} fields ({}).".format(len(slices), len(self.order), self.order))
-        
-        indTable = []
-        for ii,var in enumerate(self.order):
-            ss = slices[ii]
-            indList = range(len(self.ranges[var]))
-            
-            if isinstance(ss, slice):
-                try:
-                    indTable.append(indList[ss])
-                except BaseException as err:
-                    raise IndexError(f"Slice '{ss}' out of range for field '{var}'.")
-                
-            elif isinstance(ss,int):
-                if not(ss in indList):
-                    raise IndexError("Index out of range for field '{}'.".format(var))
-                indTable.append([ss])
-            
-            elif isinstance(ss,Iterable):
-                for ind in ss:
-                    if not(ind in indList):
-                        raise IndexError("Index out of range for field '{}'.".format(var))
-                
-                indTable.append(ss)
-                
-            else:
-                raise TypeError("Type missmatch. Attempting to slice with entry of type '{}'.".format(ss.__class__.__name__))
-        
-        #Set values:
         try:
-            slTab = np.ix_(*tuple(slices))
-            self._data[slTab] = items
+            #Check nested access
+            if isinstance(index, tuple):
+                if len(index) != self.ndim:
+                    raise ValueError("Number of entries not consistent with number of dimensions stored in the tabulation ({} expected, while {} found).".format(self.ndim, len(index)))
+                
+                #Use ndarray.__setitem__
+                self._data.__setitem__(index, value)
+            
+            #Flattened access
+            elif isinstance(index, (int, np.integer, slice, Iterable)):
+                if isinstance(index, Iterable):
+                    self.checkArray(index, (int, np.integer), "index")
+                
+                nestedId = self._computeIndex(index)
+                if isinstance(nestedId, tuple): #Single index -> convert to list[tuple]
+                    nestedId = [nestedId]
+                
+                if not isinstance(value, Iterable): #Single value -> convert to list
+                    value = [value]
+                
+                if not len(value) == len(nestedId):
+                    raise ValueError("Number of entries not consistent with number of dimensions stored in the tabulation ({} expected, while {} found).".format(len(nestedId), len(value)))
+                
+                for idx, val in zip(nestedId, value):
+                    self._data.__setitem__(idx, val)
+            
+            else:
+                raise TypeError("Cannot access with index of type '{}'.".format(index.__class__.__name__))
+            
         except BaseException as err:
-            raise ValueError("Failed setting items in Tabulation")
+            raise ValueError("Failed setting items in Tabulation: {}".format(err))
         
         #Update interpolator
         self._createInterpolator()
@@ -508,7 +882,7 @@ class Tabulation(Utilities):
     #######################################
     def __eq__(self, value:Tabulation) -> bool:
         if not isinstance(value, Tabulation):
-            return False
+            raise NotImplementedError("Cannot compare Tabulation with object of type '{}'.".format(value.__class__.__name__))
         
         #Ranges
         if False if (self._ranges.keys() != value._ranges.keys()) else any([not np.array_equal(value._ranges[var], self._ranges[var]) for var in self._ranges]):
@@ -518,379 +892,23 @@ class Tabulation(Utilities):
         if self._order != value._order:
             return False
         
+        #Data
         if not np.array_equal(value._data, self._data):
             return False
         
         return True
     
-    #####################################
-    #Allow iteration
-    def __iter__(self):
-        """
-        Iterator
-
-        Returns:
-            Self
-        """
-        for ii in range(self.size):
-            yield self[ii]
-    
-    #########################################################################
-    #Public member functions:
-    
-    #Squeeze 0/1 len dimension
-    def squeeze(self):
-        """
-        Remove dimensions with only 1 data-point.
-        """
-        dimsToKeep = []
-        for ii, dim in enumerate(self.shape):
-            if dim > 1:
-                dimsToKeep.append(ii)
-        
-        self._order = map(self.order.__getitem__, dimsToKeep)
-        self._ranges = {var:self._ranges[var] for var in self._order}
-        self._data = self._data.squeeze()
-        
-        #Update interpolator
-        self._createInterpolator()
-    
     #######################################
-    def slice(self, slices:Iterable[slice|Iterable[int]|int]=None, ranges:dict[str,Iterable[float]]=None, **argv) -> Tabulation:
+    def __str__(self):
         """
-        Extract a table with sliced datase. Can access in two ways:
-            1) by slicer
-            2) sub-set of interpolation points. Keyworld arguments also accepred.
-
-        Args:
-            ranges (dict[str,Iterable[float]], optional): Ranges of sliced table. Defaults to None.
-            slices (Iterable[slice|Iterable[int]|int]): The slicers for each input-variable.
-
-        Returns:
-            Tabulation: The sliced table.
+        String representation of the tabulation.
         """
-        #Swith access
-        if not slices is None:
-            #By slices
-            
-            #Check other args
-            if (not ranges is None) or (len(argv) > 0):
-                raise ValueError("Cannot access both by slices and ranges")
-            
-            #Check types
-            self.checkType(slices, Iterable, "slices")
-            if not(len(slices) == len(self.order)):
-                raise IndexError("Given {} ranges, while table has {} fields ({}).".format(len(slices), len(self.order), self.order))
-            
-            for ii, ss in enumerate(slices):
-                if isinstance(ss, slice):
-                    # Ok
-                    pass
-                    
-                elif isinstance(ss,int):
-                    if ss >= self.size:
-                        raise IndexError(f"Index out of range for slices[{ii}] ({ss} >= {self.size})")
-                
-                elif isinstance(ss,Iterable):
-                    for jj,ind in enumerate(ss):
-                        if ind >= len(self.ranges[self.order[ii]]):
-                            self.checkType(ind, int, f"slices[{ii}][{jj}]")
-                            raise IndexError(f"Index out of range for variable {ii}:{self.order[ii]} ({ind} >= {len(self.ranges[self.order[ii]])})")
-                else:
-                    raise TypeError("Type mismatch. Attempting to slice with entry of type '{}'.".format(ss.__class__.__name__))
-            
-            #Create ranges:
-            order = self.order
-            ranges =  dict()
-            for ii,  Slice in enumerate(slices):
-                ranges[order[ii]] = [self.ranges[order[ii]][ss] for ss in Slice]
-            
-            #Create slicing table:
-            slTab = np.ix_(*tuple(slices))
-            data = cp.deepcopy(self.data[slTab])
-            
-            return self.__class__(data, ranges, order)
-        
-        else:
-            #By ranges
-            ranges = dict() if ranges is None else ranges
-            
-            #Start from the original ranges
-            newRanges = self.ranges
-            
-            #Check arguments:
-            ranges = ranges.update(argv)
-            self.checkMap(ranges, str, Iterable, entryName="ranges")
-            
-            for rr in ranges:
-                for ii in ranges[rr]:
-                    if not(ii in self.ranges[rr]):
-                        raise ValueError("Sampling value '{}' not found in range for field '{}'.".format(ii,rr))
-            
-            #Update ranges
-            newRanges.update(**ranges)
-            
-            #Create slicers to access by index
-            slices = []
-            for ii, item in enumerate(self.order):
-                slices.append([self._ranges[item].index(vv) for vv in ranges[item]])
-            
-            #Slice by index
-            return self.slice(tuple(slices))
+        string = super().__str__()
+        string += self.to_pandas().to_string()
+        return string
     
-    #######################################
-    def concat(self, table:Tabulation, fieldName:str, *, inplace:bool=False) -> Tabulation|None:
-        #Check arguments
-        self.checkType(table, Tabulation, "table")
-        self.checkType(fieldName, str, "fieldName")
-        self.checkType(inplace, bool, "inplace")
-        
-        if not fieldName in self.order:
-            raise ValueError("Field '{}' not found in table.".format(fieldName))
-        
-        if not fieldName in table.order:
-            raise ValueError("Field '{}' not found in 'secondTable'.".format(fieldName))
-        
-        if (False if (len(self.order) != len(table.order)) else (self.order != table.order)):
-            raise ValueError("Table fields not compatible.\nTable fields:\n{}\nFields of table to concatenate:\n{}".format(table.order, self.order))
-        
-        #Check if fields already present:
-        for item in table.ranges[fieldName]:
-            if item in self.ranges[fieldName]:
-                raise ValueError("Value '{}' already present in range of field '{}'.".format(item, self.ranges[fieldName]))
-        
-        #Check compatibility:
-        otherFields = [f for f in self.order if f != fieldName]
-        otherRanges = {f:self.ranges[f] for f in otherFields}
-        otherRangesSecond = {f:table.ranges[f] for f in otherFields}
-        if otherRanges != otherRangesSecond:
-            raise ValueError("Table ranges of other fields not compatible.\nTable ranges:\n{}Ranges of table to append:\n{}".format(otherRanges, otherRangesSecond))
-        
-        #Append data:
-        if inplace:
-            fieldIndex = self.order.index(fieldName)
-            self._ranges[fieldName] += table.ranges[fieldName]
-            self._data = np.append(self._data, table.data, axis=fieldIndex)
-        else:
-            #Copy and concatenate to copy
-            table = self.copy()
-            return self.copy().concat(table, fieldName, inplace=True)
-    
-    #########################################################################
-    #Plot:
-    # def plot(self, xVar:str, yVar:str, isoSurf=None, **argv):
-    #     """
-    #     xVar:   str
-    #         Name of the field on x-axis
-            
-    #     yVar:   str
-    #         Name of the field on the y-axis
-            
-    #     isoSurf:    list<dict>
-    #         List of dictionaries used to sort which iso-surfaces to plot. Each
-    #         element of the list must be a dictionary containing a value for
-    #         each remaining field of the tabulation.
-    #         It can be optional in case there are three fields in the tabulation,
-    #         it will contain each element of the third field. Otherwise it is
-    #         mandatory.
-            
-    #         Exaple:
-    #         [
-    #             {
-    #                 var_ii:value1.1
-    #                 var_jj:value2.1
-    #                 ...
-    #             }
-    #             {
-    #                 var_ii:value1.2
-    #                 var_jj:value2.2
-    #                 ...
-    #             }
-    #             ...
-    #         ]
-        
-    #     [keyworld arguments]
-    #     xRange: list<float>
-    #         Sampling points of the x-axis field (if want a subset)
-        
-    #     yRange: list<float>
-    #         Sampling points of the y-axis field (if want a subset)
-        
-    #     Display the sampling points in the tabulation as iso-surfaces and
-    #     returns a tuple with handles to figure and axes.
-    #     """
-    #     try:
-    #         #Argument checking:
-    #         Utilities.checkType(xVar, str, entryName="xVar")
-    #         Utilities.checkType(yVar, str, entryName="yVar")
-    #         if not(isoSurf is None):
-    #             if len(isoSurf) == 0:
-    #                 raise ValueError("dict entry 'isoSurf' is empty, cannot generate the iso-surface plot.")
-                
-    #             Utilities.checkInstanceTemplate(isoSurf, [{"A":1.0}], entryName="isoSurf")
-            
-    #         f = ""
-    #         for F in self.fields():
-    #             f += "\t" + F + "\n"
-    #         if not(xVar in self.fields()):
-    #             raise ValueError("Entry {} (xVar) not found among table fields. Available fields are:\n{}".format(f))
-            
-    #         if not(yVar in self.fields()):
-    #             raise ValueError("Entry {} (yVar) not found among table fields. Available fields are:\n{}".format(f))
-            
-    #         defaultArgv = \
-    #         {
-    #             "xRange":   self.ranges()[xVar],
-    #             "yRange":   self.ranges()[yVar]
-    #         }
-            
-    #         argv = Utilities.updateKeywordArguments(argv, defaultArgv)
-            
-    #     except BaseException as err:
-    #         self.fatalErrorInArgumentChecking(self.plot, err)
-        
-    #     #Ranges
-    #     xRange = argv["xRange"]
-    #     yRange = argv["yRange"]
-        
-    #     #Create figure:
-    #     fig = plt.figure()
-    #     ax = Axes3D(fig)
-    #     X, Y = Utilities.np.meshgrid(xRange, yRange)
-        
-    #     try:
-    #         if isoSurf is None:
-    #             otherVar = None
-    #             for var in self.fields():
-    #                 if not ((var == xVar) or (var == yVar)):
-    #                     #if not (otherVar is None):
-    #                         #raise ValueError("Cannot plot iso-surfaces of table with more then 3 variables stored. Must give the data to plot through 'isoSurf' argument, as a list of dicts determining the iso values of the remaining variables:\n\n[\{var_ii:value1.1, var_jj:value2.1,...\}, {var_ii:value1.2, var_jj:value2.2,...\}, ...]")
-    #                     if (otherVar is None):
-    #                         otherVar = [var]
-    #                     else:
-    #                         otherVar.append(var)
-                
-    #             if otherVar is None:
-    #                 Z = self.cp.deepcopy(X)
-                    
-    #                 for ii in range(X.shape[0]):
-    #                     for jj in range(X.shape[1]):
-                            
-    #                         values = {xVar:X[ii][jj], yVar:Y[ii][jj]}
-                            
-    #                         #Sort in correct order
-    #                         arguments = []
-    #                         for field in self.fields():
-    #                             if field in values:
-    #                                 arguments.append(values[field])
-    #                         arguments = tuple(arguments)
-                            
-    #                         Z[ii][jj] = self(*arguments)
-                        
-    #                 surf = ax.plot_surface(X, Y, Z)
-    #                 surf._facecolors2d=surf._facecolors
-    #                 surf._edgecolors2d=surf._edgecolors
-                    
-    #                 isoSurf = []
-                    
-    #             else:
-    #                 isoSurf = []
-    #                 varIDs = [0]*len(otherVar)
-    #                 while(True):
-    #                     #Append surface
-    #                     isoSurf.append({})
-    #                     for ii, var in enumerate(otherVar):
-    #                         isoSurf[-1][var] = self.ranges()[var][varIDs[ii]]
-                        
-    #                     #Increase counter
-    #                     for ii,var in enumerate(otherVar):
-    #                         jj = len(varIDs)-ii-1
-                            
-    #                         if ii == 0:
-    #                             varIDs[jj] += 1
-                            
-    #                         varIDs[jj], rem = (varIDs[jj]%len(self.ranges()[otherVar[jj]])), (varIDs[jj]//len(self.ranges()[otherVar[jj]]))
-    #                         if jj > 0:
-    #                             varIDs[jj-1] += rem
-                        
-    #                     #Check if looped the counter
-    #                     if all([ID == 0 for ID in varIDs]):
-    #                         break
-                
-    #         for isoDict in isoSurf:
-    #             if not isinstance(isoDict, dict):
-    #                 raise TypeError("'isoSurf' entry must be in the form:\n\n[\{var_ii:value1.1, var_jj:value2.1\}, {var_ii:value1.2, var_jj:value2.2\}, ...] \n\n where [var_ii, var_jj,...] are all the remaining dimensions of the tabulation, while valueXX.YY must be float or int.")
-    #             elif  not isoDict:
-    #                 raise ValueError("Empty entry in list 'isoSurf'. 'isoSurf' entry must be in the form:\n\n[\{var_ii:value1.1, var_jj:value2.1,...\}, {var_ii:value1.2, var_jj:value2.2,...\}, ...] \n\n where [var_ii, var_jj,...] are all the remaining dimensions of the tabulation.")
-    #             elif not (len(isoDict) == (len(self.fields()) - 2)):
-    #                 raise ValueError("Empty entry in list 'isoSurf'. 'isoSurf' entry must be in the form:\n\n[\{var_ii:value1.1, var_jj:value2.1,...\}, {var_ii:value1.2, var_jj:value2.2,...\}, ...] \n\n where [var_ii, var_jj,...] are all the remaining dimensions of the tabulation, while valueXX.YY must be float or int.")
-                
-    #             for key in isoDict:
-    #                 if not(key in self.fields()):
-    #                     raise ValueError("Key '{}' in element of entry 'isoSurf' not found among table fields. 'isoSurf' entry must be in the form:\n\n[\{var_ii:value1.1, var_jj:value2.1,...\}, {var_ii:value1.2, var_jj:value2.2,...\}, ...] \n\n where [var_ii, var_jj,...] are all the remaining dimensions of the tabulation, while valueXX.YY must be float or int.".format(key))
-    #                 elif not(isinstance(isoDict[key], (int,float))):
-    #                     raise TypeError("Wrong type, expected float or int, {} found. 'isoSurf' entry must be in the form:\n\n[\{var_ii:value1.1, var_jj:value2.1,...\}, {var_ii:value1.2, var_jj:value2.2,...\}, ...] \n\n where [var_ii, var_jj,...] are all the remaining dimensions of the tabulation, while valueXX.YY must be float or int.".format(isoDict[key].__class__.__name__))
-                
-    #             Z = Utilities.cp.deepcopy(X)
-    #             for ii in range(X.shape[0]):
-    #                 for jj in range(X.shape[1]):
-                        
-    #                     values = {xVar:X[ii][jj], yVar:Y[ii][jj]}
-                        
-    #                     label = ""
-    #                     for key in isoDict:
-    #                         if label:
-    #                             label += " - "
-    #                         label += "{}: {}".format(key,isoDict[key])
-                            
-    #                         values[key] = isoDict[key]
-                            
-    #                     #Sort in correct order
-    #                     arguments = []
-    #                     for field in self.fields():
-    #                         if field in values:
-    #                             arguments.append(values[field])
-    #                     arguments = tuple(arguments)
-                        
-    #                     Z[ii][jj] = self(*arguments)
-                
-    #             surf = ax.plot_surface(X, Y, Z, label=label)
-    #             surf._facecolors2d=surf._facecolors
-    #             surf._edgecolors2d=surf._edgecolors
-                
-    #         ax.legend()
-    #         plt.xlabel(xVar)
-    #         plt.ylabel(yVar)
-        
-    #     except BaseException as err:
-    #         self.fatalErrorInClass(self.plot, "Failed plotting tabulation", err)
-        
-    #     return fig, ax
-
-#############################################################################
-#                             AUXILIARY FUNCTIONS                           #
-#############################################################################
-def concat(tables:Iterable[Tabulation], fieldName:str) -> Tabulation:
+    def __repr__(self):
         """
-        Concatenate a list of tables.
-
-        Args:
-            tables (Iterable[Tabulation]): Tables to merge
-            fieldName (str): Field to use to concatenate the tables
-
-        Returns:
-            Tabulation: The merged table
+        Representation of the tabulation.
         """
-        #Argument checking:
-        Utilities.checkType(fieldName, str, entryName="fieldName")
-        Utilities.checkType(tables, Iterable, entryName="tables")
-        [Utilities.checkType(t, Iterable, entryName=f"tables[{ii}]") for ii,t in enumerate(tables)]
-        
-        #First table
-        output = tables[0]
-        
-        #Append all
-        for tab in output[1:]:
-            tab.concat(output, fieldName, inplace=True)
-            
-        return tab
+        return super().__repr__() + f"data={self.data})"
