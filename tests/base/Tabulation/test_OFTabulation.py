@@ -589,4 +589,22 @@ def test_OFTabulation_clip():
     tab.clip(x=(-5,1), inplace=True)
     assert tab.shape == (2, 2)
     assert np.array_equal(tab.ranges["x"], np.array([0,1]))
+
+def test_OFTabulation_squeeze():
+    ranges = {
+        "x": [0.0, 1.0, 2.0],
+        "y": [0.0]
+    }
+    data = {
+        "z": [0.0, 1.0, 2.0]
+    }
+    order = ["x", "y"]
     
+    table = OFTabulation(ranges=ranges, data=data, order=order)
+    
+    table.squeeze(inplace=True)
+    
+    assert table.shape == (3,)
+    assert np.array_equal(table.ranges["x"], np.array([0,1,2]))
+    assert table.tables["z"].shape == (3,)
+    assert np.array_equal(table.tables["z"].ranges["x"], table.ranges["x"])

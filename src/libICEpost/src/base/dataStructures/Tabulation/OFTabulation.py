@@ -518,9 +518,9 @@ def squeeze(table:OFTabulation, *, inplace:bool=False) -> OFTabulation|None:
         return table
     
     #Squeeze the tables
-    for var in table.fields:
-        if not table.tables[var] is None:
-            table.tables[var].squeeze(inplace=True)
+    for f in table.fields:
+        if not table._data[f].table is None:
+            table._data[f].table.squeeze(inplace=True)
     
     #Squeeze the order
     table._order = [var for var in table.order if table._inputVariables[var].numel > 1]
