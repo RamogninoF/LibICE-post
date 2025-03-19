@@ -286,22 +286,6 @@ class BaseTabulation(Utilities, metaclass=ABCMeta):
     append = merge = concat
     
     @abstractmethod
-    def slice(self, slices:Iterable[slice|Iterable[int]|int]=None, ranges:dict[str,float|Iterable[float]]=None, inplace=False) -> Self:
-        """
-        Extract a table with sliced data. Can access in two ways:
-            1) by slicer
-            2) sub-set of interpolation points. Keyword arguments also accepred.
-        
-        Args:
-            slices (Iterable[slice|Iterable[int]|int]): The slicers for each input-variable.
-            ranges (dict[str,float|Iterable[float]], optional): Ranges of sliced table. Defaults to None.
-            inplace (bool, optional): If True, the operation is performed in-place. Defaults to False.
-            
-        Returns:
-            Self: The sliced table.
-        """
-        
-    @abstractmethod
     def squeeze(self, inplace:bool=False) -> Self|None:
         """
         Remove dimensions with only 1 data-point.
