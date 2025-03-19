@@ -23,7 +23,7 @@ from bidict import bidict
 
 from libICEpost.src.base.dataStructures.Tabulation.BaseTabulation import BaseTabulation
 from libICEpost.src.base.dataStructures.Tabulation.Tabulation import Tabulation
-from libICEpost.src.base.Functions.typeChecking import checkType, checkArray
+from libICEpost.src.base.Functions.typeChecking import checkType, checkArray, checkMap
 from libICEpost.src.base.Utilities import Utilities
 from libICEpost.src.base.Functions.functionsForOF import readOFscalarList, writeOFscalarList
 
@@ -364,7 +364,7 @@ def sliceOFTable(table:OFTabulation, *, slices:Iterable[slice|Iterable[int]|int]
         checkMap(ranges, str, (Iterable, float), entryName="ranges")
         
         for rr in ranges:
-            if isinstance(ranges[rr], float):
+            if not isinstance(ranges[rr], Iterable):
                 ranges[rr] = [ranges[rr]]
             for ii in ranges[rr]:
                 if not(ii in table.ranges[rr]):
