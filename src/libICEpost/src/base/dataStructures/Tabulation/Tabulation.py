@@ -331,9 +331,11 @@ def sliceTable(table:Tabulation, *, slices:Iterable[slice|Iterable[int]|int]=Non
         newRanges = table.ranges
         
         #Check arguments:
-        table.checkMap(ranges, str, Iterable, entryName="ranges")
+        checkMap(ranges, str, (Iterable, float), entryName="ranges")
         
         for rr in ranges:
+            if isinstance(ranges[rr], float):
+                ranges[rr] = [ranges[rr]]
             for ii in ranges[rr]:
                 if not(ii in table.ranges[rr]):
                     raise ValueError(f"Sampling value '{ii}' not found in range for variable '{rr}' with points:\n{table.ranges[rr]}")
@@ -417,7 +419,7 @@ def clipTable(table:Tabulation, ranges:dict[str,tuple[float|None,float|None]]=No
 #############################################################################
 #Plot:
 def plotTable(   table:Tabulation, 
-            x:str, c:str, iso:dict[str,float], 
+            x:str, c:str, iso:dict[str,float]=None, 
             *,
             ax:plt.Axes=None,
             colorMap:str="turbo",
@@ -437,7 +439,7 @@ def plotTable(   table:Tabulation,
         table (Tabulation): The table to plot.
         x (str): The x-axis variable.
         c (str): The color variable.
-        iso (dict[str,float]): The iso-values to plot.
+        iso (dict[str,float], optional): The iso-values to plot. If the table has only 2 variables, this argument is not needed. Defaults to None.
         ax (plt.Axes, optional): The axis to plot on. Defaults to None.
         colorMap (str, optional): The color-map to use. Defaults to "turbo". Equivalent keys are [`cmap`, `colormap`]
         xlabel (str, optional): The x-axis label. Defaults to None. Equivalent keys are [`x_label`, `xLabel`]
@@ -505,6 +507,8 @@ def plotTable(   table:Tabulation,
     checkType(table, Tabulation, "table")
     checkType(x, str, "x")
     checkType(c, str, "c")
+    checkType(iso, dict, "iso", allowNone=True)
+    if iso is None: iso = dict()
     checkMap(iso, str, float, "iso")
     checkType(ax, plt.Axes, "ax", allowNone=True)
     checkType(colorMap, str, "colorMap")
@@ -531,7 +535,7 @@ def plotTable(   table:Tabulation,
             raise ValueError(f"Iso-value for variable '{f}' not found in the table.")
     
     if not (set(table.order) == set(iso.keys()).union({x, c})):
-        raise ValueError("Iso-values must be given for all but x and c variables.")
+        raise ValueError("Iso-values must be given for all but x and c variables ({}).".format(", ".join(set(table.order) - set(iso.keys()).union({x, c}))))
     
     #Create the axis
     if ax is None:
@@ -544,7 +548,7 @@ def plotTable(   table:Tabulation,
         kwargs.update(linestyle="--")
     
     #Slice the data-set
-    tab = table.slice(ranges={f:[iso[f]] for f in iso})
+    tab = table.slice(ranges={f:[iso[f]] for f in iso}) if (len(iso) > 0) else table
     
     #Update color-bar limits
     if clim[0] is None:

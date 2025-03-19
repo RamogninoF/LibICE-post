@@ -361,9 +361,11 @@ def sliceOFTable(table:OFTabulation, *, slices:Iterable[slice|Iterable[int]|int]
         newRanges = table.ranges
         
         #Check arguments:
-        table.checkMap(ranges, str, Iterable, entryName="ranges")
+        checkMap(ranges, str, (Iterable, float), entryName="ranges")
         
         for rr in ranges:
+            if isinstance(ranges[rr], float):
+                ranges[rr] = [ranges[rr]]
             for ii in ranges[rr]:
                 if not(ii in table.ranges[rr]):
                     raise ValueError(f"Sampling value '{ii}' not found in range for variable '{rr}' with points:\n{table.ranges[rr]}")

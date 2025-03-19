@@ -423,6 +423,11 @@ def test_tabulation_slice():
     assert sliced_tab.shape == (1, 3, 4)
     assert np.array_equal(sliced_tab.data, data[0:1, :, :])
     
+    #Test slicing with single value
+    sliced_tab = tab.slice(x=0.0)
+    assert sliced_tab.shape == (1, 3, 4)
+    assert np.array_equal(sliced_tab.data, data[0:1, :, :])
+    
     #Check that all ranges are still ndarray
     for key in sliced_tab.ranges:
         assert isinstance(sliced_tab.ranges[key], np.ndarray)
@@ -789,7 +794,11 @@ def test_tabulation_plot():
     ax = tab.plot(x="x", c="z", iso={"y": 0.5}, xLabel="X", yLabel="Y", cmap="viridis")
     with pytest.raises(ValueError):
         tab.plot(x="x", c="z", iso={"y": 0.5}, xLabel="X", yLabel="Y", cmap="viridis", xlabel="viridis")
-        
+    
+    #Plot a table with only two axes (empty iso)
+    tab = tab.slice(z=[0.0]).squeeze()
+    ax = tab.plot(x="x", c="y", xLabel="X", yLabel="Y", cmap="viridis")
+    
 @pytest.mark.filterwarnings("error::libICEpost.src.base.dataStructures.Tabulation.Tabulation.TabulationAccessWarning")
 def test_tabulation_interpolation():
     """
