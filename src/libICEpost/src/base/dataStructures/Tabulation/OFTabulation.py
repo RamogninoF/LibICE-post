@@ -115,12 +115,12 @@ to_pandas = toPandas
 #############################################################################
 def concat(table:OFTabulation, *tables:OFTabulation, inplace:bool=False, verbose:bool=True, **kwargs):
     """
-    Extend the table with the data of other tables. The tables must have the same fields but 
+    Extend the table with the data of other tables. The tables must have the same variables but 
     not necessarily in the same order. The data of the second table is appended to the data 
-    of the first table, preserving the order of the fields.
+    of the first table, preserving the order of the variables.
     
     If fillValue is not given, the ranges of the second table must be consistent with those
-    of the first table in the fields that are not concatenated. If fillValue is given, the
+    of the first table in the variables that are not concatenated. If fillValue is given, the
     missing sampling points are filled with the given value.
     
     Args:
@@ -153,7 +153,7 @@ def concat(table:OFTabulation, *tables:OFTabulation, inplace:bool=False, verbose
     for ii, tab in enumerate(tables):
         #Check compatibility
         if not (sorted(order) == sorted(tab.order)):
-            raise ValueError(f"Tables must have the same fields to concatenate (table[{ii}] incompatible).")
+            raise ValueError(f"Tables must have the same variables to concatenate (table[{ii}] incompatible).")
         
         #Check fields
         if not (table.fields == tab.fields):
@@ -317,7 +317,7 @@ def sliceOFTable(table:OFTabulation, *, slices:Iterable[slice|Iterable[int]|int]
         
         slices = list(slices) #Cast to list (mutable)
         if not(len(slices) == len(table.order)):
-            raise IndexError("Given {} slices, while table has {} fields ({}).".format(len(slices), len(table.order), table.order))
+            raise IndexError("Given {} slices, while table has {} variables ({}).".format(len(slices), len(table.order), table.order))
         
         for ii, ss in enumerate(slices):
             if isinstance(ss, slice):
@@ -366,7 +366,7 @@ def sliceOFTable(table:OFTabulation, *, slices:Iterable[slice|Iterable[int]|int]
         for rr in ranges:
             for ii in ranges[rr]:
                 if not(ii in table.ranges[rr]):
-                    raise ValueError(f"Sampling value '{ii}' not found in range for field '{rr}' with points:\n{table.ranges[rr]}")
+                    raise ValueError(f"Sampling value '{ii}' not found in range for variable '{rr}' with points:\n{table.ranges[rr]}")
         
         #Update ranges
         newRanges.update(**ranges)
@@ -380,22 +380,96 @@ def sliceOFTable(table:OFTabulation, *, slices:Iterable[slice|Iterable[int]|int]
         table.slice(slices=tuple(slices), inplace=True)
 
 #############################################################################
+def clipOFTable(table:OFTabulation, *, ranges:dict[str,tuple[float,float]]=None, inplace:bool=False, **kwargs) -> OFTabulation|None:
+    """
+    Clip the table to the given ranges. The ranges are given as a dictionary with the 
+    variable names as keys and a tuple with the minimum and maximum values.
+    
+    Args:
+        table (OFTabulation): The table to clip.
+        ranges (dict[str,tuple[float|None,float|None]], optional): The ranges to clip for each input-variable. If min or max is None, the range is unbounded.
+        inplace (bool, optional): If True, the operation is performed in-place. Defaults to False.
+        **kwargs: Can access also by keyword arguments.
+        
+    Returns:
+        OFTabulation|None: The clipped table if inplace is False, None otherwise.
+    """
+    checkType(table, OFTabulation, "table")
+    checkType(inplace, bool, "inplace")
+    checkType(ranges, dict, "ranges", allowNone=True)
+    
+    if not inplace:
+        table = table.copy()
+        clipOFTable(table, ranges=ranges, inplace=True, **kwargs)
+        return table
+    
+    #Update ranges with keyword arguments
+    ranges = dict() if ranges is None else ranges
+    for kw in kwargs:
+        if kw in ranges:
+            raise ValueError(f"Keyword argument '{kw}' is already present in 'ranges'.")
+    ranges.update(kwargs)
+    if len(ranges) == 0:
+        ranges = None
+    
+    if ranges is None:
+        raise ValueError("Must provide 'ranges' to clip the table.")
+    
+    #Check arguments
+    table.checkMap(ranges, str, tuple, entryName="ranges")
+    
+    #Compute clipped ranges
+    newRanges = {}
+    for var in ranges:
+        if not var in table.order:
+            raise ValueError(f"Variable '{var}' not found in table.")
+        
+        if not len(ranges[var]) == 2:
+            raise ValueError(f"Invalid range for variable '{var}'. Must be a tuple with two values (min, max).")
+        
+        if not (ranges[var][0] is None) or not (ranges[var][1] is None):
+            newRanges[var] = table.ranges[var]
+            
+        if not (ranges[var][0] is None):
+            newRanges[var] = newRanges[var][(newRanges[var] >= ranges[var][0])]
+        if not (ranges[var][1] is None):
+            newRanges[var] = newRanges[var][(newRanges[var] <= ranges[var][1])]
+
+    if any([len(newRanges[var]) == 0 for var in newRanges]):
+        raise ValueError("Clipping would result in empty table (zero-size range).")
+    
+    #Clip
+    for var in ranges:
+        if not var in table.order:
+            raise ValueError(f"Variable '{var}' not found in table.")
+        
+        if not (ranges[var][0] is None):
+            table._inputVariables[var].data = table._inputVariables[var].data[(table._inputVariables[var].data >= ranges[var][0])]
+        if not (ranges[var][1] is None):
+            table._inputVariables[var].data = table._inputVariables[var].data[(table._inputVariables[var].data <= ranges[var][1])]
+    
+    #Clip the tables
+    for var in table.fields:
+        if not table.tables[var] is None:
+            table._data[var].table.clip(ranges=ranges, inplace=True)
+    
+#############################################################################
 def insertDimension(table:OFTabulation, *, variable:str, value:float, index:int=None, inplace:bool=False) -> OFTabulation|None:
     """
-    Insert a new dimension in the table by adding a new field with constant value.
+    Insert a new dimension in the table by adding a new variable with constant value.
     
     Args:
         table (OFTabulation): The table to insert the dimension.
         variable (str): The name of the input variable to insert.
-        value (float): The value to assign to the new field.
-        index (int, optional): The index where to insert the new field. Defaults to None (append at the end).
+        value (float): The value to assign to the new variable.
+        index (int, optional): The index where to insert the new variable. Defaults to None (append at the end).
         inplace (bool, optional): If True, the operation is performed in-place. Defaults to False.
     
     Returns:
         OFTabulation|None: The new table with the inserted dimension if inplace is False, None otherwise.
     """
     #Check arguments
-    table.checkType(variable, str, "field")
+    table.checkType(variable, str, "variable")
     table.checkType(value, (float, int), "value")
     table.checkType(index, int, "index", allowNone=True)
     table.checkType(inplace, bool, "inplace")
@@ -560,7 +634,7 @@ class OFTabulation(BaseTabulation):
     @property
     def fields(self) -> list[str]:
         """
-        The variables tabulated.
+        The fields tabulated.
         """
         return [var for var in self._data]
     
@@ -893,6 +967,7 @@ class OFTabulation(BaseTabulation):
     #####################################
     slice = sliceOFTable
     concat = merge = append = concat
+    clip = clipOFTable
     
     toPandas = to_pandas = toPandas
     write = writeOFTable    #Write the table

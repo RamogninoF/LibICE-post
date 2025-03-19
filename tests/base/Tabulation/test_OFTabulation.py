@@ -537,3 +537,56 @@ def test_OFTabulation_setRange():
         table.setRange("x", [2, 0, 3])
     with pytest.raises(ValueError):
         table.setRange("k", [0, 1, 2, 3])
+
+def test_OFTabulation_clip():
+    ranges = {
+        "x": [0.0, 1.0, 2.0],
+        "y": [0.0, 1.0]
+    }
+    data = {
+        "z": [0.0, 1.0, 2.0, 3.0, 4.0, 5.0]
+    }
+    order = ["x", "y"]
+    
+    tab = OFTabulation(ranges=ranges, data=data, order=order)
+    
+    #Key word arguments
+    tab_clip = tab.clip(x=(1,2))
+    assert tab_clip.shape == (2, 2)
+    assert np.array_equal(tab_clip.ranges["x"], np.array([1,2]))
+    assert np.array_equal(tab_clip.ranges["x"], tab_clip.tables["z"].ranges["x"])
+    
+    #Both
+    tab_clip = tab.clip(x=(0,1), ranges={"y": (1,2)})
+    assert tab_clip.shape == (2, 1)
+    assert np.array_equal(tab_clip.ranges["x"], np.array([0,1]))
+    assert np.array_equal(tab_clip.ranges["y"], np.array([1]))
+    assert np.array_equal(tab_clip.ranges["x"], tab_clip.tables["z"].ranges["x"])
+    assert np.array_equal(tab_clip.ranges["y"], tab_clip.tables["z"].ranges["y"])
+    
+    #None
+    tab_clip = tab.clip(x=(None, 1))
+    assert tab_clip.shape == (2, 2)
+    assert np.array_equal(tab_clip.ranges["x"], np.array([0,1]))
+    assert np.array_equal(tab_clip.ranges["x"], tab_clip.tables["z"].ranges["x"])
+    
+    tab_clip = tab.clip(x=(None,None))
+    assert tab_clip == tab
+    
+    #Errors
+    with pytest.raises(TypeError):
+        tab.clip(x=(0,1), ranges={"y": [0,2]})
+    with pytest.raises(ValueError):
+        tab.clip(x=(0,1), ranges={"k": (0,2)})
+    with pytest.raises(ValueError):
+        tab.clip(x=(0,1), ranges={"y": (0,2,3)})
+    with pytest.raises(ValueError):
+        tab.clip(x=(0,1), ranges={"y": (2,1)})
+    with pytest.raises(ValueError):
+        tab.clip(x=(0,1), ranges={"y": (0,2)}, y=(0,1))
+    
+    #Inplace
+    tab.clip(x=(-5,1), inplace=True)
+    assert tab.shape == (2, 2)
+    assert np.array_equal(tab.ranges["x"], np.array([0,1]))
+    

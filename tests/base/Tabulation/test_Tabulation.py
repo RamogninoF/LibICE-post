@@ -1078,3 +1078,59 @@ def test_tabulation_setRange():
         tab.setRange("x", [2, 0])
     with pytest.raises(ValueError):
         tab.setRange("k", [0, 2])
+
+def test_tabulation_clip():
+    data = np.array([[[100, 101, 102, 103],
+                      [110, 111, 112, 113],
+                      [120, 121, 122, 123]],
+                     [[200, 201, 202, 203],
+                      [210, 211, 212, 213],
+                      [220, 221, 222, 223]]])
+    ranges = {
+        "x": [0, 1],
+        "y": [0, 1, 2],
+        "z": [0, 1, 2, 3]
+    }
+    order = ["x", "y", "z"]
+    
+    tab = Tabulation(data, ranges, order)
+    
+    #Key word arguments
+    tab_clip = tab.clip(y=(1,2))
+    assert tab_clip.shape == (2, 2, 4)
+    assert np.array_equal(tab_clip.data, data[:,1:3,:])
+    assert np.array_equal(tab_clip.ranges["y"], np.array([1,2]))
+    
+    #Both
+    tab_clip = tab.clip(x=(0,1), ranges={"y": (1,2)})
+    assert tab_clip.shape == (2, 2, 4)
+    assert np.array_equal(tab_clip.data, data[:,1:3,:])
+    assert np.array_equal(tab_clip.ranges["y"], np.array([1,2]))
+    assert np.array_equal(tab_clip.ranges["x"], np.array([0,1]))
+    
+    #None
+    tab_clip = tab.clip(z=(None, 2))
+    assert tab_clip.shape == (2, 3, 3)
+    assert np.array_equal(tab_clip.data, data[:,:,0:3])
+    assert np.array_equal(tab_clip.ranges["z"], np.array([0,1,2]))
+    
+    tab_clip = tab.clip(x=(None,None))
+    assert tab_clip == tab
+    
+    #Errors
+    with pytest.raises(TypeError):
+        tab.clip(x=(0,1), ranges={"y": [0,2]})
+    with pytest.raises(ValueError):
+        tab.clip(x=(0,1), ranges={"k": (0,2)})
+    with pytest.raises(ValueError):
+        tab.clip(x=(0,1), ranges={"y": (0,2,3)})
+    with pytest.raises(ValueError):
+        tab.clip(x=(0,1), ranges={"y": (2,1)})
+    with pytest.raises(ValueError):
+        tab.clip(x=(0,1), ranges={"y": (0,2)}, y=(0,1))
+    
+    #Inplace
+    tab.clip(y=(-5,1), inplace=True)
+    assert tab.shape == (2, 2, 4)
+    assert np.array_equal(tab.data, data[:,0:2,:])
+    assert np.array_equal(tab.ranges["y"], np.array([0,1]))

@@ -191,7 +191,7 @@ class BaseTabulation(Utilities, metaclass=ABCMeta):
     getInput = getInput
     
     @abstractmethod
-    def insertDimension(self, variable:str, value:float, index:int=None, inplace:bool=False) -> BaseTabulation|None:
+    def insertDimension(self, variable:str, value:float, index:int=None, *, inplace:bool=False) -> BaseTabulation|None:
         """
         Insert an axis to the dimension-set of the table with a single value. 
         This is useful to merge two tables with respect to an additional variable.
@@ -231,7 +231,7 @@ class BaseTabulation(Utilities, metaclass=ABCMeta):
         """
     
     @abstractmethod
-    def slice(self, slices:Iterable[slice|Iterable[int]|int]=None, ranges:dict[str,float|Iterable[float]]=None) -> Self:
+    def slice(self, *, slices:Iterable[slice|Iterable[int]|int]=None, ranges:dict[str,float|Iterable[float]]=None, inplace:bool=False) -> Self|None:
         """
         Extract a table with sliced data. Can access in two ways:
             1) by slicer
@@ -240,20 +240,36 @@ class BaseTabulation(Utilities, metaclass=ABCMeta):
         Args:
             slices (Iterable[slice|Iterable[int]|int]): The slicers for each input-variable.
             ranges (dict[str,float|Iterable[float]], optional): Ranges of sliced table. Defaults to None.
+            inplace (bool, optional): If True, the operation is performed in-place. Defaults to False.
         
         Returns:
-            Self: The sliced table.
+            Self|None: The sliced table if inplace is False, None otherwise.
+        """
+    
+    @abstractmethod
+    def clip(self, ranges:dict[str,tuple[float|None,float|None]]=None, *, inplace:bool=False, **kwargs) -> Self|None:
+        """
+        Clip the table to the given ranges. The ranges are given as a dictionary with the 
+        variable names as keys and a tuple with the minimum and maximum values.
+    
+        Args:
+            ranges (dict[str,tuple[float|None,float|None]], optional): The ranges to clip for each input-variable. If min or max is None, the range is unbounded.
+            inplace (bool, optional): If True, the operation is performed in-place. Defaults to False.
+            **kwargs: Can access also by keyword arguments.
+        
+        Returns:
+            Self|None: The clipped table if inplace is False, None otherwise.
         """
     
     @abstractmethod
     def concat(self, *tables:BaseTabulation, inplace:bool=False, fillValue:float=None, overwrite:bool=False) -> Self|None:
         """
-        Extend the table with the data of other tables. The tables must have the same fields but 
+        Extend the table with the data of other tables. The tables must have the same variables but 
         not necessarily in the same order. The data of the second table is appended to the data 
-        of the first table, preserving the order of the fields.
+        of the first table, preserving the order of the variables.
         
         If fillValue is not given, the ranges of the second table must be consistent with those
-        of the first table in the fields that are not concatenated. If fillValue is given, the
+        of the first table in the variables that are not concatenated. If fillValue is given, the
         missing sampling points are filled with the given value.
         
         Args:

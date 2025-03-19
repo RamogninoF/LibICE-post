@@ -143,12 +143,12 @@ def insertDimension(table:Tabulation, variable:str, value:float, index:int=None,
 #############################################################################
 def concat(table:Tabulation, *tables:Tabulation, inplace:bool=False, fillValue:float=None, overwrite:bool=False) -> Tabulation|None:
     """
-    Extend the table with the data of other tables. The tables must have the same fields but 
+    Extend the table with the data of other tables. The tables must have the same variables but 
     not necessarily in the same order. The data of the second table is appended to the data 
-    of the first table, preserving the order of the fields.
+    of the first table, preserving the order of the variables.
     
     If fillValue is not given, the ranges of the second table must be consistent with those
-    of the first table in the fields that are not concatenated. If fillValue is given, the
+    of the first table in the variables that are not concatenated. If fillValue is given, the
     missing sampling points are filled with the given value.
     
     Args:
@@ -290,7 +290,7 @@ def sliceTable(table:Tabulation, *, slices:Iterable[slice|Iterable[int]|int]=Non
         slices = list(slices) #Cast to list (mutable)
         #Check types
         if not(len(slices) == len(table.order)):
-            raise IndexError("Given {} slices, while table has {} fields ({}).".format(len(slices), len(table.order), table.order))
+            raise IndexError("Given {} slices, while table has {} variables ({}).".format(len(slices), len(table.order), table.order))
         
         for ii, ss in enumerate(slices):
             if isinstance(ss, slice):
@@ -336,7 +336,7 @@ def sliceTable(table:Tabulation, *, slices:Iterable[slice|Iterable[int]|int]=Non
         for rr in ranges:
             for ii in ranges[rr]:
                 if not(ii in table.ranges[rr]):
-                    raise ValueError(f"Sampling value '{ii}' not found in range for field '{rr}' with points:\n{table.ranges[rr]}")
+                    raise ValueError(f"Sampling value '{ii}' not found in range for variable '{rr}' with points:\n{table.ranges[rr]}")
         
         #Update ranges
         newRanges.update(**ranges)
@@ -349,6 +349,71 @@ def sliceTable(table:Tabulation, *, slices:Iterable[slice|Iterable[int]|int]=Non
         #Slice by index
         table.slice(slices=tuple(slices), inplace=True)
 
+#############################################################################
+def clipTable(table:Tabulation, ranges:dict[str,tuple[float|None,float|None]]=None, *, inplace:bool=False, **kwargs) -> Tabulation|None:
+    """
+    Clip the table to the given ranges. The ranges are given as a dictionary with the 
+    variable names as keys and a tuple with the minimum and maximum values.
+    
+    Args:
+        table (Tabulation): The table to clip.
+        ranges (dict[str,tuple[float|None,float|None]], optional): The ranges to clip for each input-variable. If min or max is None, the range is unbounded.
+        inplace (bool, optional): If True, the operation is performed in-place. Defaults to False.
+        **kwargs: Can access also by keyword arguments.
+        
+    Returns:
+        Tabulation|None: The clipped table if inplace is False, None otherwise.
+    """
+    checkType(table, Tabulation, "table")
+    checkType(inplace, bool, "inplace")
+    checkType(ranges, dict, "ranges", allowNone=True)
+    
+    if not inplace:
+        tab = table.copy()
+        tab.clip(ranges, inplace=True, **kwargs)
+        return tab
+    
+    #Update ranges with keyword arguments
+    ranges = dict() if ranges is None else ranges
+    for kw in kwargs:
+        if kw in ranges:
+            raise ValueError(f"Keyword argument '{kw}' is already present in 'ranges'.")
+    ranges.update(kwargs)
+    if len(ranges) == 0:
+        ranges = None
+    
+    if ranges is None:
+        raise ValueError("Must provide 'ranges' to clip the table.")
+    
+    #Check arguments
+    table.checkMap(ranges, str, tuple, entryName="ranges")
+    
+    #Compute clipped ranges
+    newRanges = {}
+    for var in ranges:
+        if not var in table.order:
+            raise ValueError(f"Variable '{var}' not found in table.")
+        
+        if not len(ranges[var]) == 2:
+            raise ValueError(f"Invalid range for variable '{var}'. Must be a tuple with two values (min, max).")
+        
+        if not (ranges[var][0] is None) or not (ranges[var][1] is None):
+            newRanges[var] = table._ranges[var]
+        
+        if not (ranges[var][0] is None):
+            newRanges[var] = newRanges[var][newRanges[var] >= ranges[var][0]]
+        if not (ranges[var][1] is None):
+            newRanges[var] = newRanges[var][newRanges[var] <= ranges[var][1]]
+
+    if any([len(newRanges[var]) == 0 for var in newRanges]):
+        raise ValueError("Clipping would result in empty table (zero-size range).")
+    
+    #Clip
+    for ii, var in enumerate(table.order):
+        if var in newRanges:
+            table._data = table._data.take(np.asarray(np.isin(table._ranges[var], newRanges[var])).nonzero()[0], axis=ii)
+            table._ranges[var] = newRanges[var]
+        
 #############################################################################
 #Plot:
 def plotTable(   table:Tabulation, 
@@ -370,8 +435,8 @@ def plotTable(   table:Tabulation,
     
     Args:
         table (Tabulation): The table to plot.
-        x (str): The x-axis field.
-        c (str): The color field.
+        x (str): The x-axis variable.
+        c (str): The color variable.
         iso (dict[str,float]): The iso-values to plot.
         ax (plt.Axes, optional): The axis to plot on. Defaults to None.
         colorMap (str, optional): The color-map to use. Defaults to "turbo". Equivalent keys are [`cmap`, `colormap`]
@@ -452,21 +517,21 @@ def plotTable(   table:Tabulation,
     checkType(clim, tuple, "clim")
     checkType(figsize, tuple, "figsize")
     
-    #Check fields
+    #Check variables
     if not x in table.order:
-        raise ValueError(f"Field '{x}' not found in table.")
+        raise ValueError(f"Variable '{x}' not found in table.")
     if not c in table.order:
-        raise ValueError(f"Field '{c}' not found in table.")
+        raise ValueError(f"Variable '{c}' not found in table.")
     
     #Check iso-values
     for f in iso:
         if not f in table.order:
-            raise ValueError(f"Field '{f}' not found in table.")
+            raise ValueError(f"Variable '{f}' not found in table.")
         if not iso[f] in table.ranges[f]:
-            raise ValueError(f"Iso-value for field '{f}' not found in the table.")
+            raise ValueError(f"Iso-value for variable '{f}' not found in the table.")
     
     if not (set(table.order) == set(iso.keys()).union({x, c})):
-        raise ValueError("Iso-values must be given for all but x and c fields.")
+        raise ValueError("Iso-values must be given for all but x and c variables.")
     
     #Create the axis
     if ax is None:
@@ -559,7 +624,7 @@ class Tabulation(BaseTabulation):
             raise ValueError("DataFrame must have n+x columns, where n is the number of input variables.")
         for f in order:
             if not f in data.columns:
-                raise ValueError(f"Field '{f}' not found in DataFrame.")
+                raise ValueError(f"Variable '{f}' not found in DataFrame.")
         if not field in data.columns:
             raise ValueError(f"Field '{field}' not found in DataFrame.")
         
@@ -577,7 +642,7 @@ class Tabulation(BaseTabulation):
         for ii, sp in enumerate(samplingPoints):
             for jj, f in enumerate(order):
                 if not data_sorted.iloc[ii][f] == sp[jj]:
-                    raise ValueError(f"Data not consistent with sampling points. Expected {sp} at index {ii} for field '{f}'.")
+                    raise ValueError(f"Data not consistent with sampling points. Expected {sp} at index {ii} for variable '{f}'.")
         
         #Create data and return
         return cls(data_sorted[field].values, ranges, order, **kwargs)
@@ -774,6 +839,7 @@ class Tabulation(BaseTabulation):
     append = merge = concat = concat
     insertDimension = insertDimension
     slice = sliceTable
+    clip = clipTable
     squeeze = squeeze
     
     def copy(self):
@@ -794,7 +860,7 @@ class Tabulation(BaseTabulation):
         Change the range of an input variable in the tabulation.
         
         Args:
-            field (str): The variable to modify.
+            variable (str): The variable to modify.
             range (Iterable[float]): The new range for the variable.
         """
         self.checkType(variable, str, "variable")
@@ -859,9 +925,9 @@ class Tabulation(BaseTabulation):
                     if entry[ii] != self._ranges[f][0]:
                         warnings.warn(
                             TabulationAccessWarning(
-                                f"Field '{f}' with only one data-point, cannot " +
+                                f"Variable '{f}' with only one data-point, cannot " +
                                 "interpolate along that dimension. Entry for that " +
-                                "field will be ignored.")
+                                "variable will be ignored.")
                             )
         
         #Update out-of-bounds
