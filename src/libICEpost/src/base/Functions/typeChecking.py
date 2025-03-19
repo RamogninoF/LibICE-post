@@ -84,11 +84,30 @@ def checkType(entry:Any, Type:type|Iterable[type|_SpecialGenericAlias],
         return
     
     #If intAsFloat is True, treat int as float
-    if (isinstance(entry, (int,np.integer))
-        and 
-        (any([issubclass(t,(float, np.floating)) for t in Type]) if isinstance(Type, Iterable) else issubclass(Type,(float, np.floating))) # Handle iterable of types
-        and intAsFloat):
-        return
+    if isinstance(entry, (int,np.integer)) and intAsFloat:
+        acceptedTypes = (float, np.floating)
+        check = False
+        if isinstance(Type, _SpecialGenericAlias):
+            #Check with isinstance
+            if isinstance(Type, acceptedTypes):
+                check = True
+        elif isinstance(Type, Iterable):
+            for t in Type:
+                if isinstance(t, _SpecialGenericAlias):
+                    #Check with isinstance
+                    if isinstance(t, acceptedTypes):
+                        check = True
+                        break
+                elif isinstance(t, type):
+                    #Check with isubclass
+                    if issubclass(t, acceptedTypes):
+                        check = True
+                        break
+        else:
+            check = issubclass(Type, acceptedTypes)
+        
+        if check:
+            return
     
     #Check type
     if not(isinstance(entry, Type)):

@@ -1,5 +1,6 @@
 import pytest
 from libICEpost.src.base.Functions.typeChecking import checkType, checkArray, checkMap
+from collections.abc import Iterable
 
 def reset_globals():
     from libICEpost import GLOBALS
@@ -126,3 +127,19 @@ def test_checkType_allowNone():
     
     with pytest.raises(TypeError):
         checkType(None, bool, allowNone=False)
+
+def test_checkMap():
+    reset_globals()
+    map = {"a": 1, "b": 2}
+    checkMap(map, str, int)
+    checkMap(map, str, (int, str))
+    with pytest.raises(TypeError):
+        checkMap(map, str, str)
+    
+    map = {"a": 1, "b": "2"}
+    with pytest.raises(TypeError):
+        checkMap(map, str, int)
+    checkMap(map, str, (int, str))
+    
+    map = {1: 1, "b": [2,3]}
+    checkMap(map, (int, str), (int, Iterable))
