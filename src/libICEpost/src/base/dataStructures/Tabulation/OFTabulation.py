@@ -94,19 +94,19 @@ def toPandas(table:OFTabulation) -> pd.DataFrame:
     """
     checkType(table, OFTabulation, "table")
     
+    fields = table.fields
+    order = table.order
+    ranges = table.ranges
     # Create the dataframe
-    df = pd.DataFrame({**{f:[float("nan")]*table.size for f in table.fields}, **{f:[0.0]*table.size for f in table.ranges}})
+    df = pd.DataFrame({**{f:table._data[f].table._data.flatten() for f in fields}, **{f:[0.0]*table.size for f in table.ranges}}, columns=fields + order)
     
     #Sort the columns to have first the input variables in order
-    df = df[table.order + table.fields]
+    df = df[table.order + fields]
     
     #Populate
-    for ii, item in enumerate(table):
-        input = table.getInput(ii)
-        df.loc[ii, list(input.keys())] = [input[it] for it in input.keys()]
-        for jj, f in enumerate(table.fields):
-            df.loc[ii, f] = item[f]
-    
+    inputs = itertools.product(*[ranges[f] for f in order])
+    for ii, ipt in enumerate(inputs):
+        df.iloc[ii,:-len(fields)] = list(ipt)
     return df
 
 #Aliases
@@ -638,7 +638,7 @@ class OFTabulation(BaseTabulation):
         """
         The fields tabulated.
         """
-        return [var for var in self._data]
+        return [var for var in self._data.keys()]
     
     ################################
     @property
