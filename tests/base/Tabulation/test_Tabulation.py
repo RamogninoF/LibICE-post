@@ -798,6 +798,51 @@ def test_tabulation_plot():
     #Plot a table with only two axes (empty iso)
     tab = tab.slice(z=[0.0]).squeeze()
     ax = tab.plot(x="x", c="y", xLabel="X", yLabel="Y", cmap="viridis")
+    with pytest.raises(ValueError):
+        ax = tab.plot(x="x", c="z", xLabel="X", yLabel="Y", cmap="viridis")
+
+def test_tabulation_plotHeatmap():
+    """
+    Test the plot method of the Tabulation class.
+    """
+    data = np.array([[[100, 101, 102, 103],
+                      [110, 111, 112, 113],
+                      [120, 121, 122, 123]],
+                     [[200, 201, 202, 203],
+                      [210, 211, 212, 213],
+                      [220, 221, 222, 223]]])
+    ranges = {
+        "x": np.linspace(0, 1, 2),
+        "y": np.linspace(0, 1, 3),
+        "z": np.linspace(0, 1, 4)
+    }
+    order = ["x", "y", "z"]
+    
+    tab = Tabulation(data, ranges, order)
+    
+    # Test plot method
+    ax = tab.plotHeatmap(x="x", y="z", iso={"y": 0.5})
+    
+    from matplotlib import pyplot as plt
+    ax = plt.subplot()
+    ax = tab.plot(x="x", c="y", iso={"z": 1.0}, ax=ax, xlabel="X", ylabel="Y", title="Title", colorMap="viridis")
+    
+    with pytest.raises(ValueError):
+        tab.plotHeatmap(x="x", y="z", iso={"z": 1.0})
+    
+    with pytest.raises(ValueError):
+        tab.plotHeatmap(x="y", y="z", iso={"x": 0.5})
+    
+    # Test plotting with equivalent keyword arguments
+    ax = tab.plotHeatmap(x="x", y="z", iso={"y": 0.5}, xLabel="X", yLabel="Y", cmap="viridis")
+    with pytest.raises(ValueError):
+        tab.plotHeatmap(x="x", y="z", iso={"y": 0.5}, xLabel="X", yLabel="Y", cmap="viridis", xlabel="viridis")
+    
+    #Plot a table with only two axes (empty iso)
+    tab = tab.slice(z=[0.0]).squeeze()
+    ax = tab.plotHeatmap(x="x", y="y", xLabel="X", yLabel="Y", cmap="viridis")
+    with pytest.raises(ValueError):
+        ax = tab.plotHeatmap(x="x", y="z", xLabel="X", yLabel="Y", cmap="viridis")
     
 @pytest.mark.filterwarnings("error::libICEpost.src.base.dataStructures.Tabulation.Tabulation.TabulationAccessWarning")
 def test_tabulation_interpolation():

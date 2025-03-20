@@ -18,6 +18,7 @@ import pandas as pd
 import os
 import shutil
 import matplotlib.pyplot as plt
+import itertools
 
 from bidict import bidict
 
@@ -545,10 +546,32 @@ def plotOFTable(table:OFTabulation, field:str, **kwargs) -> plt.Axes:
         raise ValueError(f"Field '{field}' not found in the tabulation. Avaliable fields are:\n\t" + "\n\t".join(table.fields))
     
     #Set y-label if not given
-    if not "ylabel" in kwargs:
+    if not any(k in kwargs for k in ["ylabel", "y_label", "yLabel"]):
         kwargs["ylabel"] = field
     
-    return table.tables[field].plot(**kwargs)
+    return table._data[field].table.plot(**kwargs)
+
+#############################################################################
+def plotHeatmapOFTable(table:OFTabulation, field:str, **kwargs) -> plt.Axes:
+    """
+    Plot a heatmap of a field of a tabulation.
+
+    Args:
+        table (OFTabulation): The tabulation to plot.
+        field (str): The field to plot.
+        **kwargs: Keyword arguments to pass to the 'plotHeatmap' method of the Tabulation object.
+        
+    Returns:
+        plt.Axes: The axis where the plot is drawn.
+    """
+    if not field in table.fields:
+        raise ValueError(f"Field '{field}' not found in the tabulation. Avaliable fields are:\n\t" + "\n\t".join(table.fields))
+    
+    #Set c-label if not given
+    if not any(k in kwargs for k in ["clabel", "c_label", "cLabel"]):
+        kwargs["clabel"] = field
+    
+    return table._data[field].table.plotHeatmap(**kwargs)
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -978,6 +1001,7 @@ class OFTabulation(BaseTabulation):
     squeeze = squeeze
     
     plot = plotOFTable
+    plotHeatmap = plotHeatmapOFTable
     
     #####################################
     #Clear the table:
@@ -1286,7 +1310,7 @@ class OFTabulation(BaseTabulation):
             - If a single index is given, a dictionary with the output variables at that index.
             - If slice|Iterable[slice] is given, a dictionary with the output variables at that slice.
         """
-        return {var:(self._data[var].table[index] if (not self._data[var].table is None) else None) for var in self._data}
+        return {var:(self._data[var].table[index] if (not self._data[var].table is None) else None) for var in self.fields}
     
     #####################################
     #Setitem not allowed

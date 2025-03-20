@@ -17,6 +17,7 @@ from typing import Iterable, Any, Self
 
 import numpy as np
 from pandas import DataFrame
+import matplotlib.pyplot as plt
 
 from abc import ABCMeta, abstractmethod
 from libICEpost.src.base.Functions.typeChecking import checkType
@@ -231,7 +232,7 @@ class BaseTabulation(Utilities, metaclass=ABCMeta):
         """
     
     @abstractmethod
-    def slice(self, *, slices:Iterable[slice|Iterable[int]|int]=None, ranges:dict[str,float|Iterable[float]]=None, inplace:bool=False) -> Self|None:
+    def slice(self, *, slices:Iterable[slice|Iterable[int]|int]=None, ranges:dict[str,float|Iterable[float]]=None, inplace:bool=False) -> BaseTabulation|None:
         """
         Extract a table with sliced data. Can access in two ways:
             1) by slicer
@@ -247,7 +248,7 @@ class BaseTabulation(Utilities, metaclass=ABCMeta):
         """
     
     @abstractmethod
-    def clip(self, ranges:dict[str,tuple[float|None,float|None]]=None, *, inplace:bool=False, **kwargs) -> Self|None:
+    def clip(self, ranges:dict[str,tuple[float|None,float|None]]=None, *, inplace:bool=False, **kwargs) -> BaseTabulation|None:
         """
         Clip the table to the given ranges. The ranges are given as a dictionary with the 
         variable names as keys and a tuple with the minimum and maximum values.
@@ -262,7 +263,7 @@ class BaseTabulation(Utilities, metaclass=ABCMeta):
         """
     
     @abstractmethod
-    def concat(self, *tables:BaseTabulation, inplace:bool=False, fillValue:float=None, overwrite:bool=False) -> Self|None:
+    def concat(self, *tables:BaseTabulation, inplace:bool=False, fillValue:float=None, overwrite:bool=False) -> BaseTabulation|None:
         """
         Extend the table with the data of other tables. The tables must have the same variables but 
         not necessarily in the same order. The data of the second table is appended to the data 
@@ -286,7 +287,7 @@ class BaseTabulation(Utilities, metaclass=ABCMeta):
     append = merge = concat
     
     @abstractmethod
-    def squeeze(self, inplace:bool=False) -> Self|None:
+    def squeeze(self, inplace:bool=False) -> BaseTabulation|None:
         """
         Remove dimensions with only 1 data-point.
         
@@ -310,9 +311,15 @@ class BaseTabulation(Utilities, metaclass=ABCMeta):
     
     #Plotting
     @abstractmethod
-    def plot(self, *args, **kwargs) -> None:
+    def plot(self, *args, **kwargs) -> plt.Axes:
         """
         Plot the tabulation.
+        """
+    
+    @abstractmethod
+    def plotHeatmap(self, *args, **kwargs) -> plt.Axes:
+        """
+        Plot a heatmap of the tabulation.
         """
     
     #########################################################################

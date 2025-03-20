@@ -13,7 +13,7 @@ Last update:        12/06/2023
 
 from __future__ import annotations
 
-from typing import Iterable, Literal
+from typing import Iterable, Literal, Callable
 from enum import StrEnum
 
 import pandas as pd
@@ -27,6 +27,7 @@ from scipy.interpolate import RegularGridInterpolator
 import matplotlib as mpl
 import matplotlib.colors as mcolors
 from matplotlib import pyplot as plt
+import matplotlib.ticker
 
 import itertools
 import warnings
@@ -422,15 +423,15 @@ def plotTable(   table:Tabulation,
             x:str, c:str, iso:dict[str,float]=None, 
             *,
             ax:plt.Axes=None,
-            colorMap:str="turbo",
+            colorMap:str=None,
             xlabel:str=None,
             ylabel:str=None,
             clabel:str=None,
             title:str=None,
-            xlim:tuple[float]=(None, None),
-            ylim:tuple[float]=(None, None),
-            clim:tuple[float]=(None, None),
-            figsize:tuple[float]=(8, 6),
+            xlim:tuple[float|None,float|None]=None,
+            ylim:tuple[float|None,float|None]=None,
+            clim:tuple[float|None,float|None]=None,
+            figsize:tuple[float]=None,
             **kwargs) -> plt.Axes:
     """
     Plot a table in a 2D plot with a color-map.
@@ -441,67 +442,64 @@ def plotTable(   table:Tabulation,
         c (str): The color variable.
         iso (dict[str,float], optional): The iso-values to plot. If the table has only 2 variables, this argument is not needed. Defaults to None.
         ax (plt.Axes, optional): The axis to plot on. Defaults to None.
-        colorMap (str, optional): The color-map to use. Defaults to "turbo". Equivalent keys are [`cmap`, `colormap`]
+        colorMap (str, optional): The color-map to use. Defaults to None. Equivalent keys are [`cmap`, `colormap`]
         xlabel (str, optional): The x-axis label. Defaults to None. Equivalent keys are [`x_label`, `xLabel`]
         ylabel (str, optional): The y-axis label. Defaults to None. Equivalent keys are [`y_label`, `yLabel`]
         clabel (str, optional): The color-bar label. Defaults to None. Equivalent keys are [`c_label`, `cLabel`]
         title (str, optional): The title of the plot. Defaults to None.
-        xlim (tuple[float], optional): The x-axis limits. Defaults to (None, None). Equivalent keys are [`x_lim`, `xLim`]
-        ylim (tuple[float], optional): The y-axis limits. Defaults to (None, None). Equivalent keys are [`y_lim`, `yLim`]
-        clim (tuple[float], optional): The color-bar limits. Defaults to (None, None). Equivalent keys are [`c_lim`, `cLim`]
-        figsize (tuple[float], optional): The size of the figure. Defaults to (8, 6).
+        xlim (tuple[float], optional): The x-axis limits. Defaults to None. Equivalent keys are [`x_lim`, `xLim`]
+        ylim (tuple[float], optional): The y-axis limits. Defaults to None. Equivalent keys are [`y_lim`, `yLim`]
+        clim (tuple[float], optional): The color-bar limits. Defaults to None. Equivalent keys are [`c_lim`, `cLim`]
+        figsize (tuple[float], optional): The size of the figure. Defaults to None.
         **kwargs: Additional arguments to pass to the plot
     
     Returns:
         plt.Axes: The axis of the plot.
     """
+    
     #Check for equivalent keys
-    equivalentKeys = {
-        "cmap":"colorMap",
-        "colormap":"colorMap",
-        "xlabel":"xlabel",
-        "x_label":"xlabel",
-        "xLabel":"xlabel",
-        "ylabel":"ylabel",
-        "y_label":"ylabel",
-        "yLabel":"ylabel",
-        "clabel":"clabel",
-        "c_label":"clabel",
-        "cLabel":"clabel",
-        "xlim":"xlim",
-        "x_lim":"xlim",
-        "xLim":"xlim",
-        "ylim":"ylim",
-        "y_lim":"ylim",
-        "yLim":"ylim",
-        "clim":"clim",
-        "c_lim":"clim",
-        "cLim":"clim",
+    equivalentKeys:dict[str,list[str]] = {
+        "xlabel":["xlabel", "x_label", "xLabel"],
+        "ylabel":["ylabel", "y_label", "yLabel"],
+        "clabel":["clabel", "c_label", "cLabel"],
+        "xlim":["xlim", "x_lim", "xLim"],
+        "ylim":["ylim", "y_lim", "yLim"],
+        "clim":["clim", "c_lim", "cLim"],
+        "colorMap":["colorMap", "cmap", "colormap"],
     }
     fullkwargs = {**kwargs}
     if xlabel is not None: fullkwargs["xlabel"] = xlabel
     if ylabel is not None: fullkwargs["ylabel"] = ylabel
     if clabel is not None: fullkwargs["clabel"] = clabel
-    if any(x is not None for x in xlim): fullkwargs["xlim"] = xlim
-    if any(x is not None for x in ylim): fullkwargs["ylim"] = ylim
-    if any(x is not None for x in clim): fullkwargs["clim"] = clim
+    if xlim is not None: fullkwargs["xlim"] = xlim
+    if ylim is not None: fullkwargs["ylim"] = ylim
+    if clim is not None: fullkwargs["clim"] = clim
+    if colorMap is not None: fullkwargs["colorMap"] = colorMap
     
-    foundKeys = set(fullkwargs.keys()).intersection(equivalentKeys.keys())
+    foundKeys = set(fullkwargs.keys()).intersection(sum(equivalentKeys.values(), start=[]))
+    
     #Check for multiple entries that are equivalent
-    backMap:dict[str,list] = {v:[] for v in equivalentKeys.values()}
+    keyMap:dict[str,list] = {v:[] for v in equivalentKeys.keys()}
     for key in foundKeys:
-        backMap[equivalentKeys[key]].append(key)
-    for key in backMap:
-        if len(backMap[key]) > 1:
-            raise ValueError(f"Key '{key}' found multiple times in kwargs: {backMap[key]}")
+        for k in equivalentKeys:
+            if key in equivalentKeys[k]:
+                keyMap[k].append(key)
+    for key in keyMap:
+        if len(keyMap[key]) > 1:
+            raise ValueError(f"Key '{key}' found multiple times in kwargs: {keyMap[key]}")
     
-    #Merge equivalent keys
-    for key in backMap:
-        if len(backMap[key]) == 0:
-            continue
-        kwarg = backMap[key][0]
-        if kwarg in kwargs: kwargs.pop(kwarg) #Remove from kwargs
-        locals()[key] = fullkwargs[kwarg] #Set local variable
+    #Set equivalent keys
+    xlabel = fullkwargs[keyMap["xlabel"][0]] if len(keyMap["xlabel"]) > 0 else None
+    ylabel = fullkwargs[keyMap["ylabel"][0]] if len(keyMap["ylabel"]) > 0 else None
+    clabel = fullkwargs[keyMap["clabel"][0]] if len(keyMap["clabel"]) > 0 else None
+    xlim = fullkwargs[keyMap["xlim"][0]] if len(keyMap["xlim"]) > 0 else (None, None)
+    ylim = fullkwargs[keyMap["ylim"][0]] if len(keyMap["ylim"]) > 0 else (None, None)
+    clim = fullkwargs[keyMap["clim"][0]] if len(keyMap["clim"]) > 0 else (None, None)
+    colorMap = fullkwargs[keyMap["colorMap"][0]] if len(keyMap["colorMap"]) > 0 else None
+    
+    #Remove from kwargs
+    for key in foundKeys:
+        if key in kwargs: kwargs.pop(key)
     
     #Check arguments
     checkType(table, Tabulation, "table")
@@ -511,7 +509,7 @@ def plotTable(   table:Tabulation,
     if iso is None: iso = dict()
     checkMap(iso, str, float, "iso")
     checkType(ax, plt.Axes, "ax", allowNone=True)
-    checkType(colorMap, str, "colorMap")
+    checkType(colorMap, str, "colorMap", allowNone=True)
     checkType(xlabel, str, "xlabel", allowNone=True)
     checkType(ylabel, str, "ylabel", allowNone=True)
     checkType(clabel, str, "clabel", allowNone=True)
@@ -519,7 +517,7 @@ def plotTable(   table:Tabulation,
     checkType(xlim, tuple, "xlim")
     checkType(ylim, tuple, "ylim")
     checkType(clim, tuple, "clim")
-    checkType(figsize, tuple, "figsize")
+    checkType(figsize, tuple, "figsize", allowNone=True)
     
     #Check variables
     if not x in table.order:
@@ -557,9 +555,9 @@ def plotTable(   table:Tabulation,
         clim = (clim[0], tab.ranges[c].max())
     
     #Plot
-    cmap = mpl.colormaps[colorMap]
     norm = mcolors.Normalize(vmin=clim[0], vmax=clim[1])
-    sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
+    sm = plt.cm.ScalarMappable(cmap=colorMap, norm=norm)
+    cmap = sm.cmap
     sm.set_array([])
     
     for ii, val in enumerate(tab.ranges[c]):
@@ -573,6 +571,187 @@ def plotTable(   table:Tabulation,
     #Color-bar
     cbar = plt.colorbar(sm, ax=ax)
     cbar.set_label(clabel if not clabel is None else c)
+    
+    #Labels
+    ax.set_xlabel(xlabel if not xlabel is None else x)
+    ax.set_ylabel(ylabel)
+    ax.set_title(title if not title is None else " - ".join([f"{f}={iso[f]}" for f in iso]))
+    ax.set_xlim(xlim)
+    ax.set_ylim(ylim)
+    
+    return ax
+
+#############################################################################
+def plotTableHeatmap(   table:Tabulation, 
+            x:str, y:str, iso:dict[str,float]=None, 
+            *,
+            ax:plt.Axes=None,
+            colorMap:str=None,
+            xlabel:str=None,
+            ylabel:str=None,
+            clabel:str=None,
+            title:str=None,
+            xlim:tuple[float|None,float|None]=None,
+            ylim:tuple[float|None,float|None]=None,
+            clim:tuple[float|None,float|None]=None,
+            figsize:tuple[float,float]=None,
+            isolines_kwargs:dict[str,object]=None,
+            **kwargs) -> plt.Axes:
+    """
+    Plot a table in a 2D plot with a color-map.
+    
+    Args:
+        table (Tabulation): The table to plot.
+        x (str): The x-axis variable.
+        y (str): The y-axis variable.
+        iso (dict[str,float], optional): The iso-values to plot. If the table has only 3 variables, this argument is not needed. Defaults to None.
+        ax (plt.Axes, optional): The axis to plot on. Defaults to None.
+        colorMap (str, optional): The color-map to use. Defaults to None. Equivalent keys are [`cmap`, `colormap`]
+        xlabel (str, optional): The x-axis label. Defaults to None. Equivalent keys are [`x_label`, `xLabel`]
+        ylabel (str, optional): The y-axis label. Defaults to None. Equivalent keys are [`y_label`, `yLabel`]
+        clabel (str, optional): The color-bar label. Defaults to None. Equivalent keys are [`c_label`, `cLabel`]
+        title (str, optional): The title of the plot. Defaults to None.
+        xlim (tuple[float|None,float|None], optional): The x-axis limits. Defaults to None. Equivalent keys are [`x_lim`, `xLim`]
+        ylim (tuple[float|None,float|None], optional): The y-axis limits. Defaults to None. Equivalent keys are [`y_lim`, `yLim`]
+        clim (tuple[float|None,float|None], optional): The color-bar limits. Defaults to None. Equivalent keys are [`c_lim`, `cLim`]
+        figsize (tuple[float,float], optional): The size of the figure. Defaults to None.
+        isolines_kwargs (dict[str,object], optional): The keyword arguments to pass to contour() for the isolines. Defaults to None.
+        **kwargs: Additional arguments to pass to the contourf plot.
+    
+    Returns:
+        plt.Axes: The axis of the plot.
+    """
+    #Check for equivalent keys
+    equivalentKeys:dict[str,list[str]] = {
+        "xlabel":["xlabel", "x_label", "xLabel"],
+        "ylabel":["ylabel", "y_label", "yLabel"],
+        "clabel":["clabel", "c_label", "cLabel"],
+        "xlim":["xlim", "x_lim", "xLim"],
+        "ylim":["ylim", "y_lim", "yLim"],
+        "clim":["clim", "c_lim", "cLim"],
+        "colorMap":["colorMap", "cmap", "colormap"],
+    }
+    fullkwargs = {**kwargs}
+    if xlabel is not None: fullkwargs["xlabel"] = xlabel
+    if ylabel is not None: fullkwargs["ylabel"] = ylabel
+    if clabel is not None: fullkwargs["clabel"] = clabel
+    if xlim is not None: fullkwargs["xlim"] = xlim
+    if ylim is not None: fullkwargs["ylim"] = ylim
+    if clim is not None: fullkwargs["clim"] = clim
+    if colorMap is not None: fullkwargs["colorMap"] = colorMap
+    
+    foundKeys = set(fullkwargs.keys()).intersection(sum(equivalentKeys.values(), start=[]))
+    
+    #Check for multiple entries that are equivalent
+    keyMap:dict[str,list] = {v:[] for v in equivalentKeys.keys()}
+    for key in foundKeys:
+        for k in equivalentKeys:
+            if key in equivalentKeys[k]:
+                keyMap[k].append(key)
+    for key in keyMap:
+        if len(keyMap[key]) > 1:
+            raise ValueError(f"Key '{key}' found multiple times in kwargs: {keyMap[key]}")
+    
+    #Set equivalent keys
+    xlabel = fullkwargs[keyMap["xlabel"][0]] if len(keyMap["xlabel"]) > 0 else None
+    ylabel = fullkwargs[keyMap["ylabel"][0]] if len(keyMap["ylabel"]) > 0 else None
+    clabel = fullkwargs[keyMap["clabel"][0]] if len(keyMap["clabel"]) > 0 else None
+    xlim = fullkwargs[keyMap["xlim"][0]] if len(keyMap["xlim"]) > 0 else (None, None)
+    ylim = fullkwargs[keyMap["ylim"][0]] if len(keyMap["ylim"]) > 0 else (None, None)
+    clim = fullkwargs[keyMap["clim"][0]] if len(keyMap["clim"]) > 0 else (None, None)
+    colorMap = fullkwargs[keyMap["colorMap"][0]] if len(keyMap["colorMap"]) > 0 else None
+    
+    #Remove from kwargs
+    for key in foundKeys:
+        if key in kwargs: kwargs.pop(key)
+    
+    #Keyword arguments for isolines
+    if isolines_kwargs is None: isolines_kwargs = dict()
+    if not any(k in isolines_kwargs for k in ["c", "colors"]):
+        isolines_kwargs.update(colors="black")
+    if "norm" in kwargs:
+        isolines_kwargs.update(norm=kwargs["norm"])
+    
+    #Check arguments
+    checkType(table, Tabulation, "table")
+    checkType(x, str, "x")
+    checkType(y, str, "y")
+    checkType(iso, dict, "iso", allowNone=True)
+    if iso is None: iso = dict()
+    checkMap(iso, str, float, "iso")
+    checkType(ax, plt.Axes, "ax", allowNone=True)
+    checkType(colorMap, str, "colorMap", allowNone=True)
+    checkType(xlabel, str, "xlabel", allowNone=True)
+    checkType(ylabel, str, "ylabel", allowNone=True)
+    checkType(clabel, str, "clabel", allowNone=True)
+    checkType(title, str, "title", allowNone=True)
+    checkType(xlim, tuple, "xlim")
+    checkType(ylim, tuple, "ylim")
+    checkType(clim, tuple, "clim")
+    checkType(figsize, tuple, "figsize", allowNone=True)
+    checkMap(isolines_kwargs, str, object, "isolines_kwargs")
+    
+    #Check variables
+    if not x in table.order:
+        raise ValueError(f"Variable '{x}' not found in table.")
+    if not y in table.order:
+        raise ValueError(f"Variable '{y}' not found in table.")
+    
+    #Check iso-values
+    for f in iso:
+        if not f in table.order:
+            raise ValueError(f"Variable '{f}' not found in table.")
+        if not iso[f] in table.ranges[f]:
+            raise ValueError(f"Iso-value for variable '{f}' not found in the table.")
+    
+    if not (set(table.order) == set(iso.keys()).union({x, y})):
+        raise ValueError("Iso-values must be given for all but x and y variables ({}).".format(", ".join(set(table.order) - set(iso.keys()).union({x, y}))))
+    
+    #Create the axis
+    if ax is None:
+        fig, ax = plt.subplots(figsize=figsize)
+    
+    #Slice the data-set
+    tab = table.slice(ranges={f:[iso[f]] for f in iso}) if (len(iso) > 0) else table
+    tab.squeeze(inplace=True)
+    tab.order = [x, y]
+    
+    #Update color-bar limits
+    if clim[0] is None:
+        clim = (np.min(tab._data), clim[1])
+    if clim[1] is None:
+        clim = (clim[0], np.max(tab._data))
+    
+    #Plot
+    cs = ax.contourf(
+        tab.ranges[x],
+        tab.ranges[y],
+        tab.data.T,
+        levels=np.linspace(clim[0], clim[1], 256),
+        cmap=colorMap,
+        **kwargs)
+    
+    #Color-bar
+    import matplotlib.cm as cm
+    sm = cm.ScalarMappable(norm=kwargs.get("norm"), cmap=colorMap)
+    sm.norm.vmin = clim[0]
+    sm.norm.vmax = clim[1]
+    sm.set_array([])
+    cbar = fig.colorbar(sm, ax=ax)
+    cbar.set_label(clabel)
+    
+    #Isolines
+    cs = ax.contour(
+        tab.ranges[x],
+        tab.ranges[y],
+        tab._data.T,
+        levels=cbar.get_ticks(),
+        vmin=clim[0],
+        vmax=clim[1],
+        **isolines_kwargs)
+    
+    #If one day we want to add labels to the isolines (quite ugly)
+    # ax.clabel(cs, cs.levels, fmt=cbar.formatter if levelsfmt is None else levelsfmt, fontsize=levelssize)
     
     #Labels
     ax.set_xlabel(xlabel if not xlabel is None else x)
@@ -857,6 +1036,7 @@ class Tabulation(BaseTabulation):
     
     #Plotting
     plot = plotTable
+    plotHeatmap = plotTableHeatmap
     
     #Access
     def setRange(self, variable:str, range:Iterable[float]) -> None:
