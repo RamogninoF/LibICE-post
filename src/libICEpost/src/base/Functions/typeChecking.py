@@ -117,7 +117,7 @@ def checkType(entry:Any, Type:type|Iterable[type|_SpecialGenericAlias],
             raise TypeError("Wrong type for entry '{}': '{}' expected but '{}' was found.".format(entryName, ([t.__name__ for t in Type] if isinstance(Type, Iterable) else Type.__name__), entry.__class__.__name__))
 
 #############################################################################
-def checkArray(array:Iterable, Type:type|Iterable[type|_SpecialGenericAlias]|_SpecialGenericAlias, entryName:str="array", **kwargs):
+def checkArray(array:Iterable, Type:type|Iterable[type|_SpecialGenericAlias]|_SpecialGenericAlias, entryName:str="array", *, allowEmpty:bool=True, **kwargs):
     """
     Check the type of elements in an array.
     
@@ -125,6 +125,7 @@ def checkArray(array:Iterable, Type:type|Iterable[type|_SpecialGenericAlias]|_Sp
         array (Iterable): Array to be checked.
         Type (type | Iterable[type | _SpecialGenericAlias]): Type required for the elements.
         entryName (str, optional): Name of the array to be checked (used as info when raising TypeError).
+        allowEmpty (bool, optional): If True, empty arrays are allowed (default is True).
         **kwargs: Additional keyword arguments to pass to checkType function.
     
     Raises:
@@ -136,9 +137,15 @@ def checkArray(array:Iterable, Type:type|Iterable[type|_SpecialGenericAlias]|_Sp
     #Check if array is iterable
     checkType(array, Iterable, "array")
     
-    if GLOBALS.__SAFE_ITERABLE_CHECKING__: #Check all elements
+    #Check if array is empty
+    if not allowEmpty and (len(array) == 0):
+        raise TypeError(f"Empty array '{entryName}' is not allowed.")
+    
+    if isinstance(array, np.ndarray): #In case of numpy array, check the dtype
+        checkType(array.dtype.type().item(), Type, f"{entryName}.dtype", **kwargs)
+    elif GLOBALS.__SAFE_ITERABLE_CHECKING__: #Check all elements
         [checkType(entry, Type, f"{entryName}[{ii}]", **kwargs) for ii,entry in enumerate(array)]
-    elif len(array) > 0: #Check only the first element
+    elif (len(array) > 0): #Check only the first element
         checkType(array[0], Type, f"{entryName}[0]", **kwargs)
     else: #Empty array
         return

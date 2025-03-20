@@ -49,9 +49,18 @@ def test_checkArray_incorrect_type():
     with pytest.raises(TypeError):
         checkArray([1, "2", 3], int)
 
+def test_array_ndarray():
+    import numpy as np
+    reset_globals()
+    checkArray(np.array([1, 2, 3]), int)
+    with pytest.raises(TypeError):
+        checkArray(np.array([1, 2, 3]), str)
+
 def test_checkArray_empty():
     reset_globals()
     checkArray([], int)
+    with pytest.raises(TypeError):
+        checkArray([], int, allowEmpty=False)
 
 def test_checkArray_safe_iterable_checking():
     reset_globals()
@@ -143,3 +152,4 @@ def test_checkMap():
     
     map = {1: 1, "b": [2,3]}
     checkMap(map, (int, str), (int, Iterable))
+    
