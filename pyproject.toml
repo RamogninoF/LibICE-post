@@ -1,6 +1,6 @@
 [project]
 name = "libICEpost"
-version = "0.10.dev0"
+version = "0.10.1"
 
 authors = [
   { name="Federico Ramognino", email="federico.ramognino@polimi.it" },
