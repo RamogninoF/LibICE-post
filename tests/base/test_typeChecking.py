@@ -55,6 +55,12 @@ def test_array_ndarray():
     checkArray(np.array([1, 2, 3]), int)
     with pytest.raises(TypeError):
         checkArray(np.array([1, 2, 3]), str)
+    with pytest.raises(TypeError):
+        checkArray(np.array([1, "2", 3]), int)
+    with pytest.raises(TypeError):
+        import pandas as pd
+        data = pd.DataFrame({"a": [1, 2, 3], "b": ["a", "b", "c"]})
+        checkArray(data.values, int)
 
 def test_checkArray_empty():
     reset_globals()

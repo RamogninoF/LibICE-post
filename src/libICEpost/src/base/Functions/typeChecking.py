@@ -142,7 +142,27 @@ def checkArray(array:Iterable, Type:type|Iterable[type|_SpecialGenericAlias]|_Sp
         raise TypeError(f"Empty array '{entryName}' is not allowed.")
     
     if isinstance(array, np.ndarray): #In case of numpy array, check the dtype
-        checkType(array.dtype.type().item(), Type, f"{entryName}.dtype", **kwargs)
+        #Try instantiating an item
+        item = None
+        t = array.dtype.type
+        try: #A numpy type
+            item = t().item()
+        except AttributeError: #A built-in type or numpy.object_
+            if t == np.object_: #A numpy.object_
+                check = False
+                if isinstance(Type, Iterable):
+                    for T in Type:
+                        if issubclass(t, T):
+                            check = True
+                            break
+                else:
+                    check = issubclass(t, Type)
+                if check:
+                    return
+                else:
+                    raise TypeError(f"Wrong type for elements of array '{entryName}': '{Type.__name__}' expected but '{t.__name__}' was found.")
+            item = t() #A built-in type
+        checkType(item, Type, f"{entryName}.dtype", **kwargs)
     elif GLOBALS.__SAFE_ITERABLE_CHECKING__: #Check all elements
         [checkType(entry, Type, f"{entryName}[{ii}]", **kwargs) for ii,entry in enumerate(array)]
     elif (len(array) > 0): #Check only the first element
