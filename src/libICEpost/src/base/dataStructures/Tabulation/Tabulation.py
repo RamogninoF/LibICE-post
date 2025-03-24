@@ -320,7 +320,7 @@ def sliceTable(table:Tabulation, *, slices:Iterable[slice|Iterable[int]|int]=Non
         
         #Create slicing table:
         slTab = np.ix_(*tuple(slices))
-        data = table.data[slTab]
+        data = table._data[slTab]
         
         #Update table
         table._data = data
