@@ -118,9 +118,7 @@ class SelectionTable(Utilities):
         """
         self.checkType(typeName, str, "typeName")
         if not typeName in self:
-            string = f"Class {typeName} not found in selection table. Available classes are:"
-            for entry in self.__db:
-                string += f"\n{entry}"
+            string = f"Class {typeName} not found in selection table. Available classes are:\n\t" + "\n\t".join(self.__db.keys())
             raise ValueError(string)
         
         return self.__db[typeName]

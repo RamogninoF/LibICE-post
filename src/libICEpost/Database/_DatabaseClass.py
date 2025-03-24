@@ -54,9 +54,7 @@ class _DatabaseClass(BaseClass, dict, Mapping):
             return super().__getattribute__(__name)
         except:
             if not (__name in self):
-                string = f"{__name} not found in database '{self._name}'. Available entries are:\n"
-                for item in self:
-                    string += f"\t{item}\n"
+                string = f"{__name} not found in database '{self._name}'. Available entries are:\n\t" + "\n\t".join(self.keys())
                 raise ValueError(string)
         return super().__getitem__(__name)
     
@@ -95,9 +93,7 @@ class _DatabaseClass(BaseClass, dict, Mapping):
     
     def __getitem__(self, __key: Any) -> Any:
         if not __key in self:
-            string = f"Key {__key} not found in database. Available entries are:"
-            for item in self:
-                string += f"\n{item}"
+            string = f"Key {__key} not found in database. Available entries are:\n\t" + "\n\t".join(self.keys())
             raise ValueError(string)
         
         return super().__getitem__(__key)

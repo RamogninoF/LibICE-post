@@ -4,7 +4,11 @@
 
 """
 @author: F. Ramognino       <federico.ramognino@polimi.it>
-Last update:        12/06/2023
+
+Dictionary class with some OpenFOAM-like methods.
+
+Content of the module:
+    Dictionary (`class`): Ordered dictionary embedding some useful OpenFOAM-like methods.
 """
 
 #####################################################################

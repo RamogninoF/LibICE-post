@@ -4,9 +4,14 @@
 
 """
 @author: F. Ramognino       <federico.ramognino@polimi.it>
-Last update:        12/06/2023
 
 Functions for warnings and error messages.
+
+Content of the module:
+    printStack (`function`): print the current call-stack (`deprecated`)
+    runtimeWarning (`function`): print a runtime warning message and the call-stack (`deprecated`)
+    runtimeError (`function`): print a runtime error message and the call-stack (`deprecated`)
+    helpOnFail (`decorator`): decorator for printing the help of a function in case of failure
 """
 
 #####################################################################
@@ -105,6 +110,9 @@ def runtimeError(Msg, verbosityLevel=1, stack=True):
 #############################################################################
 #Decorator for printing helper
 def helpOnFail(func):
+    """
+    Decorator for printing the help of a function in case of failure.
+    """
     @wraps(func)
     def wrapper(*args, **kwargs):
         try:
