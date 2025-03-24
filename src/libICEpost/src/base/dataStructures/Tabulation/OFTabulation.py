@@ -99,10 +99,7 @@ def toPandas(table:OFTabulation) -> pd.DataFrame:
     order = table.order
     ranges = table.ranges
     # Create the dataframe
-    df = pd.DataFrame({**{f:table._data[f].table._data.flatten() for f in fields}, **{f:[0.0]*table.size for f in table.ranges}}, columns=fields + order)
-    
-    #Sort the columns to have first the input variables in order
-    df = df[table.order + fields]
+    df = pd.DataFrame({**{f:table._data[f].table._data.flatten() for f in fields}, **{f:[0.0]*table.size for f in order}}, columns=order + fields)
     
     #Populate
     inputs = itertools.product(*[ranges[f] for f in order])
