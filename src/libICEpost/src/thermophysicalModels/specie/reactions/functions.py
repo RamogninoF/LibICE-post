@@ -231,12 +231,12 @@ def makeEquilibriumMechanism(path:str, species:Iterable[str], *, overwrite:bool=
         [
             {
                 "name":s,
-                "composition":{a.atom.name:a.n for a in Molecules[s]},
+                "composition":{a.atom.name:float(a.n) for a in Molecules[s]},
                 "thermo":
                 {
                     "model":"NASA7",
-                    "temperature-ranges":[janaf7_db[s].Tlow, janaf7_db[s].Tth, janaf7_db[s].Thigh],
-                    "data":[janaf7_db[s].cpLow, janaf7_db[s].cpHigh]
+                    "temperature-ranges":[float(janaf7_db[s].Tlow), float(janaf7_db[s].Tth), float(janaf7_db[s].Thigh)],
+                    "data":[[float(v) for v in janaf7_db[s].cpLow], [float(v) for v in janaf7_db[s].cpHigh]]
                 }
             } for s in species_list
         ]
@@ -247,7 +247,7 @@ def makeEquilibriumMechanism(path:str, species:Iterable[str], *, overwrite:bool=
     print(f"Molecules: {species}")
     print(f"Elements: {atoms}")
     with open(path, 'w') as yaml_file:
-        yaml.dump(output, yaml_file)
+        yaml.dump(output, yaml_file, default_flow_style=False)
     
 #############################################################################
 @lru_cache(maxsize=__CACHE_SIZE__)
