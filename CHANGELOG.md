@@ -38,3 +38,8 @@ Tested packages/functions:
 ### Changes
 - `OFTabulation(slice)` and `Tabulation(slice)`: accept single float values as ranges.
 - `Tabulation(plot)`: Accept also empty iso for tables with only 2 variables.
+
+## v0.10.1.post1 (26/03/2025)
+
+### Fixes
+- `makeEquilibriumMechanism`: Fixed conversion of data to builtin classes to ensure correct conversion to YAML format
