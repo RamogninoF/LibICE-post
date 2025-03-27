@@ -18,6 +18,7 @@ import numpy as np
 from typing import Iterable
 
 from libICEpost.src.base.Functions.typeChecking import checkType
+from libICEpost.src.base.Functions.runtimeWarning import helpOnFail
 from libICEpost import Dictionary
 
 #############################################################################
@@ -46,6 +47,7 @@ class Resample(Filter):
     #########################################################################
     #Class methods and static methods:
     @classmethod
+    @helpOnFail
     def fromDictionary(cls, dictionary):
         """
         Create from dictionary with the following entries:

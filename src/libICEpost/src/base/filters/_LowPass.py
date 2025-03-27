@@ -25,6 +25,7 @@ from matplotlib.axes import Axes
 
 from libICEpost import Dictionary
 from libICEpost.src.base.Functions.typeChecking import checkType
+from libICEpost.src.base.Functions.runtimeWarning import helpOnFail
 
 from typing import Iterable
 
@@ -61,6 +62,7 @@ class LowPass(Filter):
     #########################################################################
     #Class methods and static methods:
     @classmethod
+    @helpOnFail
     def fromDictionary(cls, dictionary):
         """
         Create from dictionary with the following entries:

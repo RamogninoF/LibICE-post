@@ -18,6 +18,7 @@ from typing import Callable, Iterable
 import numpy as np
 from libICEpost import Dictionary
 from libICEpost.src.base.Functions.typeChecking import checkType
+from libICEpost.src.base.Functions.runtimeWarning import helpOnFail
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -46,6 +47,7 @@ class UserDefinedFilter(Filter):
     #########################################################################
     #Class methods and static methods:
     @classmethod
+    @helpOnFail
     def fromDictionary(cls, dictionary):
         """
         Create from dictionary with the following entries:
