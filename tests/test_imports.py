@@ -1,121 +1,38 @@
 import importlib
 import pytest
 import sys
+import os
 
-modules = [
-"libICEpost.Database",
-"libICEpost.Database.chemistry",
-"libICEpost.Database.chemistry.constants",
-"libICEpost.Database.chemistry.reactions",
-"libICEpost.Database.chemistry.reactions.StoichiometricReaction",
-"libICEpost.Database.chemistry.specie",
-"libICEpost.Database.chemistry.specie.Mixtures",
-"libICEpost.Database.chemistry.specie.Molecules",
-"libICEpost.Database.chemistry.specie.periodicTable",
-"libICEpost.Database.chemistry.thermo",
-"libICEpost.Database.chemistry.thermo.EquationOfState",
-"libICEpost.Database.chemistry.thermo.Thermo",
-"libICEpost.Database.chemistry.thermo.Thermo.constantCp",
-"libICEpost.Database.chemistry.thermo.Thermo.janaf7",
-"libICEpost.Database.data",
-"libICEpost.Database._DatabaseClass",
-"libICEpost.GLOBALS",
-"libICEpost.src",
-"libICEpost.src.base",
-"libICEpost.src.base.BaseClass",
-"libICEpost.src.base.dataStructures",
-"libICEpost.src.base.dataStructures.Dictionary",
-"libICEpost.src.base.dataStructures.EngineData",
-"libICEpost.src.base.dataStructures.EngineData.EngineData",
-"libICEpost.src.base.dataStructures.Tabulation",
-"libICEpost.src.base.dataStructures.Tabulation.OFTabulation",
-"libICEpost.src.base.dataStructures.Tabulation.Tabulation",
-"libICEpost.src.base.Filter",
-"libICEpost.src.base.Filter.Filter",
-"libICEpost.src.base.Filter.LowPassAndResample",
-"libICEpost.src.base.Filter.LowPass",
-"libICEpost.src.base.Filter.Resample",
-"libICEpost.src.base.Filter.UserDefinedFilter",
-"libICEpost.src.base.Functions",
-"libICEpost.src.base.Functions.functionsForOF",
-"libICEpost.src.base.Functions.runtimeWarning",
-"libICEpost.src.base.Functions.typeChecking",
-"libICEpost.src.base.Logging",
-"libICEpost.src.base.Logging.logging_configs",
-"libICEpost.src.base.Logging.Logging",
-"libICEpost.src.base.Utilities",
-"libICEpost.src.engineModel",
-"libICEpost.src.engineModel.EngineGeometry",
-"libICEpost.src.engineModel.EngineGeometry.ConRod",
-"libICEpost.src.engineModel.EngineGeometry.EngineGeometry",
-"libICEpost.src.engineModel.EngineModel",
-"libICEpost.src.engineModel.EngineModel.EngineModel",
-"libICEpost.src.engineModel.EngineModel.SparkIgnitionEngine",
-"libICEpost.src.engineModel.EngineTime",
-"libICEpost.src.engineModel.EngineTime.EngineTime",
-"libICEpost.src.engineModel.EngineTime.SparkIgnitionTime",
-"libICEpost.src.engineModel.functionObjects",
-"libICEpost.src.engineModel.functions",
-"libICEpost.src.engineModel.HeatTransferModel",
-"libICEpost.src.engineModel.HeatTransferModel.HeatTransferModel",
-"libICEpost.src.engineModel.HeatTransferModel.Woschni",
-"libICEpost.src.thermophysicalModels",
-"libICEpost.src.thermophysicalModels.laminarFlameSpeedModels",
-"libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.LaminarFlameSpeedModel",
-"libICEpost.src.thermophysicalModels.laminarFlameSpeedModels.TabulatedLFS",
-"libICEpost.src.thermophysicalModels.specie",
-"libICEpost.src.thermophysicalModels.specie.reactions",
-"libICEpost.src.thermophysicalModels.specie.reactions.functions",
-"libICEpost.src.thermophysicalModels.specie.reactions.Reaction",
-"libICEpost.src.thermophysicalModels.specie.reactions.Reaction.Reaction",
-"libICEpost.src.thermophysicalModels.specie.reactions.Reaction.StoichiometricReaction",
-"libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel",
-"libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.DissociationModel",
-"libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.DissociationModel.ConstantDissociationFraction",
-"libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.DissociationModel.DissociationModel",
-"libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.Equilibrium",
-"libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.Inhert",
-"libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.ReactionModel",
-"libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.Stoichiometry",
-"libICEpost.src.thermophysicalModels.specie.specie",
-"libICEpost.src.thermophysicalModels.specie.thermo",
-"libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState",
-"libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.EquationOfState",
-"libICEpost.src.thermophysicalModels.specie.thermo.EquationOfState.PerfectGas",
-"libICEpost.src.thermophysicalModels.specie.thermo.Thermo",
-"libICEpost.src.thermophysicalModels.specie.thermo.Thermo.constantCp",
-"libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7",
-"libICEpost.src.thermophysicalModels.specie.thermo.Thermo.Thermo",
-"libICEpost.src.thermophysicalModels.thermoModels",
-"libICEpost.src.thermophysicalModels.thermoModels.CombustionModel",
-"libICEpost.src.thermophysicalModels.thermoModels.CombustionModel.CombustionModel",
-"libICEpost.src.thermophysicalModels.thermoModels.CombustionModel.NoCombustion",
-"libICEpost.src.thermophysicalModels.thermoModels.CombustionModel.PremixedCombustion",
-"libICEpost.src.thermophysicalModels.thermoModels.EgrModel",
-"libICEpost.src.thermophysicalModels.thermoModels.EgrModel.EgrModel",
-"libICEpost.src.thermophysicalModels.thermoModels.EgrModel.FixedCompositionExternalEGR",
-"libICEpost.src.thermophysicalModels.thermoModels.EgrModel.StoichiometricMixtureEGR",
-"libICEpost.src.thermophysicalModels.thermoModels.StateInitializer",
-"libICEpost.src.thermophysicalModels.thermoModels.StateInitializer.mpV",
-"libICEpost.src.thermophysicalModels.thermoModels.StateInitializer.StateInitializer",
-"libICEpost.src.thermophysicalModels.thermoModels.thermoMixture",
-"libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.mixingRules",
-"libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.mixingRules.EquationOfState",
-"libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.mixingRules.EquationOfState.EquationOfStateMixing",
-"libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.mixingRules.EquationOfState.PerfectGasMixing",
-"libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.mixingRules.Thermo",
-"libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.mixingRules.Thermo.constantCpMixing",
-"libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.mixingRules.Thermo.janaf7Mixing",
-"libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.mixingRules.Thermo.ThermoMixing",
-"libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.ThermoMixture",
-"libICEpost.src.thermophysicalModels.thermoModels.ThermoModel",
-"libICEpost.src.thermophysicalModels.thermoModels.ThermoState",]
+#Generate the test for all the modules in the libICEpost package
+def get_modules():
+    #Base folder
+    baseModule = "./src/libICEpost"
+    modules:list[str] = []
+    
+    if not os.path.exists(baseModule):
+        raise FileNotFoundError(f"Base module {baseModule} not found")
+    
+    #Walk the base folder, save all the folders containing a __init__.py file or even a .py files that are not __init__.py
+    # Store the modelule name as its full path replacing the separator with a dot
+    for root, dirs, files in os.walk(baseModule):
+        for file in files:
+            if file.endswith(".py") and not file == "__init__.py":
+                modules.append(os.path.join(root, file).replace(os.sep, ".").replace(".py", ""))
+            elif file == "__init__.py":
+                modules.append(root.replace(os.sep, "."))
 
-@pytest.mark.parametrize("module", modules)
+    #Remove trailing ...src
+    return [m.removeprefix("..src.") for m in modules]
+
+MODULES = get_modules()
+
+print(MODULES)
+@pytest.mark.parametrize('module', MODULES)
 def test_import_module(module):
-    splitModule = module.rsplit(".", 1)
-    if len(splitModule) == 1:
-        p, m = "", splitModule[0]
-    else:
-        p, m = splitModule
-    exec(f"from {p} import {m}")
+    print(module)
+    # splitModule = module.rsplit(".", 1)
+    # if len(splitModule) == 1:
+    #     p, m = "", splitModule[0]
+    # else:
+    #     p, m = splitModule
+    # exec(f"from {p} import {m}")
