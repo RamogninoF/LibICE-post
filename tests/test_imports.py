@@ -29,10 +29,10 @@ MODULES = get_modules()
 print(MODULES)
 @pytest.mark.parametrize('module', MODULES)
 def test_import_module(module):
-    print(module)
-    # splitModule = module.rsplit(".", 1)
-    # if len(splitModule) == 1:
-    #     p, m = "", splitModule[0]
-    # else:
-    #     p, m = splitModule
-    # exec(f"from {p} import {m}")
+    splitModule = module.rsplit(".", 1)
+    if len(splitModule) == 1:
+        p, m = "", splitModule[0]
+        exec(f"import {m}")
+    else:
+        p, m = splitModule
+        exec(f"from {p} import {m}")
