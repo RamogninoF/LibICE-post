@@ -77,7 +77,7 @@ class LowPass(Filter):
         dictionary = Dictionary(**dictionary)
         
         #Constructing this class with the specific entries
-        data = {dictionary.lookup("cutoff")}
+        data = {"cutoff":dictionary.lookup("cutoff")}
         if "order" in dictionary: data["order"] = dictionary.lookup("order")
         
         return cls(**data)
@@ -96,6 +96,11 @@ class LowPass(Filter):
         checkType(cutoff, float, "cutoff")
         checkType(order, int, "order")
 
+        if cutoff <= 0:
+            raise ValueError(f"cutoff must be positive. Got {cutoff}")
+        if order <= 0:
+            raise ValueError(f"order must be positive. Got {order}")
+        
         self._cutoff = cutoff
         self._order = order
     
@@ -103,7 +108,7 @@ class LowPass(Filter):
     #Dunder methods:
     def __call__(self, xp:Iterable[float], yp:Iterable[float])-> tuple[np.ndarray[float], np.ndarray[float]]:
         #Type checking and recasting to numpy arrays
-        xp, yp = Filter(self, xp, yp)
+        xp, yp = Filter.__call__(self, xp, yp)
         
         #Resample on uniform grid with step equal to the minimum step
         res_x, res_y, delta = self._preProcess(xp, yp)
@@ -210,7 +215,7 @@ class LowPass(Filter):
             tuple[Figure, np.ndarray[Axes]]: The figure and axes
         """
         #Cast to numpy array and check
-        xp, yp = Filter(self, xp, yp)
+        xp, yp = Filter.__call__(self, xp, yp)
         
         fig, ax = plt.subplots(2,1, figsize=(8,8))
         
@@ -226,14 +231,14 @@ class LowPass(Filter):
         
         #Original FT
         RMS = np.sqrt(np.mean(y**2.))
-        yf = sp.fftpack.fft(y)
-        xf = np.linspace(0.0, 1.0/(2./fs), len(y)//2)
+        yf_Orig = sp.fftpack.fft(y)
+        xf_Orig = np.linspace(0.0, 1.0/(2./fs), len(y)//2)
         
         #Filter data:
         xNew, yNew = self(xp, yp)
         
         #Remove nan
-        IDs = np.array([not v for v in np.isnan(yNew)])
+        IDs = np.array(np.invert(np.isnan(yNew)))
         xNew, yNew = xNew[IDs], yNew[IDs]
         
         #Filtered FT:
@@ -245,7 +250,7 @@ class LowPass(Filter):
         
         #Frequency domain plots:
         ax1.plot(0.5*fs*w/np.pi, np.abs(h), c="blue", label="Filter FRF")
-        ax1.plot(xf, 2.0/len(y) * 20*np.abs(yf[:len(y)//2])/RMS, c="grey", label="Original $\\mathcal{F}[y(x)]$")
+        ax1.plot(xf_Orig, 2.0/len(y) * 20*np.abs(yf_Orig[:len(y)//2])/RMS, c="grey", label="Original $\\mathcal{F}[y(x)]$")
         ax1.plot(xf, 2.0/len(yNew) * 20*np.abs(yf[:len(yNew)//2])/RMS, color="k", label="Filtered $\\mathcal{F}[y(x)]$")
         ax1.axvline(self.cutoff, color='k', linestyle="dashed", label="_no")
         

@@ -86,7 +86,7 @@ class UserDefinedFilter(Filter):
     #Dunder methods:
     def __call__(self, xp:Iterable[float], yp:Iterable[float])-> tuple[np.ndarray[float], np.ndarray[float]]:
         #Type checking and recasting to numpy arrays
-        xp, yp = Filter(self, xp, yp)
+        xp, yp = Filter.__call__(self, xp, yp)
         
         #Apply the filter
         return self._function(xp, yp)

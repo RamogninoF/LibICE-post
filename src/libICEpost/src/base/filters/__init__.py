@@ -7,11 +7,11 @@ create filter objects. The filter objects can be used to filter the data through
 method, which returns the filtered (x, y) data.
 
 The filters are defined in the following classes:
-    - Filter: base class for the filters
-    - Resample: resampling over a regular grid
-    - LowPass: low-pass filter (Butterworth)
-    - LowPassAndResample: low-pass filter and resampling
-    - UserDefinedFilter: user-defined filter (custom function for __call__)
+    - `Filter`: abstract base class for the filters
+    - `Resample`: resampling over a regular grid
+    - `LowPass`: low-pass filter (Butterworth)
+    - `LowPassAndResample`: low-pass filter and resampling
+    - `UserDefinedFilter`: user-defined filter (custom function for __call__)
 """
 
 #Load the classes

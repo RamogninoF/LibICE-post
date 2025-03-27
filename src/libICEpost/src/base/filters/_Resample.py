@@ -74,13 +74,15 @@ class Resample(Filter):
         #Argument checking:
         #Type checking
         checkType(delta, float, "delta")
+        if delta <= 0:
+            raise ValueError(f"delta must be positive. Got {delta}")
         self._delta = delta
     
     #########################################################################
     #Dunder methods:
     def __call__(self, xp:Iterable[float], yp:Iterable[float])-> tuple[np.ndarray[float], np.ndarray[float]]:
         #Type checking and recasting to numpy arrays
-        xp, yp = Filter(self, xp, yp)
+        xp, yp = Filter.__call__(self, xp, yp)
         
         #Construct uniform grid from min(x) to max(x)
         interval = np.arange(xp[0],xp[len(xp)-1]+self.delta, self.delta)
