@@ -1,24 +1,16 @@
 """
-@author: <N. Surname>       <e-mail>
-Last update:        DD/MM/YYYY
+@author: F. Ramognino (federico.ramognino@polimi.it)
 
-Fliters for data pre-processing
-
-Content of the package:
-    Filter (class)
-        Base class
-    
-    Resample (class)
-        Resampling with constant discretization
-        
-    LowPass (class)
-        Low-pass filter
-    
+**WARNING**: deprecated module. Use libICEpost.src.base.filters instead.
 """
 
 #Load the classes
-from .Filter import Filter
-from .Resample import Resample
-from .LowPass import LowPass
-from .LowPassAndResample import LowPassAndResample
-from .UserDefinedFilter import UserDefinedFilter
+from . import Filter
+from . import Resample
+from . import LowPass
+from . import LowPassAndResample
+from . import UserDefinedFilter
+
+# Deprecated import system
+import warnings
+warnings.warn("deprecated module libICEpost.src.base.Filter. Use the following instead:\n\tfrom libICEpost.src.base.filters import ...", DeprecationWarning, stacklevel=2)
