@@ -25,6 +25,8 @@ T = TypeVar("T")
 
 import os.path as path
 
+from libICEpost.src.base.Functions.typeChecking import checkType
+
 #############################################################################
 #                               MAIN CLASSES                                #
 #############################################################################
@@ -66,13 +68,15 @@ class Dictionary(OrderedDict, Utilities):
     @classmethod
     def fromFile(cls, fileName:str):
         """
-        fileName:   str
-            Path of the file
         Read the variables stored in a python file (Runs the code in the file and retrieves the local variables)
         
-        NOTE: local variable 'this' for this file. You can access the local folder as 'this.path' within the dictionary.
+        Args:
+            fileName (str): Path of the file
+            
+        Returns:
+            Dictionary: A Dictionary object containing the variables defined in the file.
         """
-        cls.checkType(fileName, str, "fileName")
+        checkType(fileName, str, "fileName")
         
         this = cls(_fileName=fileName)
         
@@ -91,7 +95,7 @@ class Dictionary(OrderedDict, Utilities):
         return this
         
     #############################################################################
-    def lookup(self, entryName:str, *, varType:T|Iterable[type]=None) -> T|Any:
+    def lookup(self, entryName:str, *, varType:T|Iterable[type]=None, **kwargs) -> T|Any:
         """
         Same as __getitem__ but embeds error handling and type checking.
 
@@ -99,6 +103,7 @@ class Dictionary(OrderedDict, Utilities):
             entryName (str): Name of the entry to look for
             varType (type|Iterable[type], optional): Type of the variable to lookup for. 
                 Performes type-checking if it is given. Defaults to None.
+            **kwargs (dict[str,object]): Additional arguments to pass to the checkType function in case of type checking.
 
         Raises:
             KeyError: If the entry is not found
@@ -107,20 +112,14 @@ class Dictionary(OrderedDict, Utilities):
         Returns:
             varType|Any: self[entryName]
         """
-        self.checkType(entryName, str, "entryName")
-        if varType is None:
-            pass
-        elif isinstance(varType, Iterable):
-            [self.checkType(t, (type, _SpecialGenericAlias), f"varType[{ii}]") for ii,t in enumerate(varType)]
-        else:
-            self.checkType(varType, (type, _SpecialGenericAlias), f"varType")
-            
+        checkType(entryName, str, "entryName")
+        
         if not entryName in self:
             raise KeyError(f"Entry '{entryName}' not found in Dictionary. Available entries are:\n\t" + f"\n\t".join([str(k) for k in self.keys()]))
-        elif (not varType is None) and (not isinstance(self[entryName], varType)):
-            raise TypeError(f"Entry '{entryName}' of wrong type. {varType.__name__ if not isinstance(varType, Iterable) else [v.__name__ for v in varType]} expected but {self[entryName].__class__.__name__} was found.")
-        else:
-            return self[entryName]
+        elif not (varType is None):
+            checkType(self[entryName], varType, entryName, **kwargs)
+
+        return self[entryName]
     
     #############################################################################
     def pop(self, entryName:str):
@@ -136,7 +135,7 @@ class Dictionary(OrderedDict, Utilities):
             return super().pop(entryName)
     
     ######################################
-    def lookupOrDefault(self, entryName:str, default:T, fatal:bool=True) -> T:
+    def lookupOrDefault(self, entryName:str, default:T, fatal:bool=True, **kwargs) -> T:
         """
         Lookup of give a default value if not found
         
@@ -144,18 +143,20 @@ class Dictionary(OrderedDict, Utilities):
             entryName (str): Name of the entry to look for
             default (T): Instance to return in case the value is not found. It is also used for typeChecking
             fatal (bool, optional): If the type is not consistent rise a TypeError. Defaults to True.
+            **kwargs (dict[str,object]): Additional arguments to pass to the checkType function in case of type checking.
             
         Returns:
             T: self[entryName] if entryName is found, else default
         """
-        self.checkType(entryName, str, "entryName")
-        self.checkType(fatal, bool, "fatal")
+        checkType(entryName, str, "entryName")
+        checkType(fatal, bool, "fatal")
         
         if not entryName in self:
             return default
         else:
-            if not isinstance(self[entryName], type(default)) and fatal:
-                raise TypeError(f"Inconsistent type of returne value ({type(self[entryName]).__name__}) with default ({type(default).__name__}).")
+            if fatal:
+                #Check the type of the entry
+                checkType(self[entryName], type(default), entryName, **kwargs)
             return self[entryName]
     
     ######################################
