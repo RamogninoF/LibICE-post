@@ -13,9 +13,11 @@ Package with useful classes and executables and function for pre/post processing
     TODO: Add description
 """
 
-#Useful staff to have pre-loaded here
+#Useful stuff to have pre-loaded here
 from .Database import database
 from .src.base.BaseClass import BaseClass
 from .src.base.dataStructures.Dictionary import Dictionary
+from .src.base.dataStructures._TimeSeries import TimeSeries
+from .src.base import enum
 
 # from .src.base.Logging.Logging import logger
