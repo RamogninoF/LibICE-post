@@ -3,10 +3,17 @@
 #####################################################################
 
 """
-@author: F. Ramognino       <federico.ramognino@polimi.it>
-Last update:        12/06/2023
-
 Functions for type checking.
+This module provides functions to check the type of variables and their 
+elements, including arrays and maps. It raises TypeError if the types 
+do not match the expected ones.
+
+Content of the package:
+    - `checkType` (function): Check the type of an instance.
+    - `checkArray` (function): Check the type of elements in an Iterable.
+    - `checkMap` (function): Check the type of keys and values in a Mapping.
+
+@author: F. Ramognino       <federico.ramognino@polimi.it>
 """
 
 #####################################################################

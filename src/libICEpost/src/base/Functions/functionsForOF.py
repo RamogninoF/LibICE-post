@@ -3,10 +3,13 @@
 #####################################################################
 
 """
-@author: F. Ramognino       <federico.ramognino@polimi.it>
-Last update:        12/06/2023
+Functions used to handle OpenFOAM files.
 
-Functions used to handle OpenFOAM files
+Content of the module:
+    - `readOFscalarList` (function): Read an OpenFOAM file with a scalar list.
+    - `writeOFscalarList` (function): Write an OpenFOAM file with a scalar list.
+
+@author: F. Ramognino       <federico.ramognino@polimi.it>
 """
 
 #####################################################################

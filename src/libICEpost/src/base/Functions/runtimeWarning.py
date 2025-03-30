@@ -3,8 +3,6 @@
 #####################################################################
 
 """
-@author: F. Ramognino       <federico.ramognino@polimi.it>
-
 Functions for warnings and error messages.
 
 Content of the module:
@@ -12,6 +10,8 @@ Content of the module:
     runtimeWarning (`function`): print a runtime warning message and the call-stack (`deprecated`)
     runtimeError (`function`): print a runtime error message and the call-stack (`deprecated`)
     helpOnFail (`decorator`): decorator for printing the help of a function in case of failure
+    
+@author: F. Ramognino       <federico.ramognino@polimi.it>
 """
 
 #####################################################################
