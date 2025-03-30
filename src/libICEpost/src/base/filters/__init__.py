@@ -1,9 +1,7 @@
 """
-@author: F. Ramognino (federico.ramognino@polimi.it)
-
 Module for definition of filter objects, which can be used to pre-process data before the analysis
 (resampling, low-pass filtering, etc.). The filters are defined as classes, which can be used to
-create filter objects. The filter objects can be used to filter the data throught the __call__(x, y)
+create filter objects. The filter objects can be used to filter the data throught the `__call__(x, y)`
 method, which returns the filtered (x, y) data.
 
 The filters are defined in the following classes:
@@ -11,7 +9,9 @@ The filters are defined in the following classes:
     - `Resample`: resampling over a regular grid
     - `LowPass`: low-pass filter (Butterworth)
     - `LowPassAndResample`: low-pass filter and resampling
-    - `UserDefinedFilter`: user-defined filter (custom function for __call__)
+    - `UserDefinedFilter`: user-defined filter (custom function for `__call__`)
+
+@author: F. Ramognino (federico.ramognino@polimi.it)
 """
 
 #Load the classes
