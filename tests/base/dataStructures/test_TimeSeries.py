@@ -83,6 +83,8 @@ def test_loadArray():
     assert len(ts) == 7
     assert np.isnan(ts["var2"][[0,1]]).all()
     assert np.isnan(ts["var1"][[5,6]]).all()
+    assert np.invert(np.isnan(ts["var1"][:5])).all()
+    assert np.invert(np.isnan(ts["var2"][2:])).all()
 
     # Extend the interval of var2 from a pandas.DataFrame with data by column,
     # suppressing the warning for orverwriting.
@@ -102,6 +104,8 @@ def test_loadArray():
     # 10  11   NaN -1.00
     assert len(ts) == 11
     assert np.isnan(ts["var1"][[7,8,9,10]]).all()
+    assert np.invert(np.isnan(ts["var1"][:5])).all()
+    assert np.invert(np.isnan(ts["var2"][2:])).all()
     
     with pytest.warns(TimeSeriesWarning):
         ts.loadArray(data, "var2", dataFormat="column", verbose=True)
@@ -128,6 +132,9 @@ def test_loadArray():
     assert np.isnan(ts["var3"][[7,8,9,10,11,12]]).all()
     assert np.isnan(ts["var1"][0])
     assert np.isnan(ts["var2"][0])
+    assert np.invert(np.isnan(ts["var1"][1:6])).all()
+    assert np.invert(np.isnan(ts["var2"][3:])).all()
+    assert np.invert(np.isnan(ts["var3"][:7])).all()
 
 @pytest.mark.filterwarnings("error::libICEpost.src.base.dataStructures.TimeSeriesWarning")
 @pytest.mark.filterwarnings("error::DeprecationWarning")
@@ -180,7 +187,7 @@ def test_loadFile(tmp_path):
         data = "#1 2\n2 3\n3 4"
         with open(file_path, "w") as file:
             file.write(data)
-        ts.loadFile(file_path, "var1", delimiter=" ", comment="#")
+        ts.loadFile(file_path, "var1", delimiter=" ", comments="#")
         assert len(ts) == 2
         
         #Aliases

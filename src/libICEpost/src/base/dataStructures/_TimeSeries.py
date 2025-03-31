@@ -3,15 +3,15 @@
 #####################################################################
 
 """
-@author: F. Ramognino       <federico.ramognino@polimi.it>
-
 Data structure for time-series data. It wraps a pandas DataFrame class and adds
 some useful I/O methods and defines interpolators of the varibles to easily access
 data at generic instants.
 
 Content of the module:
-    TimeSeries (`class`): data structure for time-series data.
-    TimeSeriesWarning (`class`): warning for TimeSeries class.
+    `TimeSeries` (`class`): data structure for time-series data.
+    `TimeSeriesWarning` (`class`): warning for TimeSeries class.
+    
+@author: F. Ramognino       <federico.ramognino@polimi.it>
 """
 
 #####################################################################
@@ -184,6 +184,7 @@ class TimeSeries(Utilities):
             delimiter:str=None,
             interpolate:bool=True,
             default:float=float("nan"),
+            verbose:bool=True,
             **kwargs) -> Self:
         """
         Load a file containing the time-series of a variable. If data were already 
@@ -209,6 +210,7 @@ class TimeSeries(Utilities):
             delimiter (str, optional): Delimiter for the columns (defaults to whitespace). Defaults to None.
             interpolate (bool, optional): Interpolate the data-set at existing time range (used to load non-consistent data). Defaults to True.
             default (float, optional): Default value to add in out-of-range values or if `interpolate` is `False`. Defaults to `float("nan")`.
+            verbose (bool, optional): If need to print loading information. Defaults to True.
             
         Returns:
             Self: self.
@@ -256,14 +258,18 @@ class TimeSeries(Utilities):
                 warnings.warn(DeprecationWarning(f"Key '{keyMap[key][0]}' is deprecated. Use '{key}' instead."))
         
         #Set equivalent keys
-        x_col = fullkwargs[keyMap["x_col"][0]] if len(keyMap["x_col"]) > 0 else 0
-        y_col = fullkwargs[keyMap["y_col"][0]] if len(keyMap["y_col"]) > 0 else 1
-        x_off = fullkwargs[keyMap["x_off"][0]] if len(keyMap["x_off"]) > 0 else 0.0
-        y_off = fullkwargs[keyMap["y_off"][0]] if len(keyMap["y_off"]) > 0 else 0.0
-        x_scale = fullkwargs[keyMap["x_scale"][0]] if len(keyMap["x_scale"]) > 0 else 1.0
-        y_scale = fullkwargs[keyMap["y_scale"][0]] if len(keyMap["y_scale"]) > 0 else 1.0
-        skip_rows = fullkwargs[keyMap["skip_rows"][0]] if len(keyMap["skip_rows"]) > 0 else 0
-        max_rows = fullkwargs[keyMap["max_rows"][0]] if len(keyMap["max_rows"]) > 0 else None
+        x_col = fullkwargs.pop(keyMap["x_col"][0]) if len(keyMap["x_col"]) > 0 else 0
+        y_col = fullkwargs.pop(keyMap["y_col"][0]) if len(keyMap["y_col"]) > 0 else 1
+        x_off = fullkwargs.pop(keyMap["x_off"][0]) if len(keyMap["x_off"]) > 0 else 0.0
+        y_off = fullkwargs.pop(keyMap["y_off"][0]) if len(keyMap["y_off"]) > 0 else 0.0
+        x_scale = fullkwargs.pop(keyMap["x_scale"][0]) if len(keyMap["x_scale"]) > 0 else 1.0
+        y_scale = fullkwargs.pop(keyMap["y_scale"][0]) if len(keyMap["y_scale"]) > 0 else 1.0
+        skip_rows = fullkwargs.pop(keyMap["skip_rows"][0]) if len(keyMap["skip_rows"]) > 0 else 0
+        max_rows = fullkwargs.pop(keyMap["max_rows"][0]) if len(keyMap["max_rows"]) > 0 else None
+        
+        #Check for unknown keys
+        unknownKeys = set(fullkwargs.keys()).difference(sum(equivalentKeys.values(), start=[]))
+        if len(unknownKeys) > 0: raise ValueError(f"Unknown keyword arguments '{unknownKeys}'.")
         
         #Check arguments
         checkType(fileName , str   , "fileName")
@@ -279,6 +285,7 @@ class TimeSeries(Utilities):
         checkType(max_rows   , int , "max_rows", allowNone=True)
         checkType(interpolate, bool, "interpolate")
         checkType(default  , float , "default" )
+        checkType(verbose  , bool  , "verbose" )
 
         data:np.ndarray = np.loadtxt\
             (
@@ -295,7 +302,7 @@ class TimeSeries(Utilities):
         data[:,1] += y_off
         data[:,1] *= y_scale
 
-        self.loadArray(data, varName, default=default, interpolate=interpolate)
+        self.loadArray(data, varName, default=default, interpolate=interpolate, verbose=verbose)
 
         return self
 
@@ -308,7 +315,7 @@ class TimeSeries(Utilities):
         *,
         verbose:bool=True,
         default:float=float("nan"),
-        interpolate:bool=False,
+        interpolate:bool=True,
         dataFormat:Literal["column", "row"]="column") -> Self:
         """
         Load an array into the table. Automatically removes duplicate times.
@@ -321,7 +328,7 @@ class TimeSeries(Utilities):
             verbose (bool, optional): If need to print loading information. Defaults to True.
             default (float, optional): Default value for out-of-range elements. Defaults to float("nan").
             interpolate (bool, optional): Interpolate the data-set at existing time range (used to load \
-                non-consistent data). Defaults to False.
+                non-consistent data). Defaults to True.
             dataFormat (str, Literal[&quot;column&quot;, &quot;row&quot;], optional): Format of data: \
                 'column' -> [N,2] \
                 'row' -> [2,N]
@@ -419,7 +426,7 @@ class TimeSeries(Utilities):
         
         #Remove duplicates
         df.drop_duplicates(subset=self.timeName, keep="first", inplace=True)
-
+        
         #Index with CA (useful for merging)
         self._data.set_index(self.timeName, inplace=True)
         df.set_index(self.timeName, inplace=True)
@@ -431,41 +438,68 @@ class TimeSeries(Utilities):
 
         #If data were not stored yet, just load this
         if len(self._data) < 1:
-            #Update based on CA of right
-            self._data = self._data.join(df, how="right")
+            newData = self._data.join(df, how="right")
 
         else:
-            #Check if index are not consistent, to perform interpolation later
-            consistentCA = False if (len(self._data.index) != len(df.index)) else all(self._data.index == df.index)
-            if (not consistentCA) and interpolate:
-                CAold = self._data.index
-
-            #Update based on CA of self
-            self._data = self._data.join(df, how="outer", rsuffix="_new")
-
+            #Merge the time ranges
+            tLeft = self._data.index
+            tRight = df.index
+            consistentTime = tRight.to_list() == tLeft.to_list()
+            
+            #Update based on time of self
+            newData = self._data.join(df, how="outer", rsuffix="_new")
+            
             #Merge data if overwriting
             if not firstTime:
-                self._data.update(pd.DataFrame(self._data[varName + "_new"].rename(varName)))
-                self._data.drop(varName + "_new", axis="columns", inplace=True)
-
+                newData.update(pd.DataFrame(newData[varName + "_new"].rename(varName)))
+                
+                # Store the times where data where already present, we won't interpolate at those
+                alreadyPresent = np.invert(newData[varName].isna())
+                
+                #Remove the new column
+                newData.drop(varName + "_new", axis="columns", inplace=True)
+                
             #Perform interpolation
-            if (not consistentCA) and interpolate:
-                #Interpolate original dataset
-                missingCA = self._data.index[pd.DataFrame(self._data.index).apply((lambda x:not CAold.__contains__(x),))[self.timeName]["<lambda>"]]
-                if len(missingCA > 0):
+            if (not consistentTime) and interpolate:
+                time = newData.index
+                
+                #Interpolate original dataset at indexes of the new dataset not present 
+                # in the old one
+                t = tLeft.to_numpy()
+                notMissing = time.isin(t)
+                missing = np.invert(notMissing)
+                if any(missing):
                     #Interpolate everything but the loaded variable:
-                    for var in [v for v in self.columns if not v == varName]:
-                        self[var].loc[missingCA] = self.np.interp(missingCA, CAold, self._data.loc[CAold,var], float("nan"), float("nan"))
+                    for ii, var in enumerate(newData.columns):
+                        if var == varName:
+                            continue
+                        newData.iloc[missing, ii] = np.interp(
+                            time[missing], 
+                            time[notMissing], 
+                            newData.iloc[notMissing,ii].to_numpy(),
+                            float("nan"), float("nan"))
 
-                #Interpolate loaded dataset (needed if new variable):
-                if firstTime:
-                    missingCA = self._data.index[pd.DataFrame(self._data.index).apply((lambda x:not df.index.__contains__(x),))[self.timeName]["<lambda>"]]
-                    if len(missingCA > 0):
-                        self[varName].loc[missingCA] = self.np.interp(missingCA, df.index, df[varName], default, default)
+                #Interpolate loaded dataset if not first time
+                t = tRight.to_numpy()
+                notMissing = time.isin(t)
+                missing = np.invert(notMissing)
+                
+                #If some data were already present, we don't interpolate there
+                if not firstTime:
+                    missing = missing & np.invert(alreadyPresent)
+                    
+                varID = newData.columns.get_loc(varName)
+                if any(missing):
+                    newData.iloc[missing, varID] = np.interp(
+                        time[missing],
+                        time[notMissing],
+                        newData.iloc[notMissing,varID].to_numpy(),
+                        default, default)
 
         #Return to normal indexing
-        self._data.reset_index(inplace=True)
-
+        newData.reset_index(inplace=True)
+        self._data = newData
+        
         return self
 
     #######################################

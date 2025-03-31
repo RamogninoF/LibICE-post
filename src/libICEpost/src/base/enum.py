@@ -4,6 +4,15 @@
 
 """
 Enumeration classes that when instantiated with a value not in the enumeration, list the allowed values.
+This extends the functionality of the standard enum module, adding debugging information 
+by extending the `EnumType` metaclass.
+
+Content of the module:
+    - `MetaCheckedEnum` (class): Metaclass that adds the functionality of 
+    listing the allowed values when an invalid value is passed.
+    - `Enum` (class): Enum class that uses the MetaCheckedEnum metaclass.
+    - `StrEnum` (class): Enum class that uses the MetaCheckedEnum metaclass 
+    and where members are also (and must be) strings.
 
 @author: F. Ramognino       <federico.ramognino@polimi.it>
 """
@@ -22,7 +31,7 @@ from enum import EnumType
 #CheckedEnum metaclass
 class MetaCheckedEnum(EnumType):
     """
-    Metaclass for CheckedEnum. This adds the functionality of listing the allowed values when an invalid value is passed.
+    Enumeration metaclass that adds the functionality of listing the allowed values when an invalid value is passed.
     """
     def __call__(cls, value, *args, **kwargs):
         try:
@@ -38,7 +47,7 @@ class Enum(_Enum, metaclass=MetaCheckedEnum):
     Create a collection of name/value pairs. See the enum module for more information.
     """
 
-class EnumStr(_StrEnum, metaclass=MetaCheckedEnum):
+class StrEnum(_StrEnum, metaclass=MetaCheckedEnum):
     """
     Enum where members are also (and must be) strings.
     """
