@@ -35,7 +35,7 @@ def filter(ts:TimeSeries, filter:Filter, *, fields:Iterable[str]=None, verbose:b
     checkType(ts, TimeSeries, "ts")
     checkType(filter, Filter, "filter")
     if fields is None: fields = [c for c in ts.columns if not c == ts.timeName]
-    checkType(fields, Iterable, "fields")
+    checkArray(fields, str, "fields")
     checkType(verbose, bool, "verbose", optional=True)
     
     if verbose:
