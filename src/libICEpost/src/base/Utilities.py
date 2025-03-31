@@ -3,8 +3,10 @@
 #####################################################################
 
 """
+Defunes the class `Utilities` wrapping general purpose functions as static methods.
+All the classes in the library inherit from this class.
+
 @author: F. Ramognino       <federico.ramognino@polimi.it>
-Last update:        12/06/2023
 """
 
 #####################################################################
@@ -25,7 +27,7 @@ import os
 #############################################################################
 class Utilities(object):
     """
-    Class wrapping useful methods (virtual).
+    Class wrapping general purpose functions as static methods.
     """
     
     #Type checking:

@@ -3,8 +3,15 @@
 #####################################################################
 
 """
+This module contains the definition of the abstact base class `BaseClass`,
+which implements the base functionality for class inheritance and run-time 
+selection which is used in the `libICEpost` library.
+
+Content of the module:
+    - `SelectionTable` (class): Class for storing classes for run-time selection.
+    - `BaseClass` (class): Class wrapping useful methods for base virtual classes (e.g. run-time selector)
+
 @author: F. Ramognino       <federico.ramognino@polimi.it>
-Last update:        12/06/2023
 """
 
 #####################################################################

@@ -3,8 +3,25 @@
 #####################################################################
 
 """
+Tabulation class for storing, accessing, and manipulating tabulated data.
+It provides methods for slicing, concatenating, and plotting the data, as well as for
+interpolating between data points. The class is designed to work with n-dimensional data
+and can handle missing data points.
+
+Content of the module:
+    - `Tabulation` (`class`): Class for tabulated data.
+    - `insertDimension` (`function`): Insert a new dimension to a `Tabulation` object.
+    - `concat` (`function`): Concatenate two or more `Tabulation` objects. Alias: `merge`.
+    - `squeeze` (`function`): Remove dimensions with only 1 data-point.
+    - `sliceTable` (`function`): Slice a `Tabulation` object.
+    - `clipTable` (`function`): Clip a `Tabulation` object to the given ranges.
+    - `plotTable` (`function`): Plot a `Tabulation` object.
+    - `plotTableHeatmap` (`function`): Plot a `Tabulation` object as a heatmap.
+    - `toPandas` (`function`): Convert a `Tabulation` object to a pandas DataFrame. Alias: `to_pandas`.
+    - `OutOfBoundMethod` (`class`): Enum for out-of-bounds methods.
+    - `TabulationAccessWarning` (`class`): Warning for `Tabulation` access.
+
 @author: F. Ramognino       <federico.ramognino@polimi.it>
-Last update:        12/06/2023
 """
 
 #####################################################################
@@ -14,7 +31,7 @@ Last update:        12/06/2023
 from __future__ import annotations
 
 from typing import Iterable, Literal, Callable
-from enum import StrEnum
+from libICEpost.src.base.enum import StrEnum
 
 import pandas as pd
 import numpy as np
@@ -37,7 +54,7 @@ from .BaseTabulation import BaseTabulation
 #####################################################################
 #                            AUXILIARY CLASSES                      #
 #####################################################################
-class _OoBMethod(StrEnum):
+class OutOfBoundMethod(StrEnum):
     """Out-of-bounds methods"""
     extrapolate = "extrapolate"
     nan = "nan"
@@ -777,7 +794,7 @@ class Tabulation(BaseTabulation):
     _data:np.ndarray
     """The n-dimensional dataset of the table"""
     
-    _outOfBounds:_OoBMethod
+    _outOfBounds:OutOfBoundMethod
     """How to handle out-of-bounds access to table."""
     
     _interpolator:RegularGridInterpolator
@@ -843,7 +860,7 @@ class Tabulation(BaseTabulation):
     @outOfBounds.setter
     def outOfBounds(self, outOfBounds:Literal["extrapolate", "fatal", "nan"]):
         self.checkType(outOfBounds, str, "outOfBounds")
-        self._outOfBounds = _OoBMethod(outOfBounds)
+        self._outOfBounds = OutOfBoundMethod(outOfBounds)
         
         #Update interpolator
         self._createInterpolator()
@@ -985,7 +1002,7 @@ class Tabulation(BaseTabulation):
             self._data = self._data.reshape([len(ranges[o]) for o in order])
         
         #Options
-        self._outOfBounds = _OoBMethod(outOfBounds)
+        self._outOfBounds = OutOfBoundMethod(outOfBounds)
         self._createInterpolator()
     
     #########################################################################
@@ -1006,11 +1023,11 @@ class Tabulation(BaseTabulation):
         
         #Extrapolation method:
         opts = {"bounds_error":False}
-        if self.outOfBounds == _OoBMethod.fatal:
+        if self.outOfBounds == OutOfBoundMethod.fatal:
             opts.update(bounds_error=True)
-        elif self.outOfBounds == _OoBMethod.nan:
+        elif self.outOfBounds == OutOfBoundMethod.nan:
             opts.update(fill_value=float('nan'))
-        elif self.outOfBounds == _OoBMethod.extrapolate:
+        elif self.outOfBounds == OutOfBoundMethod.extrapolate:
             opts.update(fill_value=None)
         else:
             raise ValueError(f"Unexpecred out-of-bound method {self.outOfBounds}")

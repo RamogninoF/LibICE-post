@@ -3,8 +3,26 @@
 #####################################################################
 
 """
+OpenFOAM tabulation class. The tabulation is a multi-input multi-output, i.e., it access through a
+set of input variables (IV) to a set of tabulated variables (TV):
+    [IV1, IV2, IV3, ...] -> [TV1, TV2, TV3, ...]
+
+Content of the module:
+    - `OFTabulation` (`class`): Class for OpenFOAM tabulated data.
+    - `toPandas` (`function`): Convert an instance of OFTabulation to a `pandas.DataFrame` with 
+    all the points stored in the tabulation. Alias: `to_pandas`.
+    - `concat` (`function`): Merge multiple `OFTabulation` objects. Alias: `merge`.
+    - `writeOFTable` (`function`): Write the tabulation to a directory structure compatible with OpenFOAM.
+    - `sliceOFTable` (`function`): Slice the table to a given set of sampling points.
+    - `clipOFTable` (`function`): Clip the table to a given set of ranges.
+    - `insertDimension` (`function`): Insert a new dimension in the table by adding a new variable with constant value.
+    - `squeeze` (`function`): Remove dimensions with only one sampling point.
+    - `plotOFTable` (`function`): Plot a field of a tabulation.
+    - `plotHeatmapOFTable` (`function`): Plot a heatmap of a field of a tabulation.
+    - `toPandas` (`function`): Convert an instance of OFTabulation to a pandas.DataFrame with all
+    the points stored in the tabulation. Alias: `to_pandas`.
+    
 @author: F. Ramognino       <federico.ramognino@polimi.it>
-Last update:        12/06/2023
 """
 
 #####################################################################

@@ -3,12 +3,12 @@
 #####################################################################
 
 """
-@author: F. Ramognino       <federico.ramognino@polimi.it>
-
 Dictionary class with some OpenFOAM-like methods.
 
 Content of the module:
     Dictionary (`class`): Ordered dictionary embedding some useful OpenFOAM-like methods.
+
+@author: F. Ramognino       <federico.ramognino@polimi.it>
 """
 
 #####################################################################

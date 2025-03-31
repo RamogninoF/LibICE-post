@@ -3,8 +3,13 @@
 #####################################################################
 
 """
-@author: F. Ramognino       <federico.ramognino@polimi.it>
-Last update:        12/06/2023
+Abstract base class and geneal-purpose functions for tabulations, containing data in a 
+structured grid in an n-dimensional space of input-variables.
+
+Content of the module:
+    `BaseTabulation` (`class`): Base class for tabulations.
+    `getInput` (`function`): Get the input values at a slice of the table.
+    `tableIndex` (`function`): Compute the location of an index inside a table.
 """
 
 #####################################################################
