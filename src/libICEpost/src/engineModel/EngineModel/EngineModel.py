@@ -855,7 +855,8 @@ class EngineModel(BaseClass):
         self._process__pre__()
         
         #Process cylinder data
-        for t in tqdm(self.time(self.data.loc[:,"CA"]), "Progress: ", initial=0, total=(self.time.endTime-self.time.startTime), unit="CAD"):  #With progress bar :)
+        bar = tqdm([], "Progress: ", initial=0, total=(self.time.endTime-self.time.startTime), unit="CAD")
+        for t in self.time(self.data["CA"].to_numpy()):  #With progress bar :)
             self.info["time"] = t
             #Break the time loop if the updating fails:
             try:
@@ -866,7 +867,10 @@ class EngineModel(BaseClass):
                 self.runtimeError(f"Failed updating engine model at time {t}",stack=True)
                 print(traceback.format_exc())
                 break
-
+            #Update progress bar
+            bar.update(self.time.deltaT)
+        bar.close()
+        
         #Final updates (heat transfer, cumulatives, etc...)
         self._process__post__()
         
