@@ -65,6 +65,11 @@ class Filter(BaseClass):
     
     #########################################################################
     #Methods:
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}()"
+    
+    def __str__(self) -> str:
+        return self.__repr__()
     
 #########################################################################
 #Create selection table for the class used for run-time selection of type
