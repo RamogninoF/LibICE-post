@@ -36,6 +36,7 @@ from libICEpost.src.base.dataStructures.EngineData.EngineData import EngineData
 #I/O and pre-processing
 from libICEpost.src.base.dataStructures.Dictionary import Dictionary
 from libICEpost.src.base.filters import Filter
+from libICEpost.src.base.filters import filter as filterData
 from libICEpost.src.base.dataStructures import loadField
 from libICEpost.src.base.dataStructures._loading import LoadingMethod
 
@@ -617,32 +618,23 @@ class EngineModel(BaseClass):
         return self
     
     ####################################
-    def filterData(self, filter:"Filter|FunctionType|None"=None) -> EngineModel:
+    def filterData(self, filter:Filter=None) -> EngineModel:
         """
-        filter: Filter|FunctionType|None (optional)
-            Filter to apply to raw data (e.g. resampling, low-pass filter, etc.). Required
-            a method __call__(xp, yp)->(x,y) that resamples the dataset (xp,yp) to the
-            datapoints (x,y).
+        Filter the data in self.raw and save the corresponding filtered data to self.data.
+        If filter is None, data are cloned from self.raw (i.e. no filter is applied).
         
-        Filter the data in self.raw. Save the corresponding 
-        filtered data to self.data.
-        If filter is None, data are cloned from self.raw
+        Args:
+            filter (Filter, optional): Filter to apply to raw data (e.g. resampling, low-pass filter, etc.).
         """
         #Save filter
         self.info["filter"] = filter
         
         #Clone if no filter is given
         if filter is None:
-            for field in self._raw.columns:
-                self._data.loadArray(np.array((self._raw.loc[:,"CA"],self._raw.loc[:,field])).T, field)
-            return self
+            filter = Filter.selector("Clone", {})
         
         #Apply filter
-        print(f"Applying filter {filter if isinstance(filter,Filter) else filter.__name__}")
-        for var in self._raw.columns:
-            #Filter data
-            if var != "CA":
-                self._data.loadArray(np.array(filter(self._raw.loc[:,"CA"], self._raw.loc[:,var])).T, var)
+        self._data = filterData(self._raw, filter=filter)
         
         return self
     
@@ -780,22 +772,29 @@ class EngineModel(BaseClass):
         self.loadData(dataPath, data=data)
         
         # Filtering data
-        self.info["preProcessing"] = preProcessing
         filter = None
         if not preProcessing is None:
-            preProcessing = Dictionary(**preProcessing)
-            filterType = preProcessing.lookupOrDefault("Filter", None, fatal=False)
-            if isinstance(filterType, str):
+            if not isinstance(preProcessing, Dictionary):
+                #Cast to dictionary
+                self.checkType(preProcessing, dict, "preProcessing")
+                preProcessing = Dictionary(**preProcessing, _name="preProcessing")
+            filterType = preProcessing.lookupOrDefault("Filter", None, allowNone=True, fatal=False)
+            if filterType is None:
+                #No filtering
+                pass
+            elif isinstance(filterType, str):
                 #Got type name for run-time construction
                 filter:Filter = Filter.selector(filterType, preProcessing.lookup(f"{filterType}Dict"))
             elif isinstance(filterType, Filter):
-                #Got filter item
+                #Got Filter item
                 filter = filterType
             else:
-                #No filtering
-                pass
+                raise TypeError(f"Type {filterType.__class__.__name__} not supported for filter")
             
         self.filterData(filter)
+        
+        #Store
+        self.info["preProcessing"] = preProcessing
         
         #Initial conditions for thermodinamic models:
         self.initializeThemodynamicModels(**initialConditions)
