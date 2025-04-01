@@ -37,9 +37,10 @@ class Dictionary(OrderedDict, Utilities):
     """
     path:str|None
     file:str|None
+    name:str
     
     #############################################################################
-    def __init__(self, *args, _fileName:str=None, **argv):
+    def __init__(self, *args, _fileName:str=None, _name:str="Dictionary", **argv):
         """
         Same constructor as collections.OrderedDict class.
         """
@@ -62,7 +63,14 @@ class Dictionary(OrderedDict, Utilities):
                 raise ValueError(f"Invalid file name {_fileName}")
             self.fileName = file
         
+        #Name of the dictionary
+        self.name = _name
+        
+        #Call the constructor of the parent class
         super().__init__(*args,**argv)
+        
+        #Cast the sub-dictionaries to Dictionary classes
+        self._correctSubdicts()
         
     #############################################################################
     @classmethod
@@ -104,7 +112,7 @@ class Dictionary(OrderedDict, Utilities):
             varType (type|Iterable[type], optional): Type of the variable to lookup for. 
                 Performes type-checking if it is given. Defaults to None.
             **kwargs (dict[str,object]): Additional arguments to pass to the checkType function in case of type checking.
-
+        
         Raises:
             KeyError: If the entry is not found
             TypeError: If the type is not consistent with varType
@@ -115,9 +123,9 @@ class Dictionary(OrderedDict, Utilities):
         checkType(entryName, str, "entryName")
         
         if not entryName in self:
-            raise KeyError(f"Entry '{entryName}' not found in Dictionary. Available entries are:\n\t" + f"\n\t".join([str(k) for k in self.keys()]))
+            raise KeyError(f"Entry '{entryName}' not found in Dictionary '{self.name}'. Available entries are:\n\t" + f"\n\t".join([str(k) for k in self.keys()]))
         elif not (varType is None):
-            checkType(self[entryName], varType, entryName, **kwargs)
+            checkType(self[entryName], varType, f"{self.name}[{entryName}]", **kwargs)
 
         return self[entryName]
     
@@ -166,7 +174,7 @@ class Dictionary(OrderedDict, Utilities):
         """
         for entry in self:
             if isinstance(self[entry], dict) and not isinstance(self[entry], Dictionary):
-                self[entry] = Dictionary(**self[entry])
+                self[entry] = Dictionary(**self[entry], _name=self.name + "." + entry)
         return self
     
     ######################################
