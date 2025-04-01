@@ -11,6 +11,7 @@ Content of the module:
     - `LowPassAndResample` (class): low-pass filter and resampling
     - `UserDefinedFilter` (class): user-defined filter (custom function for `__call__`)
     - `filter` (function): function to apply the filter to a `libICEpost` `TimeSeries` object
+    - `Clone` (class): filter that does nothing (used to clone the data without any modification)
 
 @author: F. Ramognino (federico.ramognino@polimi.it)
 """
@@ -21,5 +22,6 @@ from ._Resample import Resample
 from ._LowPass import LowPass
 from ._LowPassAndResample import LowPassAndResample
 from ._UserDefinedFilter import UserDefinedFilter
+from ._Clone import Clone
 
 from ._functions import filter
