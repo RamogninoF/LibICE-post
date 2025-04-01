@@ -297,6 +297,16 @@ class TimeSeries(Utilities):
                 delimiter=delimiter
             )
 
+        if verbose:
+            if x_off != 0.0:
+                print(f"\tApplying offset {x_off} to time data")
+            if y_off != 0.0:
+                print(f"\tApplying offset {y_off} to variable data")
+            if x_scale != 1.0:
+                print(f"\tApplying scaling {x_scale} to time data")
+            if y_scale != 1.0:
+                print(f"\tApplying scaling {y_scale} to variable data")
+        
         data[:,0] += x_off
         data[:,0] *= x_scale
         data[:,1] += y_off
