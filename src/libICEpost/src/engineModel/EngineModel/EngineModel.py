@@ -35,7 +35,9 @@ from libICEpost.src.base.dataStructures.EngineData.EngineData import EngineData
 
 #I/O and pre-processing
 from libICEpost.src.base.dataStructures.Dictionary import Dictionary
-from libICEpost.src.base.Filter.Filter import Filter
+from libICEpost.src.base.filters import Filter
+from libICEpost.src.base.dataStructures import loadField
+from libICEpost.src.base.dataStructures._loading import LoadingMethod
 
 #Submodels
 from libICEpost.src.engineModel.EngineTime.EngineTime import EngineTime
@@ -53,6 +55,7 @@ from libICEpost.Database.chemistry.specie.Mixtures import Mixtures, Mixture
 
 #Errors
 from libICEpost.src.base.Functions.runtimeWarning import helpOnFail
+import warnings
 
 #############################################################################
 #                                  FUNCTIONS                                #
@@ -546,14 +549,14 @@ class EngineModel(BaseClass):
         return self
     
     ####################################
-    def loadData(self, dataPath:str=None, *, data:dict|Dictionary) -> EngineModel:
+    def loadData(self, dataPath:str=None, *, data:dict[str,dict[str,object]]) -> EngineModel:
         """
         Load raw data.
         
         TODO: Info
         
         Args:
-            data (dict | Dictionary): Dictionary containing the data to load for each region.
+            data (ddict[str,dict[str,object]]): Dictionary containing the data to load for each region.
             dataPath (str, optional): Global path where to load/write data. Defaults to None.
 
         Returns:
@@ -562,16 +565,18 @@ class EngineModel(BaseClass):
         print("Loading data")
         print(f"Data path: {dataPath}")
         
-        #Seth path info
+        #Set path info
         self.info["dataPath"] = dataPath
         
         #Cast to Dictionary
-        data = Dictionary(**data)
+        if not isinstance(data, Dictionary):
+            data = Dictionary(**data, _name="data")
         self.info["data"] = data
         
         #Load data:
         for zone in self.Zones:
-            zoneDict = data.lookup(zone)
+            print(f"Loading data for zone {zone}")
+            zoneDict:Dictionary = data.lookup(zone, varType=Dictionary)
             
             #Check that pressure is found (mandatory)
             if (not "p" in zoneDict) and (not "p" in self.raw.columns):
@@ -579,71 +584,36 @@ class EngineModel(BaseClass):
             
             #Loop over data to be loaded:
             for entry in zoneDict:
-                dataDict = zoneDict.lookup(entry)
-                self.checkType(dataDict, Dictionary, f"{zone}[{entry}]")
+                dataDict:Dictionary = zoneDict.lookup(entry, varType=Dictionary)
                 
                 #If the region is not cylinder, append its name to the field
                 entryName:str = entry + get_postfix(zone)
-                currData:Dictionary = dataDict.lookup("data")
+                
+                #Get the loading method
+                #NOTE: 'format' is deprecated, use 'method' instead
+                if "format" in dataDict:
+                    warnings.warn(DeprecationWarning(f"Keyword 'format' for setting the loading method is deprecated. Use 'method' instead"))
+                    method:str = dataDict.lookup("format", varType=str)
+                else:
+                    method:str = dataDict.lookup("method", varType=str)
+                
+                #Get the data and options
+                currData:Dictionary = dataDict.lookup("data", varType=Dictionary)
                 opts:Dictionary = currData.lookupOrDefault("opts", Dictionary())
                 
-                #Get format
-                dataFormat:str = dataDict.lookup("format")
-                if (dataFormat == "file"):
-                    #File
-                    fileName = currData.lookup("fileName")
-                    
-                    #relative to dataPath if given
-                    fileName = (dataPath + os.path.sep if dataPath else "") + fileName
-                    
-                    #Load
-                    self._loadFile(fileName, entryName, **opts)
-                    
-                elif (dataFormat == "array"):
-                    #(CA,val) array
-                    dataArray = currData.lookup("array")
-                    self._loadArray(dataArray, entryName, **opts)
+                #Set the keywords for the loading function
+                kwargs = {**currData}
+                kwargs.pop("opts", None)
+                kwargs.update(opts)
+                kwargs.update(method=method)
                 
-                elif (dataFormat == "function"):
-                    #Function f(CA)
-                    function:FunctionType = currData.lookup("function")
-                    self.checkType(function, FunctionType, f"{zone}[{entry}][function]")
-                    
-                    CA = self.raw.loc[:,"CA"]
-                    f = CA.apply(function)
-                    
-                    self._loadArray(np.array((CA,f)).T, entryName, **opts)
-                    
-                elif (dataFormat == "uniform"):
-                    #Uniform value
-                    value:float = currData.lookup("value")
-                    self.checkType(value, float, f"{zone}[{entry}][value]")
-                    self.raw.loc[:,entryName] = value
+                # If the data is a file, set the global path
+                lm = LoadingMethod(method)
+                if (lm == LoadingMethod.file):
+                    kwargs.update(root=dataPath)
                 
-                elif (dataFormat == "calc"):
-                    #Apply operation between alredy loaded data
-                    function:FunctionType = currData.lookup("function")
-                    self.checkType(function, FunctionType, f"{zone}[{entry}][function]")
-                    
-                    #Function arguments
-                    argNames:list[str] = function.__code__.co_varnames[:function.__code__.co_argcount]
-                    
-                    #Check if are present:
-                    for arg in argNames:
-                        if not arg in self.raw.columns:
-                            raise ValueError(f"Field '{arg}' was not loaded.")
-                    
-                    #Extract corresponding columns from data-frame:
-                    cols = {c:self.raw.loc[:,c] for c in argNames}
-                    
-                    CA = self.raw.loc[:,"CA"]
-                    f = function(**cols)
-                    
-                    self._loadArray(np.array((CA,f)).T, entryName, **opts)
+                loadField(self._raw, field=entryName, inplace=True, **kwargs)
                 
-                else:
-                    raise ValueError(f"Unknown data format '{dataFormat}' for entry {zone}[{entry}]")
-                    
         return self
     
     ####################################
