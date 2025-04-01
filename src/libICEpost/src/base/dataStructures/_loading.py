@@ -53,14 +53,14 @@ class LoadingMethod(enum.StrEnum):
 ######################################################################
 #                               FUNCTIONS                            #
 ######################################################################
-def load_file(ts: TimeSeries, field: str, filename: str, root:str=None, verbose:bool=True, **kwargs) -> None:
+def load_file(ts: TimeSeries, field: str, fileName: str, root:str=None, verbose:bool=True, **kwargs) -> None:
     """
     Load a field from a file into a TimeSeries object.
     
     Args:
         ts (TimeSeries): TimeSeries object to load the field into.
         field (str): Name of the field to load.
-        filename (str): Name of the file to load the field from.
+        fileName (str): Name of the file to load the field from.
         root (str): Root directory for the file. If None, the file is loaded directly. Default is None.
         verbose (bool, optional): If True, print information about the loading process. Default is True.
         **kwargs: Additional keyword arguments to pass to the loading function.
@@ -70,7 +70,7 @@ def load_file(ts: TimeSeries, field: str, filename: str, root:str=None, verbose:
     """
     checkType(ts, TimeSeries, "ts")
     checkType(field, str, "field")
-    checkType(filename, str, "filename")
+    checkType(fileName, str, "fileName")
     checkType(root, str, "root", allowNone=True)
     checkType(verbose, bool, "verbose")
     
@@ -79,10 +79,10 @@ def load_file(ts: TimeSeries, field: str, filename: str, root:str=None, verbose:
         print(f"Field '{field}' already exists in the TimeSeries object. Overwriting...")
         
     # Load the field from the file
-    if root is not None: filename = os.path.join(root, filename)
+    if root is not None: fileName = os.path.join(root, fileName)
     if verbose:
-        print(f"Loading field '{field}' from file '{filename}'...")
-    ts.loadFile(fileName=filename, varName=field, verbose=verbose, **kwargs)
+        print(f"Loading field '{field}' from file '{fileName}'...")
+    ts.loadFile(fileName=fileName, varName=field, verbose=verbose, **kwargs)
 
 #######################################################################
 def load_array(ts: TimeSeries, field: str, array: Iterable, verbose:bool=True, **kwargs) -> None:
@@ -206,17 +206,15 @@ def load_calculated(ts: TimeSeries, field: str, function: Callable, verbose:bool
     if field in ts.columns and verbose:
         print(f"Field '{field}' already exists in the TimeSeries object. Overwriting...")
         
+    # Get the arguments of the function
+    args = function.__code__.co_varnames[:function.__code__.co_argcount]
+    
     # Load the field as a function of data already in the TimeSeries object
     if verbose:
-        print(f"Loading field '{field}' as a function of data already in the TimeSeries object...")
+        print(f"Loading field '{field}' as a function of {args}...")
     
     if len(ts) == 0:
         raise ValueError("TimeSeries is empty. Cannot load calculated field.")
-    
-    time = ts[ts.timeName].to_list()
-    
-    # Get the arguments of the function
-    args = function.__code__.co_varnames[:function.__code__.co_argcount]
     
     # Get the values of the arguments from the TimeSeries object
     for var in args:
@@ -231,6 +229,7 @@ def load_calculated(ts: TimeSeries, field: str, function: Callable, verbose:bool
         raise ValueError("Function must have at least one argument.")
     out = function(*data)
     
+    time = ts[ts.timeName].to_list()
     ts.loadArray([time, out], varName=field, verbose=verbose, dataFormat="row", **kwargs)
 
 ######################################################################

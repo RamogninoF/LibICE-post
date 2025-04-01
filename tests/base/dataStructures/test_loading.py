@@ -18,7 +18,7 @@ def test_load_file(timeseries):
         temp_file_path = temp_file.name
         
         fieldName = "new_field"
-        load_file(timeseries, filename=temp_file_path, field=fieldName, verbose=True)
+        load_file(timeseries, fileName=temp_file_path, field=fieldName, verbose=True)
         assert fieldName in timeseries.columns
         assert timeseries[fieldName].to_list() == [2, 4, 6]
         assert timeseries[timeseries.timeName].to_list() == [1, 3, 5]
@@ -92,7 +92,7 @@ def test_loadField():
         temp_file.write("1 2\n3 4\n5 6\n")
         temp_file.flush()
         temp_file_path = temp_file.name
-        loadField(timeseries, field=fieldName, method="file", filename=temp_file_path, verbose=True)
+        loadField(timeseries, field=fieldName, method="file", fileName=temp_file_path, verbose=True)
         assert fieldName in timeseries.columns
         assert timeseries[fieldName].to_list() == [2, 4, 6]
         assert timeseries[timeseries.timeName].to_list() == [1, 3, 5]
