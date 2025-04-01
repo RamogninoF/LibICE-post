@@ -4,7 +4,6 @@
 
 """
 @author: F. Ramognino       <federico.ramognino@polimi.it>
-Last update:        12/06/2023
 """
 
 #####################################################################
@@ -102,6 +101,17 @@ class Time(BaseClass):
     def endTime(self, value:float):
         checkType(value, float, "endTime")
         self._endTime = value
+    
+    @property
+    def timings(self) -> dict[str,float]:
+        """
+        A dictionary with the relevant timings (here nothing to add, 
+        extended in derived classes)
+        
+        Returns:
+            dict[str,float]: A dictionary with the relevant timings
+        """
+        return {}
     
     #########################################################################
     #Constructor:
