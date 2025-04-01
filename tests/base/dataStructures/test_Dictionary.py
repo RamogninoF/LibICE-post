@@ -1,5 +1,5 @@
 import pytest
-from libICEpost.src.base.dataStructures.Dictionary import Dictionary
+from libICEpost.src.base.dataStructures.Dictionary import Dictionary, toDictionary
 
 def test_dictionary_initialization():
     d = Dictionary(a=1, b=2)
@@ -69,3 +69,28 @@ def test_dictionary_lookup_with_iterable_type():
     
     with pytest.raises(TypeError):
         d.lookup('a', varType=(1,))
+
+def test_toDictionary():
+    # Test converting a regular dictionary to a Dictionary object
+    regular_dict = {"a": 1, "b": {"c": 2}}
+    converted_dict = toDictionary(regular_dict, name="TestDict")
+    assert isinstance(converted_dict, Dictionary)
+    assert converted_dict.name == "TestDict"
+    assert isinstance(converted_dict["b"], Dictionary)
+    assert converted_dict["b"].name == "TestDict.b"
+
+    # Test passing an already converted Dictionary object
+    existing_dict = Dictionary(a=1, b=2, _name="ExistingDict")
+    result_dict = toDictionary(existing_dict)
+    assert result_dict is existing_dict
+    assert result_dict.name == "ExistingDict"
+
+def test_dictionary_name_attribute():
+    # Test the name attribute of the Dictionary class
+    d = Dictionary(a=1, b=2, _name="MyDict")
+    assert d.name == "MyDict"
+
+    # Test sub-dictionaries inherit the correct name
+    d["sub"] = {"c": 3}
+    assert isinstance(d["sub"], Dictionary)
+    assert d["sub"].name == "MyDict.sub"

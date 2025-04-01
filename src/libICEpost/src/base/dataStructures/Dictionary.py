@@ -204,3 +204,25 @@ class Dictionary(OrderedDict, Utilities):
         self._correctSubdicts()
         
         return self
+
+#############################################################################
+#                                  FUNCTIONS                                #
+#############################################################################
+
+def toDictionary(dictionary:dict|Dictionary, name:str=None) -> Dictionary:
+    """
+    Convert a dictionary to a Dictionary object (if it is not already one).
+    
+    Args:
+        dictionary (dict|Dictionary): The dictionary to convert.
+        name (str, optional): The name of the dictionary. Defaults to None.
+        
+    Returns:
+        Dictionary: The converted Dictionary object.
+    """
+    checkType(dictionary, (dict, Dictionary), "dictionary")
+    
+    if isinstance(dictionary, dict) and not isinstance(dictionary, Dictionary):
+        return Dictionary(**dictionary, _name=name)
+    else:
+        return dictionary
