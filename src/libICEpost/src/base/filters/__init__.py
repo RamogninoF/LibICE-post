@@ -10,8 +10,8 @@ Content of the module:
     - `LowPass` (class): low-pass filter (Butterworth)
     - `LowPassAndResample` (class): low-pass filter and resampling
     - `UserDefinedFilter` (class): user-defined filter (custom function for `__call__`)
-    - `filter` (function): function to apply the filter to a `libICEpost` `TimeSeries` object
     - `Clone` (class): filter that does nothing (used to clone the data without any modification)
+    - `filter` (function): function to apply the filter to a `libICEpost` `TimeSeries` object
 
 @author: F. Ramognino (federico.ramognino@polimi.it)
 """
