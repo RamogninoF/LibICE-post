@@ -833,7 +833,7 @@ class EngineModel(BaseClass):
                 self._storeLatestTime()                             #Save results at this time
                 [fo(self) for fo in self.info["functionObjects"]]   #Compute function objects
             except BaseException as err:
-                self.runtimeError(f"Failed updating engine model at time {t}",stack=True)
+                self.runtimeError(f"Failed updating engine model at time {t}",stack=False)
                 print(traceback.format_exc())
                 break
             #Update progress bar
