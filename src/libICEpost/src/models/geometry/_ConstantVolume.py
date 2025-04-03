@@ -17,6 +17,8 @@ import numpy as np
 import pandas as pd
 
 from libICEpost.src.base.Functions.typeChecking import checkType, checkArray, checkMap
+from libICEpost.src.base.dataStructures.Dictionary import Dictionary, toDictionary
+from libICEpost.src.base.Functions.runtimeWarning import helpOnFail
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -39,6 +41,26 @@ class ConstantVolume(Geometry):
     def patches(self) -> list[str]:
         """The list of patches"""
         return self._patches
+    
+    #########################################################################
+    @classmethod
+    @helpOnFail
+    def fromDictionary(cls, dictionary:dict):
+        """
+        Create from dictionary containing:
+            - `patches` (dict[str,float]): Dictionary of patch names and their areas [m^2]
+            - `volume` (float): The volume of the domain [m^3]
+        
+        Args:
+            dictionary (dict): Dictionary with the parameters for the ConstantVolume object.
+        
+        Returns:
+            ConstantVolume: The ConstantVolume object.
+        """
+        dictionary = toDictionary(dictionary)
+        return cls(
+            patches=dictionary.lookup("patches"),
+            volume=dictionary.lookup("volume"))
     
     #########################################################################
     def __init__(self, patches:dict[str,float], volume:float):
@@ -150,4 +172,4 @@ class ConstantVolume(Geometry):
     
 #########################################################################
 #Create selection table
-Geometry.createRuntimeSelectionTable()
+Geometry.addToRuntimeSelectionTable(ConstantVolume)
