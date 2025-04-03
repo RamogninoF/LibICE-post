@@ -11,12 +11,19 @@ Time classes used to handle time in post-processing models.
     spark-ignition derivation from a given `Time` class.
 - `SparkIgnitionTime` (`class`): SI derivation of `Time` class.
 
+### engine (module)
+Time classes designed for time in internal combustion engines.
+
 @author: F. Ramognino       <federico.ramognino@polimi.it>
 """
-
 
 from ._Time import Time
 from ._si import createSparkIgnitionTime
 
+from . import engine
+
 #Create all the time classes:
 SparkIgnitionTime = createSparkIgnitionTime(Time)
+
+#Add to the selection tables:
+Time.addToRuntimeSelectionTable(SparkIgnitionTime)

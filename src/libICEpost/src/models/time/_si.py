@@ -19,6 +19,10 @@ Content of the module:
 #####################################################################
 
 from ._Time import Time
+from libICEpost.src.base.Functions.runtimeWarning import helpOnFail
+from libICEpost.src.base.Functions.typeChecking import checkType
+
+from libICEpost.src.base.dataStructures.Dictionary import Dictionary, toDictionary
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -53,7 +57,7 @@ class SparkIgnitionTime(Time):
         Args:
             value (float): The spark advance
         """
-        self.checkType(value,float,"SA")
+        checkType(value,float,"SA")
         self._SA = value
 
     @property
@@ -69,6 +73,24 @@ class SparkIgnitionTime(Time):
         return out
     
     #########################################################################
+    @classmethod
+    def fromDictionary(cls, dictionary:dict):
+        """
+        Create a new instance from a dictionary containing:
+            - `SA`: The spark advance
+            - other parameters from the base class(es) constructor
+        
+        Args:
+            dictionary (dict): The dictionary with the parameters
+        """
+        #Create a new instance:
+        out = cls.__new__(cls)
+        
+        #Initialize the instance:
+        helpOnFail(cls.__init__)(out, **dictionary)
+        return out
+    
+    #########################################################################
     #Constructor:
     def __init__(self, SA:float, *args, **argv):
         """
@@ -79,9 +101,10 @@ class SparkIgnitionTime(Time):
             *args: Time arguments
             **argv: Time keyword arguments
         """
-        #Argument checking:
-        super().__init__(*args,**argv)
+        #Initialization of the base class:
+        helpOnFail(super().__init__)(*args,**argv)
         
+        checkType(SA, float, "SA")
         self.SA = SA
     
     #########################################################################
@@ -111,18 +134,23 @@ def createSparkIgnitionTime(time:type[Time]):
         raise TypeError("The input class must be a subclass of Time")
     
     #Create the subclass:
-    class siTime(time, SparkIgnitionTime):
+    class siTime(SparkIgnitionTime, time):
         """
         Class for spark-ignited systems. This defines the time instant of 
-        spark ignition (SA) as the start of combustion.
+        spark ignition (SA) as the start of combustion. See the
+        documentation of the base class for more details.
         
-        Attibutes:
+        Additional attibutes:
             - `SA` (`float`): The spark advance
         """
     
     siTime.__name__ = f"SparkIgnition{time.__name__}"
+    siTime.__doc__ = f"""
+    SparkIgnition{time.__name__} class, derived from {time.__name__}.
+    See documentation of {time.__name__} for more details.
     
-    #Add to runtime selection table:
-    time.addToRuntimeSelectionTable(siTime)
+    Additional attributes:
+        - `SA` (`float`): The spark advance
+    """
     
     return siTime

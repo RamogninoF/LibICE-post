@@ -25,11 +25,12 @@ class Time(BaseClass):
     Base class for handling time in a post-processing model.
     
     Attibutes:
-        - `startTime` (`float`): The start-time for post-processing
-        - `endTime` (`float`): The end-time for post-processing
-        - `time` (`float`): The current time instant
-        - `deltaT` (`float`): Current time-step
-        - `oldTime` (`float`): The old time instant
+        `startTime` (`float`): The start-time for post-processing
+        `endTime` (`float`): The end-time for post-processing
+        `time` (`float`): The current time instant
+        `deltaT` (`float`): Current time-step
+        `oldTime` (`float`): The old time instant
+        `timings` (`dict[str,float]`): A dictionary with the relevant timings (here nothing to add, extended in derived classes)
     """
     
     _time:float
@@ -50,6 +51,11 @@ class Time(BaseClass):
     units:str = "s"
     """
     The unit used for measuring time (might be overwritten in derived classes)
+    """
+    
+    unitName:str = "time"
+    """
+    The name of the unit used for measuring time (might be overwritten in derived classes)
     """
     
     #########################################################################
@@ -166,7 +172,7 @@ class Time(BaseClass):
     
     ###################################
     def __repr__(self):
-        string = f"{self.__class__.__name__}(startTime={self.startTime}, endTime={self.endTime}, units={self.units})"
+        string = f"{self.__class__.__name__}(startTime={self.startTime}, endTime={self.endTime})"
         return string
     
     ###################################
@@ -226,6 +232,29 @@ class Time(BaseClass):
         if isinstance(t, Iterable):
             checkArray(t, float, "t")
         return t
+    
+    ###################################
+    def dTdt(self, t:float|Iterable[float]|None) -> float|np.ndarray:
+        """
+        Returns the time derivative of the user-time variable at time t.
+        Might be overwritten in derived classes. The default implementation 
+        returns 1.0.
+
+        Args:
+            t (float | Iterable[float]|None): Time in seconds. If None, uses self.time
+
+        Returns:
+            float|np.ndarray: dT/dt [[user-time units]/s]
+        """
+        checkType(t, (float, Iterable), "t", allowNone=True)
+        if t is None:
+            t = self.time
+        
+        if isinstance(t, Iterable):
+            checkArray(t, float, "t")
+            return np.ones_like(np.array(t))
+        else:
+            return 1.0
     
     ###################################
     def isCombustion(self,CA:float|Iterable[float]=None) -> bool|np.ndarray:
