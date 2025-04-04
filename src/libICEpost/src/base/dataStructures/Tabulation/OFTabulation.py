@@ -998,7 +998,7 @@ class OFTabulation(BaseTabulation):
         """
         return self.__class__(
             ranges=self.ranges, 
-            data={var:self._data[var].table.copy() for var in self.fields}, 
+            data={var:self._data[var].table._data.flatten() for var in self.fields}, 
             path=None, 
             order=self.order, 
             noWrite=True, 
