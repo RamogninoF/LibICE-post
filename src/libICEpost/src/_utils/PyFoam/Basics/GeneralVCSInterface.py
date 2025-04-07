@@ -1,11 +1,11 @@
 #  ICE Revision: $Id$
 """General interface to VCS implementations"""
 
-from PyFoam.Error import notImplemented,error
+from libICEpost.src._utils.PyFoam.Error import notImplemented,error
 from os import path,getcwd,chdir
 import subprocess,os
 
-from PyFoam.ThirdParty.six import exec_,PY3
+from libICEpost.src._utils.PyFoam.ThirdParty.six import exec_,PY3
 
 class GeneralVCSInterface(object):
     """This is an abstract class that implements an interface to general VCS operations"""

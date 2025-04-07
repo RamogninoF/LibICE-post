@@ -5,9 +5,9 @@ from optparse import OptionGroup
 
 from .PyFoamApplication import PyFoamApplication
 
-from PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
+from libICEpost.src._utils.PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
 
-from PyFoam.Basics.GeneralVCSInterface import getVCS
+from libICEpost.src._utils.PyFoam.Basics.GeneralVCSInterface import getVCS
 
 from os import path
 from glob import glob

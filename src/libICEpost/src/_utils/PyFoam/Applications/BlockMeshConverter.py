@@ -1,12 +1,12 @@
 from optparse import OptionGroup
-from PyFoam.Applications.PyFoamApplication import PyFoamApplication
-from PyFoam.Basics.RestructuredTextHelper import RestructuredTextHelper
-from PyFoam.Basics.FoamOptionParser import Subcommand
-from PyFoam.RunDictionary.BlockMesh2D import BlockMesh2D
-from PyFoam.Basics.DataStructures import *
+from libICEpost.src._utils.PyFoam.Applications.PyFoamApplication import PyFoamApplication
+from libICEpost.src._utils.PyFoam.Basics.RestructuredTextHelper import RestructuredTextHelper
+from libICEpost.src._utils.PyFoam.Basics.FoamOptionParser import Subcommand
+from libICEpost.src._utils.PyFoam.RunDictionary.BlockMesh2D import BlockMesh2D
+from libICEpost.src._utils.PyFoam.Basics.DataStructures import *
 from os import path
 import sys,re
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 
 class BlockMeshConverter(PyFoamApplication):

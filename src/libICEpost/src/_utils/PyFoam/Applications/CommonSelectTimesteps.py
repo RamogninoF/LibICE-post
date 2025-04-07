@@ -5,7 +5,7 @@ Class that implements common functionality for selecting timesteps
 
 from optparse import OptionGroup
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 class CommonSelectTimesteps(object):
     """

@@ -5,7 +5,7 @@ Store data permanently in the metadata of a notebook
 """
 
 from IPython.display import Javascript,display
-from PyFoam.ThirdParty.six.moves import cPickle as pickle
+from libICEpost.src._utils.PyFoam.ThirdParty.six.moves import cPickle as pickle
 import base64
 from time import sleep
 
@@ -76,7 +76,7 @@ function ensurePyFoamStorage() {
   }
 
   var store=IPython.notebook.metadata.pyFoam.storedData;
-  var expr="from PyFoam.IPythonHelpers.PermanentStorage import PermanentStorage as perm\\nperm._data={}";
+  var expr="from libICEpost.src._utils.PyFoam.IPythonHelpers.PermanentStorage import PermanentStorage as perm\\nperm._data={}";
   status="Starting transfer";
   var kernel=IPython.notebook.kernel;
   kernel.execute(expr, callbacks, {silent:false});

@@ -3,8 +3,8 @@
 
 import os
 
-from PyFoam.Error import error
-from PyFoam.ThirdParty.six import iteritems
+from libICEpost.src._utils.PyFoam.Error import error
+from libICEpost.src._utils.PyFoam.ThirdParty.six import iteritems
 
 class RestructuredTextHelper(object):
     """Helper class that formats stuff for restructured text"""

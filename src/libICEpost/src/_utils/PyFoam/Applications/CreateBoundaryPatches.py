@@ -10,11 +10,11 @@ import sys
 
 from .PyFoamApplication import PyFoamApplication
 
-from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
-from PyFoam.RunDictionary.BoundaryDict import BoundaryDict
-from PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
+from libICEpost.src._utils.PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
+from libICEpost.src._utils.PyFoam.RunDictionary.BoundaryDict import BoundaryDict
+from libICEpost.src._utils.PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 class CreateBoundaryPatches(PyFoamApplication):
     def __init__(self,

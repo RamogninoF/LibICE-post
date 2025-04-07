@@ -6,10 +6,10 @@ from optparse import OptionGroup
 from .PyFoamApplication import PyFoamApplication
 from .CommonSelectTimesteps import CommonSelectTimesteps
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
-from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
-from PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
+from libICEpost.src._utils.PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
+from libICEpost.src._utils.PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
 
 from os import path
 from glob import glob

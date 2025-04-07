@@ -14,11 +14,11 @@ from os import mkdir,path
 from optparse import OptionGroup
 
 from .PyFoamApplication import PyFoamApplication
-from PyFoam import configuration as config
+from libICEpost.src._utils.PyFoam import configuration as config
 
 from .CommonParallel import CommonParallel
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 class ClusterTester(PyFoamApplication,
                     CommonParallel):

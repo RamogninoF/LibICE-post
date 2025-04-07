@@ -8,10 +8,10 @@ from .PyFoamApplication import PyFoamApplication
 from os import path
 from optparse import OptionGroup
 
-from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
+from libICEpost.src._utils.PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
 from .CommonChangeBoundary import CommonChangeBoundary
 
-from PyFoam.ThirdParty.six import print_,string_types
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_,string_types
 
 class ChangeBoundaryType(PyFoamApplication,
                          CommonChangeBoundary):

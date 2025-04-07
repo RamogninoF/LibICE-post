@@ -3,7 +3,7 @@ Class that implements the common functionality for running cases in parallel
 """
 from optparse import OptionGroup
 
-from PyFoam.Execution.ParallelExecution import LAMMachine
+from libICEpost.src._utils.PyFoam.Execution.ParallelExecution import LAMMachine
 
 class CommonParallel(object):
     """ The class that defines options for parallel execution

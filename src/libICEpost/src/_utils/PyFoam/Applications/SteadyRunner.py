@@ -5,9 +5,9 @@ Application class that implements pyFoamSteadyRunner
 
 from .PyFoamApplication import PyFoamApplication
 
-from PyFoam.Execution.ConvergenceRunner import ConvergenceRunner
-from PyFoam.LogAnalysis.BoundingLogAnalyzer import BoundingLogAnalyzer
-from PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
+from libICEpost.src._utils.PyFoam.Execution.ConvergenceRunner import ConvergenceRunner
+from libICEpost.src._utils.PyFoam.LogAnalysis.BoundingLogAnalyzer import BoundingLogAnalyzer
+from libICEpost.src._utils.PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
 
 from .CommonParallel import CommonParallel
 from .CommonRestart import CommonRestart

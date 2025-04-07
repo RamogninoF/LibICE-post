@@ -9,14 +9,14 @@ from optparse import OptionGroup
 
 from .PyFoamApplication import PyFoamApplication
 
-from PyFoam.Basics.TemplateFile import TemplateFile,TemplateFileOldFormat
-from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
+from libICEpost.src._utils.PyFoam.Basics.TemplateFile import TemplateFile,TemplateFileOldFormat
+from libICEpost.src._utils.PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
 
 from .CommonPickledDataInput import CommonPickledDataInput
 from .CommonTemplateFormat import CommonTemplateFormat
 from .CommonTemplateBehaviour import CommonTemplateBehaviour
 
-from PyFoam.ThirdParty.six import print_,iteritems
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_,iteritems
 
 from os import path
 

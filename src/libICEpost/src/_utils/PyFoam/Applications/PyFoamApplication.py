@@ -4,13 +4,13 @@
 Classes can also be called with a command-line string"""
 
 from optparse import OptionGroup
-from PyFoam.Basics.FoamOptionParser import FoamOptionParser,SubcommandFoamOptionParser
-from PyFoam.Error import error,warning,FatalErrorPyFoamException,PyFoamException,isatty
-from PyFoam.RunDictionary.SolutionDirectory import NoTouchSolutionDirectory
-from PyFoam.FoamInformation import ensureDynamicLibraries
+from libICEpost.src._utils.PyFoam.Basics.FoamOptionParser import FoamOptionParser,SubcommandFoamOptionParser
+from libICEpost.src._utils.PyFoam.Error import error,warning,FatalErrorPyFoamException,PyFoamException,isatty
+from libICEpost.src._utils.PyFoam.RunDictionary.SolutionDirectory import NoTouchSolutionDirectory
+from libICEpost.src._utils.PyFoam.FoamInformation import ensureDynamicLibraries
 
-from PyFoam.Basics.TerminalFormatter import TerminalFormatter
-from PyFoam import configuration
+from libICEpost.src._utils.PyFoam.Basics.TerminalFormatter import TerminalFormatter
+from libICEpost.src._utils.PyFoam import configuration
 
 from .CursesApplicationWrapper import cursesWrap,CWindow,hasCurses
 
@@ -22,8 +22,8 @@ import sys
 from os import path,getcwd,environ
 from copy import deepcopy
 
-from PyFoam.ThirdParty.six import print_
-from PyFoam.ThirdParty.six import iteritems,string_types
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import iteritems,string_types
 
 
 class PyFoamApplicationException(FatalErrorPyFoamException):
@@ -428,7 +428,7 @@ with these option for commands that generate a lot of output""")
             elif self.opts.profileLineProfiler:
                 import line_profiler
                 profile=line_profiler.LineProfiler(self.run)
-                import PyFoam.RunDictionary.SolutionDirectory
+                import libICEpost.src._utils.PyFoam.RunDictionary.SolutionDirectory
                 profile.add_module(PyFoam.RunDictionary.SolutionDirectory)
                 fnAdd=".lineProfiler"
             else:
@@ -479,7 +479,7 @@ with these option for commands that generate a lot of output""")
 
                 if self.opts.pickleApplicationData=="stdout":
                     # Redirect output to memory
-                    from PyFoam.ThirdParty.six.moves import StringIO
+                    from libICEpost.src._utils.PyFoam.ThirdParty.six.moves import StringIO
 
                     oldStdout=sys.stdout
                     oldStderr=sys.stderr
@@ -506,7 +506,7 @@ with these option for commands that generate a lot of output""")
                     sys.stderr=oldStderr
 
                 if self.opts.pickleApplicationData:
-                    from PyFoam.ThirdParty.six.moves import cPickle as pickle
+                    from libICEpost.src._utils.PyFoam.ThirdParty.six.moves import cPickle as pickle
                     if self.opts.pickleApplicationData=="stdout":
                         pick=pickle.Pickler(sys.stdout)
                     else:
@@ -772,7 +772,7 @@ with these option for commands that generate a lot of output""")
             return args
 
         if not hasattr(self,"_replacedSolver"):
-            from PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
+            from libICEpost.src._utils.PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
             sol=SolutionDirectory(self.getCasePath(args))
             try:
                 self._replacedSolver=sol.getDictionaryContents("system","controlDict")["application"]

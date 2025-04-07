@@ -1,17 +1,17 @@
 """Common options for blink(1)-devices"""
 
 try:
-    from PyFoam.Infrastructure.Blink1 import Blink1
+    from libICEpost.src._utils.PyFoam.Infrastructure.Blink1 import Blink1
     hasBlink=True
 except ImportError:
     hasBlink=False
 
 from optparse import OptionGroup
-from PyFoam import configuration as conf
+from libICEpost.src._utils.PyFoam import configuration as conf
 
 import sys
 
-from PyFoam.Error import PyFoamException
+from libICEpost.src._utils.PyFoam.Error import PyFoamException
 
 class CommonBlink1(object):
     """Common options for blink1-devices"""

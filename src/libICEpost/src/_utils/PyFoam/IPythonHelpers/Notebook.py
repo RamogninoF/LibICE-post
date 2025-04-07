@@ -6,9 +6,9 @@ import json
 from copy import deepcopy
 from time import asctime
 
-from PyFoam.Error import error,warning
+from libICEpost.src._utils.PyFoam.Error import error,warning
 
-from PyFoam.ThirdParty.six import string_types,text_type,u
+from libICEpost.src._utils.PyFoam.ThirdParty.six import string_types,text_type,u
 
 class Notebook(object):
     """Class that represents an IPython-notebook in memory"""

@@ -6,7 +6,7 @@ import re
 from .LogLineAnalyzer import LogLineAnalyzer
 from .TimeChanger import TimeChanger
 
-from PyFoam import configuration as conf
+from libICEpost.src._utils.PyFoam import configuration as conf
 
 class TriggerLineAnalyzer(LogLineAnalyzer):
     """Parses the line for a regular expression and when it occurs it executes a

@@ -6,8 +6,8 @@ import re
 from os import path
 from optparse import OptionGroup
 
-from PyFoam.Basics.CustomPlotInfo import readCustomPlotInfo,resetCustomCounter
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.Basics.CustomPlotInfo import readCustomPlotInfo,resetCustomCounter
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 ruleList=[]
 

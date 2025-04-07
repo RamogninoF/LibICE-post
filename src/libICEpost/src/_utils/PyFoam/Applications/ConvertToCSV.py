@@ -6,8 +6,8 @@ from optparse import OptionGroup
 from .PyFoamApplication import PyFoamApplication
 from .CommonReadWriteCSV import CommonReadWriteCSV
 
-from PyFoam.Basics.SpreadsheetData import SpreadsheetData
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.Basics.SpreadsheetData import SpreadsheetData
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 from os import path,listdir
 from copy import deepcopy

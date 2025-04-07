@@ -8,14 +8,14 @@ from os import path
 from optparse import OptionGroup
 
 from .PyFoamApplication import PyFoamApplication
-from PyFoam.RunDictionary.SampleDirectory import SampleDirectory
-from PyFoam.Basics.SpreadsheetData import WrongDataSize
+from libICEpost.src._utils.PyFoam.RunDictionary.SampleDirectory import SampleDirectory
+from libICEpost.src._utils.PyFoam.Basics.SpreadsheetData import WrongDataSize
 
-from PyFoam.Error import error,warning
+from libICEpost.src._utils.PyFoam.Error import error,warning
 
 from .PlotHelpers import cleanFilename
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 class SamplePlot(PyFoamApplication):
     def __init__(self,

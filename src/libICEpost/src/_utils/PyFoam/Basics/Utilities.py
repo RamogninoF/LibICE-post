@@ -4,8 +4,8 @@
 Can be used via a class or as functions"""
 
 import sys
-from PyFoam.ThirdParty.six import print_
-from PyFoam.Error import warning,error
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.Error import warning,error
 import subprocess
 import os,fnmatch
 

@@ -6,7 +6,7 @@ from .StandardLogAnalyzer import StandardLogAnalyzer
 from .BoundingLineAnalyzer import GeneralBoundingLineAnalyzer
 from .SimpleLineAnalyzer import GeneralSimpleLineAnalyzer
 
-from PyFoam.FoamInformation import foamVersionNumber
+from libICEpost.src._utils.PyFoam.FoamInformation import foamVersionNumber
 
 class BoundingLogAnalyzer(StandardLogAnalyzer):
     """

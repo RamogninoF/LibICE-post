@@ -4,14 +4,14 @@
 from optparse import OptionParser,TitledHelpFormatter
 import textwrap
 
-from PyFoam import versionString
+from libICEpost.src._utils.PyFoam import versionString
 
-from PyFoam.FoamInformation import changeFoamVersion
-from PyFoam.FoamInformation import oldAppConvention as oldApp
+from libICEpost.src._utils.PyFoam.FoamInformation import changeFoamVersion
+from libICEpost.src._utils.PyFoam.FoamInformation import oldAppConvention as oldApp
 
-from PyFoam.Error import error,warning
-from PyFoam.ThirdParty.six import iteritems
-from PyFoam.ThirdParty.six import string_types,integer_types
+from libICEpost.src._utils.PyFoam.Error import error,warning
+from libICEpost.src._utils.PyFoam.ThirdParty.six import iteritems
+from libICEpost.src._utils.PyFoam.ThirdParty.six import string_types,integer_types
 
 from os import path,environ
 from copy import deepcopy

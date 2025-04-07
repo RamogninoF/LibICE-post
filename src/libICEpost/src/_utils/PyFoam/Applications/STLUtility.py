@@ -4,14 +4,14 @@ Application-class that implements pyFoamSTLUtility.py
 from optparse import OptionGroup
 
 from .PyFoamApplication import PyFoamApplication
-from PyFoam.Basics.STLFile import STLFile
-from PyFoam.Basics.RestructuredTextHelper import RestructuredTextHelper
-from PyFoam.Basics.FoamOptionParser import Subcommand
+from libICEpost.src._utils.PyFoam.Basics.STLFile import STLFile
+from libICEpost.src._utils.PyFoam.Basics.RestructuredTextHelper import RestructuredTextHelper
+from libICEpost.src._utils.PyFoam.Basics.FoamOptionParser import Subcommand
 
 from os import path
 import sys,re
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 class STLUtility(PyFoamApplication):
     def __init__(self,

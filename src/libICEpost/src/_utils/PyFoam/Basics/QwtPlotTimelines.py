@@ -1,15 +1,15 @@
 #  ICE Revision: $Id$
 """Plots a collection of timelines"""
 
-from PyFoam.Error import warning,error
+from libICEpost.src._utils.PyFoam.Error import warning,error
 
-from PyFoam.Basics.CustomPlotInfo import readCustomPlotInfo,CustomPlotInfo
+from libICEpost.src._utils.PyFoam.Basics.CustomPlotInfo import readCustomPlotInfo,CustomPlotInfo
 
 from .GeneralPlotTimelines import GeneralPlotTimelines
 
 from platform import uname
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 firstTimeImport=True
 app=None

@@ -2,10 +2,10 @@
 """Line analyzer with output and the capability to store lines"""
 
 from .LogLineAnalyzer import LogLineAnalyzer
-from PyFoam.Basics.OutFileCollection import OutFileCollection
-from PyFoam.Basics.TimeLineCollection import TimeLineCollection
+from libICEpost.src._utils.PyFoam.Basics.OutFileCollection import OutFileCollection
+from libICEpost.src._utils.PyFoam.Basics.TimeLineCollection import TimeLineCollection
 
-from PyFoam.Error import warning
+from libICEpost.src._utils.PyFoam.Error import warning
 import sys
 
 class GeneralLineAnalyzer(LogLineAnalyzer):

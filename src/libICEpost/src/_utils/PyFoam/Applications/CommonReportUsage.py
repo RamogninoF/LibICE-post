@@ -2,7 +2,7 @@
 Class that implements the common functionality for reporting the usage of a run
 """
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 class CommonReportUsage(object):
     """ The class that reports the resource usage

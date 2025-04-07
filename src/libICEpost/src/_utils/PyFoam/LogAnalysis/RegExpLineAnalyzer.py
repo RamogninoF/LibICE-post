@@ -8,8 +8,8 @@ import sys
 from math import *
 
 from .GeneralLineAnalyzer import GeneralLineAnalyzer
-from PyFoam.Error import warning
-from PyFoam.ThirdParty.six import integer_types,print_
+from libICEpost.src._utils.PyFoam.Error import warning
+from libICEpost.src._utils.PyFoam.ThirdParty.six import integer_types,print_
 
 class RegExpLineAnalyzer(GeneralLineAnalyzer):
     """Parses lines for an arbitrary regular expression

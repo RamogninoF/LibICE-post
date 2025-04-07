@@ -8,13 +8,13 @@ from os import path
 
 from .PyFoamApplication import PyFoamApplication
 
-from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
-from PyFoam.Basics.Utilities import copyfile
-from PyFoam.Basics.DataStructures import DictProxy
-from PyFoam.Basics.FoamFileGenerator import makeString
-from PyFoam.Error import error
+from libICEpost.src._utils.PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
+from libICEpost.src._utils.PyFoam.Basics.Utilities import copyfile
+from libICEpost.src._utils.PyFoam.Basics.DataStructures import DictProxy
+from libICEpost.src._utils.PyFoam.Basics.FoamFileGenerator import makeString
+from libICEpost.src._utils.PyFoam.Error import error
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 class DictionaryUpgradeInfo(object):
     """This class knows how to detect old versions and how to upgrade them"""

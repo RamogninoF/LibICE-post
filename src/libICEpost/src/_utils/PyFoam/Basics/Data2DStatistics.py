@@ -5,8 +5,8 @@ dimensions"""
 
 import sys
 
-from PyFoam.Basics.TableData import TableData
-from PyFoam.Error import error
+from libICEpost.src._utils.PyFoam.Basics.TableData import TableData
+from libICEpost.src._utils.PyFoam.Error import error
 
 from math import *
 import collections

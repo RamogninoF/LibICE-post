@@ -22,13 +22,13 @@ except ImportError:
     import numpypy
     import numpy
 
-from PyFoam.ThirdParty.six import print_
-from PyFoam.ThirdParty.six.moves import input as rinput
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six.moves import input as rinput
 
 try:
-    from PyFoam.ThirdParty import Gnuplot
-    from PyFoam.ThirdParty.Gnuplot import PlotItems
-    from PyFoam.ThirdParty.Gnuplot import funcutils
+    from libICEpost.src._utils.PyFoam.ThirdParty import Gnuplot
+    from libICEpost.src._utils.PyFoam.ThirdParty.Gnuplot import PlotItems
+    from libICEpost.src._utils.PyFoam.ThirdParty.Gnuplot import funcutils
     Gnuplot.funcutils = funcutils
 except ImportError:
     # kludge in case Gnuplot hasn't been installed as a module yet:

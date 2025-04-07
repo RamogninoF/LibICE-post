@@ -7,9 +7,9 @@ import sys,re
 
 from .PyFoamApplication import PyFoamApplication
 
-from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
+from libICEpost.src._utils.PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 class ReadDictionary(PyFoamApplication):
     def __init__(self,

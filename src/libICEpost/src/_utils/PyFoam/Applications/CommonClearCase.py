@@ -2,7 +2,7 @@
 Class that implements the common functionality for clearing the cases
 """
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 class CommonClearCase(object):
     """ The class that clears the case

@@ -2,9 +2,9 @@
 Class that implements the common functionality for reporting the data that was submitted to the runner
 """
 
-from PyFoam.Basics.RestructuredTextHelper import ReSTTable,RestructuredTextHelper
+from libICEpost.src._utils.PyFoam.Basics.RestructuredTextHelper import ReSTTable,RestructuredTextHelper
 
-from PyFoam.ThirdParty.six import print_,iteritems
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_,iteritems
 
 class CommonReportRunnerData(object):
     """ The class that reports the resource usage

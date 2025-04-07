@@ -8,15 +8,15 @@ import os
 import shutil
 import glob
 
-from PyFoam.Error import error
-from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile,FoamStringParser
-from PyFoam.Execution.BasicRunner import BasicRunner
-from PyFoam.FoamInformation import oldAppConvention as oldApp
+from libICEpost.src._utils.PyFoam.Error import error
+from libICEpost.src._utils.PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile,FoamStringParser
+from libICEpost.src._utils.PyFoam.Execution.BasicRunner import BasicRunner
+from libICEpost.src._utils.PyFoam.FoamInformation import oldAppConvention as oldApp
 from .CreateBoundaryPatches import CreateBoundaryPatches
-from PyFoam import configuration as config
-from PyFoam.Basics.DataStructures import Vector
+from libICEpost.src._utils.PyFoam import configuration as config
+from libICEpost.src._utils.PyFoam.Basics.DataStructures import Vector
 
-from PyFoam.ThirdParty.six import exec_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import exec_
 
 class CaseBuilderDescriptionList(object):
     """Gets a list of the case-builder files found in the current path"""

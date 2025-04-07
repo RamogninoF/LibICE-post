@@ -7,13 +7,13 @@ from optparse import OptionGroup
 
 from .PyFoamApplication import PyFoamApplication
 
-from PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
-from PyFoam.Paraview.ServermanagerWrapper import ServermanagerWrapper as SM
-from PyFoam.Paraview.StateFile import StateFile
+from libICEpost.src._utils.PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
+from libICEpost.src._utils.PyFoam.Paraview.ServermanagerWrapper import ServermanagerWrapper as SM
+from libICEpost.src._utils.PyFoam.Paraview.StateFile import StateFile
 
 from os import path,unlink,system
 
-from PyFoam import configuration as config
+from libICEpost.src._utils.PyFoam import configuration as config
 
 class PVLoadState(PyFoamApplication):
     def __init__(self,

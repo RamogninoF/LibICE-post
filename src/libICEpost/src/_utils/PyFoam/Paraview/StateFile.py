@@ -9,11 +9,11 @@ import os
 import shutil
 import glob
 
-from PyFoam.Error import error
-from PyFoam import configuration as config
+from libICEpost.src._utils.PyFoam.Error import error
+from libICEpost.src._utils.PyFoam import configuration as config
 from tempfile import mkstemp
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 class StateFile(object):
     """The actual PVSM-file

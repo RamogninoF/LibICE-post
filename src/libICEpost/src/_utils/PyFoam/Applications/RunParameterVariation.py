@@ -8,19 +8,19 @@ from os import path
 
 from .PrepareCase import PrepareCase
 
-from PyFoam.Basics.DataStructures import DictProxy
-from PyFoam.Execution.AnalyzedRunner import AnalyzedRunner
-from PyFoam.LogAnalysis.BoundingLogAnalyzer import BoundingLogAnalyzer
-from PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
-from PyFoam.RunDictionary.RegionCases import RegionCases
-from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
+from libICEpost.src._utils.PyFoam.Basics.DataStructures import DictProxy
+from libICEpost.src._utils.PyFoam.Execution.AnalyzedRunner import AnalyzedRunner
+from libICEpost.src._utils.PyFoam.LogAnalysis.BoundingLogAnalyzer import BoundingLogAnalyzer
+from libICEpost.src._utils.PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
+from libICEpost.src._utils.PyFoam.RunDictionary.RegionCases import RegionCases
+from libICEpost.src._utils.PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
 try:
-    from PyFoam.Basics.RunDatabase import RunDatabase
+    from libICEpost.src._utils.PyFoam.Basics.RunDatabase import RunDatabase
     hasDatabase=True
 except ImportError:
     hasDatabase=False
 
-from PyFoam.Error import warning
+from libICEpost.src._utils.PyFoam.Error import warning
 
 from .CommonPlotLines import CommonPlotLines
 from .CommonReportUsage import CommonReportUsage
@@ -30,11 +30,11 @@ from .CommonParallel import CommonParallel
 from .CommonServer import CommonServer
 from .CommonPrePostHooks import CommonPrePostHooks
 
-from PyFoam.Basics.CustomPlotInfo import resetCustomCounter
-from PyFoam.Basics.TimeLineCollection import allLines
-from PyFoam.Basics.GeneralPlotTimelines import allPlots
+from libICEpost.src._utils.PyFoam.Basics.CustomPlotInfo import resetCustomCounter
+from libICEpost.src._utils.PyFoam.Basics.TimeLineCollection import allLines
+from libICEpost.src._utils.PyFoam.Basics.GeneralPlotTimelines import allPlots
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 class RunParameterVariation(PrepareCase,
                             CommonPlotLines,
@@ -49,7 +49,7 @@ class RunParameterVariation(PrepareCase,
                  **kwargs):
         description="""\
 Takes a template case and a file that specifies the parameters to be varied.
-Using the machinery from pyFoamPrepareCase.py it sets up the case with each
+Using the machinery from libICEpost.src._utils.PyFoamPrepareCase.py it sets up the case with each
 parameters and runs the solver on it. Collects the results in a database
 
 The format of the parameter file is a regular OpenFOAM-dictionary file

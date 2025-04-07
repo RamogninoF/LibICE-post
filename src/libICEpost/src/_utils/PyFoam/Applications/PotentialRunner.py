@@ -10,12 +10,12 @@ from optparse import OptionGroup
 
 from .PyFoamApplication import PyFoamApplication
 
-from PyFoam.Execution.BasicRunner import BasicRunner
-from PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
+from libICEpost.src._utils.PyFoam.Execution.BasicRunner import BasicRunner
+from libICEpost.src._utils.PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
 
-from PyFoam.Error import warning,error
+from libICEpost.src._utils.PyFoam.Error import warning,error
 
-from PyFoam.FoamInformation import oldAppConvention as oldApp
+from libICEpost.src._utils.PyFoam.FoamInformation import oldAppConvention as oldApp
 
 from .CommonParallel import CommonParallel
 from .CommonStandardOutput import CommonStandardOutput
@@ -23,9 +23,9 @@ from .CommonServer import CommonServer
 from .CommonVCSCommit import CommonVCSCommit
 from .CommonLibFunctionTrigger import CommonLibFunctionTrigger
 
-from PyFoam.FoamInformation import oldTutorialStructure,foamVersion
+from libICEpost.src._utils.PyFoam.FoamInformation import oldTutorialStructure,foamVersion
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 class PotentialRunner(PyFoamApplication,
                       CommonStandardOutput,
@@ -152,7 +152,7 @@ Copies the current fields for U and p to backup-files.
 
         self.addToCaseLog(cName,"Ending")
 
-from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
+from libICEpost.src._utils.PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
 
 class PotentialTrigger:
     def __init__(self,

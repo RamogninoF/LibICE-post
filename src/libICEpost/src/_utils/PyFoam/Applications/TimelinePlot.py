@@ -8,9 +8,9 @@ from os import path
 from optparse import OptionGroup
 
 from .PyFoamApplication import PyFoamApplication
-from PyFoam.RunDictionary.TimelineDirectory import TimelineDirectory
-from PyFoam.Basics.SpreadsheetData import WrongDataSize
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.RunDictionary.TimelineDirectory import TimelineDirectory
+from libICEpost.src._utils.PyFoam.Basics.SpreadsheetData import WrongDataSize
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 from .PlotHelpers import cleanFilename
 

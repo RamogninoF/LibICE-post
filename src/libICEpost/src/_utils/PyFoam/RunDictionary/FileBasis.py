@@ -9,12 +9,12 @@ from tempfile import mktemp
 import gzip
 
 
-from PyFoam.Basics.Utilities import Utilities
-from PyFoam.Basics.LineReader import LineReader
+from libICEpost.src._utils.PyFoam.Basics.Utilities import Utilities
+from libICEpost.src._utils.PyFoam.Basics.LineReader import LineReader
 
-from PyFoam.Error import warning,error
+from libICEpost.src._utils.PyFoam.Error import warning,error
 
-from PyFoam.ThirdParty.six import PY3
+from libICEpost.src._utils.PyFoam.ThirdParty.six import PY3
 
 class FileBasis(Utilities):
     """ Base class for the other OpenFOAM--file-classes"""

@@ -8,11 +8,11 @@ http://blogs.blumetech.com/blumetechs-tech-blog/2011/06/python-xmlrpc-server-wit
 
 """
 
-from PyFoam.ThirdParty.six import PY3
-from PyFoam.Error import warning
-from PyFoam import configuration as config
-import PyFoam.Infrastructure.Authentication as auth
-from PyFoam.FoamInformation import getUserName
+from libICEpost.src._utils.PyFoam.ThirdParty.six import PY3
+from libICEpost.src._utils.PyFoam.Error import warning
+from libICEpost.src._utils.PyFoam import configuration as config
+import libICEpost.src._utils.PyFoam.Infrastructure.Authentication as auth
+from libICEpost.src._utils.PyFoam.FoamInformation import getUserName
 
 if PY3:
     try:

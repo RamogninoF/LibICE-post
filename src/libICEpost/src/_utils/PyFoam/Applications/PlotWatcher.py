@@ -3,7 +3,7 @@
 Class that implements pyFoamPlotWatcher
 """
 
-from PyFoam.Execution.GnuplotRunner import GnuplotWatcher
+from libICEpost.src._utils.PyFoam.Execution.GnuplotRunner import GnuplotWatcher
 
 from .PyFoamApplication import PyFoamApplication
 
@@ -15,7 +15,7 @@ from .CursesApplicationWrapper import CWindowAnalyzed
 from os import path
 from optparse import OptionGroup
 
-from PyFoam.ThirdParty.six import PY3,print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import PY3,print_
 
 if PY3:
     long=int

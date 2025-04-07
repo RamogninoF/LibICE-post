@@ -2,9 +2,9 @@
 """Read a STL file and do simple manipulations"""
 
 from os import path
-from PyFoam.Error import error
+from libICEpost.src._utils.PyFoam.Error import error
 
-from PyFoam.ThirdParty.six import next as iterNext
+from libICEpost.src._utils.PyFoam.ThirdParty.six import next as iterNext
 
 class STLFile(object):
     """Store a complete STL-file and do simple manipulations with it"""

@@ -4,15 +4,15 @@ Application class that implements pyFoamBuildHelper
 """
 
 from .PyFoamApplication import PyFoamApplication
-from PyFoam.Basics.GeneralVCSInterface import whichVCS,getVCS
-from PyFoam.Error import FatalErrorPyFoamException
+from libICEpost.src._utils.PyFoam.Basics.GeneralVCSInterface import whichVCS,getVCS
+from libICEpost.src._utils.PyFoam.Error import FatalErrorPyFoamException
 
 from optparse import OptionGroup
 from os import environ,path
 from platform import uname
 import os,subprocess
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 import sys
 

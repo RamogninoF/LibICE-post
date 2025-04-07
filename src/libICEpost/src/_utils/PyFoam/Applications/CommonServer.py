@@ -8,7 +8,7 @@ class CommonServer(object):
 
     def addOptions(self,haveServer=True):
         self.ensureGeneralOptions()
-        from PyFoam import configuration as conf
+        from libICEpost.src._utils.PyFoam import configuration as conf
         defaultForServer=conf().getboolean("Network","startServerThread")
 
         if haveServer and defaultForServer:

@@ -6,11 +6,11 @@ and the representation objects"""
 
 from paraview import servermanager
 
-from PyFoam.Paraview import proxyManager as pm
-from PyFoam.Paraview import renderView as rv
-from PyFoam.Paraview import characteristicLength as lc
-from PyFoam.Paraview import getCenter as gc
-from PyFoam.Paraview import transformsModule as tm
+from libICEpost.src._utils.PyFoam.Paraview import proxyManager as pm
+from libICEpost.src._utils.PyFoam.Paraview import renderView as rv
+from libICEpost.src._utils.PyFoam.Paraview import characteristicLength as lc
+from libICEpost.src._utils.PyFoam.Paraview import getCenter as gc
+from libICEpost.src._utils.PyFoam.Paraview import transformsModule as tm
 
 from SourceBase import SourceBase
 

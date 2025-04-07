@@ -7,10 +7,10 @@ import os
 import gzip
 from time import sleep
 
-from PyFoam.Basics.LineReader import LineReader
-from PyFoam import configuration as config
+from libICEpost.src._utils.PyFoam.Basics.LineReader import LineReader
+from libICEpost.src._utils.PyFoam import configuration as config
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 class BasicWatcher(object):
     """Base class for watching the output of commands

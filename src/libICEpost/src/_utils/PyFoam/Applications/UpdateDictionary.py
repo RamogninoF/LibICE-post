@@ -9,17 +9,17 @@ from os import path
 
 from .PyFoamApplication import PyFoamApplication
 
-from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
-from PyFoam.Basics.DataStructures import DictProxy,TupleProxy
+from libICEpost.src._utils.PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
+from libICEpost.src._utils.PyFoam.Basics.DataStructures import DictProxy,TupleProxy
 
-from PyFoam.Error import error,warning
+from libICEpost.src._utils.PyFoam.Error import error,warning
 
 from .CommonParserOptions import CommonParserOptions
 
-from PyFoam.Basics.TerminalFormatter import TerminalFormatter
+from libICEpost.src._utils.PyFoam.Basics.TerminalFormatter import TerminalFormatter
 
-from PyFoam.ThirdParty.six import print_
-from PyFoam.ThirdParty.six.moves import input
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six.moves import input
 
 f=TerminalFormatter()
 f.getConfigFormat("source",shortName="src")

@@ -10,7 +10,7 @@ linearRegExp="^(.+):  Solving for (.+), Initial residual = (.+), Final residual 
 
 from .GeneralLineAnalyzer import GeneralLineAnalyzer
 
-from PyFoam.ThirdParty.six import iteritems
+from libICEpost.src._utils.PyFoam.ThirdParty.six import iteritems
 
 class GeneralLinearSolverLineAnalyzer(GeneralLineAnalyzer):
     """Parses for information about the linear solver

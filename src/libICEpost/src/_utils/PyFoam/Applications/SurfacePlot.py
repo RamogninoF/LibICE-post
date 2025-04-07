@@ -10,14 +10,14 @@ from copy import copy
 from math import sqrt
 
 from .PyFoamApplication import PyFoamApplication
-from PyFoam.RunDictionary.SurfaceDirectory import SurfaceDirectory
+from libICEpost.src._utils.PyFoam.RunDictionary.SurfaceDirectory import SurfaceDirectory
 
-from PyFoam.Error import error
+from libICEpost.src._utils.PyFoam.Error import error
 
 from .PlotHelpers import cleanFilename
 
-from PyFoam.ThirdParty.six import print_
-from PyFoam.ThirdParty.six.moves import input
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six.moves import input
 
 class SurfacePlot(PyFoamApplication):
     def __init__(self,

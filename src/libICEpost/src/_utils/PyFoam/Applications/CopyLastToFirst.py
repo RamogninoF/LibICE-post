@@ -4,11 +4,11 @@ Application-class that implements pyFoamCopyLastToFirst.py
 
 from .PyFoamApplication import PyFoamApplication
 
-from PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
+from libICEpost.src._utils.PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
 
-from PyFoam.Error import error
+from libICEpost.src._utils.PyFoam.Error import error
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 class CopyLastToFirst(PyFoamApplication):
     def __init__(self,

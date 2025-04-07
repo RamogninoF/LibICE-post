@@ -1,10 +1,10 @@
 #  ICE Revision: $Id$
 """Things that are needed for convenient parallel Execution"""
 
-from PyFoam.Basics.Utilities import Utilities
-from PyFoam.FoamInformation import foamMPI,oldAppConvention
-from PyFoam.Error import error,warning,debug
-from PyFoam import configuration as config
+from libICEpost.src._utils.PyFoam.Basics.Utilities import Utilities
+from libICEpost.src._utils.PyFoam.FoamInformation import foamMPI,oldAppConvention
+from libICEpost.src._utils.PyFoam.Error import error,warning,debug
+from libICEpost.src._utils.PyFoam import configuration as config
 
 from os import path,environ,system
 

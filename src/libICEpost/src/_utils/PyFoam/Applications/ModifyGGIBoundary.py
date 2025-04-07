@@ -10,11 +10,11 @@ Author:
 """
 
 from .PyFoamApplication import PyFoamApplication
-from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
+from libICEpost.src._utils.PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
 from os import path
 import re
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 class ModifyGGIBoundary(PyFoamApplication):
     def __init__(self,

@@ -1,8 +1,8 @@
 #  ICE Revision: $Id$
 """Run a non-solver utility"""
 
-from PyFoam.Execution.AnalyzedRunner import AnalyzedRunner
-from PyFoam.LogAnalysis.UtilityAnalyzer import UtilityAnalyzer
+from libICEpost.src._utils.PyFoam.Execution.AnalyzedRunner import AnalyzedRunner
+from libICEpost.src._utils.PyFoam.LogAnalysis.UtilityAnalyzer import UtilityAnalyzer
 
 class UtilityRunner(AnalyzedRunner):
     """To this runner regular expressions can be added. Each line is

@@ -6,7 +6,7 @@ from optparse import OptionGroup
 
 from os import path
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 class CommonReadWriteCSV(object):
     """ The class implement common functionality

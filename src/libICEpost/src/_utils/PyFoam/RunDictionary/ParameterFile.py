@@ -3,8 +3,8 @@
 
 import re,os
 
-from PyFoam.Basics.LineReader import LineReader
-from PyFoam.RunDictionary.FileBasis import FileBasisBackup
+from libICEpost.src._utils.PyFoam.Basics.LineReader import LineReader
+from libICEpost.src._utils.PyFoam.RunDictionary.FileBasis import FileBasisBackup
 
 class ParameterFile(FileBasisBackup):
     """Represents a OpenFOAM parameter file"""

@@ -1,8 +1,8 @@
 """An interactive Shell that queries a pyFoamServer"""
 
-from PyFoam.Applications.PyFoamApplication import PyFoamApplication
-from PyFoam.ThirdParty.six import print_,PY3
-from PyFoam.Infrastructure.ServerBase import getServerProxy
+from libICEpost.src._utils.PyFoam.Applications.PyFoamApplication import PyFoamApplication
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_,PY3
+from libICEpost.src._utils.PyFoam.Infrastructure.ServerBase import getServerProxy
 
 import readline,sys
 from optparse import OptionGroup
@@ -36,7 +36,7 @@ procedure calls
                         help="Executes this command and finishes")
 
     def run(self):
-        from PyFoam.Infrastructure.Authentication import ensureKeyPair
+        from libICEpost.src._utils.PyFoam.Infrastructure.Authentication import ensureKeyPair
         ensureKeyPair()
 
         host=self.parser.getArgs()[0]

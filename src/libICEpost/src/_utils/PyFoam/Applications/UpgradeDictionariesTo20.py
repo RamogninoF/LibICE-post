@@ -7,8 +7,8 @@ from os import path
 
 from .UpgradeDictionariesTo17 import UpgradeDictionariesTo17,DictionaryUpgradeInfo
 
-from PyFoam.Basics.DataStructures import DictProxy,TupleProxy
-from PyFoam.Error import error,warning
+from libICEpost.src._utils.PyFoam.Basics.DataStructures import DictProxy,TupleProxy
+from libICEpost.src._utils.PyFoam.Error import error,warning
 
 class ReactionFileUpgradeInfo(DictionaryUpgradeInfo):
     def __init__(self):

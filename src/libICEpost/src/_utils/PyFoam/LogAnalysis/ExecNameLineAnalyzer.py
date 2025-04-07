@@ -3,7 +3,7 @@
 
 from .LogLineAnalyzer import LogLineAnalyzer
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 class ExecNameLineAnalyzer(LogLineAnalyzer):
     """Looks for the name of the executable"""

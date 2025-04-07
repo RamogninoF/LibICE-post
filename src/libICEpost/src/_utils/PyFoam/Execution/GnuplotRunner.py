@@ -5,11 +5,11 @@ from .StepAnalyzedCommon import StepAnalyzedCommon
 from .BasicRunner import BasicRunner
 from .BasicWatcher import BasicWatcher
 
-from PyFoam.LogAnalysis.BoundingLogAnalyzer import BoundingLogAnalyzer
-from PyFoam.LogAnalysis.SteadyConvergedLineAnalyzer import SteadyConvergedLineAnalyzer
-from PyFoam.Basics.TimeLineCollection import TimeLineCollection
-from PyFoam.Error import error
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.LogAnalysis.BoundingLogAnalyzer import BoundingLogAnalyzer
+from libICEpost.src._utils.PyFoam.LogAnalysis.SteadyConvergedLineAnalyzer import SteadyConvergedLineAnalyzer
+from libICEpost.src._utils.PyFoam.Basics.TimeLineCollection import TimeLineCollection
+from libICEpost.src._utils.PyFoam.Error import error
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 from os import path
 

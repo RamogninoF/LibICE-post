@@ -3,15 +3,15 @@
 Application class that implements pyFoamTestConfiguration.py
 """
 
-from PyFoam.ThirdParty.six.moves import configparser as ConfigParser
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six.moves import configparser as ConfigParser
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 from .PyFoamApplication import PyFoamApplication
 
 from .CommonParserOptions import CommonParserOptions
 
-from PyFoam.FoamInformation import foamVersionString
-from PyFoam import configuration as config
+from libICEpost.src._utils.PyFoam.FoamInformation import foamVersionString
+from libICEpost.src._utils.PyFoam import configuration as config
 
 class TestConfiguration(PyFoamApplication,
                      CommonParserOptions):

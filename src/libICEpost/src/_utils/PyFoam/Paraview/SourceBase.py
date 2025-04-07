@@ -6,7 +6,7 @@ Just adds some simple things like bounding boxes etc"""
 
 from math import sqrt
 
-from PyFoam.Basics.DataStructures import Vector
+from libICEpost.src._utils.PyFoam.Basics.DataStructures import Vector
 
 class SourceBase(object):
     """Base class for the sources

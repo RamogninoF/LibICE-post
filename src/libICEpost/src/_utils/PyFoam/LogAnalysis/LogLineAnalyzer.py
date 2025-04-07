@@ -1,7 +1,7 @@
 #  ICE Revision: $Id$
 """Base class for analyzing lines"""
 
-from PyFoam.Error import error
+from libICEpost.src._utils.PyFoam.Error import error
 
 class LogLineAnalyzer(object):
     """Base class for the analysis of all lines from a OpenFOAM-log

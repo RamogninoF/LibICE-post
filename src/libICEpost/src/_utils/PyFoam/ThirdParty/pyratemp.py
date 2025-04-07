@@ -180,12 +180,12 @@ IN THE SOFTWARE."""
 #=========================================
 
 import os
-from PyFoam.ThirdParty.six.moves import builtins as __builtin__
+from libICEpost.src._utils.PyFoam.ThirdParty.six.moves import builtins as __builtin__
 import re
 import sys
 
-from PyFoam.ThirdParty.six import iteritems,text_type,string_types,PY3
-from PyFoam.ThirdParty.six import u as toUni
+from libICEpost.src._utils.PyFoam.ThirdParty.six import iteritems,text_type,string_types,PY3
+from libICEpost.src._utils.PyFoam.ThirdParty.six import u as toUni
 
 # convert to unicode (independent of python3)
 def toUniCode(s):

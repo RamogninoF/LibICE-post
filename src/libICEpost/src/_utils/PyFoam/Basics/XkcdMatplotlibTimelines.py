@@ -1,7 +1,7 @@
 #  ICE Revision: $Id$
 """Plots a collection of timelines"""
 
-from PyFoam.Error import warning,error
+from libICEpost.src._utils.PyFoam.Error import warning,error
 
 from .MatplotlibTimelines import MatplotlibTimelines
 

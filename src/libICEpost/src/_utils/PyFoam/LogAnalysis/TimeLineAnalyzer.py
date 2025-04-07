@@ -5,7 +5,7 @@ import re
 
 from .LogLineAnalyzer import LogLineAnalyzer
 
-from PyFoam import configuration as conf
+from libICEpost.src._utils.PyFoam import configuration as conf
 
 class TimeLineAnalyzer(LogLineAnalyzer):
     """Parses the line for the current time and makes it available to

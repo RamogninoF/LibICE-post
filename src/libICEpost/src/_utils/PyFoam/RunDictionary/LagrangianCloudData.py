@@ -2,7 +2,7 @@
 
 from os import path,listdir
 from .ParsedParameterFile import ParsedParameterFile,PyFoamParserError
-from PyFoam.Error import warning,error
+from libICEpost.src._utils.PyFoam.Error import warning,error
 from .LagrangianPatchData import globalId
 
 import re

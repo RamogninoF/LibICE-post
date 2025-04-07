@@ -5,7 +5,7 @@ Should be able to generalize this with SampleDirectory, but not right now"""
 
 from os import path,listdir
 from glob import glob
-from PyFoam.Error import error
+from libICEpost.src._utils.PyFoam.Error import error
 import math
 
 class SurfaceDirectory(object):

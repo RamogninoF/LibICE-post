@@ -5,8 +5,8 @@ import requests
 import sys
 import time
 
-from PyFoam import configuration as conf
-from PyFoam.Error import PyFoamException
+from libICEpost.src._utils.PyFoam import configuration as conf
+from libICEpost.src._utils.PyFoam.Error import PyFoamException
 
 class Blink1(object):
     """Actual class to connect to a blink-device"""

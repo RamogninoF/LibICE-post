@@ -4,7 +4,7 @@
 Module for the Execution of OpenFOAM-commands and processing their output
 """
 
-from PyFoam.Infrastructure.Configuration import Configuration
+from libICEpost.src._utils.PyFoam.Infrastructure.Configuration import Configuration
 
 
 def version():
@@ -27,7 +27,7 @@ def versionString():
 
 
 def foamVersionString():
-    from PyFoam.FoamInformation import foamVersionString
+    from libICEpost.src._utils.PyFoam.FoamInformation import foamVersionString
     return foamVersionString()
 
 

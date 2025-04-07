@@ -1,7 +1,7 @@
 #  ICE Revision: $Id$
 """A parsed blockMeshDict"""
 
-from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
+from libICEpost.src._utils.PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
 
 class ParsedBlockMeshDict(ParsedParameterFile):
     """ A parsed version of a blockMeshDict-file. Adds some

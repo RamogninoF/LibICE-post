@@ -4,23 +4,23 @@
 from os import path,mkdir
 from shutil import move,rmtree
 
-from PyFoam.Basics.PlotTimelinesFactory import createPlotTimelines,createPlotTimelinesDirect
-from PyFoam.Basics.TimeLineCollection import signedMax
-from PyFoam.LogAnalysis.RegExpLineAnalyzer import RegExpLineAnalyzer
-from PyFoam.LogAnalysis.PhaseChangerLineAnalyzer import PhaseChangerLineAnalyzer
-from PyFoam.LogAnalysis.CountLineAnalyzer import CountLineAnalyzer
-from PyFoam.LogAnalysis.TriggerLineAnalyzer import TriggerLineAnalyzer
-from PyFoam.LogAnalysis.ExecNameLineAnalyzer import ExecNameLineAnalyzer
-from PyFoam.LogAnalysis.ReplayDataFileAnalyzer import ReplayDataFileAnalyzer
+from libICEpost.src._utils.PyFoam.Basics.PlotTimelinesFactory import createPlotTimelines,createPlotTimelinesDirect
+from libICEpost.src._utils.PyFoam.Basics.TimeLineCollection import signedMax
+from libICEpost.src._utils.PyFoam.LogAnalysis.RegExpLineAnalyzer import RegExpLineAnalyzer
+from libICEpost.src._utils.PyFoam.LogAnalysis.PhaseChangerLineAnalyzer import PhaseChangerLineAnalyzer
+from libICEpost.src._utils.PyFoam.LogAnalysis.CountLineAnalyzer import CountLineAnalyzer
+from libICEpost.src._utils.PyFoam.LogAnalysis.TriggerLineAnalyzer import TriggerLineAnalyzer
+from libICEpost.src._utils.PyFoam.LogAnalysis.ExecNameLineAnalyzer import ExecNameLineAnalyzer
+from libICEpost.src._utils.PyFoam.LogAnalysis.ReplayDataFileAnalyzer import ReplayDataFileAnalyzer
 
-from PyFoam.Error import error,warning
+from libICEpost.src._utils.PyFoam.Error import error,warning
 
 # import pickle
-from PyFoam.ThirdParty.six.moves import cPickle as pickle
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six.moves import cPickle as pickle
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
-from PyFoam.Basics.GeneralPlotTimelines import allPlots
-from PyFoam.Basics.TimeLineCollection import allLines
+from libICEpost.src._utils.PyFoam.Basics.GeneralPlotTimelines import allPlots
+from libICEpost.src._utils.PyFoam.Basics.TimeLineCollection import allLines
 
 from threading import Lock
 
@@ -101,8 +101,8 @@ class AnalyzedCommon(object):
 
         self.automaticCustom=[]
         self.oldExecName=execName
-        from PyFoam import configuration as conf
-        from PyFoam.Basics.CustomPlotInfo import CustomPlotInfo
+        from libICEpost.src._utils.PyFoam import configuration as conf
+        from libICEpost.src._utils.PyFoam.Basics.CustomPlotInfo import CustomPlotInfo
 
         solvers=set([execName])
 

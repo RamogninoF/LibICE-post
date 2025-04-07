@@ -5,9 +5,9 @@ Class that implements pyFoamPlotRunner
 
 from .PyFoamApplication import PyFoamApplication
 
-from PyFoam.Execution.GnuplotRunner import GnuplotRunner
+from libICEpost.src._utils.PyFoam.Execution.GnuplotRunner import GnuplotRunner
 
-from PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
+from libICEpost.src._utils.PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
 
 from .CommonStandardOutput import CommonStandardOutput
 from .CommonPlotLines import CommonPlotLines

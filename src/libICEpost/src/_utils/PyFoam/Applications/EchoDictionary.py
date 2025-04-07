@@ -7,11 +7,11 @@ import sys
 
 from .PyFoamApplication import PyFoamApplication
 
-from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
+from libICEpost.src._utils.PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
 
 from .CommonParserOptions import CommonParserOptions
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 class EchoDictionary(PyFoamApplication,
                      CommonParserOptions):

@@ -1,9 +1,9 @@
 #  ICE Revision: $Id: StepAnalyzedCommon.py,v dee8aef639e2 2020-01-30 23:47:00Z bgschaid $
 """Common stuff for classes that do something at every timestep"""
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
-from PyFoam.Execution.AnalyzedCommon import AnalyzedCommon
+from libICEpost.src._utils.PyFoam.Execution.AnalyzedCommon import AnalyzedCommon
 from time import time
 
 picklingFreqFactor=50

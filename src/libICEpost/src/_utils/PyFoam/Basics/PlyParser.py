@@ -4,17 +4,17 @@
 Most of this class was shamelessly stolen from the examples"""
 
 import sys
-from PyFoam.Error import PyFoamException
+from libICEpost.src._utils.PyFoam.Error import PyFoamException
 
 if sys.version_info < (2,3):
     raise PyFoamException("Version "+str(sys.version_info)+" is not sufficient for ply (2.3 needed)")
 
-import PyFoam.ThirdParty.ply.lex as lex
-import PyFoam.ThirdParty.ply.yacc as yacc
+import libICEpost.src._utils.PyFoam.ThirdParty.ply.lex as lex
+import libICEpost.src._utils.PyFoam.ThirdParty.ply.yacc as yacc
 
 import os
 
-from PyFoam.FoamInformation import getUserTempDir
+from libICEpost.src._utils.PyFoam.FoamInformation import getUserTempDir
 
 class PlyParser(object):
     """

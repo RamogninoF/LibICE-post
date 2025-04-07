@@ -1,12 +1,12 @@
 #  ICE Revision: $Id$
 """Read a file line by line"""
 
-from PyFoam.Infrastructure.Logging import foamLogger
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.Infrastructure.Logging import foamLogger
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 import sys
 
-from PyFoam.ThirdParty.six import PY3
+from libICEpost.src._utils.PyFoam.ThirdParty.six import PY3
 
 class LineReader(object):
     """Read a line from a file

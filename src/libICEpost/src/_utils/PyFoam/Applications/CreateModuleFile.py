@@ -26,11 +26,11 @@ import string
 from optparse import OptionGroup
 
 from .PyFoamApplication import PyFoamApplication
-from PyFoam.Basics.Utilities import execute
+from libICEpost.src._utils.PyFoam.Basics.Utilities import execute
 from sets import Set
 from os import path
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 class CreateModuleFile(PyFoamApplication):
     def __init__(self,

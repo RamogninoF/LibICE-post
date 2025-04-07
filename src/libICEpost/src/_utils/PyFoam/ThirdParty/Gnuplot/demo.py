@@ -16,10 +16,10 @@ the Gnuplot package, see test.py.
 from numpy import *
 
 # If the package has been installed correctly, this should work:
-from PyFoam.ThirdParty import Gnuplot
-from PyFoam.ThirdParty.Gnuplot import funcutils
+from libICEpost.src._utils.PyFoam.ThirdParty import Gnuplot
+from libICEpost.src._utils.PyFoam.ThirdParty.Gnuplot import funcutils
 
-from PyFoam.ThirdParty.six.moves import input as rinput
+from libICEpost.src._utils.PyFoam.ThirdParty.six.moves import input as rinput
 
 def demo():
     """Demonstrate the Gnuplot package."""

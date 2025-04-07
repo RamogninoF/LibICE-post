@@ -7,10 +7,10 @@ the plugins for the OpenFOAM-Data are loaded"""
 from math import sqrt
 # from glob import glob
 from paraview import servermanager
-from PyFoam.Paraview import version
-from PyFoam.FoamInformation import foamVersion
+from libICEpost.src._utils.PyFoam.Paraview import version
+from libICEpost.src._utils.PyFoam.FoamInformation import foamVersion
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 if version()>=(3,6):
     from paraview.simple import LoadPlugin
@@ -19,7 +19,7 @@ if version()>=(3,6):
 from os import environ,path
 from platform import uname
 
-from PyFoam.Error import error,warning
+from libICEpost.src._utils.PyFoam.Error import error,warning
 
 class ServermanagerWrapper(object):
     """Wrapper class for the servermanager

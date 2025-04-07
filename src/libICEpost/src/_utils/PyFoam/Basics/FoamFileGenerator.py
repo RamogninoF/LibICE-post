@@ -1,10 +1,10 @@
 #  ICE Revision: $Id$
 """Transform a Python data-structure into a OpenFOAM-File-Representation"""
 
-from PyFoam.Error import error,PyFoamException
-from PyFoam.Basics.DataStructures import Vector,Field,Dimension,TupleProxy,DictProxy,Tensor,SymmTensor,Unparsed,UnparsedList,Codestream,DictRedirection,BinaryList,BoolProxy
+from libICEpost.src._utils.PyFoam.Error import error,PyFoamException
+from libICEpost.src._utils.PyFoam.Basics.DataStructures import Vector,Field,Dimension,TupleProxy,DictProxy,Tensor,SymmTensor,Unparsed,UnparsedList,Codestream,DictRedirection,BinaryList,BoolProxy
 
-from PyFoam.ThirdParty.six import string_types,integer_types
+from libICEpost.src._utils.PyFoam.ThirdParty.six import string_types,integer_types
 from collections import OrderedDict
 
 class FoamFileGenerator(object):

@@ -4,16 +4,16 @@ Application class that implements pyFoamFunkyDoCalcFiles.py
 
 from optparse import OptionGroup
 from .PyFoamApplication import PyFoamApplication
-from PyFoam.Basics.FoamOptionParser import Subcommand
-from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
-from PyFoam.Basics.FoamFileGenerator import FoamFileGenerator as gen
-from PyFoam.Error import error
+from libICEpost.src._utils.PyFoam.Basics.FoamOptionParser import Subcommand
+from libICEpost.src._utils.PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
+from libICEpost.src._utils.PyFoam.Basics.FoamFileGenerator import FoamFileGenerator as gen
+from libICEpost.src._utils.PyFoam.Error import error
 
 from os import path
 from collections import OrderedDict
 from pprint import pprint,pformat
 
-from PyFoam.ThirdParty.six import print_,iteritems
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_,iteritems
 
 smallEps=1e-15
 

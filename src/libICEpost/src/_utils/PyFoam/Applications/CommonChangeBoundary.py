@@ -5,9 +5,9 @@ from optparse import OptionGroup
 from os import path
 from glob import glob
 
-from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
+from libICEpost.src._utils.PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 class CommonChangeBoundary(object):
     """ The class that defines options for ChangeBoundary-utilities

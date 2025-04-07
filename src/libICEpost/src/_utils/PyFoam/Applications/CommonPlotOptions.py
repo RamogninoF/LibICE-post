@@ -3,8 +3,8 @@ Class that implements common functionality for plotting options
 """
 
 from optparse import OptionGroup
-from PyFoam.Basics.GnuplotTimelines import validTerminals
-from PyFoam import configuration as conf
+from libICEpost.src._utils.PyFoam.Basics.GnuplotTimelines import validTerminals
+from libICEpost.src._utils.PyFoam import configuration as conf
 
 class CommonPlotOptions(object):
     """ The class that adds plot options
@@ -165,11 +165,11 @@ class CommonPlotOptions(object):
             self.opts.execution=True
             self.opts.deltat=True
 
-        from PyFoam.ThirdParty.Gnuplot import gp
+        from libICEpost.src._utils.PyFoam.ThirdParty.Gnuplot import gp
         gp.GnuplotOpts.prefer_fifo_data=self.opts.gnuplotUseFifo
 
         if self.opts.hardcopy and self.opts.hardcopyTerminalOptions=="":
-            from PyFoam import configuration as conf
+            from libICEpost.src._utils.PyFoam import configuration as conf
 
             self.opts.hardcopyTerminalOptions=conf().get("Plotting",
                                                          "hardcopyOptions_"+self.opts.hardcopyformat,

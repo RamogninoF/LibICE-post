@@ -4,8 +4,8 @@
 import traceback
 import sys
 
-from PyFoam.Basics.TerminalFormatter import TerminalFormatter
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.Basics.TerminalFormatter import TerminalFormatter
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 defaultFormat=TerminalFormatter()
 defaultFormat.getConfigFormat("error")

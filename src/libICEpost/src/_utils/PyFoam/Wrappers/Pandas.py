@@ -6,9 +6,9 @@ from pandas import DataFrame, Series
 from numpy import hstack, unique
 from math import isnan
 
-from PyFoam.Error import error, warning, PyFoamException
+from libICEpost.src._utils.PyFoam.Error import error, warning, PyFoamException
 
-from PyFoam.ThirdParty.six import string_types, text_type, u
+from libICEpost.src._utils.PyFoam.ThirdParty.six import string_types, text_type, u
 
 import pandas.api.types as pdtypes
 import numpy as np

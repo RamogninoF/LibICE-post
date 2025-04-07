@@ -1,13 +1,13 @@
 #  ICE Revision: $Id$
 """Collection of array of timelines"""
 
-from PyFoam.Error import error
+from libICEpost.src._utils.PyFoam.Error import error
 from math import ceil
 from copy import deepcopy
 from threading import Lock
 import sys
 
-from PyFoam.ThirdParty.six import print_,iteritems
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_,iteritems
 
 transmissionLock=Lock()
 

@@ -5,8 +5,8 @@ import socket
 import errno
 import time
 
-from PyFoam import configuration as config
-from PyFoam.ThirdParty.six import print_,PY3
+from libICEpost.src._utils.PyFoam import configuration as config
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_,PY3
 
 if PY3:
     import xmlrpc.client as xmlrpclib

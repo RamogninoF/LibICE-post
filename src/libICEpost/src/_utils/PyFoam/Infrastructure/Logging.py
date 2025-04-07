@@ -1,7 +1,7 @@
 #  ICE Revision: $Id$
 """Writes Logfiles"""
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 try:
     import logging
@@ -11,11 +11,11 @@ except ImportError:
     print_("Warning: old python-version. No logging-support")
     hasLogging=False
 
-from PyFoam.Infrastructure.Hardcoded import assertDirectory,logDirectory
+from libICEpost.src._utils.PyFoam.Infrastructure.Hardcoded import assertDirectory,logDirectory
 from os import path
 from platform import uname
 
-from PyFoam import configuration as config
+from libICEpost.src._utils.PyFoam import configuration as config
 
 _definedLoggers=[]
 

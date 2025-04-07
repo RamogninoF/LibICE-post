@@ -1,17 +1,17 @@
 #  ICE Revision: $Id$
 """Working with a solution directory"""
 
-from PyFoam.Basics.Utilities import Utilities
-from PyFoam.Basics.BasicFile import BasicFile
-from PyFoam.Error import warning,error
-from PyFoam import configuration as conf
+from libICEpost.src._utils.PyFoam.Basics.Utilities import Utilities
+from libICEpost.src._utils.PyFoam.Basics.BasicFile import BasicFile
+from libICEpost.src._utils.PyFoam.Error import warning,error
+from libICEpost.src._utils.PyFoam import configuration as conf
 
-from PyFoam.RunDictionary.TimeDirectory import TimeDirectory
-from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile,WriteParameterFile
+from libICEpost.src._utils.PyFoam.RunDictionary.TimeDirectory import TimeDirectory
+from libICEpost.src._utils.PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile,WriteParameterFile
 
-from PyFoam.Basics.DataStructures import DictProxy
+from libICEpost.src._utils.PyFoam.Basics.DataStructures import DictProxy
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 from os import listdir,path,mkdir,stat,environ
 from platform import uname
@@ -24,7 +24,7 @@ try:
     from os import getlogin
 except ImportError:
     try:
-        import PyFoam.ThirdParty.winhacks
+        import libICEpost.src._utils.PyFoam.ThirdParty.winhacks
     except ImportError:
         print_("Unable to import the getlogin function.")
         import sys

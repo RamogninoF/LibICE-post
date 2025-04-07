@@ -9,11 +9,11 @@ from glob import glob
 
 from .PyFoamApplication import PyFoamApplication
 
-from PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
+from libICEpost.src._utils.PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
 
-from PyFoam.ThirdParty.six import print_,PY3
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_,PY3
 
-from PyFoam.Basics.Utilities import humanReadableSize
+from libICEpost.src._utils.PyFoam.Basics.Utilities import humanReadableSize
 
 if PY3:
     long=int

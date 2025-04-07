@@ -2,7 +2,7 @@
 """A simple object for table data where data is accessed with a tuple
 (rowLabel,colLabel)"""
 
-from PyFoam.Basics.RestructuredTextHelper import ReSTTable
+from libICEpost.src._utils.PyFoam.Basics.RestructuredTextHelper import ReSTTable
 
 class TableData(object):
     """A simple table. Current limitiation is that column and row

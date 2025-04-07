@@ -7,14 +7,14 @@ from os import listdir,path,system
 
 from .PyFoamApplication import PyFoamApplication
 
-from PyFoam.Execution.BasicRunner import BasicRunner
-from PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
+from libICEpost.src._utils.PyFoam.Execution.BasicRunner import BasicRunner
+from libICEpost.src._utils.PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
 
 from .CommonLibFunctionTrigger import CommonLibFunctionTrigger
 from .CommonServer import CommonServer
 from .CommonVCSCommit import CommonVCSCommit
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 class MeshUtilityRunner(PyFoamApplication,
                         CommonServer,

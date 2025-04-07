@@ -4,14 +4,14 @@ Application-class that implements pyFoamAPoMaFoX.py (A Poor Man's FoamX)
 from os import path
 import sys
 
-from PyFoam.Applications.PyFoamApplication import PyFoamApplication
-from PyFoam.Applications.CaseBuilderBackend import CaseBuilderFile,CaseBuilderDescriptionList
-from PyFoam.Applications.CommonCaseBuilder import CommonCaseBuilder
-from PyFoam import configuration as config
+from libICEpost.src._utils.PyFoam.Applications.PyFoamApplication import PyFoamApplication
+from libICEpost.src._utils.PyFoam.Applications.CaseBuilderBackend import CaseBuilderFile,CaseBuilderDescriptionList
+from libICEpost.src._utils.PyFoam.Applications.CommonCaseBuilder import CommonCaseBuilder
+from libICEpost.src._utils.PyFoam import configuration as config
 
-from PyFoam.Error import error,warning
+from libICEpost.src._utils.PyFoam.Error import error,warning
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 try:
     import PyQt4

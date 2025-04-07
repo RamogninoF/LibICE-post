@@ -11,11 +11,11 @@ from .PyFoamApplication import PyFoamApplication
 from os import path
 from optparse import OptionGroup
 
-from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
-from PyFoam.RunDictionary.TimeDirectory import TimeDirectory
+from libICEpost.src._utils.PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
+from libICEpost.src._utils.PyFoam.RunDictionary.TimeDirectory import TimeDirectory
 from .CommonChangeBoundary import CommonChangeBoundary
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 class ChangeBoundaryName(PyFoamApplication,
                          CommonChangeBoundary):

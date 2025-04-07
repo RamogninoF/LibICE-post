@@ -4,8 +4,8 @@ gets input from a pipe should use it
 """
 from optparse import OptionGroup
 
-from PyFoam.ThirdParty.six.moves import cPickle as pickle
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six.moves import cPickle as pickle
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 import sys
 

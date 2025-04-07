@@ -2,7 +2,7 @@
 """Stop solver at convergence"""
 
 from .AnalyzedRunner import AnalyzedRunner
-from PyFoam.LogAnalysis.SteadyConvergedLineAnalyzer import SteadyConvergedLineAnalyzer
+from libICEpost.src._utils.PyFoam.LogAnalysis.SteadyConvergedLineAnalyzer import SteadyConvergedLineAnalyzer
 
 class ConvergenceRunner(AnalyzedRunner):
     """It is assumed that the provided solver is a steady state

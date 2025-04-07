@@ -1,10 +1,10 @@
 #  ICE Revision: $Id$
 """File that contains only a list (for instance points)"""
 
-from PyFoam.Basics.LineReader import LineReader
-from PyFoam.RunDictionary.SolutionFile import SolutionFile
+from libICEpost.src._utils.PyFoam.Basics.LineReader import LineReader
+from libICEpost.src._utils.PyFoam.RunDictionary.SolutionFile import SolutionFile
 
-from PyFoam.ThirdParty.six import PY3
+from libICEpost.src._utils.PyFoam.ThirdParty.six import PY3
 
 if PY3:
     long=int

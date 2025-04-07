@@ -3,7 +3,7 @@
 
 import sys
 
-from PyFoam.Error import warning,error
+from libICEpost.src._utils.PyFoam.Error import warning,error
 
 from .GeneralVCSInterface import GeneralVCSInterface
 

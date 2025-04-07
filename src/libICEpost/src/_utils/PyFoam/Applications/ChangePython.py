@@ -5,8 +5,8 @@ the usual -c optiont
 
 """
 
-from PyFoam.Basics.Utilities import which
-from PyFoam.ThirdParty.six import print_,PY3,u
+from libICEpost.src._utils.PyFoam.Basics.Utilities import which
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_,PY3,u
 
 if PY3:
     fopen=open
@@ -62,7 +62,7 @@ def changePython(pythonName,appClass,options=None):
     printDebug("Script file:",scriptName,"Handle",scriptFD)
     os.chmod(scriptName,stat.S_IXUSR | os.stat(scriptName).st_mode)
     fopen(scriptFD,"w").write(u("""#! %(pyInterpreter)s
-from PyFoam.Applications.%(appClass)s import %(appClass)s
+from libICEpost.src._utils.PyFoam.Applications.%(appClass)s import %(appClass)s
 
 %(appClass)s()
 """ % {'appClass':appClass,'pyInterpreter':" ".join([pyInterpreter]+options)}))

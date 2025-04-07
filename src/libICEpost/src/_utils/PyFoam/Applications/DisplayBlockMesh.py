@@ -5,16 +5,16 @@ If possible use the Qt-Variant
 
 import sys
 
-from PyFoam.RunDictionary.ParsedBlockMeshDict import ParsedBlockMeshDict
-from PyFoam.Applications.PyFoamApplication import PyFoamApplication
-from PyFoam.Error import error,warning
+from libICEpost.src._utils.PyFoam.RunDictionary.ParsedBlockMeshDict import ParsedBlockMeshDict
+from libICEpost.src._utils.PyFoam.Applications.PyFoamApplication import PyFoamApplication
+from libICEpost.src._utils.PyFoam.Error import error,warning
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 def doImports():
     try:
         global tkinter
-        from PyFoam.ThirdParty.six.moves import tkinter
+        from libICEpost.src._utils.PyFoam.ThirdParty.six.moves import tkinter
         global vtk
         try:
             import vtk

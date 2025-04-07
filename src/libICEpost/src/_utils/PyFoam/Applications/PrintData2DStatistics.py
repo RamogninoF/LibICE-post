@@ -9,9 +9,9 @@ from .PyFoamApplication import PyFoamApplication
 
 from .CommonPickledDataInput import CommonPickledDataInput
 
-from PyFoam.Basics.Data2DStatistics import Data2DStatistics
+from libICEpost.src._utils.PyFoam.Basics.Data2DStatistics import Data2DStatistics
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 class PrintData2DStatistics(PyFoamApplication,
                             CommonPickledDataInput):

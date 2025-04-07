@@ -5,7 +5,7 @@ Application-class that implements pyFoamSymlinkToFile.py
 from optparse import OptionGroup
 
 from .PyFoamApplication import PyFoamApplication
-from PyFoam.Basics.Utilities import copytree,remove
+from libICEpost.src._utils.PyFoam.Basics.Utilities import copytree,remove
 
 from os import path,rename
 

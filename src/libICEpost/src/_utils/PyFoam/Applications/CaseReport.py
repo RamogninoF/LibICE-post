@@ -9,16 +9,16 @@ from optparse import OptionGroup
 from fnmatch import fnmatch
 
 from .PyFoamApplication import PyFoamApplication
-from PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
-from PyFoam.RunDictionary.BoundaryDict import BoundaryDict
-from PyFoam.RunDictionary.MeshInformation import MeshInformation
-from PyFoam.RunDictionary.ParsedParameterFile import PyFoamParserError,ParsedBoundaryDict,ParsedParameterFile
-from PyFoam.Basics.RestructuredTextHelper import RestructuredTextHelper
-from PyFoam.Basics.DataStructures import DictProxy,Field
+from libICEpost.src._utils.PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
+from libICEpost.src._utils.PyFoam.RunDictionary.BoundaryDict import BoundaryDict
+from libICEpost.src._utils.PyFoam.RunDictionary.MeshInformation import MeshInformation
+from libICEpost.src._utils.PyFoam.RunDictionary.ParsedParameterFile import PyFoamParserError,ParsedBoundaryDict,ParsedParameterFile
+from libICEpost.src._utils.PyFoam.Basics.RestructuredTextHelper import RestructuredTextHelper
+from libICEpost.src._utils.PyFoam.Basics.DataStructures import DictProxy,Field
 
-from PyFoam.Error import error,warning
+from libICEpost.src._utils.PyFoam.Error import error,warning
 
-from PyFoam.ThirdParty.six import print_,iteritems,string_types
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_,iteritems,string_types
 
 from math import log10,ceil
 from os import path

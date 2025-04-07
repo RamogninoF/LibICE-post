@@ -16,8 +16,8 @@ behavior.
 
 import os, string, tempfile, types
 
-from PyFoam.ThirdParty.six.moves import StringIO
-from PyFoam.ThirdParty.six import string_types,integer_types
+from libICEpost.src._utils.PyFoam.ThirdParty.six.moves import StringIO
+from libICEpost.src._utils.PyFoam.ThirdParty.six import string_types,integer_types
 
 #try:
 #    from cStringIO import StringIO

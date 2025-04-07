@@ -4,12 +4,12 @@ Application-class that implements pyFoamAddCaseDataToDatabase.py
 from optparse import OptionGroup
 
 from .PyFoamApplication import PyFoamApplication
-from PyFoam.Basics.RunDatabase import RunDatabase
+from libICEpost.src._utils.PyFoam.Basics.RunDatabase import RunDatabase
 
 from os import path
 
-from PyFoam.ThirdParty.six.moves import cPickle as pickle
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six.moves import cPickle as pickle
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 import sys
 

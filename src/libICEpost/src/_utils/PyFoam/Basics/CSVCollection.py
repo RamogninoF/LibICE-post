@@ -5,9 +5,9 @@ Collects data and writes it to a CSV-file. Optionally return a pandas-data-frame
 
 import csv
 
-from PyFoam.Error import warning
+from libICEpost.src._utils.PyFoam.Error import warning
 
-from PyFoam.ThirdParty.six import string_types
+from libICEpost.src._utils.PyFoam.ThirdParty.six import string_types
 
 class CSVCollection(object):
     """
@@ -64,7 +64,7 @@ class CSVCollection(object):
         Otherwise numpy"""
         if usePandas:
             try:
-                from PyFoam.Wrappers.Pandas import PyFoamDataFrame
+                from libICEpost.src._utils.PyFoam.Wrappers.Pandas import PyFoamDataFrame
 
                 data={}
                 for k in self.headers:

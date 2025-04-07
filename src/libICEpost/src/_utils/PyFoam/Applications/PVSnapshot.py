@@ -10,16 +10,16 @@ from .PrepareCase import PrepareCase
 
 from .CommonSelectTimesteps import CommonSelectTimesteps
 
-from PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
-from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile,FoamStringParser
+from libICEpost.src._utils.PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
+from libICEpost.src._utils.PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile,FoamStringParser
 
-from PyFoam.Paraview.ServermanagerWrapper import ServermanagerWrapper as SM
-from PyFoam.Paraview.StateFile import StateFile
-from PyFoam.Paraview import version as PVVersion
+from libICEpost.src._utils.PyFoam.Paraview.ServermanagerWrapper import ServermanagerWrapper as SM
+from libICEpost.src._utils.PyFoam.Paraview.StateFile import StateFile
+from libICEpost.src._utils.PyFoam.Paraview import version as PVVersion
 
-from PyFoam.FoamInformation import foamVersion
+from libICEpost.src._utils.PyFoam.FoamInformation import foamVersion
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 from os import path,unlink
 import sys,string

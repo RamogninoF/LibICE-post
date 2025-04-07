@@ -3,12 +3,12 @@ Class that implements the common functionality for executing hooks before and
 after the running of the solver
 """
 from optparse import OptionGroup
-from PyFoam.ThirdParty.six.moves import configparser
+from libICEpost.src._utils.PyFoam.ThirdParty.six.moves import configparser
 
-from PyFoam import configuration
-from PyFoam.Error import FatalErrorPyFoamException
+from libICEpost.src._utils.PyFoam import configuration
+from libICEpost.src._utils.PyFoam.Error import FatalErrorPyFoamException
 
-from PyFoam.ThirdParty.six import print_,iteritems
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_,iteritems
 
 import traceback
 

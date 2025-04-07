@@ -1,11 +1,11 @@
 #  ICE Revision: $Id$
 """Working with direcotries from a time-step"""
 
-from PyFoam.RunDictionary.SolutionFile import SolutionFile
-from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
-from PyFoam.RunDictionary.FileBasis import FileBasis
-from PyFoam.Error import error,warning
-from PyFoam.Basics.Utilities import remove
+from libICEpost.src._utils.PyFoam.RunDictionary.SolutionFile import SolutionFile
+from libICEpost.src._utils.PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
+from libICEpost.src._utils.PyFoam.RunDictionary.FileBasis import FileBasis
+from libICEpost.src._utils.PyFoam.Error import error,warning
+from libICEpost.src._utils.PyFoam.Basics.Utilities import remove
 
 from os import listdir,stat,path,makedirs
 from stat import ST_CTIME

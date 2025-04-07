@@ -5,9 +5,9 @@ from os import path
 
 from .OutputFile import OutputFile
 
-from PyFoam import configuration as conf
+from libICEpost.src._utils.PyFoam import configuration as conf
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 import sys
 

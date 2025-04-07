@@ -8,11 +8,11 @@ from optparse import OptionGroup
 
 from .PyFoamApplication import PyFoamApplication
 
-from PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
+from libICEpost.src._utils.PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
-from PyFoam.Basics.Utilities import execute
+from libICEpost.src._utils.PyFoam.Basics.Utilities import execute
 
 class ClearCase(PyFoamApplication):
     def __init__(self,

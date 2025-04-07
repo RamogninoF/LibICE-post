@@ -22,7 +22,7 @@ except ImportError:
     import numpypy
     import numpy
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 def float_array(m):
     """Return the argument as a numpy array of type at least 'Float32'.

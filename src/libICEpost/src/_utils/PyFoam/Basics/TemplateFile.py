@@ -4,12 +4,12 @@ import re
 from math import *
 import sys
 
-from PyFoam.Error import error, warning, FatalErrorPyFoamException
-from PyFoam.ThirdParty.pyratemp import Template as PyratempTemplate
-from PyFoam.ThirdParty.pyratemp import EvalPseudoSandbox,TemplateRenderError
-from PyFoam.ThirdParty.pyratemp import Renderer as PyratempRenderer
+from libICEpost.src._utils.PyFoam.Error import error, warning, FatalErrorPyFoamException
+from libICEpost.src._utils.PyFoam.ThirdParty.pyratemp import Template as PyratempTemplate
+from libICEpost.src._utils.PyFoam.ThirdParty.pyratemp import EvalPseudoSandbox,TemplateRenderError
+from libICEpost.src._utils.PyFoam.ThirdParty.pyratemp import Renderer as PyratempRenderer
 
-from PyFoam.ThirdParty.six import iteritems,exec_,print_,PY3
+from libICEpost.src._utils.PyFoam.ThirdParty.six import iteritems,exec_,print_,PY3
 
 class RendererWithFilename(PyratempRenderer):
      """Usual renderer but report a filename"""
@@ -307,7 +307,7 @@ class EvalPseudoSandboxWithMath(EvalPseudoSandbox):
             if o[0]!="_":
                 self.register(o,getattr(math,o))
 
-        from PyFoam.ThirdParty.six.moves import builtins as __builtin__
+        from libICEpost.src._utils.PyFoam.ThirdParty.six.moves import builtins as __builtin__
         self.register("set",__builtin__.set)
 
         if allowExec:
@@ -501,7 +501,7 @@ class Jinja2TemplateFileEngine:
 
         template=_get_template_content(name=name, content=content)
 
-        from PyFoam.Wrappers.Jinja2 import get_jinja_environment as env
+        from libICEpost.src._utils.PyFoam.Wrappers.Jinja2 import get_jinja_environment as env
         jenv = env(strict_undefined=strict_undefined,
                    allow_execute=allowExec)
 

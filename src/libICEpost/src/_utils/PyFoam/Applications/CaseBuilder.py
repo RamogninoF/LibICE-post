@@ -9,9 +9,9 @@ from .PyFoamApplication import PyFoamApplication
 from .CaseBuilderBackend import CaseBuilderFile
 from .CommonCaseBuilder import CommonCaseBuilder
 
-from PyFoam.Error import error
+from libICEpost.src._utils.PyFoam.Error import error
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 class CaseBuilder(PyFoamApplication,
                   CommonCaseBuilder):

@@ -2,7 +2,7 @@
 """Hardcoded values"""
 
 from os import path,makedirs,environ
-from PyFoam.ThirdParty.six import PY3
+from libICEpost.src._utils.PyFoam.ThirdParty.six import PY3
 
 _pyFoamDirName="pyFoam"
 

@@ -5,12 +5,12 @@ Application class that implements pyFoamRunner
 
 from .PyFoamApplication import PyFoamApplication
 
-from PyFoam.Execution.AnalyzedRunner import AnalyzedRunner
-from PyFoam.LogAnalysis.BoundingLogAnalyzer import BoundingLogAnalyzer
-from PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
-from PyFoam.RunDictionary.RegionCases import RegionCases
+from libICEpost.src._utils.PyFoam.Execution.AnalyzedRunner import AnalyzedRunner
+from libICEpost.src._utils.PyFoam.LogAnalysis.BoundingLogAnalyzer import BoundingLogAnalyzer
+from libICEpost.src._utils.PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
+from libICEpost.src._utils.PyFoam.RunDictionary.RegionCases import RegionCases
 
-from PyFoam.Error import warning
+from libICEpost.src._utils.PyFoam.Error import warning
 
 from .CommonMultiRegion import CommonMultiRegion
 from .CommonPlotLines import CommonPlotLines
@@ -29,7 +29,7 @@ from .CommonBlink1 import CommonBlink1
 
 from .CursesApplicationWrapper import CWindowAnalyzed
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 from optparse import OptionGroup
 

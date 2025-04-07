@@ -15,10 +15,10 @@ except ImportError:
 import copy
 import re
 
-from PyFoam.Error import error,FatalErrorPyFoamException,warning
+from libICEpost.src._utils.PyFoam.Error import error,FatalErrorPyFoamException,warning
 
-from PyFoam.ThirdParty.six import PY3
-from PyFoam.ThirdParty.six import b as toByte
+from libICEpost.src._utils.PyFoam.ThirdParty.six import PY3
+from libICEpost.src._utils.PyFoam.ThirdParty.six import b as toByte
 
 class WrongDataSize(FatalErrorPyFoamException):
     def __init__(self,txt="Size of the arrays differs"):
@@ -720,7 +720,7 @@ class SpreadsheetData(object):
         """Return a dictionary of the data in the DataFrame format of pandas
         :param: drop duplicate times (setting it to False might break certain Pandas-operations)"""
         try:
-            from PyFoam.Wrappers.Pandas import PyFoamDataFrame
+            from libICEpost.src._utils.PyFoam.Wrappers.Pandas import PyFoamDataFrame
         except ImportError:
             warning("No pandas-library installed. Returning None")
             return None

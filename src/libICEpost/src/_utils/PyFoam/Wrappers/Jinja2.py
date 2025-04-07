@@ -23,7 +23,7 @@ def parse_foam_file(name,
                     noHeader=False,
                     noBody=False,
                     binaryMode=False):
-    from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
+    from libICEpost.src._utils.PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
 
     pf = ParsedParameterFile(name,
                              boundaryDict=boundaryDict,
@@ -43,7 +43,7 @@ def parse_foam_string(content,
                       noHeader=True,
                       noBody=False,
                       binaryMode=False):
-    from PyFoam.RunDictionary.ParsedParameterFile import FoamFileParser
+    from libICEpost.src._utils.PyFoam.RunDictionary.ParsedParameterFile import FoamFileParser
 
     pf = FoamFileParser(content,
                         boundaryDict=boundaryDict,
@@ -57,13 +57,13 @@ def parse_foam_string(content,
 
 
 def format_foam(data):
-    from PyFoam.Basics.FoamFileGenerator import makeString
+    from libICEpost.src._utils.PyFoam.Basics.FoamFileGenerator import makeString
 
     return makeString(data)
 
 
 def solution_dir(location):
-    from PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
+    from libICEpost.src._utils.PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
 
     return SolutionDirectory(location)
 
@@ -83,7 +83,7 @@ if _has_jinja:
 
         @jinja2.pass_context
         def python_exec(ctx, code):
-            from PyFoam.ThirdParty.six import exec_
+            from libICEpost.src._utils.PyFoam.ThirdParty.six import exec_
 
             result = exec_(code, ctx.parent, ctx.vars)
             return result

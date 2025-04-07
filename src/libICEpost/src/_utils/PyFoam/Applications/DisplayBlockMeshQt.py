@@ -2,20 +2,20 @@
 New implementation of DisplayBlockMesh using PyQT4
 """
 
-from PyFoam.RunDictionary.ParsedBlockMeshDict import ParsedBlockMeshDict
-from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
-from PyFoam.Applications.PyFoamApplicationQt4 import PyFoamApplicationQt4
-from PyFoam.Error import error,warning
-from PyFoam.RunDictionary.SolutionDirectory import NoTouchSolutionDirectory
-from PyFoam.Execution.BasicRunner import BasicRunner
-from PyFoam.Basics.TemplateFile import TemplateFile
+from libICEpost.src._utils.PyFoam.RunDictionary.ParsedBlockMeshDict import ParsedBlockMeshDict
+from libICEpost.src._utils.PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
+from libICEpost.src._utils.PyFoam.Applications.PyFoamApplicationQt4 import PyFoamApplicationQt4
+from libICEpost.src._utils.PyFoam.Error import error,warning
+from libICEpost.src._utils.PyFoam.RunDictionary.SolutionDirectory import NoTouchSolutionDirectory
+from libICEpost.src._utils.PyFoam.Execution.BasicRunner import BasicRunner
+from libICEpost.src._utils.PyFoam.Basics.TemplateFile import TemplateFile
 
 from .CommonTemplateFormat import CommonTemplateFormat
 
 from os import path
 from optparse import OptionGroup
 
-from PyFoam.ThirdParty.six import print_,PY3
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_,PY3
 
 import sys
 

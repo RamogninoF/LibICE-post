@@ -3,13 +3,13 @@
 
 from .TimeLineAnalyzer import TimeLineAnalyzer
 from .CountLineAnalyzer import CountLineAnalyzer
-from PyFoam.Basics.LineReader import LineReader
-from PyFoam.Error import error
+from libICEpost.src._utils.PyFoam.Basics.LineReader import LineReader
+from libICEpost.src._utils.PyFoam.Error import error
 
-from PyFoam.ThirdParty.six import iteritems
+from libICEpost.src._utils.PyFoam.ThirdParty.six import iteritems
 
-from PyFoam.Basics.ProgressOutput import ProgressOutput
-from PyFoam import configuration as config
+from libICEpost.src._utils.PyFoam.Basics.ProgressOutput import ProgressOutput
+from libICEpost.src._utils.PyFoam import configuration as config
 
 from sys import stdout
 

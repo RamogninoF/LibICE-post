@@ -1,10 +1,10 @@
 """Works with a polyMesh/boundary-File"""
 
-from PyFoam.RunDictionary.ParsedParameterFile import ParsedBoundaryDict
-from PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
-from PyFoam.Error import PyFoamException
+from libICEpost.src._utils.PyFoam.RunDictionary.ParsedParameterFile import ParsedBoundaryDict
+from libICEpost.src._utils.PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
+from libICEpost.src._utils.PyFoam.Error import PyFoamException
 
-from PyFoam.ThirdParty.six import iteritems
+from libICEpost.src._utils.PyFoam.ThirdParty.six import iteritems
 
 class BoundaryDict(ParsedBoundaryDict):
     """Handles data in a boundary-File"""

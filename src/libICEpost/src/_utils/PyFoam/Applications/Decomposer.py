@@ -6,23 +6,23 @@ Class that implements pyFoamDecompose
 from optparse import OptionGroup
 
 from .PyFoamApplication import PyFoamApplication
-from PyFoam.Basics.FoamFileGenerator import FoamFileGenerator
-from PyFoam.Error import error
-from PyFoam.Basics.Utilities import writeDictionaryHeader,rmtree
-from PyFoam.Execution.UtilityRunner import UtilityRunner
-from PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
-from PyFoam.RunDictionary.RegionCases import RegionCases
-from PyFoam.RunDictionary.ParsedParameterFile import FoamStringParser
-from PyFoam.FoamInformation import oldAppConvention as oldApp
-from PyFoam.FoamInformation import foamVersion
-from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
+from libICEpost.src._utils.PyFoam.Basics.FoamFileGenerator import FoamFileGenerator
+from libICEpost.src._utils.PyFoam.Error import error
+from libICEpost.src._utils.PyFoam.Basics.Utilities import writeDictionaryHeader,rmtree
+from libICEpost.src._utils.PyFoam.Execution.UtilityRunner import UtilityRunner
+from libICEpost.src._utils.PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
+from libICEpost.src._utils.PyFoam.RunDictionary.RegionCases import RegionCases
+from libICEpost.src._utils.PyFoam.RunDictionary.ParsedParameterFile import FoamStringParser
+from libICEpost.src._utils.PyFoam.FoamInformation import oldAppConvention as oldApp
+from libICEpost.src._utils.PyFoam.FoamInformation import foamVersion
+from libICEpost.src._utils.PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
 
 from .CommonMultiRegion import CommonMultiRegion
 from .CommonStandardOutput import CommonStandardOutput
 from .CommonServer import CommonServer
 from .CommonVCSCommit import CommonVCSCommit
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 from os import path,listdir,symlink
 from glob import glob

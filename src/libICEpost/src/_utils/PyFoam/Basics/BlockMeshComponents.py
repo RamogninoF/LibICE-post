@@ -3,13 +3,13 @@
 import re,os
 import copy
 import math
-from PyFoam.Basics.LineReader import LineReader
-from PyFoam.RunDictionary.FileBasis import FileBasisBackup
-from PyFoam.RunDictionary.BlockMesh import BlockMesh
-from PyFoam.RunDictionary.ParsedBlockMeshDict import ParsedBlockMeshDict
-from PyFoam.Basics.DataStructures import *
+from libICEpost.src._utils.PyFoam.Basics.LineReader import LineReader
+from libICEpost.src._utils.PyFoam.RunDictionary.FileBasis import FileBasisBackup
+from libICEpost.src._utils.PyFoam.RunDictionary.BlockMesh import BlockMesh
+from libICEpost.src._utils.PyFoam.RunDictionary.ParsedBlockMeshDict import ParsedBlockMeshDict
+from libICEpost.src._utils.PyFoam.Basics.DataStructures import *
 from math import ceil
-from PyFoam.Error import error
+from libICEpost.src._utils.PyFoam.Error import error
 
 class BlockMeshComponent(object):
     def __init__(self, dimension):

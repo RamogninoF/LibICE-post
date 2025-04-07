@@ -3,12 +3,12 @@
 
 import re,os
 
-from PyFoam.Basics.LineReader import LineReader
+from libICEpost.src._utils.PyFoam.Basics.LineReader import LineReader
 from .FileBasis import FileBasisBackup
 
 from math import ceil
 
-from PyFoam.Error import error
+from libICEpost.src._utils.PyFoam.Error import error
 
 class BlockMesh(FileBasisBackup):
     """Represents a C{blockMeshDict}-file"""

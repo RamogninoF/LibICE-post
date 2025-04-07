@@ -2,9 +2,9 @@
 """Pseudo-Cases for Regions, built from symlinks"""
 
 from .SolutionDirectory import SolutionDirectory
-from PyFoam.Error import error
+from libICEpost.src._utils.PyFoam.Error import error
 from glob import glob
-from PyFoam.Basics.Utilities import rmtree
+from libICEpost.src._utils.PyFoam.Basics.Utilities import rmtree
 
 from os import path,mkdir,symlink,unlink,listdir,renames
 

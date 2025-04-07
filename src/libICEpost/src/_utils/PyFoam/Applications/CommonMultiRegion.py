@@ -4,7 +4,7 @@ Class that implements the common functionality for cases with multiple regions
 
 from optparse import OptionGroup
 
-from PyFoam.FoamInformation import oldAppConvention as oldApp
+from libICEpost.src._utils.PyFoam.FoamInformation import oldAppConvention as oldApp
 
 class CommonMultiRegion(object):
     """ The class that looks for multiple mesh regions

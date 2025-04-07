@@ -1,15 +1,15 @@
 #  ICE Revision: $Id: GnuplotTimelines.py,v 3f8df529776e 2020-02-28 20:07:20Z bgschaid $
 """Plots a collection of timelines"""
 
-from PyFoam.ThirdParty.Gnuplot import Gnuplot,Data,gp
+from libICEpost.src._utils.PyFoam.ThirdParty.Gnuplot import Gnuplot,Data,gp
 
-from PyFoam.Error import warning
+from libICEpost.src._utils.PyFoam.Error import warning
 
 from .GeneralPlotTimelines import GeneralPlotTimelines
 
 from platform import uname
 
-from PyFoam import configuration as config
+from libICEpost.src._utils.PyFoam import configuration as config
 
 def validTerminals():
     """Returns a list with the valid Gnuplot terminals"""

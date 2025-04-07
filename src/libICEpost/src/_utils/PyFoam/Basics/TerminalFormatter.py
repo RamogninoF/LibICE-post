@@ -3,7 +3,7 @@
 
 import subprocess
 
-from PyFoam.Infrastructure.Configuration import Configuration as config
+from libICEpost.src._utils.PyFoam.Infrastructure.Configuration import Configuration as config
 
 def getTerminalCode(code):
     result=""

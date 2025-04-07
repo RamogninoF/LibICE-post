@@ -1,12 +1,12 @@
 #  ICE Revision: $Id: CustomPlotInfo.py,v 52a98a5ace0c 2020-01-31 21:09:38Z bgschaid $
 """Information about custom plots"""
 
-from PyFoam.Basics.TimeLineCollection import TimeLineCollection
-from PyFoam.Basics.FoamFileGenerator import makeString
-from PyFoam.RunDictionary.ParsedParameterFile import FoamStringParser,PyFoamParserError
+from libICEpost.src._utils.PyFoam.Basics.TimeLineCollection import TimeLineCollection
+from libICEpost.src._utils.PyFoam.Basics.FoamFileGenerator import makeString
+from libICEpost.src._utils.PyFoam.RunDictionary.ParsedParameterFile import FoamStringParser,PyFoamParserError
 
-from PyFoam.Error import error
-from PyFoam.ThirdParty.six import iteritems
+from libICEpost.src._utils.PyFoam.Error import error
+from libICEpost.src._utils.PyFoam.ThirdParty.six import iteritems
 
 from os import path
 

@@ -1,7 +1,7 @@
 """A simple hook that only prints a user-specified message"""
 
-from PyFoam.Infrastructure.RunHook import RunHook
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.Infrastructure.RunHook import RunHook
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 class PrintMessageHook(RunHook):
     """Print a small message"""

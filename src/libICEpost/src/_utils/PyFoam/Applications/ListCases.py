@@ -5,8 +5,8 @@ from optparse import OptionGroup
 from os import path,listdir,stat
 from glob import glob
 from fnmatch import fnmatch
-from PyFoam.ThirdParty.six.moves import cPickle as pickle
-from PyFoam.ThirdParty.six import string_types
+from libICEpost.src._utils.PyFoam.ThirdParty.six.moves import cPickle as pickle
+from libICEpost.src._utils.PyFoam.ThirdParty.six import string_types
 import time,datetime
 from stat import ST_MTIME
 import re
@@ -15,15 +15,15 @@ import subprocess as sub
 
 from .PyFoamApplication import PyFoamApplication
 
-from PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
-from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile,PyFoamParserError
+from libICEpost.src._utils.PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
+from libICEpost.src._utils.PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile,PyFoamParserError
 
-from PyFoam import configuration
+from libICEpost.src._utils.PyFoam import configuration
 
-from PyFoam.ThirdParty.six import print_,iteritems,PY3
-from PyFoam.ThirdParty.tqdm import tqdm
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_,iteritems,PY3
+from libICEpost.src._utils.PyFoam.ThirdParty.tqdm import tqdm
 
-from PyFoam.Basics.Utilities import humanReadableSize,diskUsage,humanReadableDuration
+from libICEpost.src._utils.PyFoam.Basics.Utilities import humanReadableSize,diskUsage,humanReadableDuration
 
 if PY3:
     long=int

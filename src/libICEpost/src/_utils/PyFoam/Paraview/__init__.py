@@ -14,8 +14,8 @@ except ImportError:
 # because it prevents import into a normal python
 from paraview import servermanager
 
-from PyFoam.Error import warning
-from PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
+from libICEpost.src._utils.PyFoam.Error import warning
+from libICEpost.src._utils.PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
 
 from math import sqrt
 from os import path

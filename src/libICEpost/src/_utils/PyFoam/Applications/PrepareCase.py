@@ -5,22 +5,22 @@ from optparse import OptionGroup
 
 from .PyFoamApplication import PyFoamApplication
 
-from PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
-from PyFoam.Basics.DataStructures import DictProxy
-from PyFoam.Basics.Utilities import rmtree,copytree,execute,remove,find
-from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile,WriteParameterFile,FoamStringParser
-from PyFoam.Basics.TemplateFile import TemplateFile
-from PyFoam.Execution.BasicRunner import BasicRunner
-from PyFoam.Basics.RestructuredTextHelper import RestructuredTextHelper
+from libICEpost.src._utils.PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
+from libICEpost.src._utils.PyFoam.Basics.DataStructures import DictProxy
+from libICEpost.src._utils.PyFoam.Basics.Utilities import rmtree,copytree,execute,remove,find
+from libICEpost.src._utils.PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile,WriteParameterFile,FoamStringParser
+from libICEpost.src._utils.PyFoam.Basics.TemplateFile import TemplateFile
+from libICEpost.src._utils.PyFoam.Execution.BasicRunner import BasicRunner
+from libICEpost.src._utils.PyFoam.Basics.RestructuredTextHelper import RestructuredTextHelper
 
-from PyFoam.FoamInformation import foamFork,foamVersion
+from libICEpost.src._utils.PyFoam.FoamInformation import foamFork,foamVersion
 
 from .CommonTemplateFormat import CommonTemplateFormat
 from .CommonTemplateBehaviour import CommonTemplateBehaviour
 
-from PyFoam.ThirdParty.six import print_,iteritems,exec_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_,iteritems,exec_
 
-from PyFoam import configuration
+from libICEpost.src._utils.PyFoam import configuration
 
 from os import path,listdir,mkdir
 from shutil import copymode,copy,move

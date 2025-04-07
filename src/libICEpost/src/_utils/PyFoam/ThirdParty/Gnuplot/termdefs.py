@@ -31,7 +31,7 @@ import types
 
 from . import gp, Errors
 
-from PyFoam.ThirdParty.six import string_types
+from libICEpost.src._utils.PyFoam.ThirdParty.six import string_types
 
 class Arg:
     """Process terminal subargs and return a command fragment.

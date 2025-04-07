@@ -7,8 +7,8 @@ from os import path,makedirs
 from optparse import OptionGroup
 
 from .PyFoamApplication import PyFoamApplication
-from PyFoam.RunDictionary.TimelineDirectory import TimelineDirectory
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.RunDictionary.TimelineDirectory import TimelineDirectory
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 
 class JoinTimelines(PyFoamApplication):

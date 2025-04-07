@@ -2,7 +2,7 @@
 """Doesn't really analyze the lines but returns values from a data file"""
 
 from .GeneralLineAnalyzer import GeneralLineAnalyzer
-from PyFoam.Basics.SpreadsheetData import SpreadsheetData
+from libICEpost.src._utils.PyFoam.Basics.SpreadsheetData import SpreadsheetData
 
 class ReplayDataFileAnalyzer(GeneralLineAnalyzer):
     """Reads Data into a SpreadsheetData-object and then every time a

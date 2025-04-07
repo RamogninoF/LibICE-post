@@ -1,12 +1,12 @@
 """Read files written by the Lagrangian function object that writes patch incidents
 and transforms the data into a NumPy-array"""
 
-from PyFoam.ThirdParty.six import BytesIO,b
+from libICEpost.src._utils.PyFoam.ThirdParty.six import BytesIO,b
 from .FileBasis import CleanCharactersFile
 from .TimeDirectory import TimeDirectory
 from .SolutionDirectory import SolutionDirectory
 
-from PyFoam.Error import error
+from libICEpost.src._utils.PyFoam.Error import error
 
 import numpy as np
 from os import path

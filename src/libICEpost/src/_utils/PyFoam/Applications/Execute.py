@@ -3,13 +3,13 @@
 Application class that implements pyFoamExecute
 """
 
-from PyFoam.Applications.PyFoamApplication import PyFoamApplication
-from PyFoam.Basics.Utilities import which
-from PyFoam import configuration as conf
+from libICEpost.src._utils.PyFoam.Applications.PyFoamApplication import PyFoamApplication
+from libICEpost.src._utils.PyFoam.Basics.Utilities import which
+from libICEpost.src._utils.PyFoam import configuration as conf
 
 from .CommonBlink1 import CommonBlink1
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 from subprocess import call
 from optparse import OptionGroup

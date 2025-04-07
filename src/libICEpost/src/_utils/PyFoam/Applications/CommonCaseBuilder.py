@@ -5,11 +5,11 @@ Class that implements the common functionality for CaseBuilder-applications
 from optparse import OptionGroup
 from os import path
 
-from PyFoam import configuration as config
+from libICEpost.src._utils.PyFoam import configuration as config
 from .CaseBuilderBackend import CaseBuilderDescriptionList
-from PyFoam.Error import error
+from libICEpost.src._utils.PyFoam.Error import error
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 class CommonCaseBuilder(object):
     """ The class that implements common CaseBuilder-functionality

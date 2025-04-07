@@ -16,15 +16,15 @@ from binascii import hexlify, unhexlify
 import binascii
 import sys
 
-from PyFoam.ThirdParty.six import print_,PY3,binary_type,u
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_,PY3,binary_type,u
 if PY3:
     range_func = range
 else:
     range_func = xrange
 
-from PyFoam.Infrastructure.Hardcoded import authDirectory,assertDirectory
-from PyFoam.FoamInformation import getUserName
-from PyFoam.Error import warning
+from libICEpost.src._utils.PyFoam.Infrastructure.Hardcoded import authDirectory,assertDirectory
+from libICEpost.src._utils.PyFoam.FoamInformation import getUserName
+from libICEpost.src._utils.PyFoam.Error import warning
 from os import path
 
 def myPrivateKeyFile():

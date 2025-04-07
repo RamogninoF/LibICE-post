@@ -4,7 +4,7 @@ Application-class that implements pyFoamPackCase.py
 
 from .PyFoamApplication import PyFoamApplication
 
-from PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
+from libICEpost.src._utils.PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
 
 from os import path
 from optparse import OptionGroup

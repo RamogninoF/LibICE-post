@@ -7,7 +7,7 @@ from optparse import OptionGroup
 
 from os import path
 
-from PyFoam import configuration as config
+from libICEpost.src._utils.PyFoam import configuration as config
 
 
 class CommonTemplateBehaviour(object):

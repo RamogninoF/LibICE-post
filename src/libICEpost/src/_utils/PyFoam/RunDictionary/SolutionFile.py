@@ -4,9 +4,9 @@
 import re,os
 from os import path
 
-from PyFoam.Basics.LineReader import LineReader
-from PyFoam.RunDictionary.FileBasis import FileBasis
-from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
+from libICEpost.src._utils.PyFoam.Basics.LineReader import LineReader
+from libICEpost.src._utils.PyFoam.RunDictionary.FileBasis import FileBasis
+from libICEpost.src._utils.PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
 
 class SolutionFile(FileBasis):
     """ Solution data file

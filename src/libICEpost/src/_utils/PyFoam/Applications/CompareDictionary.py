@@ -9,17 +9,17 @@ import sys
 
 from .PyFoamApplication import PyFoamApplication
 
-from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile,PyFoamParserError
-from PyFoam.Basics.DataStructures import DictProxy,Dimension,Tensor,SymmTensor,Vector,Field,TupleProxy,BoolProxy
-from PyFoam.Basics.FoamFileGenerator import makeString
+from libICEpost.src._utils.PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile,PyFoamParserError
+from libICEpost.src._utils.PyFoam.Basics.DataStructures import DictProxy,Dimension,Tensor,SymmTensor,Vector,Field,TupleProxy,BoolProxy
+from libICEpost.src._utils.PyFoam.Basics.FoamFileGenerator import makeString
 
-from PyFoam.Error import error,warning
+from libICEpost.src._utils.PyFoam.Error import error,warning
 
 from .CommonParserOptions import CommonParserOptions
 
-from PyFoam.Basics.TerminalFormatter import TerminalFormatter
+from libICEpost.src._utils.PyFoam.Basics.TerminalFormatter import TerminalFormatter
 
-from PyFoam.ThirdParty.six import print_,integer_types
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_,integer_types
 
 f=TerminalFormatter()
 f.getConfigFormat("source",shortName="src")

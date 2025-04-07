@@ -1,19 +1,19 @@
 #  ICE Revision: $Id$
 """Parameter file is read into memory and modified there"""
 
-from PyFoam.RunDictionary.FileBasis import FileBasisBackup
-from PyFoam.Basics.PlyParser import PlyParser
-from PyFoam.Basics.FoamFileGenerator import FoamFileGenerator
+from libICEpost.src._utils.PyFoam.RunDictionary.FileBasis import FileBasisBackup
+from libICEpost.src._utils.PyFoam.Basics.PlyParser import PlyParser
+from libICEpost.src._utils.PyFoam.Basics.FoamFileGenerator import FoamFileGenerator
 
-from PyFoam.Basics.DataStructures import Vector,Field,Dimension,DictProxy,TupleProxy,Tensor,SymmTensor,Unparsed,UnparsedList,Codestream,DictRedirection,BinaryBlob,BinaryList,BoolProxy
+from libICEpost.src._utils.PyFoam.Basics.DataStructures import Vector,Field,Dimension,DictProxy,TupleProxy,Tensor,SymmTensor,Unparsed,UnparsedList,Codestream,DictRedirection,BinaryBlob,BinaryList,BoolProxy
 
-from PyFoam.Error import error,warning,FatalErrorPyFoamException
+from libICEpost.src._utils.PyFoam.Error import error,warning,FatalErrorPyFoamException
 
 from os import path
 from copy import deepcopy
 import sys
 
-from PyFoam.ThirdParty.six import print_,integer_types,iteritems,string_types
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_,integer_types,iteritems,string_types
 
 class ParsedParameterFile(FileBasisBackup):
     """ Parameterfile whose complete representation is read into
@@ -762,11 +762,11 @@ class FoamFileParser(PlyParser):
                     raise PyFoamParserError("Parameters for #includeFunc not implemented")
 
             if p[1]=="includeEtc":
-                from PyFoam.FoamInformation import foamEtc
+                from libICEpost.src._utils.PyFoam.FoamInformation import foamEtc
                 fName=path.join(foamEtc(),p[2][1:-1])
             elif p[1]=="includeFunc"and not path.exists(fName):
-                from PyFoam.FoamInformation import foamPostProcessing
-                from PyFoam.Basics.Utilities import findFileInDir
+                from libICEpost.src._utils.PyFoam.FoamInformation import foamPostProcessing
+                from libICEpost.src._utils.PyFoam.Basics.Utilities import findFileInDir
 
                 fName=findFileInDir(self.directory(),includeName)
                 if not path.exists(fName):

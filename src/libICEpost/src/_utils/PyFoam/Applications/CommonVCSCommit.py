@@ -6,7 +6,7 @@ from optparse import OptionGroup
 from os import path
 import sys
 
-from PyFoam.Basics.GeneralVCSInterface import getVCS
+from libICEpost.src._utils.PyFoam.Basics.GeneralVCSInterface import getVCS
 
 class CommonVCSCommit(object):
     """ The class that defines options for commiting cases

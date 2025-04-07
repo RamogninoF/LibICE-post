@@ -2,11 +2,11 @@
 """Working with a directory of samples"""
 
 from os import path,listdir
-from PyFoam.Error import error
+from libICEpost.src._utils.PyFoam.Error import error
 import math
 import re
 
-from PyFoam.Basics.SpreadsheetData import SpreadsheetData
+from libICEpost.src._utils.PyFoam.Basics.SpreadsheetData import SpreadsheetData
 
 class SampleDirectory(object):
     """A directory of sampled times"""

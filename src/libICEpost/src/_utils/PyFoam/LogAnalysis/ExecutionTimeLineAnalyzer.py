@@ -18,8 +18,8 @@ def executionRegexp():
 
 from .GeneralLineAnalyzer import GeneralLineAnalyzer
 
-from PyFoam.FoamInformation import foamVersionNumber
-from PyFoam.Error import warning
+from libICEpost.src._utils.PyFoam.FoamInformation import foamVersionNumber
+from libICEpost.src._utils.PyFoam.Error import warning
 
 class GeneralExecutionLineAnalyzer(GeneralLineAnalyzer):
     """Parses lines for the execution time"""

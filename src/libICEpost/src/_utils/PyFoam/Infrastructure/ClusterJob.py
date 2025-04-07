@@ -6,22 +6,22 @@ import os,sys,subprocess
 from os import path,unlink
 from threading import Thread,Lock,Timer
 
-from PyFoam.Applications.Decomposer import Decomposer
-from PyFoam.Applications.Runner import Runner
-from PyFoam.Applications.SteadyRunner import SteadyRunner
-from PyFoam.Applications.CloneCase import CloneCase
-from PyFoam.Applications.FromTemplate import FromTemplate
-from PyFoam.Applications.PrepareCase import PrepareCase
-from PyFoam.Applications.RunParameterVariation import RunParameterVariation
+from libICEpost.src._utils.PyFoam.Applications.Decomposer import Decomposer
+from libICEpost.src._utils.PyFoam.Applications.Runner import Runner
+from libICEpost.src._utils.PyFoam.Applications.SteadyRunner import SteadyRunner
+from libICEpost.src._utils.PyFoam.Applications.CloneCase import CloneCase
+from libICEpost.src._utils.PyFoam.Applications.FromTemplate import FromTemplate
+from libICEpost.src._utils.PyFoam.Applications.PrepareCase import PrepareCase
+from libICEpost.src._utils.PyFoam.Applications.RunParameterVariation import RunParameterVariation
 
-from PyFoam.FoamInformation import changeFoamVersion
-from PyFoam.FoamInformation import foamVersion as getFoamVersion
-from PyFoam.Error import error,warning
-from PyFoam import configuration as config
-from PyFoam.FoamInformation import oldAppConvention as oldApp
-from PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
+from libICEpost.src._utils.PyFoam.FoamInformation import changeFoamVersion
+from libICEpost.src._utils.PyFoam.FoamInformation import foamVersion as getFoamVersion
+from libICEpost.src._utils.PyFoam.Error import error,warning
+from libICEpost.src._utils.PyFoam import configuration as config
+from libICEpost.src._utils.PyFoam.FoamInformation import oldAppConvention as oldApp
+from libICEpost.src._utils.PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
 
-from PyFoam.ThirdParty.six import print_,iteritems
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_,iteritems
 
 def checkForMessageFromAbove(job):
     if not job.listenToTimer:
@@ -570,7 +570,7 @@ class PrepareCaseJob(SolverJob):
                       ":",arguments)
 
             # make all string arguments that could be boolean boolean values
-            from PyFoam.Basics.DataStructures import BoolProxy
+            from libICEpost.src._utils.PyFoam.Basics.DataStructures import BoolProxy
 
             for k,v in dict(zip(arguments[::2],arguments[1::2])).items():
                 try:

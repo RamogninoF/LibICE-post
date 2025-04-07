@@ -4,8 +4,8 @@ such a way that every time-step is written to disk"""
 import sys
 
 from os import path
-from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
-from PyFoam.Error import warning
+from libICEpost.src._utils.PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
+from libICEpost.src._utils.PyFoam.Error import warning
 
 class CommonWriteAllTrigger(object):
     """ The class that does the actual triggering

@@ -8,7 +8,7 @@ import re
 
 # import FoamFileGenerator in the end to avoid circular dependencies
 
-from PyFoam.ThirdParty.six import integer_types,PY3,string_types,StringIO
+from libICEpost.src._utils.PyFoam.ThirdParty.six import integer_types,PY3,string_types,StringIO
 
 if PY3:
     def cmp(a,b):
@@ -614,7 +614,7 @@ class Unparsed(object):
                                 regexp,
                                 dtypes)
         except TypeError:
-            from PyFoam.ThirdParty.six import BytesIO,b
+            from libICEpost.src._utils.PyFoam.ThirdParty.six import BytesIO,b
             return np.fromregex(BytesIO(b(self.data)),
                                 regexp,
                                 dtypes)
@@ -657,7 +657,7 @@ class UnparsedList(object):
                                 regexp,
                                 dtypes)
         except TypeError:
-            from PyFoam.ThirdParty.six import BytesIO,b
+            from libICEpost.src._utils.PyFoam.ThirdParty.six import BytesIO,b
             return np.fromregex(BytesIO(b(self.data)),
                                 regexp,
                                 dtypes)
@@ -676,6 +676,6 @@ def makePrimitiveString(val):
         return val
 
 # Moved to the end to avoid circular dependencies
-import PyFoam.Basics.FoamFileGenerator
+import libICEpost.src._utils.PyFoam.Basics.FoamFileGenerator
 
 # Should work with Python3 and Python2

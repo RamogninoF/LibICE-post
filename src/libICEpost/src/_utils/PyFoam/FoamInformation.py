@@ -11,9 +11,9 @@ else:
 
 import re
 
-from PyFoam.Error import error,warning
+from libICEpost.src._utils.PyFoam.Error import error,warning
 
-from PyFoam import configuration as config
+from libICEpost.src._utils.PyFoam import configuration as config
 
 def getPathFromEnviron(name):
     """Gets a path from an environment variable
@@ -428,12 +428,12 @@ def getUserName():
     return getpass.getuser()
 
 def getPublicKey():
-    from PyFoam.Infrastructure.Authentication import myPublicKeyText,ensureKeyPair
+    from libICEpost.src._utils.PyFoam.Infrastructure.Authentication import myPublicKeyText,ensureKeyPair
     ensureKeyPair()
     return myPublicKeyText()
 
 def getAuthenticatedKeys():
-    from PyFoam.Infrastructure.Authentication import authenticatedKeys,ensureKeyPair
+    from libICEpost.src._utils.PyFoam.Infrastructure.Authentication import authenticatedKeys,ensureKeyPair
     ensureKeyPair()
     return authenticatedKeys()
 

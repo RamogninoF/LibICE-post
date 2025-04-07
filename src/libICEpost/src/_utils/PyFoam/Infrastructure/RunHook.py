@@ -1,7 +1,7 @@
 """Base class for all Run-Hooks"""
 
-from PyFoam import configuration
-from PyFoam.Error import notImplemented
+from libICEpost.src._utils.PyFoam import configuration
+from libICEpost.src._utils.PyFoam.Error import notImplemented
 
 class RunHook(object):
     """The actual class"""

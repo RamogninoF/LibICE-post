@@ -1,10 +1,10 @@
 """Gets information about the mesh of a case. Makes no attempt to manipulate
 the mesh, because this is better left to the OpenFOAM-utilities"""
 
-from PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
-from PyFoam.RunDictionary.ListFile import ListFile
-from PyFoam.Error import PyFoamException
-from PyFoam.RunDictionary.ParsedParameterFile import ParsedFileHeader
+from libICEpost.src._utils.PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
+from libICEpost.src._utils.PyFoam.RunDictionary.ListFile import ListFile
+from libICEpost.src._utils.PyFoam.Error import PyFoamException
+from libICEpost.src._utils.PyFoam.RunDictionary.ParsedParameterFile import ParsedFileHeader
 
 from os import path
 import re

@@ -5,12 +5,12 @@ from optparse import OptionGroup
 
 from .PyFoamApplication import PyFoamApplication
 
-from PyFoam.ThirdParty.six import print_
-from PyFoam.ThirdParty.tqdm import tqdm
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.tqdm import tqdm
 
-from PyFoam.Basics.Utilities import diskUsage,humanReadableSize
+from libICEpost.src._utils.PyFoam.Basics.Utilities import diskUsage,humanReadableSize
 
-import PyFoam.FoamInformation as FI
+import libICEpost.src._utils.PyFoam.FoamInformation as FI
 
 from os import listdir,path
 

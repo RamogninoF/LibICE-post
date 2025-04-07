@@ -5,10 +5,10 @@ This Package is a stand-in for the actual Package. Imports will be redirected
 to $PYFOAM_SITE_DIR/lib if this is present. Othherwise this directory is useless
 """
 
-from PyFoam.Infrastructure.Hardcoded import pyFoamSiteVar
+from libICEpost.src._utils.PyFoam.Infrastructure.Hardcoded import pyFoamSiteVar
 import sys
 from os import path,environ
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 if pyFoamSiteVar in environ:
     libDir=path.join(environ[pyFoamSiteVar],"lib")

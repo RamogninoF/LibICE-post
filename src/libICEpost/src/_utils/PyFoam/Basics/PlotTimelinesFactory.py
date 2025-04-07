@@ -1,17 +1,17 @@
 #  ICE Revision: $Id$
 """Creates subclasses of GeneralPlotTimelines"""
 
-from PyFoam.Basics.GnuplotTimelines import GnuplotTimelines,validTerminals
-from PyFoam.Basics.MatplotlibTimelines import MatplotlibTimelines
-from PyFoam.Basics.XkcdMatplotlibTimelines import XkcdMatplotlibTimelines
-from PyFoam.Basics.QwtPlotTimelines import QwtPlotTimelines
-from PyFoam.Basics.DummyPlotTimelines import DummyPlotTimelines
+from libICEpost.src._utils.PyFoam.Basics.GnuplotTimelines import GnuplotTimelines,validTerminals
+from libICEpost.src._utils.PyFoam.Basics.MatplotlibTimelines import MatplotlibTimelines
+from libICEpost.src._utils.PyFoam.Basics.XkcdMatplotlibTimelines import XkcdMatplotlibTimelines
+from libICEpost.src._utils.PyFoam.Basics.QwtPlotTimelines import QwtPlotTimelines
+from libICEpost.src._utils.PyFoam.Basics.DummyPlotTimelines import DummyPlotTimelines
 
 from .CustomPlotInfo import CustomPlotInfo
 
 
-from PyFoam import configuration
-from PyFoam.Error import error
+from libICEpost.src._utils.PyFoam import configuration
+from libICEpost.src._utils.PyFoam.Error import error
 
 lookupTable = { "gnuplot" : GnuplotTimelines ,
                 "matplotlib" : MatplotlibTimelines,

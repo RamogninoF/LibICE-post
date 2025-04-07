@@ -6,10 +6,10 @@ try:
 except ImportError:
     zeroConfOK=False
 
-from PyFoam.Infrastructure.Logging import foamLogger
-from PyFoam.Error import warning
-from PyFoam.ThirdParty.six import print_,b
-from PyFoam.Infrastructure.FoamMetaServer import ServerInfo
+from libICEpost.src._utils.PyFoam.Infrastructure.Logging import foamLogger
+from libICEpost.src._utils.PyFoam.Error import warning
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_,b
+from libICEpost.src._utils.PyFoam.Infrastructure.FoamMetaServer import ServerInfo
 
 from os import path
 from time import sleep

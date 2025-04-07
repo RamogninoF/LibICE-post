@@ -3,14 +3,14 @@ Class that implements the common functionality for the format of templates
 """
 from optparse import OptionGroup
 
-from PyFoam import configuration as config
+from libICEpost.src._utils.PyFoam import configuration as config
 
 class CommonTemplateFormat(object):
     """ The class that defines options for template formats
     """
 
     def addOptions(self):
-        from PyFoam.Basics.TemplateFile import available_engines
+        from libICEpost.src._utils.PyFoam.Basics.TemplateFile import available_engines
 
         gformat = OptionGroup(self.parser,
                               "Template Format",

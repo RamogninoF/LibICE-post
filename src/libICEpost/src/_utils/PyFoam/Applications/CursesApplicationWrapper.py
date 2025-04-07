@@ -10,9 +10,9 @@ except ImportError:
 import re
 from collections import deque
 import sys
-import PyFoam.ThirdParty.six as six
+import libICEpost.src._utils.PyFoam.ThirdParty.six as six
 from os import path
-from PyFoam import configuration as config
+from libICEpost.src._utils.PyFoam import configuration as config
 
 from threading import Thread
 
@@ -142,7 +142,7 @@ class CWindow:
 
     def updateHeaderText(self):
         if len(self.headerText)==0:
-            from PyFoam import FoamInformation as FI
+            from libICEpost.src._utils.PyFoam import FoamInformation as FI
             self.headerText=[(path.basename(sys.argv[0]),
                               self.app.getApplication(),
                               "{} v{}".format(FI.foamFork(),FI.foamVersionString()))]
@@ -499,10 +499,10 @@ class CWindowAnalyzed(CWindow):
                 if self.analyzer.hasAnalyzer("ExecName"):
                     caseName=self.analyzer.getAnalyzer("ExecName").caseName
                     if caseName and path.isdir(caseName):
-                        from PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
+                        from libICEpost.src._utils.PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
                         sol=SolutionDirectory(caseName,paraviewLink=False)
             if sol:
-                from PyFoam.RunDictionary.ParameterFile import ParameterFile
+                from libICEpost.src._utils.PyFoam.RunDictionary.ParameterFile import ParameterFile
                 control=ParameterFile(sol.controlDict())
                 try:
                     self.endTime=float(control.readParameter("endTime"))
@@ -515,7 +515,7 @@ class CWindowAnalyzed(CWindow):
                 self.execName=self.analyzer.getAnalyzer("ExecName").execName
                 self.headerChanged=True
 
-        from PyFoam.LogAnalysis.LogLineAnalyzer import LogLineAnalyzer
+        from libICEpost.src._utils.PyFoam.LogAnalysis.LogLineAnalyzer import LogLineAnalyzer
         for e in LogLineAnalyzer.allRegexp:
             addExpr(e)
 
@@ -545,7 +545,7 @@ class CWindowAnalyzed(CWindow):
         return update
 
     def updateFooterText(self):
-        from PyFoam.LogAnalysis.LogLineAnalyzer import LogLineAnalyzer
+        from libICEpost.src._utils.PyFoam.LogAnalysis.LogLineAnalyzer import LogLineAnalyzer
 
         self.footerText=[["Lines: {}".format(self.lineCount)+"/{}".format(self.analyzer.analyzedLines) if self.analyzer else "",
                           "Time {} to {}".format(self.startTime,self.endTime) if self.startTime is not None else None,
@@ -567,7 +567,7 @@ class CWindowAnalyzed(CWindow):
 #                                    "Now: %f" % self.currTime,
 #                                    "Clock: %f" % self.clockTime ])
 
-            from PyFoam.ThirdParty.tqdm import tqdm
+            from libICEpost.src._utils.PyFoam.ThirdParty.tqdm import tqdm
             targetLen=self.maxx-1
             progString=tqdm.format_meter(self.nSteps,
                                          total=max(steps,self.nSteps),

@@ -4,10 +4,10 @@
 import sys
 
 from threading import Thread,Lock,Timer
-from PyFoam.ThirdParty.six import print_
-from PyFoam.Error import warning,error
-from PyFoam import configuration as config
-from PyFoam.FoamInformation import shellExecutionPrefix
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.Error import warning,error
+from libICEpost.src._utils.PyFoam import configuration as config
+from libICEpost.src._utils.PyFoam.FoamInformation import shellExecutionPrefix
 
 if sys.version_info<(2,4):
     from popen2 import Popen4
@@ -20,7 +20,7 @@ try:
     from resource import getrusage,getpagesize,RUSAGE_CHILDREN
 except ImportError:
     try:
-        from PyFoam.ThirdParty.winhacks import getrusage,getpagesize,RUSAGE_CHILDREN
+        from libICEpost.src._utils.PyFoam.ThirdParty.winhacks import getrusage,getpagesize,RUSAGE_CHILDREN
     except ImportError:
         error("Unable to import working getrusage,getpagesize,RUSAGE_CHILDREN functions.")
 
@@ -28,8 +28,8 @@ from os import kill,path,unlink
 from platform import uname
 import signal
 
-from PyFoam.Basics.LineReader import LineReader
-from PyFoam.Infrastructure.Logging import foamLogger
+from libICEpost.src._utils.PyFoam.Basics.LineReader import LineReader
+from libICEpost.src._utils.PyFoam.Infrastructure.Logging import foamLogger
 
 def checkForStopFile(thrd):
     """Checks for the file 'stop' in the directory of the FoamRun. If

@@ -1,8 +1,8 @@
 #  ICE Revision: $Id$
 """Command is run and output is analyzed"""
 
-from PyFoam.Execution.BasicRunner import BasicRunner
-from PyFoam.Execution.StepAnalyzedCommon import StepAnalyzedCommon
+from libICEpost.src._utils.PyFoam.Execution.BasicRunner import BasicRunner
+from libICEpost.src._utils.PyFoam.Execution.StepAnalyzedCommon import StepAnalyzedCommon
 
 class AnalyzedRunner(StepAnalyzedCommon,BasicRunner):
     """The output of a command is analyzed while being run

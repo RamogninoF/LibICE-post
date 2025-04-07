@@ -1,7 +1,7 @@
 #  ICE Revision: $Id$
 """A VCS-interface to Mercurial"""
 
-from PyFoam.Error import warning,error,notImplemented
+from libICEpost.src._utils.PyFoam.Error import warning,error,notImplemented
 
 from .GeneralVCSInterface import GeneralVCSInterface
 

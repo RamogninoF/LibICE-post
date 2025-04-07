@@ -5,9 +5,9 @@ Application class that implements pyFoamUtilityRunner
 
 from .PyFoamApplication import PyFoamApplication
 
-from PyFoam.Execution.UtilityRunner import UtilityRunner
+from libICEpost.src._utils.PyFoam.Execution.UtilityRunner import UtilityRunner
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 import sys
 from os import path

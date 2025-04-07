@@ -16,8 +16,8 @@ import sys, string, types
 
 from . import gp, PlotItems, termdefs, Errors
 
-from PyFoam.ThirdParty.six import string_types
-from PyFoam.ThirdParty.six.moves import input as rinput
+from libICEpost.src._utils.PyFoam.ThirdParty.six import string_types
+from libICEpost.src._utils.PyFoam.ThirdParty.six.moves import input as rinput
 
 class _GnuplotFile:
     """A file to which gnuplot commands can be written.

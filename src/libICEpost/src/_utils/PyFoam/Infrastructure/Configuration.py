@@ -3,10 +3,10 @@
 
 Also hardcodes defaults for the settings"""
 
-from PyFoam.ThirdParty.six.moves import configparser
-from PyFoam.ThirdParty.six import iteritems,PY3
+from libICEpost.src._utils.PyFoam.ThirdParty.six.moves import configparser
+from libICEpost.src._utils.PyFoam.ThirdParty.six import iteritems,PY3
 
-from PyFoam.Infrastructure.Hardcoded import globalConfigFile,userConfigFile,globalDirectory,userDirectory,globalConfigDir,userConfigDir,pyFoamSiteVar,siteConfigDir,siteConfigFile
+from libICEpost.src._utils.PyFoam.Infrastructure.Hardcoded import globalConfigFile,userConfigFile,globalDirectory,userDirectory,globalConfigDir,userConfigDir,pyFoamSiteVar,siteConfigDir,siteConfigFile
 
 from os import path,environ
 import glob,re
@@ -526,7 +526,7 @@ class Configuration(configparser.ConfigParser):
     def bestSection(self,section,option):
         """Get the best-fitting section that has that option"""
 
-        from PyFoam import foamVersionString
+        from libICEpost.src._utils.PyFoam import foamVersionString
 
         try:
             if len(self.validSections[section])==1 or foamVersionString()=="":

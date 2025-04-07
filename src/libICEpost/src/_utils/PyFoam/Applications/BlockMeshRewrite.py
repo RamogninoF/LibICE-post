@@ -4,15 +4,15 @@ Application-class that implements pyFoamBlockMeshRewrite.py
 from optparse import OptionGroup
 
 from .PyFoamApplication import PyFoamApplication
-from PyFoam.Basics.RestructuredTextHelper import RestructuredTextHelper
-from PyFoam.Basics.FoamOptionParser import Subcommand
+from libICEpost.src._utils.PyFoam.Basics.RestructuredTextHelper import RestructuredTextHelper
+from libICEpost.src._utils.PyFoam.Basics.FoamOptionParser import Subcommand
 
-from PyFoam.RunDictionary.BlockMesh import BlockMesh
+from libICEpost.src._utils.PyFoam.RunDictionary.BlockMesh import BlockMesh
 
 from os import path
 import sys,re
 
-from PyFoam.ThirdParty.six import print_
+from libICEpost.src._utils.PyFoam.ThirdParty.six import print_
 
 class BlockMeshRewrite(PyFoamApplication):
     def __init__(self,

@@ -5,7 +5,7 @@ Currently not optimal as it reads the files more often than necessary"""
 
 from os import path,listdir
 
-from PyFoam.Error import error,warning
+from libICEpost.src._utils.PyFoam.Error import error,warning
 import math
 
 try:
@@ -14,9 +14,9 @@ except ImportError:
     # needed py python2.5
     float_maximum=1e301
 
-from PyFoam.Basics.SpreadsheetData import SpreadsheetData
+from libICEpost.src._utils.PyFoam.Basics.SpreadsheetData import SpreadsheetData
 
-from PyFoam.ThirdParty.six import PY3
+from libICEpost.src._utils.PyFoam.ThirdParty.six import PY3
 
 if PY3:
     from functools import reduce
