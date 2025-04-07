@@ -1,6 +1,6 @@
 [project]
 name = "libICEpost"
-version = "0.10.dev1"
+version = "0.10.dev2"
 
 authors = [
   { name="Federico Ramognino", email="federico.ramognino@polimi.it" },
@@ -11,7 +11,6 @@ readme = "README.md"
 requires-python = "~=3.11"
 dependencies = [
   'chempy',
-  'pyfoam',
   'tqdm',
   'colorama',
   'pandas',

@@ -69,8 +69,7 @@ def patchPackage(pack:str, patch:str) -> None:
 
 packages = \
     [
-        {"pack":"PyFoam", "OS":"Windows", "patch":"PyFoam.patch"},
-        {"pack":"PyFoam", "OS":"Windows", "patch":"PyFoam2.patch"},
+        # {"pack":"PyFoam", "OS":"Windows", "patch":"PyFoam.patch"},
     ]
 def main():
     for p in packages:
