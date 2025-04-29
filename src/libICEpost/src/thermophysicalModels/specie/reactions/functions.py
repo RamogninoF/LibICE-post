@@ -122,6 +122,9 @@ def computeAlphaSt(air:Mixture, fuel:Mixture, *, oxidizer:Molecule=database.chem
         
     #5)
     alphaSt = Y_air/Y_fuel
+    # abbiamo trovato la formula per calcolare il rapporto stechiometrico
+    # non sappiamo come implementarla
+    # stoich_air_fuel_ratio = gas.stoich_air_fuel_ratio('IC8H18:0.287391, C2H5OH:0.712609', 'O2:0.21, N2:0.79', basis='mole')
     
     return alphaSt
 
