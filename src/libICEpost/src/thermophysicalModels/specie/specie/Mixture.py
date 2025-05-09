@@ -463,7 +463,7 @@ class Mixture(Utilities):
     ###############################
     #Compute MMmix:
     @property
-    def MM(self) -> MM:
+    def MM(self) -> float:
         """
         Return the average molecular mass of the mixture [g/mol].
         """
