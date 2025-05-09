@@ -8,7 +8,8 @@ data = \
     "cylinder":\
     {
         #Pressure (mandatory)
-        "p":\
+        # the name MUST be 'p' for the pressure field to be used for HRR
+        "p":\ 
         {
             #The format of the data to load
             "format":"file",    #Retrieve from file
@@ -25,7 +26,7 @@ data = \
                         # "varScale":1.0,   #Scaling variable
                         # "varOff":0.0,     #Offset to variable
                         # "CAscale":1.0,    #Scaling CA
-                        # "CAoff":0.0,      #Offset to CA
+                        # "CAOff":0.0,      #Offset to CA
                     }
             }
         },

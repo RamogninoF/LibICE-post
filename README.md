@@ -153,7 +153,7 @@ model = loadModel("./dictionaries/")
 model.process()
 ```
 
-The following part of the code is intended to post-process the data that was processed by the tool. Here you can define some specific plots you want to see like a p-V diagram, which is already impelemented as part of the `model` class:
+The following part of the code is intended to post-process the data that was processed by the tool. Here you can define some specific plots you want to see like a p-V diagram, which is already implemented as part of the `model` class:
 
 ```python
 #Plotting p-V diagram
