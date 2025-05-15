@@ -11,7 +11,9 @@ Generic functions useful for internal combustion engines.
 
 from __future__ import annotations
 
+import traceback
 from libICEpost.src.base.Functions.typeChecking import checkType
+from libICEpost.src.base.dataStructures.Dictionary import Dictionary
 
 from .EngineModel.EngineModel import EngineModel
 
@@ -62,3 +64,31 @@ def MFB(engine:EngineModel, xb:float) -> float:
     return interp1d(engine.data["xb"], engine.data["CA"])(xb)
 
 #############################################################################
+#Define function for simplify loading:
+def loadModel(controlDict:Dictionary, *, fatal:bool=True) -> EngineModel|None:
+    """
+    Convenient function for loading the engineModel from a control dictionary.
+
+    Args:
+        controlDict (Dictionary): The control dictionary to load the model from.
+        fatal (bool): If True, the function will raise an exception if the model cannot be loaded. Default is True.
+
+    Returns:
+        EngineModel: The engine model.
+    """
+    
+    try:
+        #Lookup engine model type and its dictionary
+        engineModelType:str = controlDict.lookup("engineModelType")
+        engineModelDict:Dictionary = controlDict.lookup(engineModelType + "Dict")
+        
+        #Construct from run-time selector
+        model:EngineModel = EngineModel.selector(engineModelType, engineModelDict)
+        return model
+    
+    except BaseException as err:
+        if fatal:
+            raise
+        #If not fatal, print the error
+        print(f"Failed loading model")
+        print(traceback.format_exc())
