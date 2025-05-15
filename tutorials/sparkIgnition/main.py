@@ -9,41 +9,14 @@ import os
 import traceback
 import shutil
 from libICEpost.src.engineModel.EngineModel.EngineModel import EngineModel
-from libICEpost.src.base.dataStructures.Dictionary import Dictionary
 
 #To disable the warning from the janaf7 module of out of bound temperature
-#from libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7 import janaf7
-#janaf7.__WARNING__ = False
+from libICEpost.src.thermophysicalModels.specie.thermo.Thermo.janaf7 import janaf7
+janaf7.__WARNING__ = False
 
-#Define function for simplify loading:
-def loadModel(path:str, controlDictName:str="controlDict.py") -> EngineModel|None:
-    """
-    Convenient function for loading the engineModel from the constrolDict.py file at specific 'path'.
-
-    Args:
-        path (str): The path where to find the controlDict.py file
-
-    Returns:
-        EngineModel: The engine model.
-    """
-    
-    try:
-        #Load the constrol dictionary
-        print(f"Loading engine model from {path}/{controlDictName}")
-        controlDict = Dictionary.fromFile(f"{path}/{controlDictName}")
-        
-        #Lookup engine model type and its dictionary
-        engineModelType:str = controlDict.lookup("engineModelType")
-        engineModelDict:Dictionary = controlDict.lookup(engineModelType + "Dict")
-        
-        #Construct from run-time selector
-        model:EngineModel = EngineModel.selector(engineModelType, engineModelDict)
-        return model
-    
-    except BaseException as err:
-        print(f"Failed loading model from {path}:\n\t{err}")
-        print(traceback.format_exc())
-    
+# Function for loading a dictionary and an engine model
+from libICEpost.src.base.Functions.userInterface import loadDictionary
+from libICEpost.src.engineModel.functions import loadModel
 
 #Getting the current path (needed when running in debug mode)
 thisPath, _ = os.path.split(__file__)
@@ -51,7 +24,8 @@ print(f"thisPath = {thisPath}")
 os.chdir(thisPath)  #Move here if in debug
 
 #Load the model
-model = loadModel("./dictionaries/")
+controlDict = loadDictionary("./dictionaries/controlDict.py")
+model = loadModel(controlDict)
 
 #Process the data in the engine model
 model.process()
