@@ -80,7 +80,10 @@ class Dictionary(OrderedDict, Utilities):
         _OLDLOCALS = list(_LOCALS)
         
         with open(fileName) as _FILE:
-            exec(_FILE.read())
+            try:
+                exec(compile(_FILE.read(), fileName, "exec"))
+            except Exception as e:
+                raise IOError(f"Error loading dictionary from file '{fileName}'")
         
         _LOCALS = locals().copy()
         for l in _LOCALS.keys():
