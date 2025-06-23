@@ -92,7 +92,10 @@ class Dictionary(OrderedDict, Utilities):
         _OLDLOCALS = list(_LOCALS)
         
         with open(fileName) as _FILE:
-            exec(_FILE.read())
+            try:
+                exec(compile(_FILE.read(), fileName, "exec"))
+            except Exception as e:
+                raise IOError(f"Error loading dictionary from file '{fileName}'")
         
         _LOCALS = locals().copy()
         for l in _LOCALS.keys():
@@ -112,7 +115,7 @@ class Dictionary(OrderedDict, Utilities):
             varType (type|Iterable[type], optional): Type of the variable to lookup for. 
                 Performes type-checking if it is given. Defaults to None.
             **kwargs (dict[str,object]): Additional arguments to pass to the checkType function in case of type checking.
-        
+
         Raises:
             KeyError: If the entry is not found
             TypeError: If the type is not consistent with varType
@@ -123,9 +126,9 @@ class Dictionary(OrderedDict, Utilities):
         checkType(entryName, str, "entryName")
         
         if not entryName in self:
-            raise KeyError(f"Entry '{entryName}' not found in Dictionary '{self.name}'. Available entries are:\n\t" + f"\n\t".join([str(k) for k in self.keys()]))
+            raise KeyError(f"Entry '{entryName}' not found in Dictionary. Available entries are:\n\t" + f"\n\t".join([str(k) for k in self.keys()]))
         elif not (varType is None):
-            checkType(self[entryName], varType, f"{self.name}[{entryName}]", **kwargs)
+            checkType(self[entryName], varType, entryName, **kwargs)
 
         return self[entryName]
     

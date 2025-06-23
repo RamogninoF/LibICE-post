@@ -767,7 +767,7 @@ class OFTabulation(BaseTabulation):
                  verbose:bool=True,
                  **kwargs) -> OFTabulation:
         """
-        Construct a table from files stored in an OpenFOAM-LibICE tabulation locted at 'path'.
+        Construct a table from files stored in an OpenFOAM-LibICE tabulation located at 'path'.
         Directory structure as follows: \\
            path                         \\
            |-tableProperties            \\
