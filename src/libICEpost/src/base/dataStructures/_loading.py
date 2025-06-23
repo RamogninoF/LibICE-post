@@ -12,6 +12,7 @@ Content of the module:
     - `load_uniform` (function): load a constant field into a TimeSeries object
     - `load_function` (function): load a field as a function of time into a TimeSeries object
     - `load_calculated` (function): load a field as a function of data already in the TimeSeries object
+    - `load_stitched` (function): stitch multiple fields together into a TimeSeries object
     - `LoadingMethod` (enum.EnumStr): enumeration of the loading methods for TimeSeries objects
 
 @author: F. Ramognino       <federico.ramognino@polimi.it>
@@ -22,7 +23,7 @@ Content of the module:
 #####################################################################
 
 from ._TimeSeries import TimeSeries
-from libICEpost.src.base.Functions.typeChecking import checkType
+from libICEpost.src.base.Functions.typeChecking import checkType, checkArray
 from libICEpost.src.base import enum
 
 from typing import Callable, Iterable, Literal
@@ -54,6 +55,8 @@ class LoadingMethod(enum.StrEnum):
     # Calculated
     calc = "calc"
     calculated = "calculated"
+    # Stitching multiple fields together
+    stitch = "stitch"
 
 ######################################################################
 #                               FUNCTIONS                            #
@@ -237,6 +240,81 @@ def load_calculated(ts: TimeSeries, field: str, function: Callable, verbose:bool
     time = ts[ts.timeName].to_list()
     ts.loadArray([time, out], varName=field, verbose=verbose, dataFormat="row", **kwargs)
 
+#######################################################################
+def load_stitched(ts: TimeSeries, field:str, fields: Iterable[str], stitchingMethod:Literal["begin", "end", "user-defined"], times:Iterable[float]=None, verbose:bool=True, **kwargs) -> None:
+    """
+    Stitch multiple fields together into a TimeSeries object.
+    
+    Args:
+        ts (TimeSeries): TimeSeries object to load the fields into.
+        field (str): Name of the field to create from the stitched fields.
+        fields (Iterable[str]): Names of the fields to stitch together.
+        stitchingMethod (str): Method to stitch the fields. Can be one of the following:
+            - `begin`: Stitch fields at the first non-nan value of the following field.
+            - `end`: Stitch fields at the last non-nan value of the previous field.
+            - `user-defined`: Stitch fields at user-defined points.
+        times (Iterable[float], optional): User-defined times to stitch the fields together. Required if stitching method is `user-defined`, with length 1 less then `fields`.
+        verbose (bool, optional): If True, print information about the loading process. Default is True.
+        **kwargs: Additional keyword arguments to pass to the loading function.
+        
+    Returns:
+        None
+    """
+    checkType(ts, TimeSeries, "ts")
+    checkArray(fields, str, "fields", allowEmpty=False)
+    checkType(verbose, bool, "verbose")
+    
+    if not stitchingMethod in ("begin", "end", "user-defined"):
+        raise ValueError(f"Method '{stitchingMethod}' is not valid. Must be one of 'begin', 'end', or 'user-defined'.")
+    
+    # Check if the fields are already in the TimeSeries object
+    if field in ts.columns and verbose:
+        print(f"Field '{field}' already exists in the TimeSeries object. Overwriting...")
+        
+    for f in fields:
+        if f not in ts.columns:
+            raise FieldDependencyError(f"Field '{f}' not found in TimeSeries object. Available fields are: {ts.columns}")
+    
+    # Load the fields as a stitched array
+    if verbose:
+        print(f"Stitching fields {fields} together...")
+        
+    # Construct the times where to stitch the fields
+    if stitchingMethod == "user-defined":
+        checkArray(times, float, "times")
+        if len(times) != len(fields) - 1:
+            raise ValueError(f"Number of times ({len(times)}) must be one less than the number of fields ({len(fields)}).")
+    elif stitchingMethod == "begin":
+        # Look for the first non-nan value of the following field
+        idx = [ts[f].first_valid_index() for f in fields[1:]]
+        times = [ts[ts.timeName][ii] if ii is not None else None for ii in idx]
+    elif stitchingMethod == "end":
+        # Look for the last non-nan value of the previous field
+        idx = [ts[f].first_valid_index() for f in fields[:-1]]
+        times = [ts[ts.timeName][ii] if ii is not None else None for ii in idx]
+    else:
+        raise ValueError(f"Method '{stitchingMethod}' is not valid. Must be one of 'begin', 'end', or 'user-defined'.")
+    
+    # Check that the times are valid
+    if any(t is None for t in times):
+        raise ValueError("Some times are None. This means that some field is non-nan everywhere, so the begin/end for automatic stiching cannot be computed. Use 'user-defined' method to specify the times manually.")
+    
+    if verbose:
+        print(f"Stitching times:\n" + f"{ts[ts.timeName][0]:.3g}" + " -> " + " -> ".join([f"{f} -> {time:.3g}" for f, time in zip(fields, times + [ts[ts.timeName].to_numpy()[-1]])]))
+    
+    # Compute the stitched data
+    index = []
+    for i, _ in enumerate(fields[:-1]):
+        index.append(ts.index[ts[ts.timeName] < times[i]])
+    index.append(ts.index[ts[ts.timeName] >= times[-1]])
+    
+    # Merge the data from the fields at the specified indices
+    data = sum([ts[f].to_numpy()[idx].tolist() for f, idx in zip(fields, index)], [])
+    
+    # Load in the TimeSeries object
+    ts.loadArray([ts[ts.timeName], data], varName=field, verbose=verbose, dataFormat="row", **kwargs)
+    
+
 ######################################################################
 #                               INTERFACE                            #
 ######################################################################
@@ -254,6 +332,7 @@ def loadField(ts: TimeSeries, field: str, method:Literal["file", "array", "unifo
             - `uniform`: load a constant field given a value. Aliases: `const`, `constant`
             - `function`: load a field as a function of time. Aliases: `func`, `func_time`
             - `calculated`: load a field as a function of data already in the TimeSeries object. Aliases: `calc`
+            - `stitch`: stitch multiple fields together into a TimeSeries object.
         inplace (bool, optional): If True, the field will be loaded into the TimeSeries object.
             If False, a new TimeSeries object will be created with the loaded field. Default is True.
         verbose (bool, optional): If True, print information about the loading process. Default is True.
@@ -291,5 +370,7 @@ def loadField(ts: TimeSeries, field: str, method:Literal["file", "array", "unifo
         load_function(ts, field, **kwargs, verbose=verbose)
     elif method_ in (LoadingMethod.calc, LoadingMethod.calculated):
         load_calculated(ts, field, **kwargs, verbose=verbose)
+    elif method_ == LoadingMethod.stitch:
+        load_stitched(ts, field, **kwargs, verbose=verbose)
     else: # This should never happen if the enum is used correctly
         raise RuntimeError(f"Something went wrong...")
