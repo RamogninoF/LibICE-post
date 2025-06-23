@@ -438,7 +438,7 @@ class TimeSeries(Utilities):
         df.drop_duplicates(subset=self.timeName, keep="first", inplace=True)
         
         #Index with CA (useful for merging)
-        self._data.set_index(self.timeName, inplace=True)
+        reindexedData = self._data.set_index(self.timeName)
         df.set_index(self.timeName, inplace=True)
 
         #Check if data were already loaded
@@ -447,17 +447,17 @@ class TimeSeries(Utilities):
             warnings.warn(TimeSeriesWarning(f"Overwriting existing data for field '{varName}'"))
 
         #If data were not stored yet, just load this
-        if len(self._data) < 1:
-            newData = self._data.join(df, how="right")
+        if len(reindexedData) < 1:
+            newData = reindexedData.join(df, how="right")
 
         else:
             #Merge the time ranges
-            tLeft = self._data.index
+            tLeft = reindexedData.index
             tRight = df.index
             consistentTime = tRight.to_list() == tLeft.to_list()
             
             #Update based on time of self
-            newData = self._data.join(df, how="outer", rsuffix="_new")
+            newData = reindexedData.join(df, how="outer", rsuffix="_new")
             
             #Merge data if overwriting
             if not firstTime:
