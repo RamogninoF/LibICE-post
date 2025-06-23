@@ -29,7 +29,7 @@ from libICEpost.src.base import enum
 from typing import Callable, Iterable, Literal
 import os
 
-class FieldDependencyError(Exception):
+class FieldDependencyError(ValueError, RuntimeError):
     """
     Exception raised when a field is dependent on another field that is not loaded yet.
     """
