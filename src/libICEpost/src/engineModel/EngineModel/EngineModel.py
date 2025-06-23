@@ -38,7 +38,7 @@ from libICEpost.src.base.dataStructures.Dictionary import Dictionary
 from libICEpost.src.base.filters import Filter
 from libICEpost.src.base.filters import filter as filterData
 from libICEpost.src.base.dataStructures import loadField
-from libICEpost.src.base.dataStructures._loading import LoadingMethod
+from libICEpost.src.base.dataStructures._loading import LoadingMethod, FieldDependencyError
 
 #Submodels
 from libICEpost.src.engineModel.EngineTime.EngineTime import EngineTime
@@ -583,8 +583,10 @@ class EngineModel(BaseClass):
             if (not "p" in zoneDict) and (not "p" in self.raw.columns):
                 raise ValueError(f"Mandatory entry 'p' in data dictionary for zone {zone} not found. Pressure trace must be loaded for each thermodynamic region.")
             
-            #Loop over data to be loaded:
-            for entry in zoneDict:
+            # Try resolving the dependency issues for fields. While looping, store the fields that have some dependencies (raising FieldDependencyError). Then, after loading a field try looping again over those fields to try to resolve the dependencies. At the end, keep looping over those fields until no more dependencies are found or if the length of the fields with dependencies does not change (i.e. no more dependencies can be resolved).
+            
+            dependent:list[str] = [] #Fields that have dependencies
+            def load(entry:str) -> None:
                 dataDict:Dictionary = zoneDict.lookup(entry, varType=Dictionary)
                 
                 #If the region is not cylinder, append its name to the field
@@ -612,9 +614,56 @@ class EngineModel(BaseClass):
                 lm = LoadingMethod(method)
                 if (lm == LoadingMethod.file):
                     kwargs.update(root=dataPath)
-                
+                    
                 loadField(self._raw, field=entryName, inplace=True, **kwargs)
+            
+            #Loop over data to be loaded:
+            for entry in zoneDict:
+                try:
+                    load(entry)
+                    
+                    # Try to resolve the dependencies
+                    to_remove = []
+                    for dep in dependent:
+                        # Try to load the field with dependencies
+                        try:
+                            load(dep)
+                            to_remove.append(dep)  # If loaded successfully, remove from dependent list
+                        except FieldDependencyError:
+                            # If still has dependencies, keep it in the list
+                            warnings.warn(RuntimeWarning(f"Field '{dep}' still has dependencies, will try to resolve them later."))
+                    # Remove successfully loaded fields from dependent list
+                    for dep in to_remove:
+                        dependent.remove(dep)
+                    
+                except FieldDependencyError as err:
+                    #Field has dependencies, store it to try again later
+                    dependent.append(entry)
+                    warnings.warn(RuntimeWarning(f"Field '{entry}' has dependencies and could not be loaded. Will try to resolve them later."))
+                except BaseException as err:
+                    err.add_note(f"Failed loading field '{zone}.{entry}'.")
+                    raise err
+            
+            #After loading all fields, try to resolve the dependencies
+            while dependent:
+                # Try to load the fields with dependencies
+                new_dependent = []
+                for dep in dependent:
+                    try:
+                        load(dep)
+                    except FieldDependencyError:
+                        # If still has dependencies, keep it in the list
+                        new_dependent.append(dep)
+                        warnings.warn(RuntimeWarning(f"Field '{dep}' still has dependencies, will try to resolve them later."))
+                if len(new_dependent) == len(dependent):
+                    # If no new dependencies were resolved, break the loop
+                    break
+                dependent = new_dependent
                 
+            # Check if all dependencies were resolved
+            if dependent:
+                raise FieldDependencyError(f"Some fields could not be loaded due to unresolved dependencies: {', '.join(dependent)}")
+            
         return self
     
     ####################################

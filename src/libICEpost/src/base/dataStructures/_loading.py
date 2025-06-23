@@ -28,6 +28,11 @@ from libICEpost.src.base import enum
 from typing import Callable, Iterable, Literal
 import os
 
+class FieldDependencyError(Exception):
+    """
+    Exception raised when a field is dependent on another field that is not loaded yet.
+    """
+
 #####################################################################
 class LoadingMethod(enum.StrEnum):
     """
@@ -142,7 +147,7 @@ def load_uniform(ts: TimeSeries, field: str, value: float, verbose:bool=True, **
         print(f"Loading field '{field}' as a uniform value {value}...")
     
     if len(ts) == 0:
-        raise ValueError("TimeSeries is empty. Cannot load uniform field.")
+        raise FieldDependencyError("TimeSeries is empty. Cannot load uniform field.")
     
     time = ts[ts.timeName].to_numpy()
     ts.loadArray([(time[0], value), (time[-1], value)], varName=field, verbose=verbose, dataFormat="column", **kwargs)
@@ -176,7 +181,7 @@ def load_function(ts: TimeSeries, field: str, function: Callable[[float],float],
         print(f"Loading field '{field}' as a function of time...")
     
     if len(ts) == 0:
-        raise ValueError("TimeSeries is empty. Cannot load function field.")
+        raise FieldDependencyError("TimeSeries is empty. Cannot load function field.")
     
     time = ts[ts.timeName].to_list()
     out = [function(t) for t in time]
@@ -214,12 +219,12 @@ def load_calculated(ts: TimeSeries, field: str, function: Callable, verbose:bool
         print(f"Loading field '{field}' as a function of {args}...")
     
     if len(ts) == 0:
-        raise ValueError("TimeSeries is empty. Cannot load calculated field.")
+        raise FieldDependencyError("TimeSeries is empty. Cannot load calculated field.")
     
     # Get the values of the arguments from the TimeSeries object
     for var in args:
         if var not in ts.columns:
-            raise ValueError(f"Variable '{var}' not found in TimeSeries object. Available variables are: {ts.columns}")
+            raise FieldDependencyError(f"Variable '{var}' not found in TimeSeries object. Available variables are: {ts.columns}")
     
     if len(args) == 1:
         data = [ts[args[0]].to_numpy()]
