@@ -584,9 +584,10 @@ class EngineModel(BaseClass):
                 raise ValueError(f"Mandatory entry 'p' in data dictionary for zone {zone} not found. Pressure trace must be loaded for each thermodynamic region.")
             
             # Try resolving the dependency issues for fields. While looping, store the fields that have some dependencies (raising FieldDependencyError). Then, after loading a field try looping again over those fields to try to resolve the dependencies. At the end, keep looping over those fields until no more dependencies are found or if the length of the fields with dependencies does not change (i.e. no more dependencies can be resolved).
-            
+            #Reload all the uniform fields at the end, so that their values are extended to the whole time range.
             dependent:list[str] = [] #Fields that have dependencies
-            def load(entry:str) -> None:
+            uniform:set[str] = set() #Fields that are uniform (i.e. do not depend on time)
+            def load(entry:str, verbose:bool=True) -> None:
                 dataDict:Dictionary = zoneDict.lookup(entry, varType=Dictionary)
                 
                 #If the region is not cylinder, append its name to the field
@@ -614,8 +615,10 @@ class EngineModel(BaseClass):
                 lm = LoadingMethod(method)
                 if (lm == LoadingMethod.file):
                     kwargs.update(root=dataPath)
-                    
-                loadField(self._raw, field=entryName, inplace=True, **kwargs)
+                elif (lm == LoadingMethod.uniform) or (lm == LoadingMethod.const) or (lm == LoadingMethod.constant):
+                    # If the field is uniform, add it to the uniform list
+                    uniform.add(entryName)
+                loadField(self._raw, field=entryName, inplace=True, verbose=verbose, **kwargs)
             
             #Loop over data to be loaded:
             for entry in zoneDict:
@@ -645,6 +648,7 @@ class EngineModel(BaseClass):
                     raise err
             
             #After loading all fields, try to resolve the dependencies
+            if dependent: print("Resolving dependencies...")
             while dependent:
                 # Try to load the fields with dependencies
                 new_dependent = []
@@ -659,10 +663,16 @@ class EngineModel(BaseClass):
                     # If no new dependencies were resolved, break the loop
                     break
                 dependent = new_dependent
-                
+            
             # Check if all dependencies were resolved
             if dependent:
                 raise FieldDependencyError(f"Some fields could not be loaded due to unresolved dependencies: {', '.join(dependent)}")
+            
+            #After loading all fields, re-load the uniform fields
+            if uniform: print("Reloading uniform fields to extend their values to the whole time range...")
+            for entry in uniform:
+                # Reload the uniform fields to extend their values to the whole time range
+                load(entry)
             
         return self
     
