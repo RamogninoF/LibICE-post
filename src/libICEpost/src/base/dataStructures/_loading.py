@@ -13,6 +13,7 @@ Content of the module:
     - `load_function` (function): load a field as a function of time into a TimeSeries object
     - `load_calculated` (function): load a field as a function of data already in the TimeSeries object
     - `load_stitched` (function): stitch multiple fields together into a TimeSeries object
+    - `load_cumulative` (function): load a field as a cumulative integral of another field in the TimeSeries object
     - `LoadingMethod` (enum.EnumStr): enumeration of the loading methods for TimeSeries objects
 
 @author: F. Ramognino       <federico.ramognino@polimi.it>
@@ -26,6 +27,7 @@ from ._TimeSeries import TimeSeries
 from libICEpost.src.base.Functions.typeChecking import checkType, checkArray
 from libICEpost.src.base import enum
 
+from scipy import integrate
 from typing import Callable, Iterable, Literal
 import os
 
@@ -57,6 +59,9 @@ class LoadingMethod(enum.StrEnum):
     calculated = "calculated"
     # Stitching multiple fields together
     stitch = "stitch"
+    # Cumulative integral of a field
+    cumulative = "cumulative"
+    integrate = "integrate"
 
 ######################################################################
 #                               FUNCTIONS                            #
@@ -314,6 +319,57 @@ def load_stitched(ts: TimeSeries, field:str, fields: Iterable[str], stitchingMet
     # Load in the TimeSeries object
     ts.loadArray([ts[ts.timeName], data], varName=field, verbose=verbose, dataFormat="row", **kwargs)
     
+######################################################################
+def load_cumulative(ts: TimeSeries, field: str, input: str, reference:float=None, verbose:bool=True, **kwargs) -> None:
+    """
+    Load a field as a cumulative integral of another field in the TimeSeries object.
+    
+    Args:
+        ts (TimeSeries): TimeSeries object to load the field into.
+        field (str): Name of the field to load.
+        input (str): Name of the field to integrate.
+        reference (float, optional): Reference value for the cumulative integral (instant where to set the integral to zero)
+            If `None`, the integral is set to zero at the first time step. Default is None.
+        verbose (bool, optional): If True, print information about the loading process. Default is True.
+        **kwargs: Additional keyword arguments to pass to the loading function.
+    """
+    checkType(ts, TimeSeries, "ts")
+    checkType(field, str, "field")
+    checkType(input, str, "input")
+    checkType(reference, float, "reference", allowNone=True)
+    checkType(verbose, bool, "verbose")
+    
+    # Check if the field is already in the TimeSeries object
+    if field in ts.columns and verbose:
+        print(f"Field '{field}' already exists in the TimeSeries object. Overwriting...")
+        
+    # Check if the input field is in the TimeSeries object
+    if input not in ts.columns:
+        raise FieldDependencyError(f"Input field '{input}' not found in TimeSeries object. Available fields are: {ts.columns}")
+    
+    # Load the field as a cumulative integral
+    if verbose:
+        print(f"Loading field '{field}' as a cumulative integral of '{input}'...")
+    
+    if len(ts) == 0:
+        raise FieldDependencyError("TimeSeries is empty. Cannot load cumulative field.")
+    
+    time = ts[ts.timeName].to_numpy()
+    data = ts[input].to_numpy()
+    
+    # Compute the cumulative integral
+    cum_data = integrate.cumtrapz(data, time, initial=0.0)
+    if reference is not None:
+        if verbose:
+            print(f"Setting cumulative integral to zero at reference time {reference}...")
+        # Set the cumulative integral to zero at the reference time
+        ref_idx = (time >= reference).argmax()
+        if ref_idx == 0:
+            raise ValueError(f"Reference time {reference} is before the first time step in the TimeSeries object.")
+        cum_data -= cum_data[ref_idx]
+    
+    # Load in the TimeSeries object
+    ts.loadArray([time, cum_data], varName=field, verbose=verbose, dataFormat="row", **kwargs)    
 
 ######################################################################
 #                               INTERFACE                            #
@@ -333,6 +389,7 @@ def loadField(ts: TimeSeries, field: str, method:Literal["file", "array", "unifo
             - `function`: load a field as a function of time. Aliases: `func`, `func_time`
             - `calculated`: load a field as a function of data already in the TimeSeries object. Aliases: `calc`
             - `stitch`: stitch multiple fields together into a TimeSeries object.
+            - `cumulative`: load a field as a cumulative integral of another field in the TimeSeries object. Aliases: `integrate`
         inplace (bool, optional): If True, the field will be loaded into the TimeSeries object.
             If False, a new TimeSeries object will be created with the loaded field. Default is True.
         verbose (bool, optional): If True, print information about the loading process. Default is True.
@@ -372,5 +429,7 @@ def loadField(ts: TimeSeries, field: str, method:Literal["file", "array", "unifo
         load_calculated(ts, field, **kwargs, verbose=verbose)
     elif method_ == LoadingMethod.stitch:
         load_stitched(ts, field, **kwargs, verbose=verbose)
+    elif method_ in (LoadingMethod.cumulative, LoadingMethod.integrate):
+        load_cumulative(ts, field, **kwargs, verbose=verbose)
     else: # This should never happen if the enum is used correctly
         raise RuntimeError(f"Something went wrong...")
