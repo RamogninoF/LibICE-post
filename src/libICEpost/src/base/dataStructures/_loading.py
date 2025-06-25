@@ -309,12 +309,13 @@ def load_stitched(ts: TimeSeries, field:str, fields: Iterable[str], stitchingMet
     
     # Compute the stitched data
     index = []
-    for i, _ in enumerate(fields[:-1]):
-        index.append(ts.index[ts[ts.timeName] < times[i]])
-    index.append(ts.index[ts[ts.timeName] >= times[-1]])
+    extended_times = [ts[ts.timeName][0]] + times + [ts[ts.timeName].to_numpy()[-1]]
+    for i in range(len(fields)):
+        index.append(ts.index[(ts[ts.timeName] >= extended_times[i]) & (ts[ts.timeName] < extended_times[i + 1])].to_list())
+    index[-1].append(ts.index[-1])  # Ensure the last index includes the last time step
     
     # Merge the data from the fields at the specified indices
-    data = sum([ts[f].to_numpy()[idx].tolist() for f, idx in zip(fields, index)], [])
+    data = sum([ts.loc[idx,f].tolist() for f, idx in zip(fields, index)], [])
     
     # Load in the TimeSeries object
     ts.loadArray([ts[ts.timeName], data], varName=field, verbose=verbose, dataFormat="row", **kwargs)
