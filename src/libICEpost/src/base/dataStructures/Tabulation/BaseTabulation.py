@@ -192,7 +192,7 @@ class BaseTabulation(Utilities, metaclass=ABCMeta):
     getInput = getInput
     
     @abstractmethod
-    def insertDimension(self, variable:str, value:float, index:int=None, *, inplace:bool=False) -> BaseTabulation|None:
+    def insertDimension(self, *,variable:str, value:float, index:int=None,  inplace:bool=False) -> BaseTabulation|None:
         """
         Insert an axis to the dimension-set of the table with a single value. 
         This is useful to merge two tables with respect to an additional variable.
