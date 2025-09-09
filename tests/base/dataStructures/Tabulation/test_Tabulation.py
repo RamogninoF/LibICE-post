@@ -718,7 +718,7 @@ def test_tabulation_insertDimension():
     tab = Tabulation(data, ranges, order)
     
     # Insert new dimension
-    tab.insertDimension("w", 0.5, 1, inplace=True)
+    tab.insertDimension(variable="w", value=0.5, index=1, inplace=True)
     
     assert tab.order == ["x", "w", "y", "z"]
     assert tab.shape == (2, 1, 3, 4)
@@ -729,25 +729,25 @@ def test_tabulation_insertDimension():
     
     # Test invalid index
     with pytest.raises(ValueError):
-        tab.insertDimension("v", 0.5, 5, inplace=True)
+        tab.insertDimension(variable="v", value=0.5, index=5, inplace=True)
     
     # Test invalid field type
     with pytest.raises(TypeError):
-        tab.insertDimension(123, 0.5, 1, inplace=True)
+        tab.insertDimension(variable=123, value=0.5, index=1, inplace=True)
     
     # Test invalid value type
     with pytest.raises(TypeError):
-        tab.insertDimension("v", "invalid", 1, inplace=True)
+        tab.insertDimension(variable="v", value="invalid", index=1, inplace=True)
     
     # Test invalid index type
     with pytest.raises(TypeError):
-        tab.insertDimension("v", 0.5, "invalid", inplace=True)
+        tab.insertDimension(variable="v", value=0.5, index="invalid", inplace=True)
         
     #Test example from documentation
     tab2 = Tabulation(data, ranges, order)
     
-    tab3 = tab2.insertDimension("w", 0.5, 1, inplace=False)
-    tab2.insertDimension("w", 1.0, 1, inplace=True)
+    tab3 = tab2.insertDimension(variable="w", value=0.5, index=1, inplace=False)
+    tab2.insertDimension(variable="w", value=1.0, index=1, inplace=True)
     tab2.concat(tab, inplace=True)
     
     assert tab2.shape == (2, 2, 3, 4)

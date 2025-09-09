@@ -93,7 +93,7 @@ def toPandas(table:Tabulation) -> DataFrame:
 to_pandas = toPandas
 
 #############################################################################
-def insertDimension(table:Tabulation, variable:str, value:float, index:int=None, inplace:bool=False) -> Tabulation|None:
+def insertDimension(table:Tabulation, *, variable:str, value:float, index:int=None, inplace:bool=False) -> Tabulation|None:
     """
     Insert an axis to the dimension-set of the table with a single value. 
     This is useful to merge two tables with respect to an additional variable.
@@ -133,7 +133,7 @@ def insertDimension(table:Tabulation, variable:str, value:float, index:int=None,
     """
     if not inplace:
         tab = table.copy()
-        tab.insertDimension(variable, value, index, inplace=True)
+        tab.insertDimension(variable=variable, value=value, index=index, inplace=True)
         return tab
     
     #Check arguments
