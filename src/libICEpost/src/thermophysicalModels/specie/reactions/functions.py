@@ -12,7 +12,7 @@ Last update:        10/06/2024
 #####################################################################
 
 import os
-from typing import Iterable
+from typing import Iterable, Any
 
 import yaml
 
@@ -23,6 +23,9 @@ from libICEpost.src.thermophysicalModels.specie.specie.Molecule import Molecule
 from libICEpost.src.thermophysicalModels.specie.reactions.Reaction.StoichiometricReaction import StoichiometricReaction
 from libICEpost.src.thermophysicalModels.specie.reactions.ReactionModel.Stoichiometry import Stoichiometry
 from libICEpost.src.thermophysicalModels.thermoModels.thermoMixture.ThermoMixture import ThermoMixture
+
+from io import StringIO
+import cantera as ct
 
 from libICEpost.Database import database
 
@@ -46,88 +49,17 @@ def computeAlphaSt(air:Mixture, fuel:Mixture, *, oxidizer:Molecule=database.chem
     Returns:
         float
     """
-    
-    #Splitting the computation into three steps:
-    #1) Removing the non-reacting compounds
-    #   ->  Identified as those not found in the reactants 
-    #       of any reactions
-    #2) Identification of the active reactions
-    #   ->  Active reactions are those where all reactants are present
-    #       in the mixture and at least one fuel and the oxidizer
-    #3) Solve the balance
-    
-    #Identification of active fuels in fuel mixture
-    fuels:list[Molecule] = []
-    for s in fuel:
-        if s.specie.name in database.chemistry.specie.Fuels:
-            fuels.append(s.specie)
-    
-    #Get reactions from database
-    reactions = database.chemistry.reactions
-    ReactionType = "StoichiometricReaction"
-    
-    #Look for the oxidation reactions for all fuels
-    oxReactions:dict[str:StoichiometricReaction] = {}    #List of oxidation reactions
-    for f in fuels:
-        found = False
-        for r in reactions[ReactionType]:
-            react = reactions[ReactionType][r]
-            if (f in react.reactants) and (oxidizer in react.reactants):
-                found = True
-                oxReactions[f.name] = react
-                break
-        if not found:
-            #Create oxidation reaction
-            oxReactions[f.name] = StoichiometricReaction.fromFuelOxidation(fuel=f, oxidizer=oxidizer)
-            #Add to the database for later use
-            reactions[ReactionType][oxReactions[f.name].name] = oxReactions[f.name]
-            # raise ValueError(f"Oxidation reaction not found in database 'rections.{ReactionType}' for the couple (fuel, oxidizer) = {f.name, oxidizer.name}")
-    
-    #If oxidizing agent is not in air, raise value error:
-    if not oxidizer in air:
-        raise ValueError(f"Oxidizing molecule {oxidizer.name} not found in air mixture.")
-    
-    #If air contains any fuel, value error:
-    if any([True for f in fuels if f in air]):
-        raise ValueError("Air mixture must not contain any fuel.")
-    
-    #Compute mixture of stoichiometric reactants in following steps:
-    #   1) Blend reactants of active reaction based on proportion of molecules in fuel mixture
-    #   2) Detect fuel/oxidiser masses without inert species
-    #   3) Add the non-active compounts in fuel to preserve their ratio
-    #   4) Add non-active compounds in air to preserve their ratio
-    #   5) Compute alpha
-    
-    #1)
-    X = [fuel[f].X for f in fuels]
-    sumX = sum(X)
-    X = [x/sumX for x in X]
-    reactants = mixtureBlend([oxReactions[f.name].reactants for f in fuels], X, "mole")
-    
-    #2)
-    Y_fuel = sum(s.Y for s in reactants if s.specie in fuel)
-    Y_air = sum(s.Y for s in reactants if s.specie in air)
-    
-    #3)
-    if len([m for m in fuel if not (m.specie in fuels)]) > 0:
-        reactingFracInFuel = sum([m.Y for m in fuel if m.specie in fuels])
-        reactingFracInReactants = sum([m.Y for m in reactants if m.specie in fuels])
-        Y_fuel += (1. - reactingFracInFuel)/reactingFracInFuel*reactingFracInReactants
-    
-    #4)
-    if len([m for m in air if not (m.specie == oxidizer)]) > 0:
-        oxidizerFracInAir = sum([m.Y for m in air if (m.specie == oxidizer)])
-        oxidizerFracInReactants = sum([m.Y for m in reactants if (m.specie == oxidizer)])
-        Y_air += (1. - oxidizerFracInAir)/oxidizerFracInAir*oxidizerFracInReactants
-        
-    #5)
-    alphaSt = Y_air/Y_fuel
-    # abbiamo trovato la formula per calcolare il rapporto stechiometrico
-    # non sappiamo come implementarla
-    # stoich_air_fuel_ratio = gas.stoich_air_fuel_ratio('IC8H18:0.287391, C2H5OH:0.712609', 'O2:0.21, N2:0.79', basis='mole')
-    
-    return alphaSt
+    # Create mechanism with thermophysical from database of janaf7
+    with StringIO() as tempf:
+        makeEquilibriumMechanism(tempf, set([s.specie.name for s in air] + [s.specie.name for s in fuel] + [oxidizer.name]), overwrite=True)
 
+        mix = ct.Solution(yaml=tempf.getvalue())
+        mix.X = {s.specie.name: s.X for s in air}
+        
+        stoich_air_fuel_ratio = mix.stoich_air_fuel_ratio({s.specie.name: s.X for s in fuel}, {s.specie.name: s.X for s in air}, basis="mole")
+        
+        return stoich_air_fuel_ratio
+    
 #############################################################################
 @lru_cache(maxsize=__CACHE_SIZE__)
 def computeAlpha(air:Mixture, fuel:Mixture, reactants:Mixture, *, oxidizer:Molecule=database.chemistry.specie.Molecules.O2) -> float:
@@ -159,11 +91,11 @@ def computeAlpha(air:Mixture, fuel:Mixture, reactants:Mixture, *, oxidizer:Molec
     return yAir/yFuel
     
 #############################################################################
-def makeEquilibriumMechanism(path:str, species:Iterable[str], *, overwrite:bool=False) -> None:
+def makeEquilibriumMechanism(path_or_stream:str|Any, species:Iterable[str], *, overwrite:bool=False) -> None:
     """
     Create a mechanism (in yaml format) for computation of chemical equilibrium 
     (with cantera) with the desired specie. The thermophysical properties are 
-    based on NASA polinomials, which are looked-up in the corresponding database.
+    based on NASA polynomials, which are looked-up in the corresponding database.
     
         File structure:
             phases:
@@ -186,31 +118,34 @@ def makeEquilibriumMechanism(path:str, species:Iterable[str], *, overwrite:bool=
             - ...
     
     Args:
-        path (str): The path where to save the mechanism in .yaml format.
+        path_or_stream (str or stream): The path where to save the mechanism in .yaml format or a writable stream.
         species (Iterable[Molecule]): The list of specie to use in the mechanism.
         overwrite (bool, optional): Overwrite if found?  Defaults to False.
     """
-    #Check for the path
-    checkType(path, str, "path")
+    # Check for the path_or_stream
     checkType(species, Iterable, "species")
-    [checkType(s, str, f"species[{ii}]") for ii,s in enumerate(species)]
+    [checkType(s, str, f"species[{ii}]") for ii, s in enumerate(species)]
     
-    #Make species a set (remove duplicate)
+    # Make species a set (remove duplicate)
     species = set(species)
     species_list = list(species)
     
-    if not path.endswith(".yaml"):
-        path += ".yaml"
+    # Determine if path_or_stream is a string (file path) or a stream
+    is_path = isinstance(path_or_stream, str)
+    if is_path:
+        path = path_or_stream
+        if not path.endswith(".yaml"):
+            path += ".yaml"
+        
+        # Check path
+        if not overwrite and os.path.isfile(path):
+            raise IOError(f"Path '{path}' exists. Set 'overwrite' to True to overwrite.")
     
-    #Check path
-    if not overwrite and os.path.isfile(path):
-        raise IOError(f"Path '{path}' exists. Set 'overwrite' to True to overwrite.")
-    
-    #Load the databases
+    # Load the databases
     from libICEpost.Database.chemistry.thermo.Thermo.janaf7 import janaf7_db, janaf7
     from libICEpost.Database.chemistry.specie.Molecules import Molecules
     
-    #Find the atoms
+    # Find the atoms
     atoms:list[str] = []
     for s in species_list:
         specie = Molecules[s]
@@ -245,12 +180,11 @@ def makeEquilibriumMechanism(path:str, species:Iterable[str], *, overwrite:bool=
         ]
     
     output["reactions"] = []
-    
-    print(f"Writing mechanism for computation of chemical equilibrium to file '{path}'")
-    print(f"Molecules: {species}")
-    print(f"Elements: {atoms}")
-    with open(path, 'w') as yaml_file:
-        yaml.dump(output, yaml_file, default_flow_style=False)
+    if is_path:
+        with open(path, 'w') as yaml_file:
+            yaml.dump(output, yaml_file, default_flow_style=False)
+    else:
+        yaml.dump(output, path_or_stream, default_flow_style=False)
     
 #############################################################################
 @lru_cache(maxsize=__CACHE_SIZE__)

@@ -208,8 +208,8 @@ class Stoichiometry(ReactionModel):
                 #Create oxidation reaction
                 oxReactions[f.name] = StoichiometricReaction.fromFuelOxidation(fuel=f, oxidizer=self.oxidizer)
                 #Add to the database for later use
-                reactions[ReactionType][oxReactions[f.name].name] = oxReactions[f.name]
-                raise ValueError(f"Oxidation reaction not found in database 'rections.{self.ReactionType}' for the couple (fuel, oxidizer) = ({f.name, self.oxidizer.name})")
+                self.reactions[oxReactions[f.name].name] = oxReactions[f.name]
+                # raise ValueError(f"Oxidation reaction not found in database 'rections.{self.ReactionType}' for the couple (fuel, oxidizer) = ({f.name, self.oxidizer.name})")
         
         #Identification of reacting compounds
         yReact = 0.0
