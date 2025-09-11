@@ -23,6 +23,8 @@ from typing import Iterable
 # Import functions to read OF files:
 from libICEpost.src._utils.PyFoam.RunDictionary.ParsedParameterFile import ParsedFileHeader,ParsedParameterFile
 from libICEpost.src._utils.PyFoam.Basics.DataStructures import BinaryList
+from foamlib import FoamFile
+import numpy as np
 
 #############################################################################
 #                               MAIN FUNCTIONS                              #
@@ -49,31 +51,16 @@ def readOFscalarList(fileName:str) -> Iterable[float]:
     if not(os.path.isfile(fileName)):
         raise IOError("File '{}' not found.".format(fileName))
     
-    #Check header:
-    header = ParsedFileHeader(fileName).header
-    if not(header["class"] == "scalarList"):
-        raise IOError("File '{}' does not store a scalarList, instead '{}' was found.".format(fileName, header["class"]))
-    binary = False
-    if header["format"] == "binary":
-        binary = True
+    with FoamFile(fileName) as f:
+        if f.class_ != "scalarList":
+            raise IOError("File '{}' does not store a scalarList.".format(fileName))
         
-    #Load table:
-    File = ParsedParameterFile(fileName, listDictWithHeader=True, binaryMode=binary)
-    tab = File.content
-    #Load data:
-    if isinstance(tab, BinaryList):
-        numel = tab.length
+        data = f[None]
+        # Check if the data were correctly read as float, otherwise convert them
+        if isinstance(data, np.ndarray) and data.dtype == np.int64:
+            data.dtype = np.float64
         
-        import struct
-        with open(fileName, "rb") as f:
-            while True:
-                ch = f.read(1)
-                if ch == b'(':
-                    break
-            data = f.read(8*tab.length)
-        return list(struct.unpack("d" * numel, data))
-    else:
-        return tab
+        return data
 
 #############################################################################
 #Write OF file with scalar list
