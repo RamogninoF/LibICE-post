@@ -63,13 +63,11 @@ def toPandas(table:Tabulation) -> DataFrame:
     """
     checkType(table, Tabulation, "table")
     
+    # Create the sampling points
+    inputs = np.array(list(itertools.product(*[table.ranges[f] for f in table.order])))
+
     # Create the dataframe
-    df = DataFrame({"output":table._data.flatten(), **{f:[0.0]*table.size for f in table.ranges}}, columns=table.order+["output"])
-    
-    #Populate
-    inputs = itertools.product(*[table.ranges[f] for f in table.order])
-    for ii, ipt in enumerate(inputs):
-        df.iloc[ii,:-1] = list(ipt)
+    df = DataFrame({"output":table._data.flat, **{f:inputs[:,i] for i,f in enumerate(table.ranges)}}, columns=table.order+["output"])
     return df
 
 #Alias
@@ -185,26 +183,23 @@ def concat(table:Tabulation, *tables:Tabulation, inplace:bool=False, fillValue:f
         
         #Merge ranges
         ranges = {f:sorted(set(ranges[f]).union(set(tab.ranges[f]))) for f in order}
-    
-    data = np.zeros([len(ranges[f]) for f in order])*float("nan") #Create empty data
+
+    data = np.zeros([len(ranges[f]) for f in order])*(float("nan") if fillValue is None else fillValue) #Create empty data
     if not fillValue is None: data *= fillValue #Fill with value
     written = np.zeros_like(data, dtype=bool) #Check if data has been written
     for tab in [table, *tables]:
         r = {f:list(tab.ranges[f]) for f in order}
-        o = tab.order
-        for jj in itertools.product(*[range(len(ranges[f])) for f in order]):
-            #Get index of jj in the table
-            index = [
-                r[f].index(ranges[f][jj[order.index(f)]]) if ranges[f][jj[order.index(f)]] in r[f] else None 
-                for ii, f in enumerate(o)]
-            if None in index:
+        for ii, val in enumerate(tab._data.flat):
+            ipt = tab.getInput(ii)
+            #Find index in new table
+            ijt = [ranges[f].index(ipt[f]) if f in r else None for f in order]
+            if None in ijt:
                 continue #Not in this table
-            
-            if not overwrite and written[jj]:
-                raise ValueError(f"Data already written at index {jj}. Cannot overwrite.")
-            data[*jj] = tab._data[*index]
-            written[*jj] = True
-    
+            if not overwrite and written[tuple(ijt)]:
+                raise ValueError(f"Data already written at index {tuple(ijt)}. Cannot overwrite.")
+            data[tuple(ijt)] = val
+            written[tuple(ijt)] = True
+
     #Check for missing sampling points
     if fillValue is None and not np.all(written):
         raise ValueError("Missing sampling points in the concatenated tables. Cannot concatenate without 'fillValue' argument.")

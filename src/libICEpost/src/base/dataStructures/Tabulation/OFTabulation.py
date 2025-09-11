@@ -93,13 +93,13 @@ def toPandas(table:OFTabulation) -> pd.DataFrame:
     fields = table.fields
     order = table.order
     ranges = table.ranges
-    # Create the dataframe
-    df = pd.DataFrame({**{f:table._data[f].table._data.flatten() for f in fields}, **{f:[0.0]*table.size for f in order}}, columns=order + fields)
     
-    #Populate
-    inputs = itertools.product(*[ranges[f] for f in order])
-    for ii, ipt in enumerate(inputs):
-        df.iloc[ii,:-len(fields)] = list(ipt)
+    # Create the sampling points
+    inputs = np.array(list(itertools.product(*[table.ranges[f] for f in table.order])))
+    
+    # Create the dataframe
+    df = pd.DataFrame({**{f:table._data[f].table._data.flat for f in fields}, **{f:inputs[:,i] for i,f in enumerate(order)}}, columns=order + fields)
+
     return df
 
 #Aliases
