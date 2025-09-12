@@ -32,7 +32,6 @@ classifiers = [
 "*" = ["*.json", "*.patch"]
 
 [project.scripts]
-libICEpost-applyPatches = "libICEpost.scripts.applyPatches:main"
 
 [project.urls]
 Homepage = "https://github.com/RamogninoF/LibICE-post"
