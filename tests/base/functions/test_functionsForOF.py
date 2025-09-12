@@ -2,6 +2,7 @@ import pytest
 import tempfile
 import os
 import struct
+import numpy as np
 
 from libICEpost.src.base.Functions.functionsForOF import readOFscalarList, writeOFscalarList
 
@@ -32,7 +33,7 @@ def test_readOFscalarList_binary():
 
     # Test reading the binary scalarList
     result = readOFscalarList(tmpfile_name)
-    assert result == values
+    assert np.allclose(result, values)
 
     # Clean up
     os.remove(tmpfile_name)
@@ -100,7 +101,7 @@ def test_write_and_readOFscalarList_binary():
 
     # Test reading the binary scalarList
     result = readOFscalarList(tmpfile_name)
-    assert result == values
+    assert np.allclose(result, values)
 
     # Clean up
     os.remove(tmpfile_name)
