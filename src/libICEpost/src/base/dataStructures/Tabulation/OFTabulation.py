@@ -95,7 +95,7 @@ def toPandas(table:OFTabulation) -> pd.DataFrame:
     ranges = table.ranges
     
     # Create the sampling points
-    inputs = np.array(list(itertools.product(*[table.ranges[f] for f in table.order])))
+    inputs = np.array(list(itertools.product(*[ranges[f] for f in order])))
     
     # Create the dataframe
     df = pd.DataFrame({**{f:table._data[f].table._data.flat for f in fields}, **{f:inputs[:,i] for i,f in enumerate(order)}}, columns=order + fields)
@@ -975,7 +975,7 @@ class OFTabulation(BaseTabulation):
         """
         return self.__class__(
             ranges=self.ranges, 
-            data={var:self._data[var].table.copy() for var in self.fields}, 
+            data={var:self._data[var].table._data.flat for var in self.fields}, 
             path=None, 
             order=self.order, 
             noWrite=True, 

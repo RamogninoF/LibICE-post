@@ -162,7 +162,6 @@ def concat(table:Tabulation, *tables:Tabulation, inplace:bool=False, fillValue:f
         Tabulation|None: The concatenated table if inplace is False, None otherwise.
     """
     #Check arguments
-    checkType(table, Tabulation, "table")
     checkArray(tables, Tabulation, "tables")
     checkType(inplace, bool, "inplace")
     checkType(overwrite, bool, "overwrite")
@@ -175,30 +174,32 @@ def concat(table:Tabulation, *tables:Tabulation, inplace:bool=False, fillValue:f
         return tab
     
     order = table.order
-    ranges = table.ranges
+    ranges = {f:set(table.ranges[f]) for f in order}
     for ii, tab in enumerate(tables):
         #Check compatibility
         if not (set(order) == set(tab.order)):
             raise ValueError(f"Tables must have the same input variables to concatenate (table[{ii}] incompatible).")
         
         #Merge ranges
-        ranges = {f:sorted(set(ranges[f]).union(set(tab.ranges[f]))) for f in order}
+        for f in order:
+            ranges[f].update(tab.ranges[f])
 
+    ranges = {f:sorted(ranges[f]) for f in order} #Sort ranges
     data = np.zeros([len(ranges[f]) for f in order])*(float("nan") if fillValue is None else fillValue) #Create empty data
-    if not fillValue is None: data *= fillValue #Fill with value
     written = np.zeros_like(data, dtype=bool) #Check if data has been written
     for tab in [table, *tables]:
-        r = {f:list(tab.ranges[f]) for f in order}
-        for ii, val in enumerate(tab._data.flat):
-            ipt = tab.getInput(ii)
-            #Find index in new table
-            ijt = [ranges[f].index(ipt[f]) if f in r else None for f in order]
-            if None in ijt:
-                continue #Not in this table
-            if not overwrite and written[tuple(ijt)]:
-                raise ValueError(f"Data already written at index {tuple(ijt)}. Cannot overwrite.")
-            data[tuple(ijt)] = val
-            written[tuple(ijt)] = True
+        r = tab.ranges
+        o = tab.order
+        # Create a mapping from index in tab to index in new table
+        mapping = {f: [ranges[f].index(v) for v in r[f]] for f in order}
+        reordering = [o.index(f) for f in order] #Reordering of the dimensions
+        #Fill data
+        for idx, val in zip(itertools.product(*[mapping[f] for f in o]), tab._data.flat):
+            idx = tuple(idx[i] for i in reordering) #Reorder index
+            if written[*idx] and not overwrite:
+                raise ValueError(f"Overlapping data found at index {idx}. Use 'overwrite=True' to overwrite the data.")
+            data[*idx] = val
+            written[*idx] = True
 
     #Check for missing sampling points
     if fillValue is None and not np.all(written):
@@ -1024,7 +1025,7 @@ class Tabulation(BaseTabulation):
         """
         Create a copy of the tabulation.
         """
-        return Tabulation(self.data, self.ranges, self.order, outOfBounds=self.outOfBounds)
+        return Tabulation(self._data, self.ranges, self.order, outOfBounds=self.outOfBounds)
     
     #Conversion
     toPandas = to_pandas = toPandas
@@ -1128,12 +1129,12 @@ class Tabulation(BaseTabulation):
             return returnValue
     
     #######################################
-    def __getitem__(self, index:int|Iterable[int]|slice) -> float|np.ndarray[float]:
+    def __getitem__(self, index:int|tuple[int]|slice|tuple[slice]) -> float|np.ndarray[float]:
         """
         Get an element in the table.
 
         Args:
-            index (int | Iterable[int] | slice | Iterable[slice]): Either:
+            index (int | tuple[int] | slice | tuple[slice]): Either:
                 - An index to access the table (flattened).
                 - A tuple of the x,y,z,... indices to access the table.
                 - A slice to access the table (flattened).
