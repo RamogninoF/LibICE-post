@@ -42,21 +42,20 @@ def getInput(table:BaseTabulation, index:int|Iterable[int]) -> dict[str,float]:
     Returns:
         dict[str:float]: A tuple with a dictionary mapping the names of input-variables to corresponding values
     """
-    checkType(table, BaseTabulation, "table")
     ranges = table.ranges
     
     if isinstance(index, (int, np.integer)): #Single index
         # Convert to access by list
-        return {table.order[ii]:ranges[table.order[ii]][id] for ii,id in enumerate(table._computeIndex(index))}
+        return {table._order[ii]:ranges[table._order[ii]][id] for ii,id in enumerate(table._computeIndex(index))}
     elif isinstance(index, Iterable): #List of indexes
+        table.checkArray(index, (int, np.integer), "index")
         output = {}
         for ii,id in enumerate(index):
-            table.checkType(id, (int, np.integer), f"index[{ii}]")
-            if id >= len(ranges[table.order[ii]]):
+            if id >= len(ranges[table.order[ii]]) or id < 0:
                 raise IndexError(f"index[{ii}] {id} out of range for variable {table.order[ii]} ({id} >= {len(ranges[table.order[ii]])})")
 
             # Input variables
-            output[table.order[ii]] = ranges[table.order[ii]][id]
+            output[table._order[ii]] = ranges[table._order[ii]][id]
         
         return output
     else:
