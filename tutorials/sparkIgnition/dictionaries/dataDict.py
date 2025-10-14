@@ -9,7 +9,7 @@ data = \
     {
         #Pressure (mandatory)
         # the name MUST be 'p' for the pressure field to be used for HRR
-        "p":\ 
+        "p":\
         {
             #The format of the data to load
             "format":"file",    #Retrieve from file
