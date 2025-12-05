@@ -172,6 +172,14 @@ class LowPass(Filter):
         where = np.invert(np.isnan(data))
         data_no_nan = data[where]
         
+        # If only nan, return array of nan
+        if len(data_no_nan) == 0:
+            return np.full_like(data, float("nan"))
+        
+        # Check if there are enough points to apply the filter
+        if len(data_no_nan) < 3 * max(len(a), len(b)):
+            raise ValueError(f"Not enough points to apply the filter. Need at least {3 * max(len(a), len(b))} points, got {len(data_no_nan)}")
+        
         #Filter
         y = np.array(data)
         y[where] = filtfilt(b, a, data_no_nan)
