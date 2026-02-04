@@ -286,7 +286,7 @@ class TimeSeries(Utilities):
         checkType(interpolate, bool, "interpolate")
         checkType(default  , float , "default" )
         checkType(verbose  , bool  , "verbose" )
-
+        
         data:np.ndarray = np.loadtxt\
             (
                 fileName,
@@ -296,7 +296,17 @@ class TimeSeries(Utilities):
                 max_rows=max_rows,
                 delimiter=delimiter
             )
-
+            
+        # Resize to 2D if only one row is present
+        data = data.reshape((-1,2))
+        
+        # Check if data is empty
+        if data.size == 0:
+            # Load uniform data with only "default"
+            time = self[self.timeName].to_numpy()
+            self.loadArray([(time[0], default), (time[-1], default)], varName=varName, verbose=verbose, dataFormat="column", interpolate=interpolate)
+            return
+        
         if verbose:
             if x_off != 0.0:
                 print(f"\tApplying offset {x_off} to time data")
