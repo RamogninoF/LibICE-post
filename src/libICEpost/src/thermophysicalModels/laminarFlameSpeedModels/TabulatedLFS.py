@@ -15,7 +15,7 @@ from __future__ import annotations
 
 from typing import Iterable, Any
 
-from libICEpost.src.base.dataStructures.Tabulation.OFTabulation import OFTabulation, FoamStringParser
+from libICEpost.src.base.dataStructures.Tabulation.OFTabulation import OFTabulation
 from .LaminarFlameSpeedModel import LaminarFlameSpeedModel
 
 from libICEpost.src.base.dataStructures.Dictionary import Dictionary
@@ -74,8 +74,8 @@ class TabulatedLFS(OFTabulation,LaminarFlameSpeedModel):
         files = cp.deepcopy(cls.__files)
         
         #Read table properties to see if EGR is present
-        with open(path + "/tableProperties", "r") as file:
-            tabProps = FoamStringParser(file.read(), noVectorOrTensor=True).getData()
+        with FoamFile(path + "/tableProperties") as tableProperties:
+            tabProps = tableProperties.as_dict()
             #Remove EGR entries if not found
             if not "egrValues" in tabProps:
                 del order[-1]

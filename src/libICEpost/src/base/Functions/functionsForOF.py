@@ -21,8 +21,6 @@ import os
 from typing import Iterable
 
 # Import functions to read OF files:
-from libICEpost.src._utils.PyFoam.RunDictionary.ParsedParameterFile import ParsedFileHeader,ParsedParameterFile
-from libICEpost.src._utils.PyFoam.Basics.DataStructures import BinaryList
 from foamlib import FoamFile
 import numpy as np
 
@@ -89,35 +87,17 @@ def writeOFscalarList(values:Iterable[float], path:str, *, overwrite:bool=False,
         raise IOError("File '{}' exists. Run with overwrite=True.".format(path))
     
     #Create the file object
-    File = ParsedParameterFile(path, noBody=True, binaryMode=True, dontRead=True, createZipped=False)
-    
-    #Header
-    path = os.path.abspath(path)
-    root, file = os.path.split(path)
-    File.header = \
-        {
+    with FoamFile(path) as File:
+        if File.path.exists():
+            File.path.unlink()
+        File.path.touch()
+        root, file = os.path.split(path)
+        File.add("FoamFile", {
             "class":"scalarList",
             "version":2.0,
             "object":file,
             "location":os.path.split(root)[1],
             "format": "binary" if binary else "ascii"
-        }
-    
-    #Empty at first
-    File.writeFile(content={})
-    
-    #Data
-    with open(path, "ba") as file:
-        file.write(f"{len(values)}".encode())
-        file.write(f"\n(".encode())
-    
-    from array import array
-    if binary:
-        with open(path, "a+b") as file:
-            file.write(struct.pack('d' * len(values), *tuple([float(v) for v in values])))
-    else:
-        with open(path, "a") as file:
-            file.write(" ".join([str(v) for v in values]))
-    
-    with open(path, "ba") as file:
-        file.write(f")\n\n".encode())
+        })
+        File.format = "binary" if binary else "ascii"
+        File.add(None,np.array(values).flatten())

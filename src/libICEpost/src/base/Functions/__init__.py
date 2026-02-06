@@ -11,7 +11,7 @@ Content of the package
                 If it is set to False, no type-checking is performed (To increase speed)
         
     functionsForOF:
-        Functions for reading/writing OpenFOAM files (PyFoam)
+        Functions for reading/writing OpenFOAM files (foamlib)
     
     functionsForDictionaries:
         Functions for management of dictionaries (DEPRECATED)

@@ -34,7 +34,7 @@ from dataclasses import dataclass
 
 
 # Import functions to read OF files:
-from libICEpost.src._utils.PyFoam.RunDictionary.ParsedParameterFile import FoamStringParser, ParsedParameterFile
+from foamlib import FoamFile
 
 #####################################################################
 #                            AUXILIARY CLASSES                      #
@@ -220,30 +220,34 @@ def writeOFTable(table:OFTabulation, path:str=None, *, binary:bool=False, overwr
     os.makedirs(path + "/system")
     
     #Table properties:
-    tablePros = ParsedParameterFile(path + "/tableProperties", noHeader=True, dontRead=True, createZipped=False)
-    tablePros.content = table.tableProperties
-    tablePros.writeFile()
+    with FoamFile(path + "/tableProperties") as tablePros:
+        if tablePros.path.exists():
+            tablePros.path.unlink()
+        tablePros.path.touch()
+        for k,v in table.tableProperties.items():
+            tablePros.add(k, v)
     
     #Tables:
     for tab in table.tables:
         if not(table.tables[tab] is None): #Check if the table was defined
             writeOFscalarList(
-                table.tables[tab].data.flatten(), 
+                table.tables[tab]._data.flatten(), 
                 path=path + "/constant/" + table.files[tab],
                 binary=binary)
     
-    #Control dict
-    controlDict = ParsedParameterFile(path + "/system/controlDict", dontRead=True, createZipped=False)
-    controlDict.header = \
-        {
+    #Control dict:
+    with FoamFile(path + "/system/controlDict") as controlDict:
+        if controlDict.path.exists():
+            controlDict.path.unlink()
+        controlDict.path.touch()
+        controlDict.add("FoamFile", {
             "class":"dictionary",
             "version":2.0,
             "object":"controlDict",
-            "location":path + "/system/",
+            "location":"system",
             "format": "ascii"
-        }
-    controlDict.content = \
-        {
+        })
+        controlDict.update({
             "startTime"        :    0,
             "endTime"          :    1,
             "deltaT"           :    1,
@@ -261,8 +265,7 @@ def writeOFTable(table:OFTabulation, path:str=None, *, binary:bool=False, overwr
             "adjustTimeStep"   :    "no",
             "maxCo"            :    1,
             "runTimeModifiable":    "no",
-        }
-    controlDict.writeFile()
+        })
     
 #############################################################################
 def sliceOFTable(table:OFTabulation, *, slices:Iterable[slice|Iterable[int]|int]=None, ranges:dict[str,float|Iterable[float]]=None, inplace=False, **argv) -> OFTabulation|None:
@@ -1198,8 +1201,8 @@ class OFTabulation(BaseTabulation):
         self.checkDir()
         
         #Read tableProperties into dict
-        with open(self.path + "/tableProperties", "r") as file:
-            tabProps = OrderedDict(**(FoamStringParser(file.read(), noVectorOrTensor=True).getData()))
+        with FoamFile(self.path + "/tableProperties") as file:
+            tabProps = file.as_dict()
         
         #Input variables and order
         if inputVariables is None:

@@ -86,3 +86,6 @@ This version mostly improves the functionalities and efficiency of tabulated cla
 - Added tutorial for using `loadDictionary` function with templetized dictionary structure (handling multiple conditions with similar configurations).
 - Created `userInterface` module for user interface functionalities; added `loadDictionary` function for loading a dictionary from a sequence of templates.
 - Updated test structure for functions and added tests for `userInterface`.
+
+## v0.10.4 (06/02/2026)
+Completely removed dependency from PyFoam due to obsolescence and moved to foamlib since currently supported and under development.

@@ -186,13 +186,13 @@ def test_OFTabulation_write_read():
             assert os.path.exists(path + "/constant/" + table.files[f])
         
         #Read table properties
-        from libICEpost.src._utils.PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
-        tableProperties = ParsedParameterFile(path + "/tableProperties", noHeader=True)
-        assert tableProperties["fields"] == ["z"]
-        assert tableProperties["inputVariables"] == ["x", "y"]
-        assert np.array_equal(tableProperties["xValues"], np.array([0.0, 1.0, 2.0]))
-        assert np.array_equal(tableProperties["yValues"], np.array([0.0, 1.0]))
-        assert tableProperties["inputVariables"] == ["x", "y"]
+        from foamlib import FoamFile
+        with FoamFile(path + "/tableProperties") as tableProperties:
+            assert tableProperties["fields"] == ["z"]
+            assert tableProperties["inputVariables"] == ["x", "y"]
+            assert np.array_equal(tableProperties["xValues"], np.array([0.0, 1.0, 2.0]))
+            assert np.array_equal(tableProperties["yValues"], np.array([0.0, 1.0]))
+            assert tableProperties["inputVariables"] == ["x", "y"]
         
         #Write to different path
         table.write(path=path + "2")
