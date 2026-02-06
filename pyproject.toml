@@ -1,6 +1,6 @@
 [project]
 name = "libICEpost"
-version = "0.10.3"
+version = "0.10.4"
 
 authors = [
   { name="Federico Ramognino", email="federico.ramognino@polimi.it" },
@@ -18,7 +18,7 @@ dependencies = [
   'cantera',
   'numpy',
   'cachetools',
-  'foamlib>=1.3.5'
+  'foamlib>=1.5.0',
 ]
 
 license = "MIT"
