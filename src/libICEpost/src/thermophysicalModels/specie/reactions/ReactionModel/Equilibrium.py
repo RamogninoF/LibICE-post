@@ -50,7 +50,7 @@ class Equilibrium(ReactionModel):
     _ReactionType:str = None
     """The type for reactions to lookup for in the database"""
     
-    _reactor:ct.Solution
+    _reactor:ct.composite.Solution
     """The ractor used to compute equilibrium in CANTERA"""
     
     _mechamism:str
@@ -117,7 +117,7 @@ class Equilibrium(ReactionModel):
         self._method = _equilibriumComputationMethods(method)
         
         #Construct the reactor
-        self._reactor = ct.Solution(self.mechanism)
+        self._reactor = ct.composite.Solution(self.mechanism)
         
         super().__init__(reactants, state=state)
 
