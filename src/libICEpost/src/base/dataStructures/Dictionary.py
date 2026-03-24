@@ -20,7 +20,7 @@ from ..Utilities import Utilities
 from collections import OrderedDict
 
 from types import ModuleType
-from typing import TypeVar, Iterable, Any, _SpecialGenericAlias
+from typing import TypeVar, Iterable, Any
 T = TypeVar("T")
 
 import os.path as path
@@ -30,7 +30,6 @@ from libICEpost.src.base.Functions.typeChecking import checkType
 #############################################################################
 #                               MAIN CLASSES                                #
 #############################################################################
-
 class Dictionary(OrderedDict, Utilities):
     """
     Ordered dictionary embedding some useful OpenFOAM-like methods.
@@ -40,7 +39,7 @@ class Dictionary(OrderedDict, Utilities):
     name:str
     
     #############################################################################
-    def __init__(self, *args, _fileName:str=None, _name:str="Dictionary", **argv):
+    def __init__(self, *args, _fileName:str|None=None, _name:str|None="Dictionary", **argv):
         """
         Same constructor as collections.OrderedDict class.
         """
@@ -64,6 +63,8 @@ class Dictionary(OrderedDict, Utilities):
             self.fileName = file
         
         #Name of the dictionary
+        if _name is None:
+            _name = "Dictionary"
         self.name = _name
         
         #Call the constructor of the parent class
@@ -103,7 +104,7 @@ class Dictionary(OrderedDict, Utilities):
         return this
         
     #############################################################################
-    def lookup(self, entryName:str, *, varType:T|Iterable[type]=None, **kwargs) -> T|Any:
+    def lookup(self, entryName:str, *, varType:type[T]|Iterable[type]|None=None, **kwargs) -> T|Any:
         """
         Same as __getitem__ but embeds error handling and type checking.
 
@@ -184,13 +185,13 @@ class Dictionary(OrderedDict, Utilities):
         return self
     
     ######################################
-    def update(self, /, dictionary:dict=None, **kwargs):
+    def update(self, /, dictionary:dict|None=None, **kwargs):
         """
         Performs like dict.update() method but recursively updates sub-dictionaries. 
         Accepts both a dictionary and keyword arguments.
         
         Args:
-            dictionary (dict, optional): Dictionary to update with. Defaults to None.
+            dictionary (dict|Dictionary, optional): Dictionary to update with. Defaults to None.
         """
         if not dictionary is None:
             self.update(**dictionary)
@@ -208,8 +209,7 @@ class Dictionary(OrderedDict, Utilities):
 #############################################################################
 #                                  FUNCTIONS                                #
 #############################################################################
-
-def toDictionary(dictionary:dict|Dictionary, name:str=None) -> Dictionary:
+def toDictionary(dictionary:dict|Dictionary, name:str|None=None) -> Dictionary:
     """
     Convert a dictionary to a Dictionary object (if it is not already one).
     
