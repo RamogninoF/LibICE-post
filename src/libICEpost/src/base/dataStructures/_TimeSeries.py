@@ -155,6 +155,7 @@ class TimeSeries(Utilities):
         return super().__getattribute__(name)
 
     def __delitem__(self, item):
+        self._interpolators.discard(item)
         return self._data.__delitem__(item)
 
     def __call__(self) -> pd.DataFrame:
