@@ -215,6 +215,7 @@ def test_loadFile(tmp_path):
                             , "var1"
                             , delimiter=" "
                             , **{key: value})
+                del ts["var1"] # Remove the loaded variable to avoid conflicts in the next iteration
     
 @pytest.mark.filterwarnings("error::libICEpost.src.base.dataStructures.TimeSeriesWarning")
 @pytest.mark.filterwarnings("error::DeprecationWarning")    
@@ -269,3 +270,17 @@ def test_loc_iloc():
     
     #Assert interpolation after setting values
     assert ts.var1(1.) == 4.5
+
+def test_timeseries_delitem_clears_interpolator():
+    """Deleting a column removes its entry from _interpolators."""
+    ts = TimeSeries()
+    ts.loadArray([[1.0, 2.0], [10.0, 20.0]], "var", dataFormat="row")
+
+    # Trigger interpolator creation by attribute access
+    _ = ts.var(1.5)
+    assert "var" in ts._interpolators
+
+    del ts["var"]
+
+    assert "var" not in ts.columns
+    assert "var" not in ts._interpolators
