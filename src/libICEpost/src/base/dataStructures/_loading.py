@@ -30,6 +30,10 @@ from libICEpost.src.base import enum
 from scipy import integrate
 from typing import Callable, Iterable, Literal
 import os
+import re
+import glob as _glob
+import numpy as np
+import warnings
 
 class FieldDependencyError(ValueError, RuntimeError):
     """
@@ -62,11 +66,52 @@ class LoadingMethod(enum.StrEnum):
     # Cumulative integral of a field
     cumulative = "cumulative"
     integrate = "integrate"
+    # Load and merge from multiple files
+    files = "files"
+    # Conditional element-wise merge of two fields/constants
+    conditional = "conditional"
+    cond        = "cond"
+
+######################################################################
+class ConditionalOperator(enum.StrEnum):
+    """
+    Enumeration of comparison operators for the conditional loading method.
+    Each operator defines a condition F3 <op> F4 that selects between F1 (true)
+    and F2 (false) at each time step.
+    """
+    gt    = ">"
+    gte   = ">="
+    lt    = "<"
+    lte   = "<="
+    eq    = "=="
+    ne    = "!="
+    isnan = "isnan"   # unary — checks np.isnan(F3); F4 is ignored
+
+# Registry: ConditionalOperator → callable(v3, v4, **op_kwargs) → bool ndarray
+# Unary operators receive v4=None and must ignore it.
+_CONDITIONAL_OPERATORS: dict = {
+    ConditionalOperator.gt:    lambda v3, v4, **kw: v3 > v4,
+    ConditionalOperator.gte:   lambda v3, v4, **kw: v3 >= v4,
+    ConditionalOperator.lt:    lambda v3, v4, **kw: v3 < v4,
+    ConditionalOperator.lte:   lambda v3, v4, **kw: v3 <= v4,
+    ConditionalOperator.eq:    lambda v3, v4, **kw: np.isclose(
+                                   v3, v4,
+                                   rtol=kw.get("rel_tol", 1e-6),
+                                   atol=kw.get("abs_tol", 1e-12)),
+    ConditionalOperator.ne:    lambda v3, v4, **kw: ~np.isclose(
+                                   v3, v4,
+                                   rtol=kw.get("rel_tol", 1e-6),
+                                   atol=kw.get("abs_tol", 1e-12)),
+    ConditionalOperator.isnan: lambda v3, v4, **kw: np.isnan(v3),
+}
+
+# Operators that do not consume f4
+_UNARY_CONDITIONAL_OPERATORS: frozenset = frozenset({ConditionalOperator.isnan})
 
 ######################################################################
 #                               FUNCTIONS                            #
 ######################################################################
-def load_file(ts: TimeSeries, field: str, fileName: str, root:str=None, verbose:bool=True, **kwargs) -> None:
+def load_file(ts: TimeSeries, field: str, fileName: str, root:str|None=None, verbose:bool=True, **kwargs) -> None:
     """
     Load a field from a file into a TimeSeries object.
     
@@ -74,7 +119,7 @@ def load_file(ts: TimeSeries, field: str, fileName: str, root:str=None, verbose:
         ts (TimeSeries): TimeSeries object to load the field into.
         field (str): Name of the field to load.
         fileName (str): Name of the file to load the field from.
-        root (str): Root directory for the file. If None, the file is loaded directly. Default is None.
+        root (str, optional): Root directory for the file. If None, the file is loaded directly. Default is None.
         verbose (bool, optional): If True, print information about the loading process. Default is True.
         **kwargs: Additional keyword arguments to pass to the loading function.
         
@@ -372,6 +417,318 @@ def load_cumulative(ts: TimeSeries, field: str, input: str, reference:float=None
     # Load in the TimeSeries object
     ts.loadArray([time, cum_data], varName=field, verbose=verbose, dataFormat="row", **kwargs)    
 
+
+
+######################################################################
+def _resolve_per_file_kwargs(filepath: str, per_file_kwargs: dict | None, global_kwargs: dict) -> dict:
+    """Merge global kwargs with per-file overrides whose regex key matches the file's basename."""
+    merged = {**global_kwargs}
+    if per_file_kwargs:
+        for pattern, overrides in per_file_kwargs.items():
+            if re.search(pattern, os.path.basename(filepath)):
+                merged.update(overrides)
+    return merged
+
+
+######################################################################
+def load_files(ts: TimeSeries, field: str, files: str | list, root: str = None,
+               per_file_kwargs: dict = None, verbose: bool = True, **kwargs) -> None:
+    """
+    Load a field by merging multiple files (glob patterns allowed) into a TimeSeries object.
+
+    Files are sorted by their transformed start time (after applying x_off and x_scale).
+    If multiple files share the same start time, the one with the latest end time is kept
+    and the others are discarded (with a RuntimeWarning). Merging uses the 'begin' stitching
+    strategy: each file takes over from the first time point of the following file.
+
+    All intermediate loading is performed on a temporary isolated TimeSeries. The merged
+    result is loaded back into `ts` via loadArray, so `ts` is never left in a corrupted
+    state if an error occurs.
+
+    Args:
+        ts (TimeSeries): TimeSeries object to load the field into.
+        field (str): Name of the field to load.
+        files (str | list[str]): Glob pattern string or list of glob patterns / explicit paths.
+        root (str, optional): Root directory prepended to each pattern before glob expansion.
+            Defaults to None.
+        per_file_kwargs (dict[str, dict], optional): Per-file keyword argument overrides.
+            Keys are regex patterns matched against the **basename** of each resolved file.
+            All matching entries are merged on top of global **kwargs (later keys win).
+            Defaults to None.
+        verbose (bool, optional): Print progress information. Defaults to True.
+        **kwargs: Global keyword arguments forwarded to every load_file call
+            (e.g. x_col, y_col, x_scale, y_scale, skip_rows, comments, delimiter).
+
+    Returns:
+        None
+
+    Raises:
+        ValueError: If no files are resolved from the given patterns.
+        ValueError: If a resolved file contains no valid data rows.
+        TypeError: If arguments have wrong types.
+    """
+    checkType(ts, TimeSeries, "ts")
+    checkType(field, str, "field")
+    checkType(files, (str, list), "files")
+    checkType(root, str, "root", allowNone=True)
+    checkType(per_file_kwargs, dict, "per_file_kwargs", allowNone=True)
+    checkType(verbose, bool, "verbose")
+
+    # Validate per_file_kwargs regex keys up-front
+    if per_file_kwargs is not None:
+        for pattern in per_file_kwargs:
+            checkType(pattern, str, f"per_file_kwargs key '{pattern}'")
+            try:
+                re.compile(pattern)
+            except re.error as e:
+                raise ValueError(f"per_file_kwargs key '{pattern}' is not a valid regex pattern: {e}") from e
+            checkType(per_file_kwargs[pattern], dict, f"per_file_kwargs['{pattern}']")
+
+    # Normalise files to a list
+    if isinstance(files, str):
+        files = [files]
+
+    # Glob-expand each pattern and collect unique resolved paths (preserving first-seen order)
+    resolved: list[str] = []
+    seen: set[str] = set()
+    for pattern in files:
+        full_pattern = os.path.join(root, pattern) if root else pattern
+        matches = sorted(_glob.glob(full_pattern))  # sort alphabetically for determinism
+        for m in matches:
+            if m not in seen:
+                resolved.append(m)
+                seen.add(m)
+
+    if not resolved:
+        raise ValueError(
+            f"No files found for field '{field}'. Patterns searched: {files}"
+            + (f" (root: {root})" if root else "")
+        )
+
+    if verbose:
+        print(f"Loading field '{field}' from {len(resolved)} file(s)...")
+
+    # Check if field already exists in ts
+    if field in ts.columns and verbose:
+        print(f"Field '{field}' already exists in the TimeSeries object. Overwriting...")
+
+    # ------------------------------------------------------------------
+    # Peek at each file to get transformed time range for sorting
+    # ------------------------------------------------------------------
+    def _peek(filepath: str, file_kwargs: dict) -> tuple[float, float]:
+        x_col      = file_kwargs.get("x_col",      file_kwargs.get("xCol",      0))
+        x_off      = file_kwargs.get("x_off",      file_kwargs.get("xOff",      0.0))
+        x_scale    = file_kwargs.get("x_scale",    file_kwargs.get("xScale",    1.0))
+        skip_rows  = file_kwargs.get("skip_rows",  file_kwargs.get("skipRows",  file_kwargs.get("skiprows", 0)))
+        comments   = file_kwargs.get("comments",   "#")
+        delimiter  = file_kwargs.get("delimiter",  None)
+        max_rows   = file_kwargs.get("max_rows",   file_kwargs.get("maxRows",   None))
+        try:
+            t_raw = np.loadtxt(filepath, usecols=(x_col,), skiprows=skip_rows,
+                               max_rows=max_rows, comments=comments, delimiter=delimiter)
+        except Exception as e:
+            raise ValueError(f"Failed reading time column from file '{filepath}': {e}") from e
+        if t_raw.ndim == 0:
+            t_raw = t_raw.reshape(1)
+        if len(t_raw) == 0:
+            raise ValueError(f"File '{filepath}' contains no valid data rows.")
+        t = (t_raw + float(x_off)) * float(x_scale)
+        return float(t[0]), float(t[-1])
+
+    file_info: list[tuple[float, float, str, dict]] = []
+    for filepath in resolved:
+        file_kwargs = _resolve_per_file_kwargs(filepath, per_file_kwargs, kwargs)
+        try:
+            t_start, t_end = _peek(filepath, file_kwargs)
+        except Exception as e:
+            e.add_note(f"Failed peeking time range for field '{field}'.")
+            raise
+        file_info.append((t_start, t_end, filepath, file_kwargs))
+
+    # ------------------------------------------------------------------
+    # Sort by transformed start time
+    # ------------------------------------------------------------------
+    file_info.sort(key=lambda x: x[0])
+
+    # ------------------------------------------------------------------
+    # Conflict resolution: same t_start → keep file with latest t_end
+    # ------------------------------------------------------------------
+    deduped: list[tuple[float, float, str, dict]] = []
+    i = 0
+    while i < len(file_info):
+        group = [file_info[i]]
+        j = i + 1
+        while j < len(file_info) and file_info[j][0] == file_info[i][0]:
+            group.append(file_info[j])
+            j += 1
+        # Keep the one with max t_end
+        keeper = max(group, key=lambda x: x[1])
+        for item in group:
+            if item is not keeper:
+                warnings.warn(RuntimeWarning(
+                    f"File '{item[2]}' shares start time {item[0]} with '{keeper[2]}' "
+                    f"and has a shorter time range. Discarding it."
+                ))
+        deduped.append(keeper)
+        i = j
+
+    if verbose:
+        print(f"  Merging {len(deduped)} file(s) after conflict resolution:")
+        for t_start, t_end, filepath, _ in deduped:
+            print(f"    [{t_start:.6g}, {t_end:.6g}]  {os.path.basename(filepath)}")
+
+    # ------------------------------------------------------------------
+    # Load each file into an isolated temp TimeSeries
+    # ------------------------------------------------------------------
+    temp_ts = TimeSeries(timeName=ts.timeName)
+    temp_field_names: list[str] = []
+
+    for idx, (t_start, t_end, filepath, file_kwargs) in enumerate(deduped):
+        temp_name = f"field_{idx}"
+        temp_field_names.append(temp_name)
+        try:
+            load_file(temp_ts, temp_name, filepath, verbose=verbose, **file_kwargs)
+        except Exception as e:
+            e.add_note(f"Failed loading file '{filepath}' for field '{field}'.")
+            raise
+
+    # ------------------------------------------------------------------
+    # Stitch in temp_ts using 'begin' method
+    # ------------------------------------------------------------------
+    if len(temp_field_names) == 1:
+        # Single file: no stitching needed, just rename
+        time = temp_ts[temp_ts.timeName].to_numpy()
+        data = temp_ts[temp_field_names[0]].to_numpy()
+    else:
+        load_stitched(temp_ts, field, temp_field_names, stitchingMethod="begin", verbose=verbose)
+        time = temp_ts[temp_ts.timeName].to_numpy()
+        data = temp_ts[field].to_numpy()
+
+    # ------------------------------------------------------------------
+    # Load merged result into original ts
+    # ------------------------------------------------------------------
+    if len(ts) > 0:
+        # ts already has a time axis (e.g. cold-flow loaded first).
+        # Interpolate per file segment so that ts time points falling in gaps
+        # between files get NaN instead of being linearly interpolated across.
+        ts_time = ts[ts.timeName].to_numpy()
+        result = np.full(len(ts_time), float("nan"))
+        for t_start, t_end, _, _ in deduped:
+            mask = (ts_time >= t_start) & (ts_time <= t_end)
+            seg  = (time   >= t_start) & (time   <= t_end)
+            if np.any(mask) and np.any(seg):
+                result[mask] = np.interp(ts_time[mask], time[seg], data[seg])
+        ts.loadArray([ts_time, result], varName=field, verbose=verbose, dataFormat="row")
+    else:
+        ts.loadArray([time, data], varName=field, verbose=verbose, dataFormat="row")
+
+
+######################################################################
+def _resolve_operand(ts: TimeSeries, x: str | float) -> "np.ndarray | float":
+    """Resolve a conditional operand: field name → numpy array, float → scalar."""
+    if isinstance(x, str):
+        if x not in ts.columns:
+            raise FieldDependencyError(
+                f"Field '{x}' not found in TimeSeries. "
+                f"Available fields: {list(ts.columns)}"
+            )
+        return ts[x].to_numpy()
+    return float(x)
+
+
+######################################################################
+def load_conditional(
+    ts: TimeSeries,
+    field: str,
+    f1: "str | float",
+    operator: str,
+    f2: "str | float",
+    f3: "str | float | None" = None,
+    f4: "str | float | None" = None,
+    verbose: bool = True,
+    **operator_kwargs,
+) -> None:
+    """
+    Load a field by element-wise conditional selection between two values:
+
+        result[t] = F1[t]   if   F3[t] <operator> F4[t]
+                    F2[t]   otherwise
+
+    F3 and F4 default to F1 and F2 respectively, so the common case of
+    selecting the larger/smaller of two fields requires no extra arguments.
+    For unary operators (e.g. `isnan`), F4 is ignored entirely.
+
+    Args:
+        ts (TimeSeries): TimeSeries object to load the field into.
+        field (str): Name of the resulting field.
+        f1 (str | float): True-branch value — existing field name or scalar constant.
+        operator (str): Comparison operator. Must be a valid `ConditionalOperator`
+            value: `>`, `>=`, `<`, `<=`, `==`, `!=`, `isnan`.
+        f2 (str | float): False-branch value — existing field name or scalar constant.
+        f3 (str | float | None): Condition LHS. Defaults to `f1`.
+        f4 (str | float | None): Condition RHS. Defaults to `f2`. Ignored for
+            unary operators.
+        verbose (bool, optional): Print progress. Defaults to True.
+        **operator_kwargs: Extra keyword arguments forwarded to the operator function.
+            For `==` / `!=`: `rel_tol` (default 1e-6), `abs_tol` (default 1e-12).
+
+    Returns:
+        None
+
+    Raises:
+        FieldDependencyError: If a field name operand is not yet in the TimeSeries,
+            or if the TimeSeries is empty.
+        ValueError: If `operator` is not a recognised `ConditionalOperator` value.
+        TypeError: If arguments have wrong types.
+    """
+    checkType(ts, TimeSeries, "ts")
+    checkType(field, str, "field")
+    checkType(f1, (str, float), "f1")
+    checkType(operator, str, "operator")
+    checkType(f2, (str, float), "f2")
+    checkType(f3, (str, float), "f3", allowNone=True)
+    checkType(f4, (str, float), "f4", allowNone=True)
+    checkType(verbose, bool, "verbose")
+
+    # Validate operator via the enum (raises ValueError with clear message on failure)
+    op = ConditionalOperator(operator)
+
+    # Require non-empty TimeSeries
+    if len(ts) == 0:
+        raise FieldDependencyError("TimeSeries is empty. Cannot load conditional field.")
+
+    # Notify if overwriting
+    if field in ts.columns and verbose:
+        print(f"Field '{field}' already exists in the TimeSeries object. Overwriting...")
+
+    # Resolve effective condition operands
+    f3_eff = f3 if f3 is not None else f1
+    f4_eff = f4 if f4 is not None else f2
+
+    if verbose:
+        is_unary = op in _UNARY_CONDITIONAL_OPERATORS
+        lhs_desc = f"{op.value}({f3_eff})" if is_unary else f"{f3_eff} {op.value} {f4_eff}"
+        print(f"Loading field '{field}' as conditional: {f1} if ({lhs_desc}) else {f2}...")
+
+    # Resolve all operands to arrays or scalars
+    v1 = _resolve_operand(ts, f1)
+    v2 = _resolve_operand(ts, f2)
+    v3 = _resolve_operand(ts, f3_eff)
+    v4 = None if op in _UNARY_CONDITIONAL_OPERATORS else _resolve_operand(ts, f4_eff)
+
+    # Evaluate condition and select
+    condition = _CONDITIONAL_OPERATORS[op](v3, v4, **operator_kwargs)
+    result = np.where(condition, v1, v2)
+
+    # Broadcast to 1-D if all operands were scalars (0-d result)
+    result = np.asarray(result)
+    if result.ndim == 0:
+        result = np.broadcast_to(result, len(ts)).copy()
+
+    time = ts[ts.timeName].to_numpy()
+    ts.loadArray([time, result], varName=field, verbose=verbose, dataFormat="row")
+
+
 ######################################################################
 #                               INTERFACE                            #
 ######################################################################
@@ -391,6 +748,8 @@ def loadField(ts: TimeSeries, field: str, method:Literal["file", "array", "unifo
             - `calculated`: load a field as a function of data already in the TimeSeries object. Aliases: `calc`
             - `stitch`: stitch multiple fields together into a TimeSeries object.
             - `cumulative`: load a field as a cumulative integral of another field in the TimeSeries object. Aliases: `integrate`
+            - `files`: load and merge multiple files (glob patterns allowed) sorted by transformed start time.
+            - `conditional`: element-wise `F1 if (F3 op F4) else F2`. Aliases: `cond`
         inplace (bool, optional): If True, the field will be loaded into the TimeSeries object.
             If False, a new TimeSeries object will be created with the loaded field. Default is True.
         verbose (bool, optional): If True, print information about the loading process. Default is True.
@@ -432,5 +791,9 @@ def loadField(ts: TimeSeries, field: str, method:Literal["file", "array", "unifo
         load_stitched(ts, field, **kwargs, verbose=verbose)
     elif method_ in (LoadingMethod.cumulative, LoadingMethod.integrate):
         load_cumulative(ts, field, **kwargs, verbose=verbose)
+    elif method_ == LoadingMethod.files:
+        load_files(ts, field, **kwargs, verbose=verbose)
+    elif method_ in (LoadingMethod.conditional, LoadingMethod.cond):
+        load_conditional(ts, field, **kwargs, verbose=verbose)
     else: # This should never happen if the enum is used correctly
         raise RuntimeError(f"Something went wrong...")

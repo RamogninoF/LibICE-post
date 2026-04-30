@@ -611,9 +611,9 @@ class EngineModel(BaseClass):
                 kwargs.update(opts)
                 kwargs.update(method=method)
                 
-                # If the data is a file, set the global path
+                # If the data is a file (or multi-file), set the global path
                 lm = LoadingMethod(method)
-                if (lm == LoadingMethod.file):
+                if lm in (LoadingMethod.file, LoadingMethod.files):
                     kwargs.update(root=dataPath)
                 elif (lm == LoadingMethod.uniform) or (lm == LoadingMethod.const) or (lm == LoadingMethod.constant):
                     # If the field is uniform, add it to the uniform list
