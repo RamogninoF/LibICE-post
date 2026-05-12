@@ -15,6 +15,8 @@ from collections.abc import Iterable
 import numpy as np
 import math
 
+import warnings
+
 from libICEpost.src.base.BaseClass import BaseClass
 
 #############################################################################
@@ -256,9 +258,13 @@ class EngineTime(BaseClass):
         self.checkType(timeList, Iterable, "timeList")
         
         timeList = np.array(timeList)
-        self.startTime = timeList[timeList >= self.startTime][0]
-        self.time = self.startTime
-        self.oldTime = self.startTime
+        st = timeList[timeList >= self.startTime]
+        if len(st) > 0:
+            self.startTime = st[0]
+            self.time = self.startTime
+            self.oldTime = self.startTime
+        else:
+            warnings.warn("Cannot update start time: no time in timeList is greater than or equal to startTime.", RuntimeWarning)
     
 #############################################################################
 EngineTime.createRuntimeSelectionTable()
