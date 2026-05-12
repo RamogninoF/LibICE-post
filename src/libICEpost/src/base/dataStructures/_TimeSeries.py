@@ -173,16 +173,12 @@ class TimeSeries(Utilities):
             self,
             fileName:str,
             varName:str , *,
-            x_col:int=None,
-            y_col:int=None,
-            x_off:float=None,
-            y_off:float=None,
-            x_scale:float=None,
-            y_scale:float=None,
-            skip_rows:int=None,
-            max_rows:int=None,
+            x_col:int|None=None,
+            y_col:int|None=None,
+            skip_rows:int|None=None,
+            max_rows:int|None=None,
             comments:str='#',
-            delimiter:str=None,
+            delimiter:str|None=None,
             interpolate:bool=True,
             default:float=float("nan"),
             verbose:bool=True,
@@ -220,22 +216,14 @@ class TimeSeries(Utilities):
         equivalentKeys:dict[str,list[str]] = {
             "x_col":["x_col", "xCol", "time_col", "t_col", "timeCol", "tCol", "CACol"],
             "y_col":["y_col", "yCol", "varCol"],
-            "x_off":["x_off", "xOff", "time_off", "t_off", "timeOff", "tOff", "CAOff"],
-            "y_off":["y_off", "yOff", "varOff"],
-            "x_scale":["x_scale", "xScale", "time_scale", "t_scale", "timeScale", "tScale", "CAscale"],
-            "y_scale":["y_scale", "yScale", "varScale"],
             "skip_rows":["skip_rows", "skipRows", "skiprows"],
             "max_rows":["max_rows", "maxRows"],
         }
-        deprecatedKeys:set[str] = {"CACol", "varCol", "CAOff", "varOff", "varScale", "CAscale"}
+        deprecatedKeys:set[str] = {"CACol", "varCol"}
         
         fullkwargs = {**kwargs}
         if x_col is not None: fullkwargs["x_col"] = x_col
         if y_col is not None: fullkwargs["y_col"] = y_col
-        if x_off is not None: fullkwargs["x_off"] = x_off
-        if y_off is not None: fullkwargs["y_off"] = y_off
-        if x_scale is not None: fullkwargs["x_scale"] = x_scale
-        if y_scale is not None: fullkwargs["y_scale"] = y_scale
         if skip_rows is not None: fullkwargs["skip_rows"] = skip_rows
         if max_rows is not None: fullkwargs["max_rows"] = max_rows
         
@@ -261,26 +249,18 @@ class TimeSeries(Utilities):
         #Set equivalent keys
         x_col = fullkwargs.pop(keyMap["x_col"][0]) if len(keyMap["x_col"]) > 0 else 0
         y_col = fullkwargs.pop(keyMap["y_col"][0]) if len(keyMap["y_col"]) > 0 else 1
-        x_off = fullkwargs.pop(keyMap["x_off"][0]) if len(keyMap["x_off"]) > 0 else 0.0
-        y_off = fullkwargs.pop(keyMap["y_off"][0]) if len(keyMap["y_off"]) > 0 else 0.0
-        x_scale = fullkwargs.pop(keyMap["x_scale"][0]) if len(keyMap["x_scale"]) > 0 else 1.0
-        y_scale = fullkwargs.pop(keyMap["y_scale"][0]) if len(keyMap["y_scale"]) > 0 else 1.0
         skip_rows = fullkwargs.pop(keyMap["skip_rows"][0]) if len(keyMap["skip_rows"]) > 0 else 0
         max_rows = fullkwargs.pop(keyMap["max_rows"][0]) if len(keyMap["max_rows"]) > 0 else None
         
-        #Check for unknown keys
-        unknownKeys = set(fullkwargs.keys()).difference(sum(equivalentKeys.values(), start=[]))
-        if len(unknownKeys) > 0: raise ValueError(f"Unknown keyword arguments '{unknownKeys}'.")
+        #Gather unused keys to pass to loadArray
+        unusedKeys = set(fullkwargs.keys()).difference(sum(equivalentKeys.values(), start=[]))
+        loadArraykwargs = {k:fullkwargs[k] for k in unusedKeys}
         
         #Check arguments
         checkType(fileName , str   , "fileName")
         checkType(varName  , str   , "varName" )
         checkType(x_col    , int   , "x_col"   )
         checkType(y_col    , int   , "y_col"   )
-        checkType(x_off    , float , "x_off"   )
-        checkType(y_off    , float , "y_off"   )
-        checkType(x_scale  , float , "x_scale" )
-        checkType(y_scale  , float , "y_scale" )
         checkType(comments , str   , "comments")
         checkType(skip_rows , int   , "skip_rows")
         checkType(max_rows   , int , "max_rows", allowNone=True)
@@ -298,22 +278,7 @@ class TimeSeries(Utilities):
                 delimiter=delimiter
             )
 
-        if verbose:
-            if x_off != 0.0:
-                print(f"\tApplying offset {x_off} to time data")
-            if y_off != 0.0:
-                print(f"\tApplying offset {y_off} to variable data")
-            if x_scale != 1.0:
-                print(f"\tApplying scaling {x_scale} to time data")
-            if y_scale != 1.0:
-                print(f"\tApplying scaling {y_scale} to variable data")
-        
-        data[:,0] += x_off
-        data[:,0] *= x_scale
-        data[:,1] += y_off
-        data[:,1] *= y_scale
-
-        self.loadArray(data, varName, default=default, interpolate=interpolate, verbose=verbose)
+        self.loadArray(data, varName, default=default, interpolate=interpolate, verbose=verbose, **loadArraykwargs)
 
         return self
 
@@ -327,7 +292,12 @@ class TimeSeries(Utilities):
         verbose:bool=True,
         default:float=float("nan"),
         interpolate:bool=True,
-        dataFormat:Literal["column", "row"]="column") -> Self:
+        x_off:float|None=None,
+        y_off:float|None=None,
+        x_scale:float|None=None,
+        y_scale:float|None=None,
+        dataFormat:Literal["column", "row"]="column",
+        **kwargs) -> Self:
         """
         Load an array into the table. Automatically removes duplicate times.
 
@@ -340,6 +310,10 @@ class TimeSeries(Utilities):
             default (float, optional): Default value for out-of-range elements. Defaults to float("nan").
             interpolate (bool, optional): Interpolate the data-set at existing time range (used to load \
                 non-consistent data). Defaults to True.
+            x_off (float, optional): Offset to sum to x range (time). Defaults to 0.0. Aliases: `xOff`, `time_off`, `t_off`, `timeOff`, `tOff`, `CAOff` (deprecated).
+            y_off (float, optional): Offset to sum to y range. Defaults to 0.0. Aliases: `yOff`, `varOff` (deprecated).
+            x_scale (float, optional): Scaling factor to apply to x range. Defaults to 1.0. Aliases: `xScale`, `time_scale`, `t_scale`, `timeScale`, `tScale`, `CAscale` (deprecated).
+            y_scale (float, optional): Scaling factor to apply to y range. Defaults to 1.0. Aliases: `yScale`, `varScale` (deprecated).
             dataFormat (str, Literal[&quot;column&quot;, &quot;row&quot;], optional): Format of data: \
                 'column' -> [N,2] \
                 'row' -> [2,N]
@@ -415,6 +389,56 @@ class TimeSeries(Utilities):
         checkType(verbose  , bool  , "verbose")
         checkType(default  , float  , "default")
         
+        #Check for equivalent keys
+        equivalentKeys:dict[str,list[str]] = {
+            "x_col":["x_col", "xCol", "time_col", "t_col", "timeCol", "tCol", "CACol"],
+            "y_col":["y_col", "yCol", "varCol"],
+            "x_off":["x_off", "xOff", "time_off", "t_off", "timeOff", "tOff", "CAOff"],
+            "y_off":["y_off", "yOff", "varOff"],
+            "x_scale":["x_scale", "xScale", "time_scale", "t_scale", "timeScale", "tScale", "CAscale"],
+            "y_scale":["y_scale", "yScale", "varScale"],
+            "skip_rows":["skip_rows", "skipRows", "skiprows"],
+            "max_rows":["max_rows", "maxRows"],
+        }
+        deprecatedKeys:set[str] = {"CACol", "varCol", "CAOff", "varOff", "varScale", "CAscale"}
+        
+        fullkwargs = {**kwargs}
+        if x_off is not None: fullkwargs["x_off"] = x_off
+        if y_off is not None: fullkwargs["y_off"] = y_off
+        if x_scale is not None: fullkwargs["x_scale"] = x_scale
+        if y_scale is not None: fullkwargs["y_scale"] = y_scale
+        
+        foundKeys = set(fullkwargs.keys()).intersection(sum(equivalentKeys.values(), start=[]))
+        
+        #Check for multiple entries that are equivalent
+        keyMap:dict[str,list] = {v:[] for v in equivalentKeys.keys()}
+        for key in foundKeys:
+            for k in equivalentKeys:
+                if key in equivalentKeys[k]:
+                    keyMap[k].append(key)
+        for key in keyMap:
+            if len(keyMap[key]) > 1:
+                raise ValueError(f"Key '{key}' found multiple times in kwargs: {keyMap[key]}")
+        
+        #Check for deprecated keys
+        for key in keyMap:
+            if len(keyMap[key]) == 0:
+                continue
+            if keyMap[key][0] in deprecatedKeys:
+                warnings.warn(DeprecationWarning(f"Key '{keyMap[key][0]}' is deprecated. Use '{key}' instead."))
+                
+        # Set equivalent keys
+        x_off = fullkwargs.pop(keyMap["x_off"][0]) if len(keyMap["x_off"]) > 0 else 0.0
+        y_off = fullkwargs.pop(keyMap["y_off"][0]) if len(keyMap["y_off"]) > 0 else 0.0
+        x_scale = fullkwargs.pop(keyMap["x_scale"][0]) if len(keyMap["x_scale"]) > 0 else 1.0
+        y_scale = fullkwargs.pop(keyMap["y_scale"][0]) if len(keyMap["y_scale"]) > 0 else 1.0
+        
+        #Check arguments
+        checkType(x_off    , float , "x_off"   )
+        checkType(y_off    , float , "y_off"   )
+        checkType(x_scale  , float , "x_scale" )
+        checkType(y_scale  , float , "y_scale" )
+        
         #Cast to pandas.DataFrame
         npData = np.array(data)
         if not npData.ndim == 2:
@@ -429,6 +453,21 @@ class TimeSeries(Utilities):
         elif (dataFormat != "column"):
             raise ValueError(f"Unknown dataFormat '{dataFormat}'. Avaliable formats are 'row' and 'column'.")
 
+        if verbose:
+            if x_off != 0.0:
+                print(f"\tApplying offset {x_off} to time data")
+            if y_off != 0.0:
+                print(f"\tApplying offset {y_off} to variable data")
+            if x_scale != 1.0:
+                print(f"\tApplying scaling {x_scale} to time data")
+            if y_scale != 1.0:
+                print(f"\tApplying scaling {y_scale} to variable data")
+        
+        npData[:,0] += x_off
+        npData[:,0] *= x_scale
+        npData[:,1] += y_off
+        npData[:,1] *= y_scale
+        
         df = pd.DataFrame(npData, columns=[self.timeName, varName])
         
         #Check types
