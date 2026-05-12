@@ -18,7 +18,8 @@ dependencies = [
   'cantera',
   'numpy',
   'cachetools',
-  'foamlib>=1.3.5'
+  'foamlib>=1.3.5',
+  'wcmatch',
 ]
 
 license = "MIT"
