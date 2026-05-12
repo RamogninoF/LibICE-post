@@ -31,7 +31,7 @@ from scipy import integrate
 from typing import Callable, Iterable, Literal
 import os
 import re
-import glob as _glob
+from wcmatch.glob import glob as _wc_glob, EXTGLOB, GLOBSTAR
 import numpy as np
 import warnings
 
@@ -415,9 +415,7 @@ def load_cumulative(ts: TimeSeries, field: str, input: str, reference:float=None
         cum_data -= cum_data[ref_idx]
     
     # Load in the TimeSeries object
-    ts.loadArray([time, cum_data], varName=field, verbose=verbose, dataFormat="row", **kwargs)    
-
-
+    ts.loadArray([time, cum_data], varName=field, verbose=verbose, dataFormat="row", **kwargs)
 
 ######################################################################
 def _resolve_per_file_kwargs(filepath: str, per_file_kwargs: dict | None, global_kwargs: dict) -> dict:
@@ -431,8 +429,8 @@ def _resolve_per_file_kwargs(filepath: str, per_file_kwargs: dict | None, global
 
 
 ######################################################################
-def load_files(ts: TimeSeries, field: str, files: str | list, root: str = None,
-               per_file_kwargs: dict = None, verbose: bool = True, **kwargs) -> None:
+def load_files(ts: TimeSeries, field: str, files: str | list, root: str | None = None,
+               per_file_kwargs: dict | None = None, verbose: bool = True, permissive: bool = False, **kwargs) -> None:
     """
     Load a field by merging multiple files (glob patterns allowed) into a TimeSeries object.
 
@@ -456,6 +454,7 @@ def load_files(ts: TimeSeries, field: str, files: str | list, root: str = None,
             All matching entries are merged on top of global **kwargs (later keys win).
             Defaults to None.
         verbose (bool, optional): Print progress information. Defaults to True.
+        permissive (bool, optional): If True, error conditions (no files found, empty files, file read errors) are treated as warnings and loading proceeds with the remaining valid files. Defaults to False.
         **kwargs: Global keyword arguments forwarded to every load_file call
             (e.g. x_col, y_col, x_scale, y_scale, skip_rows, comments, delimiter).
 
@@ -473,7 +472,7 @@ def load_files(ts: TimeSeries, field: str, files: str | list, root: str = None,
     checkType(root, str, "root", allowNone=True)
     checkType(per_file_kwargs, dict, "per_file_kwargs", allowNone=True)
     checkType(verbose, bool, "verbose")
-
+    checkType(permissive, bool, "permissive")
     # Validate per_file_kwargs regex keys up-front
     if per_file_kwargs is not None:
         for pattern in per_file_kwargs:
@@ -493,17 +492,20 @@ def load_files(ts: TimeSeries, field: str, files: str | list, root: str = None,
     seen: set[str] = set()
     for pattern in files:
         full_pattern = os.path.join(root, pattern) if root else pattern
-        matches = sorted(_glob.glob(full_pattern))  # sort alphabetically for determinism
+        matches = sorted(_wc_glob(full_pattern, flags=EXTGLOB | GLOBSTAR))
         for m in matches:
             if m not in seen:
                 resolved.append(m)
                 seen.add(m)
 
     if not resolved:
-        raise ValueError(
-            f"No files found for field '{field}'. Patterns searched: {files}"
-            + (f" (root: {root})" if root else "")
-        )
+        msg = f"No files found for field '{field}'. Patterns searched: {files}" + (f" (root: {root})" if root else "")
+        if permissive:
+            warnings.warn(msg, RuntimeWarning)
+            # Load an empty field with NaN values to avoid leaving ts without the requested field
+            return load_uniform(ts, field, value=float("nan"), verbose=verbose)
+        else:
+            raise ValueError(msg)
 
     if verbose:
         print(f"Loading field '{field}' from {len(resolved)} file(s)...")
@@ -541,8 +543,7 @@ def load_files(ts: TimeSeries, field: str, files: str | list, root: str = None,
         try:
             t_start, t_end = _peek(filepath, file_kwargs)
         except Exception as e:
-            e.add_note(f"Failed peeking time range for field '{field}'.")
-            raise
+            raise ValueError(f"Failed peeking time range for field '{field}': {e}") from e
         file_info.append((t_start, t_end, filepath, file_kwargs))
 
     # ------------------------------------------------------------------
@@ -589,8 +590,11 @@ def load_files(ts: TimeSeries, field: str, files: str | list, root: str = None,
         try:
             load_file(temp_ts, temp_name, filepath, verbose=verbose, **file_kwargs)
         except Exception as e:
-            e.add_note(f"Failed loading file '{filepath}' for field '{field}'.")
-            raise
+            if permissive:
+                warnings.warn(RuntimeWarning(f"Failed loading file '{filepath}' for field '{field}': {e}. Skipping this file."))
+                temp_field_names.pop()  # Remove the temp field name since loading failed
+                continue
+            raise ValueError(f"Failed loading file '{filepath}' for field '{field}': {e}") from e
 
     # ------------------------------------------------------------------
     # Stitch in temp_ts using 'begin' method
@@ -599,28 +603,49 @@ def load_files(ts: TimeSeries, field: str, files: str | list, root: str = None,
         # Single file: no stitching needed, just rename
         time = temp_ts[temp_ts.timeName].to_numpy()
         data = temp_ts[temp_field_names[0]].to_numpy()
+    elif len(temp_field_names) == 0:
+        if permissive:
+            warnings.warn(RuntimeWarning(f"No valid files loaded for field '{field}'. Loading an empty field with NaN values."))
+            return load_uniform(ts, field, value=float("nan"), verbose=verbose)
+        else:
+            raise ValueError(f"No valid files loaded for field '{field}'.")
     else:
         load_stitched(temp_ts, field, temp_field_names, stitchingMethod="begin", verbose=verbose)
         time = temp_ts[temp_ts.timeName].to_numpy()
         data = temp_ts[field].to_numpy()
 
+    if verbose:
+        print(f"  Successfully loaded {len(temp_field_names)} file(s).")
+        print(f"  Time range: [{time[0]:.6g}, {time[-1]:.6g}] with {len(time)} points.")
+    
     # ------------------------------------------------------------------
     # Load merged result into original ts
     # ------------------------------------------------------------------
     if len(ts) > 0:
+        ts_time = ts[ts.timeName].to_numpy()
+        # Extend ts_time to cover the full range of the merged files, if needed, to avoid dropping data outside ts's original time range.
+        if time[0] < ts_time[0]:
+            ts_time = np.concatenate((time[time < ts_time[0]], ts_time))
+        if time[-1] > ts_time[-1]:
+            ts_time = np.append(ts_time, time[time > ts_time[-1]])
+        result = np.full(len(ts_time), float("nan"))
+        
         # ts already has a time axis (e.g. cold-flow loaded first).
         # Interpolate per file segment so that ts time points falling in gaps
         # between files get NaN instead of being linearly interpolated across.
-        ts_time = ts[ts.timeName].to_numpy()
-        result = np.full(len(ts_time), float("nan"))
         for t_start, t_end, _, _ in deduped:
             mask = (ts_time >= t_start) & (ts_time <= t_end)
             seg  = (time   >= t_start) & (time   <= t_end)
             if np.any(mask) and np.any(seg):
                 result[mask] = np.interp(ts_time[mask], time[seg], data[seg])
-        ts.loadArray([ts_time, result], varName=field, verbose=verbose, dataFormat="row")
     else:
-        ts.loadArray([time, data], varName=field, verbose=verbose, dataFormat="row")
+        ts_time = time
+        result = data
+    
+    if verbose:
+        print(f"    Loading merged field '{field}' into TimeSeries object...")
+        print(f"    Final time range in TimeSeries: [{ts_time[0]:.6g}, {ts_time[-1]:.6g}] with {len(ts_time)} points.")
+    ts.loadArray([ts_time, result], varName=field, verbose=verbose, dataFormat="row")
 
 
 ######################################################################
