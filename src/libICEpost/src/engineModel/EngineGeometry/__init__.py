@@ -7,3 +7,4 @@ Package with models for a description of the kinematism of the engine and its ge
 
 from . import EngineGeometry
 from . import ConRod
+from . import Wankel
