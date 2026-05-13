@@ -40,7 +40,7 @@ class Dictionary(OrderedDict, Utilities):
     name:str
     
     #############################################################################
-    def __init__(self, *args, _fileName:str=None, _name:str="Dictionary", **argv):
+    def __init__(self, *args, _fileName:str|None=None, _name:str="Dictionary", **argv):
         """
         Same constructor as collections.OrderedDict class.
         """
@@ -106,7 +106,7 @@ class Dictionary(OrderedDict, Utilities):
         return this
         
     #############################################################################
-    def lookup(self, entryName:str, *, varType:T|Iterable[type]=None, **kwargs) -> T|Any:
+    def lookup(self, entryName:str, *, varType:type[T]|Iterable[type]|None=None, **kwargs) -> T|Any:
         """
         Same as __getitem__ but embeds error handling and type checking.
 
