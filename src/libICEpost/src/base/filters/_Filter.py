@@ -43,7 +43,7 @@ class Filter(BaseClass):
     #########################################################################
     #Dunder methods:
     @abstractmethod
-    def __call__(self, xp:Iterable[float], yp:Iterable[float])-> tuple[np.ndarray[float], np.ndarray[float]]:
+    def __call__(self, xp:Iterable[float], yp:Iterable[float])-> tuple[np.ndarray, np.ndarray]:
         """
         Filter an array of x,y data. Returns x sampling points and y coordinates
         
@@ -52,7 +52,7 @@ class Filter(BaseClass):
             yp (Iterable[float]): y coordinates
             
         Returns:
-            tuple[np.ndarray[float], np.ndarray[float]]: x sampling points and y filtered coordinates
+            tuple[np.ndarray, np.ndarray]: x sampling points and y filtered coordinates
         """
         checkArray(xp, float, "xp")
         checkArray(yp, float, "yp")

@@ -21,7 +21,7 @@ from libICEpost.src.base.Functions.typeChecking import checkType, checkArray
 #                               FUNCTIONS                           #
 #####################################################################
 
-def filter(ts:TimeSeries, filter:Filter, *, fields:Iterable[str]=None, verbose:bool=True) -> TimeSeries:
+def filter(ts:TimeSeries, filter:Filter, *, fields:Iterable[str]|None=None, verbose:bool=True) -> TimeSeries:
     """
     Apply a filter to the fields of a TimeSeries object, returning a
     new TimeSeries object with the filtered data.
@@ -29,7 +29,7 @@ def filter(ts:TimeSeries, filter:Filter, *, fields:Iterable[str]=None, verbose:b
     Args:
         ts (TimeSeries): The TimeSeries object to filter.
         filter (Filter): The filter to apply.
-        fields (Iterable[str], optional): The fields to filter. If None, all fields are filtered. Defaults to None.
+        fields (Iterable[str]|None, optional): The fields to filter. If None, all fields are filtered. Defaults to None.
         verbose (bool, optional): Whether to print information about the filtering process. Defaults to True.
     """
     checkType(ts, TimeSeries, "ts")

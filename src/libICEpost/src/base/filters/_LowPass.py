@@ -27,7 +27,7 @@ from libICEpost import Dictionary
 from libICEpost.src.base.Functions.typeChecking import checkType
 from libICEpost.src.base.Functions.runtimeWarning import helpOnFail
 
-from typing import Iterable
+from typing import Iterable, Sequence
 
 #############################################################################
 #                               MAIN CLASSES                                #
@@ -59,6 +59,16 @@ class LowPass(Filter):
         """
         return self._order
     
+    @property
+    def reltol(self) -> float:
+        """
+        Relative tolerance for pre-processing
+
+        Returns:
+            float
+        """
+        return self._reltol
+    
     #########################################################################
     #Class methods and static methods:
     @classmethod
@@ -68,6 +78,7 @@ class LowPass(Filter):
         Create from dictionary with the following entries:
             - `cutoff` (`float`): the cutoff frequency
             - `order` (`int`, optional): the order of the filter. Defaults to 5.
+            - `reltol` (`float`, optional): the relative tolerance for pre-processing. Defaults to 1e-3.
         
         Args:
             dictionary (dict): the dictionary with the entries
@@ -80,24 +91,28 @@ class LowPass(Filter):
         
         #Constructing this class with the specific entries
         data = {"cutoff":dictionary.lookup("cutoff")}
-        if "order" in dictionary: data["order"] = dictionary.lookup("order")
+        if "order" in dictionary: data["order"] = dictionary.lookup("order", varType=int)
+        if "reltol" in dictionary: data["reltol"] = dictionary.lookup("reltol", varType=float)
         
         return cls(**data)
     
     #########################################################################
-    def __init__(self, cutoff:float, *, order:int=5):
+    def __init__(self, cutoff:float, *, order:int=5, reltol:float=1e-3):
         """
         Create a low-pass filter with a given cutoff frequency and order.
         
         Args:
             cutoff (float): The cur-off frequency
             order (int, optional): The order of the filter. Defaults to 5.
+            reltol (float, optional): The relative tolerance between xp points to aggregate them in the pre-processing step. This is used to avoid resampling on a very fine grid when there are points that are very close to each other due to numerical issues. Points are discarded when (xp[i+1] - xp[i]) / mean(diff(xp)) < reltol. Defaults to 1e-3.
         """
         #Argument checking:
         #Type checking
         checkType(cutoff, float, "cutoff")
         checkType(order, int, "order")
-
+        checkType(reltol, float, "reltol")
+        if not 0 < reltol < 1:
+            raise ValueError(f"reltol must be between 0 and 1. Got {reltol}")
         if cutoff <= 0:
             raise ValueError(f"cutoff must be positive. Got {cutoff}")
         if order <= 0:
@@ -105,10 +120,11 @@ class LowPass(Filter):
         
         self._cutoff = cutoff
         self._order = order
+        self._reltol = reltol
     
     #########################################################################
     #Dunder methods:
-    def __call__(self, xp:Iterable[float], yp:Iterable[float])-> tuple[np.ndarray[float], np.ndarray[float]]:
+    def __call__(self, xp:Iterable[float], yp:Iterable[float])-> tuple[np.ndarray, np.ndarray]:
         #Type checking and recasting to numpy arrays
         xp, yp = Filter.__call__(self, xp, yp)
         
@@ -122,14 +138,14 @@ class LowPass(Filter):
     
     ###################################
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(cutoff:{self.cutoff}, order:{self.order})"
+        return f"{self.__class__.__name__}(cutoff:{self.cutoff}, order:{self.order}, reltol:{self.reltol})"
     
     def __str__(self) -> str:
         return self.__repr__()
     
     #########################################################################
     #Methods:
-    def _butter_lowpass(self, cutoff:float, fs:float, order:int=5):
+    def _butter_lowpass(self, cutoff:float, fs:float, order:int=5) -> tuple[np.ndarray, np.ndarray]:
         """
         Compute the Butterworth low-pass filter coefficients (b,a) for a given cutoff frequency and order.
         
@@ -139,31 +155,33 @@ class LowPass(Filter):
             order (int, optional): The order of the filter. Defaults to 5.
         
         Returns:
-            tuple[np.ndarray[float], np.ndarray[float]]: The filter coefficients (b,a)
+            tuple[np.ndarray, np.ndarray]: The filter coefficients (b,a)
         """
         nyq = 0.5 * fs
         normal_cutoff = cutoff / nyq
-        b, a = butter(order, normal_cutoff, btype='low', analog=False)
-        return b, a
+        b, a = butter(order, normal_cutoff, btype='low', analog=False) #type: ignore
+        return b, a #type: ignore
     
     ###################################
-    def _butter_lowpass_filter(self, data:Iterable[float], cutoff:float, fs:float, order:int=5):
+    def _butter_lowpass_filter(self, data:Sequence[float] | np.ndarray, cutoff:float, fs:float, order:int=5):
         """
         Apply the Butterworth low-pass filter to a given data array.
         
         Args:
-            data (Iterable[float]): The data to filter
+            data (Sequence[float] | np.ndarray): The data to filter
             cutoff (float): The cutoff frequency
             fs (float): The sampling frequency
             order (int, optional): The order of the filter. Defaults to 5.
             
         Returns:
-            np.ndarray[float]: The filtered data
+            np.ndarray: The filtered data
         """
         #Data should be already checked by the __call__ method
         checkType(cutoff, float, "cutoff")
         checkType(fs, float, "fs")
         checkType(order, int, "order")
+        
+        data = np.array(data)
         
         #Get the filter coefficients
         b, a = self._butter_lowpass(cutoff, fs, order=order)
@@ -186,17 +204,24 @@ class LowPass(Filter):
         return y
     
     ###################################
-    def _preProcess(self, xp:Iterable[float], yp:Iterable[float])-> tuple[Iterable[float],Iterable[float],float]:
+    def _preProcess(self, xp:Iterable[float], yp:Iterable[float])-> tuple[np.ndarray, np.ndarray, float]:
         """
         Pre-process data to uniform time-step (equal to minimum time-step found in list), since the filter 
         requires a uniform grid.
         
         Returns:
-            tuple[Iterable[float],Iterable[float],float]: The resampled x and y data and the delta-x
+            tuple[np.ndarray, np.ndarray, float]: The resampled x and y data and the delta-x
         """
         #Cast to numpy array
         xp = np.array(xp)
         yp = np.array(yp)
+        
+        # Discard points that are too close to each other, since they can cause numerical issues in the filter. Points are discarded when (xp[i+1] - xp[i]) / mean(diff(xp)) < reltol
+        diff_xp = np.diff(xp)
+        mean_diff_xp = np.mean(diff_xp)
+        where = np.invert(diff_xp / mean_diff_xp < self.reltol)
+        xp = xp[np.append(where, True)]
+        yp = yp[np.append(where, True)]
         
         delta = min(np.diff(xp))
         n = int((xp[-1] - xp[0]) / delta)
@@ -207,9 +232,9 @@ class LowPass(Filter):
     
     ###################################
     def plot(self, xp:Iterable[float], yp:Iterable[float], *, 
-             xName:str=None,
-             yName:str=None,
-             freqUnits:str=None
+             xName:str|None=None,
+             yName:str|None=None,
+             freqUnits:str|None=None
              ) -> tuple[Figure, Iterable[Axes]]:
         """
         Plot the frequency and time domain of the original and filtered data, with the filter FRF.
@@ -237,7 +262,7 @@ class LowPass(Filter):
         
         #Filter
         b, a = self._butter_lowpass(self.cutoff, 1./delta, order=self.order)
-        w, h = freqz(b, a, worN=8000)
+        w, h = freqz(b, a, worN=8000) #type: ignore
         
         #Original FT
         RMS = np.sqrt(np.mean(y**2.))
