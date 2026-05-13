@@ -14,7 +14,7 @@ Last update:        12/06/2023
 #Typing
 from __future__ import annotations
 from types import FunctionType
-from typing import Iterable, Callable
+from typing import Iterable, Callable, Self
 from matplotlib.axes import Axes
 
 #Other
@@ -22,6 +22,7 @@ from operator import attrgetter
 import os
 from tqdm import tqdm
 import traceback
+import copy as cp
 
 #Plotting
 import numpy as np
@@ -148,6 +149,9 @@ class EngineModel(BaseClass):
     
     info:Dictionary
     """General information for pre-post processing"""
+    
+    initialConditions:Dictionary
+    """Initial conditions for the thermodynamic models"""
     
     #########################################################################
     # Properties
@@ -511,7 +515,10 @@ class EngineModel(BaseClass):
         #TODO: Update the reactants mixture based on injection models (may have already injected some mass)
         
         #All data
-        index = self.data.index[self.data.loc[:,'CA'] == self.time.time].tolist()[0]
+        index = self.data.index[self.data.loc[:,'CA'] == self.time.time].tolist()
+        if len(index) == 0:
+            raise ValueError(f"No data available at time {self.time.time}.")
+        index = index[0]
         data = self.data.loc[index].to_dict()
         
         self.CombustionModel.update(**data) #NOTE: update also fuel when implementing injection models
@@ -550,7 +557,7 @@ class EngineModel(BaseClass):
         return self
     
     ####################################
-    def loadData(self, dataPath:str=None, *, data:dict[str,dict[str,object]]) -> EngineModel:
+    def loadData(self, dataPath:str|None=None, *, data:dict[str,dict[str,object]]|Dictionary) -> EngineModel:
         """
         Load raw data.
         
@@ -571,13 +578,13 @@ class EngineModel(BaseClass):
         
         #Cast to Dictionary
         if not isinstance(data, Dictionary):
-            data = Dictionary(**data, _name="data")
+            data = Dictionary(**data, _name="data", _fileName=None)
         self.info["data"] = data
         
         #Load data:
         for zone in self.Zones:
             print(f"Loading data for zone {zone}")
-            zoneDict:Dictionary = data.lookup(zone, varType=Dictionary)
+            zoneDict = data.lookup(zone, varType=Dictionary)
             
             #Check that pressure is found (mandatory)
             if (not "p" in zoneDict) and (not "p" in self.raw.columns):
@@ -677,7 +684,7 @@ class EngineModel(BaseClass):
         return self
     
     ####################################
-    def filterData(self, filter:Filter=None) -> EngineModel:
+    def filterData(self, filter:Filter|None=None) -> EngineModel:
         """
         Filter the data in self.raw and save the corresponding filtered data to self.data.
         If filter is None, data are cloned from self.raw (i.e. no filter is applied).
@@ -698,51 +705,32 @@ class EngineModel(BaseClass):
         return self
     
     ####################################
-    def initializeThemodynamicModels(self, **initialConditions) -> EngineModel:
+    def initializeThemodynamicModels(self) -> EngineModel:
         """
-        Set the initial conditions of all thermodynamic regions of the EngineModel.
-        For region to be initialized, a dict is given for the inital conditions,
-        according to the following convention:
-        
-        ->  If a float is given, the value is used
-        ->  If a str is given, it refers to the name of the vabiables stored in the EngineModel,
-            in which case the corresponding initial condition is sampled from the the corresponding
-            data-set at self.time.startTime.
-        ->  If string starting with @ is given, it applies that method with input (self.time.startTime)
-
-        Ex:
-        {
-            "pressure": "p",            #This interpolates self.data.p at self.time.startTime
-            "mass": 1.2e-3,             #Value
-            "volume": "@geometry.V"     #Evaluates self.geometry.V(self.time.startTime)
-        }
-        
-        Args:
-            **initialConditions:  data initialization of each zone in the model.
+        Initialize the thermodynamic models of the system based on the loaded data and the initial conditions.
         """
         #Update start-time of engine time so that it is bounded to first avaliable time-step
         
-        if not "CA" in self.data.columns:
-            raise ValueError("No data loaded yet.")
-        
-        #Set start-time
-        self.time.updateStartTime(self.data.loc[:,"CA"])
-        self.info["time"] = self.time.time
-        
-        #Update the mixtures at start-time (combustion models, injection models, etc.)
-        self._updateMixtures()
-        
-        initialConditions = Dictionary(**initialConditions)
-        #Store initial conditions
-        self.info["initialConditions"] = initialConditions
-        
-        for zone in self.Zones:
-            zoneDict = initialConditions.lookup(zone)
-            self.checkType(zoneDict, dict, "zoneDict")
+        try:
+            if not "CA" in self.data.columns:
+                raise ValueError("No data loaded yet.")
             
-            attrgetter("_" + zone)(self).initializeState(**self._preprocessThermoModelInput(zoneDict, zone=zone))
-        
-        return self
+            #Set start-time
+            self.time.updateStartTime(self.data.loc[:,"CA"])
+            self.info["time"] = self.time.time
+            
+            #Update the mixtures at start-time (combustion models, injection models, etc.)
+            self._updateMixtures()
+            
+            for zone in self.Zones:
+                zoneDict = self.initialConditions.lookup(zone)
+                self.checkType(zoneDict, dict, "zoneDict")
+                
+                attrgetter("_" + zone)(self).initializeState(**self._preprocessThermoModelInput(zoneDict, zone=zone))
+            
+            return self
+        except Exception as err:
+            raise RuntimeError(f"Failed to initialize the themodynamic models: {err}") from err
     
     ####################################
     def _preprocessThermoModelInput(self, inputDict:dict, zone:str) -> dict:
@@ -800,7 +788,7 @@ class EngineModel(BaseClass):
         return outputDict
     
     ####################################
-    def preProcess(self, dataPath:str=None, *, data:dict|Dictionary, preProcessing:dict|Dictionary=None, initialConditions:dict|Dictionary, **junk) -> EngineModel:
+    def preProcess(self, dataPath:str|None=None, *, data:dict|Dictionary, preProcessing:dict|Dictionary|None=None, initialConditions:dict|Dictionary, **junk) -> EngineModel:
         """
         Pre-processing:
             1) Loading data (from files or arrays)
@@ -831,7 +819,7 @@ class EngineModel(BaseClass):
         self.loadData(dataPath, data=data)
         
         # Filtering data
-        filter = None
+        filter:Filter|None = None
         if not preProcessing is None:
             if not isinstance(preProcessing, Dictionary):
                 #Cast to dictionary
@@ -843,7 +831,7 @@ class EngineModel(BaseClass):
                 pass
             elif isinstance(filterType, str):
                 #Got type name for run-time construction
-                filter:Filter = Filter.selector(filterType, preProcessing.lookup(f"{filterType}Dict"))
+                filter = Filter.selector(filterType, preProcessing.lookup(f"{filterType}Dict"))
             elif isinstance(filterType, Filter):
                 #Got Filter item
                 filter = filterType
@@ -855,11 +843,35 @@ class EngineModel(BaseClass):
         #Store
         self.info["preProcessing"] = preProcessing
         
-        #Initial conditions for thermodinamic models:
-        self.initializeThemodynamicModels(**initialConditions)
+        self.setInitialConditions(**initialConditions)
         
         return self
+    
+    def setInitialConditions(self, **initialConditions) -> Self:
+        """
+        Set the initial conditions of all thermodynamic regions of the EngineModel.
+        For region to be initialized, a dict is given for the inital conditions,
+        according to the following convention:
         
+        ->  If a float is given, the value is used
+        ->  If a str is given, it refers to the name of the vabiables stored in the EngineModel,
+            in which case the corresponding initial condition is sampled from the the corresponding
+            data-set at self.time.startTime.
+        ->  If string starting with @ is given, it applies that method with input (self.time.startTime)
+
+        Ex:
+        {
+            "pressure": "p",            #This interpolates self.data.p at self.time.startTime
+            "mass": 1.2e-3,             #Value
+            "volume": "@geometry.V"     #Evaluates self.geometry.V(self.time.startTime)
+        }
+        """
+        self.initialConditions = Dictionary(**cp.deepcopy(initialConditions))
+        
+        #Store initial conditions
+        self.info["initialConditions"] = initialConditions
+        return self
+    
     #########################################################################
     #Processing methods:
     def process(self) -> EngineModel:
@@ -915,6 +927,9 @@ class EngineModel(BaseClass):
                 super()._process__pre__()
                 ...
         """
+        #Initial conditions for thermodinamic models:
+        self.initializeThemodynamicModels()
+        
         #Add fields to data:
         fields = {"dpdCA", "AHRR", "ROHR", "A"}
         for zone in self.Zones:
@@ -922,16 +937,6 @@ class EngineModel(BaseClass):
         for f in fields:
             if not f in self.data.columns:
                 self.data.loc[:,f] = float("nan")
-        
-        #Loop over zones to set mixture compositions
-        for zone in self.Zones:
-            postfix = get_postfix(zone)
-            Z:ThermoModel = getattr(self, f"_{zone}")
-            
-            # #Specie
-            # for specie in Z.mixture.mix:
-            #     self.data.loc[:,specie.specie.name + "_x" + postfix] = 0.0
-            #     self.data.loc[:,specie.specie.name + "_y" + postfix] = 0.0
         
         #Store at startTime
         self._storeLatestTime()
@@ -1098,7 +1103,7 @@ class EngineModel(BaseClass):
         Yarray = data.loc[:,y].copy()
         Yarray[np.isnan(Yarray)] = 0.0
         
-        return integrate.trapz(Yarray, x=data.loc[:,x])
+        return integrate.trapezoid(Yarray, x=data.loc[:,x])
     
     ####################################
     def cumulativeIntegral(self, y:str, *, x:str="CA", start:float=None) -> np.ndarray:
@@ -1194,7 +1199,7 @@ class EngineModel(BaseClass):
         data = self.data.iloc[index]
         data.loc[index,"V"] = self.geometry.V(data.loc[:,"CA"])
         
-        return integrate.trapz(data.loc[:,"p"], x=data.loc[:,"V"])
+        return integrate.trapezoid(data.loc[:,"p"], x=data.loc[:,"V"])
     
     ####################################
     def plotPV(self, /,*,start:float=None, end:float=None, loglog:bool=True, timingsParams:dict=dict(), showTimings:bool=True, ax:Axes=None, **kwargs):

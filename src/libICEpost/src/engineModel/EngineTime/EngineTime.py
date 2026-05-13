@@ -261,10 +261,10 @@ class EngineTime(BaseClass):
         st = timeList[timeList >= self.startTime]
         if len(st) > 0:
             self.startTime = st[0]
-            self.time = self.startTime
-            self.oldTime = self.startTime
         else:
             warnings.warn("Cannot update start time: no time in timeList is greater than or equal to startTime.", RuntimeWarning)
+        self.time = self.startTime
+        self.oldTime = self.startTime
     
 #############################################################################
 EngineTime.createRuntimeSelectionTable()
