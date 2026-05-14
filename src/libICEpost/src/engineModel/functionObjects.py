@@ -255,7 +255,7 @@ class EstimateBurntUnburntProperties(ZoneFunctionObject):
     densityRatio:float
     """Density ratio rhou/rhob"""
     
-    reactor:ct.Solution
+    reactor:ct.composite.Solution
     """The cantera reactor to compute properties at adiabati flame temperature at start of combustion"""
     
     unburnt:ThermoModel
@@ -288,7 +288,7 @@ class EstimateBurntUnburntProperties(ZoneFunctionObject):
         
         if not mechanism is None:
             self.checkType(mechanism, str, "mechanism")
-            self.reactor = ct.Solution(mechanism)
+            self.reactor = ct.composite.Solution(mechanism)
         if not densityRatio is None:
             self.checkType(densityRatio, float, "densityRatio")
             self.densityRatio = densityRatio
