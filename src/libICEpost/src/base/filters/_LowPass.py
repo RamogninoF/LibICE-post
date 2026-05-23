@@ -215,7 +215,10 @@ class LowPass(Filter):
         #Cast to numpy array
         xp = np.array(xp)
         yp = np.array(yp)
-        
+
+        if len(xp) != len(yp):
+            raise ValueError(f"xp and yp must have the same length, got {len(xp)} and {len(yp)}.")
+
         # Discard points that are too close to each other, since they can cause numerical issues in the filter. Points are discarded when (xp[i+1] - xp[i]) / mean(diff(xp)) < reltol
         diff_xp = np.diff(xp)
         mean_diff_xp = np.mean(diff_xp)
