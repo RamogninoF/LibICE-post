@@ -31,6 +31,8 @@ from scipy import integrate
 from typing import Callable, Iterable, Literal
 import os
 import re
+import inspect
+import math
 from wcmatch.glob import glob as _wc_glob, EXTGLOB, GLOBSTAR
 import numpy as np
 import warnings
@@ -264,8 +266,17 @@ def load_calculated(ts: TimeSeries, field: str, function: Callable, verbose:bool
     if field in ts.columns and verbose:
         print(f"Field '{field}' already exists in the TimeSeries object. Overwriting...")
         
-    # Get the arguments of the function
-    args = function.__code__.co_varnames[:function.__code__.co_argcount]
+    # Get the positional arguments via inspect to handle non-lambda callables
+    # and avoid __code__ brittleness (breaks for builtins, C extensions, keyword-only args).
+    try:
+        sig = inspect.signature(function)
+    except (ValueError, TypeError):
+        raise TypeError(f"Cannot introspect signature of {function!r}. Use a plain Python function or lambda.")
+    args = tuple(
+        name for name, p in sig.parameters.items()
+        if p.kind in (inspect.Parameter.POSITIONAL_ONLY,
+                      inspect.Parameter.POSITIONAL_OR_KEYWORD)
+    )
     
     # Load the field as a function of data already in the TimeSeries object
     if verbose:
@@ -291,73 +302,94 @@ def load_calculated(ts: TimeSeries, field: str, function: Callable, verbose:bool
     ts.loadArray([time, out], varName=field, verbose=verbose, dataFormat="row", **kwargs)
 
 #######################################################################
-def load_stitched(ts: TimeSeries, field:str, fields: Iterable[str], stitchingMethod:Literal["begin", "end", "user-defined"], times:Iterable[float]=None, verbose:bool=True, **kwargs) -> None:
+def load_stitched(ts: TimeSeries, field:str, fields: list[str], stitchingMethod:Literal["begin", "end", "user-defined"], times:list[float]|None=None, verbose:bool=True, **kwargs) -> None:
     """
     Stitch multiple fields together into a TimeSeries object.
-    
+
     Args:
         ts (TimeSeries): TimeSeries object to load the fields into.
         field (str): Name of the field to create from the stitched fields.
-        fields (Iterable[str]): Names of the fields to stitch together.
+        fields (list[str]): Names of the fields to stitch together.
         stitchingMethod (str): Method to stitch the fields. Can be one of the following:
             - `begin`: Stitch fields at the first non-nan value of the following field.
             - `end`: Stitch fields at the last non-nan value of the previous field.
             - `user-defined`: Stitch fields at user-defined points.
-        times (Iterable[float], optional): User-defined times to stitch the fields together. Required if stitching method is `user-defined`, with length 1 less then `fields`.
+        times (list[float], optional): User-defined times to stitch the fields together.
+            Required if stitching method is `user-defined`, with length 1 less than `fields`.
         verbose (bool, optional): If True, print information about the loading process. Default is True.
         **kwargs: Additional keyword arguments to pass to the loading function.
-        
+
     Returns:
         None
     """
     checkType(ts, TimeSeries, "ts")
     checkArray(fields, str, "fields", allowEmpty=False)
     checkType(verbose, bool, "verbose")
-    
+
+    fields = list(fields)  # ensure subscriptable regardless of input type
+
     if not stitchingMethod in ("begin", "end", "user-defined"):
         raise ValueError(f"Method '{stitchingMethod}' is not valid. Must be one of 'begin', 'end', or 'user-defined'.")
-    
+
     # Check if the fields are already in the TimeSeries object
     if field in ts.columns and verbose:
         print(f"Field '{field}' already exists in the TimeSeries object. Overwriting...")
-        
+
     for f in fields:
         if f not in ts.columns:
             raise FieldDependencyError(f"Field '{f}' not found in TimeSeries object. Available fields are: {ts.columns}")
-    
+
     # Load the fields as a stitched array
     if verbose:
         print(f"Stitching fields {fields} together...")
-        
-    # Construct the times where to stitch the fields
+
+    # Construct the stitch times
+    stitch_times: list[float | None]
     if stitchingMethod == "user-defined":
         checkArray(times, float, "times")
-        if len(times) != len(fields) - 1:
-            raise ValueError(f"Number of times ({len(times)}) must be one less than the number of fields ({len(fields)}).")
+        if len(times) != len(fields) - 1:  # type: ignore[arg-type]
+            raise ValueError(f"Number of times ({len(times)}) must be one less than the number of fields ({len(fields)}).")  # type: ignore[arg-type]
+        stitch_times = list(times)  # type: ignore[arg-type]
     elif stitchingMethod == "begin":
-        # Look for the first non-nan value of the following field
+        # First non-nan index of the following field marks the start of that segment
         idx = [ts[f].first_valid_index() for f in fields[1:]]
-        times = [ts[ts.timeName][ii] if ii is not None else None for ii in idx]
+        t_arr = ts[ts.timeName].to_numpy()
+        stitch_times = [float(t_arr[int(ii)]) if ii is not None else None  # type: ignore[arg-type]
+                        for ii in idx]
     elif stitchingMethod == "end":
-        # Look for the last non-nan value of the previous field
-        idx = [ts[f].first_valid_index() for f in fields[:-1]]
-        times = [ts[ts.timeName][ii] if ii is not None else None for ii in idx]
+        # Stitch after the last non-nan index of the previous field:
+        # the previous field keeps its last valid step; the next field starts
+        # at the following time point.
+        idx = [ts[f].last_valid_index() for f in fields[:-1]]
+        t_arr = ts[ts.timeName].to_numpy()
+        stitch_times = [float(t_arr[int(ii) + 1]) if ii is not None else None  # type: ignore[arg-type]
+                        for ii in idx]
     else:
         raise ValueError(f"Method '{stitchingMethod}' is not valid. Must be one of 'begin', 'end', or 'user-defined'.")
-    
+
     # Check that the times are valid
-    if any(t is None for t in times):
-        raise ValueError("Some times are None. This means that some field is non-nan everywhere, so the begin/end for automatic stiching cannot be computed. Use 'user-defined' method to specify the times manually.")
-    
+    if any(t is None for t in stitch_times):
+        raise ValueError("Some times are None. This means that some field is non-nan everywhere, so the begin/end for automatic stitching cannot be computed. Use 'user-defined' method to specify the times manually.")
+
+    valid_times: list[float] = stitch_times  # type: ignore[assignment]
+
     if verbose:
-        print(f"Stitching times:\n" + f"{ts[ts.timeName][0]:.3g}" + " -> " + " -> ".join([f"{f} -> {time:.3g}" for f, time in zip(fields, times + [ts[ts.timeName].to_numpy()[-1]])]))
-    
+        t0 = float(ts[ts.timeName].iloc[0])
+        t_end = float(ts[ts.timeName].to_numpy()[-1])
+        print(f"Stitching times:\n{t0:.3g} -> " + " -> ".join([f"{f} -> {t:.3g}" for f, t in zip(fields, valid_times + [t_end])]))
+
     # Compute the stitched data
     index = []
-    extended_times = [ts[ts.timeName][0]] + times + [ts[ts.timeName].to_numpy()[-1]]
+    t0 = float(ts[ts.timeName].iloc[0])
+    t_end = float(ts[ts.timeName].to_numpy()[-1])
+    extended_times: list[float] = [t0] + valid_times + [t_end]
     for i in range(len(fields)):
-        index.append(ts.index[(ts[ts.timeName] >= extended_times[i]) & (ts[ts.timeName] < extended_times[i + 1])].to_list())
-    index[-1].append(ts.index[-1])  # Ensure the last index includes the last time step
+        t_lo, t_hi = extended_times[i], extended_times[i + 1]
+        if i < len(fields) - 1:
+            mask = (ts[ts.timeName] >= t_lo) & (ts[ts.timeName] < t_hi)
+        else:
+            mask = (ts[ts.timeName] >= t_lo) & (ts[ts.timeName] <= t_hi)
+        index.append(ts.index[mask.to_numpy()].to_list())
     
     # Merge the data from the fields at the specified indices
     data = sum([ts.loc[idx,f].tolist() for f, idx in zip(fields, index)], [])
@@ -404,14 +436,15 @@ def load_cumulative(ts: TimeSeries, field: str, input: str, reference:float=None
     data = ts[input].to_numpy()
     
     # Compute the cumulative integral
-    cum_data = integrate.cumtrapz(data, time, initial=0.0)
+    cum_data = integrate.cumulative_trapezoid(data, time, initial=0.0)
     if reference is not None:
+        if reference < time[0]:
+            raise ValueError(f"Reference time {reference} is before the first time step {time[0]}.")
+        if reference > time[-1]:
+            raise ValueError(f"Reference time {reference} is after the last time step {time[-1]}.")
         if verbose:
             print(f"Setting cumulative integral to zero at reference time {reference}...")
-        # Set the cumulative integral to zero at the reference time
-        ref_idx = (time >= reference).argmax()
-        if ref_idx == 0:
-            raise ValueError(f"Reference time {reference} is before the first time step in the TimeSeries object.")
+        ref_idx = int((time >= reference).argmax())
         cum_data -= cum_data[ref_idx]
     
     # Load in the TimeSeries object
@@ -465,6 +498,12 @@ def load_files(ts: TimeSeries, field: str, files: str | list, root: str | None =
         ValueError: If no files are resolved from the given patterns.
         ValueError: If a resolved file contains no valid data rows.
         TypeError: If arguments have wrong types.
+        FieldDependencyError: When ``permissive=True`` and no valid files are loaded
+            (or no files match), a NaN placeholder field is written via
+            :func:`load_uniform`. This requires ``ts`` to already contain a
+            non-empty time axis. If ``ts`` is empty a ``FieldDependencyError``
+            is raised even with ``permissive=True`` — this is **intentional**:
+            there is no time grid on which to define the placeholder.
     """
     checkType(ts, TimeSeries, "ts")
     checkType(field, str, "field")
@@ -559,7 +598,7 @@ def load_files(ts: TimeSeries, field: str, files: str | list, root: str | None =
     while i < len(file_info):
         group = [file_info[i]]
         j = i + 1
-        while j < len(file_info) and file_info[j][0] == file_info[i][0]:
+        while j < len(file_info) and math.isclose(file_info[j][0], file_info[i][0], rel_tol=1e-9, abs_tol=1e-9):
             group.append(file_info[j])
             j += 1
         # Keep the one with max t_end
@@ -783,24 +822,21 @@ def loadField(ts: TimeSeries, field: str, method:Literal["file", "array", "unifo
     Returns:
         TimeSeries|None: The TimeSeries object with the loaded field if inplace is False, otherwise None.
     """
-    # Type checking
+    # Type checking — all checks before any branching
     checkType(ts, TimeSeries, "ts")
-    
-    if not inplace:
-        # Create a new TimeSeries object
-        ts = ts.copy()
-        loadField(ts, field, method, inplace=True, verbose=verbose, **kwargs)
-        return ts
-    
-    # Type checking
     checkType(field, str, "field")
     checkType(method, str, "method")
     checkType(inplace, bool, "inplace")
     checkType(verbose, bool, "verbose")
-    
+
+    if not inplace:
+        ts = ts.copy()
+        loadField(ts, field, method, inplace=True, verbose=verbose, **kwargs)
+        return ts
+
     # Cast the method to the enum
     method_ = LoadingMethod(method).value
-    
+
     # Run the appropriate loading method
     if method_ == LoadingMethod.file:
         load_file(ts, field, **kwargs, verbose=verbose)
@@ -820,5 +856,3 @@ def loadField(ts: TimeSeries, field: str, method:Literal["file", "array", "unifo
         load_files(ts, field, **kwargs, verbose=verbose)
     elif method_ in (LoadingMethod.conditional, LoadingMethod.cond):
         load_conditional(ts, field, **kwargs, verbose=verbose)
-    else: # This should never happen if the enum is used correctly
-        raise RuntimeError(f"Something went wrong...")

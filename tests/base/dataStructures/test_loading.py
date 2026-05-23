@@ -1,8 +1,8 @@
 import pytest
 from libICEpost.src.base.dataStructures._loading import (
     load_file, load_array, load_uniform, load_function, load_calculated,
-    load_files, load_stitched, load_conditional, loadField, LoadingMethod,
-    FieldDependencyError,
+    load_cumulative, load_files, load_stitched, load_conditional,
+    loadField, LoadingMethod, FieldDependencyError,
 )
 from libICEpost.src.base.dataStructures._TimeSeries import TimeSeries
 import tempfile
@@ -482,3 +482,218 @@ def test_loadField_cond_alias():
     loadField(ts, field="res", method="cond",
               f1="a", operator=">", f2="b", verbose=False)
     assert ts["res"].tolist() == pytest.approx([4.0, 5.0, 3.0, 6.0])
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# load_stitched tests
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _make_stitched_ts():
+    """
+    TimeSeries with time=[0..5] and two overlapping fields:
+      A: valid at t=0,1,2,3  (NaN at t=4,5)
+      B: valid at t=2,3,4,5  (NaN at t=0,1)
+    """
+    nan = float("nan")
+    ts = TimeSeries()
+    time = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0]
+    ts.loadArray([time, [10.0, 20.0, 30.0, 40.0, nan, nan]], varName="A",
+                 dataFormat="row", verbose=False)
+    ts.loadArray([time, [nan, nan, 200.0, 300.0, 400.0, 500.0]], varName="B",
+                 dataFormat="row", verbose=False)
+    return ts
+
+
+def test_load_stitched_begin():
+    """'begin' stitches at the first non-NaN index of the *following* field."""
+    ts = _make_stitched_ts()
+    # B's first valid index is at t=2; A covers [0,2), B covers [2,5]
+    load_stitched(ts, "result", ["A", "B"], stitchingMethod="begin", verbose=False)
+    result = ts["result"].tolist()
+    assert result == pytest.approx([10.0, 20.0, 200.0, 300.0, 400.0, 500.0])
+
+
+def test_load_stitched_end():
+    """'end' stitches at the last non-NaN index of the *previous* field (was using first_valid_index — bug)."""
+    ts = _make_stitched_ts()
+    # A's last valid index is at t=3; A covers [0,3], B covers (3,5]
+    load_stitched(ts, "result", ["A", "B"], stitchingMethod="end", verbose=False)
+    result = ts["result"].tolist()
+    # t=0,1,2,3 → A; t=4,5 → B
+    assert result == pytest.approx([10.0, 20.0, 30.0, 40.0, 400.0, 500.0])
+
+
+def test_load_stitched_end_differs_from_begin():
+    """Confirm 'end' and 'begin' produce different results when valid ranges overlap."""
+    ts = _make_stitched_ts()
+    load_stitched(ts, "r_begin", ["A", "B"], stitchingMethod="begin", verbose=False)
+    load_stitched(ts, "r_end",   ["A", "B"], stitchingMethod="end",   verbose=False)
+    # begin switches at t=2, end switches at t=3 — values at t=2 and t=3 differ
+    assert ts["r_begin"].tolist() != ts["r_end"].tolist()
+
+
+def test_load_stitched_user_defined():
+    """'user-defined' stitches at explicitly supplied times."""
+    ts = _make_stitched_ts()
+    # Switch from A to B at t=2.5 (between t=2 and t=3)
+    # t < 2.5 → A index {0,1,2}; t >= 2.5 → B index {3,4,5}
+    load_stitched(ts, "result", ["A", "B"], stitchingMethod="user-defined",
+                  times=[2.5], verbose=False)
+    result = ts["result"].tolist()
+    assert result[:3] == pytest.approx([10.0, 20.0, 30.0])
+    assert result[3:] == pytest.approx([300.0, 400.0, 500.0])
+
+
+def test_load_stitched_wrong_times_length():
+    """user-defined with wrong number of times raises ValueError."""
+    ts = _make_stitched_ts()
+    with pytest.raises(ValueError):
+        load_stitched(ts, "result", ["A", "B"], stitchingMethod="user-defined",
+                      times=[1.0, 2.0], verbose=False)
+
+
+def test_load_stitched_missing_field():
+    """Referencing a non-existent field raises FieldDependencyError."""
+    ts = _make_stitched_ts()
+    with pytest.raises(FieldDependencyError):
+        load_stitched(ts, "result", ["A", "nonexistent"], stitchingMethod="begin",
+                      verbose=False)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# load_cumulative tests
+# ─────────────────────────────────────────────────────────────────────────────
+
+def test_load_cumulative_basic():
+    """Cumulative integral of a constant field is a ramp."""
+    ts = TimeSeries()
+    time = [0.0, 1.0, 2.0, 3.0]
+    ts.loadArray([time, [1.0, 1.0, 1.0, 1.0]], varName="rate",
+                 dataFormat="row", verbose=False)
+    load_cumulative(ts, "cum", input="rate", verbose=False)
+    # integral of 1 from 0 → [0, 1, 2, 3]
+    assert ts["cum"].tolist() == pytest.approx([0.0, 1.0, 2.0, 3.0])
+
+
+def test_load_cumulative_reference_midpoint():
+    """Reference shifts the cumulative integral so it is zero at that time."""
+    ts = TimeSeries()
+    time = [0.0, 1.0, 2.0, 3.0]
+    ts.loadArray([time, [1.0, 1.0, 1.0, 1.0]], varName="rate",
+                 dataFormat="row", verbose=False)
+    # Without reference: [0, 1, 2, 3]. With reference=2.0: subtract cum[2]=2 → [-2, -1, 0, 1]
+    load_cumulative(ts, "cum", input="rate", reference=2.0, verbose=False)
+    assert ts["cum"].tolist() == pytest.approx([-2.0, -1.0, 0.0, 1.0])
+
+
+def test_load_cumulative_reference_at_first_step():
+    """Reference at the first time step is valid (subtracts 0, no change)."""
+    ts = TimeSeries()
+    time = [0.0, 1.0, 2.0]
+    ts.loadArray([time, [2.0, 2.0, 2.0]], varName="rate",
+                 dataFormat="row", verbose=False)
+    load_cumulative(ts, "cum", input="rate", reference=0.0, verbose=False)
+    # Natural zero is at t=0 so nothing changes
+    assert ts["cum"].tolist() == pytest.approx([0.0, 2.0, 4.0])
+
+
+def test_load_cumulative_reference_before_start_raises():
+    """Reference before the first time step raises ValueError."""
+    ts = TimeSeries()
+    ts.loadArray([[1.0, 2.0, 3.0], [1.0, 1.0, 1.0]], varName="rate",
+                 dataFormat="row", verbose=False)
+    with pytest.raises(ValueError, match="before the first time step"):
+        load_cumulative(ts, "cum", input="rate", reference=0.5, verbose=False)
+
+
+def test_load_cumulative_reference_after_end_raises():
+    """Reference after the last time step raises ValueError (was wrong error message before fix)."""
+    ts = TimeSeries()
+    ts.loadArray([[1.0, 2.0, 3.0], [1.0, 1.0, 1.0]], varName="rate",
+                 dataFormat="row", verbose=False)
+    with pytest.raises(ValueError, match="after the last time step"):
+        load_cumulative(ts, "cum", input="rate", reference=10.0, verbose=False)
+
+
+def test_load_cumulative_missing_input_raises():
+    """Missing input field raises FieldDependencyError."""
+    ts = TimeSeries()
+    ts.loadArray([[0.0, 1.0], [1.0, 1.0]], varName="rate",
+                 dataFormat="row", verbose=False)
+    with pytest.raises(FieldDependencyError):
+        load_cumulative(ts, "cum", input="nonexistent", verbose=False)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# load_calculated — inspect.signature (non-lambda callable)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def test_load_calculated_regular_function():
+    """load_calculated works with a plain def function (not just lambda)."""
+    def square(x):
+        return x ** 2
+
+    ts = TimeSeries()
+    ts.loadArray([[1.0, 2.0, 3.0], [2.0, 3.0, 4.0]], varName="x",
+                 dataFormat="row", verbose=False)
+    load_calculated(ts, "sq", function=square, verbose=False)
+    assert ts["sq"].tolist() == pytest.approx([4.0, 9.0, 16.0])
+
+
+def test_load_calculated_multi_arg():
+    """load_calculated with a two-argument function combines two fields."""
+    def add(a, b):
+        return a + b
+
+    ts = TimeSeries()
+    time = [0.0, 1.0, 2.0]
+    ts.loadArray([time, [1.0, 2.0, 3.0]], varName="a", dataFormat="row", verbose=False)
+    ts.loadArray([time, [10.0, 20.0, 30.0]], varName="b", dataFormat="row", verbose=False)
+    load_calculated(ts, "c", function=add, verbose=False)
+    assert ts["c"].tolist() == pytest.approx([11.0, 22.0, 33.0])
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# load_files — permissive on empty TimeSeries (documented intended behaviour)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def test_load_files_permissive_no_match_nonempty_ts(tmp_path):
+    """permissive=True on a non-empty ts loads a NaN placeholder instead of raising."""
+    ts = TimeSeries()
+    ts.loadArray([[0.0, 1.0, 2.0], [1.0, 2.0, 3.0]], varName="existing",
+                 dataFormat="row", verbose=False)
+
+    import warnings
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", RuntimeWarning)
+        load_files(ts, "missing", files=str(tmp_path / "no_match_*.dat"),
+                   permissive=True, verbose=False)
+
+    assert "missing" in ts.columns
+    import math as _math
+    assert all(_math.isnan(v) for v in ts["missing"].tolist())
+
+
+def test_load_files_permissive_empty_ts_raises(tmp_path):
+    """permissive=True on an empty ts raises FieldDependencyError — intended behaviour
+    because there is no time grid on which to create the NaN placeholder."""
+    ts = TimeSeries()
+    import warnings
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", RuntimeWarning)
+        with pytest.raises(FieldDependencyError):
+            load_files(ts, "v", files=str(tmp_path / "no_match_*.dat"),
+                       permissive=True, verbose=False)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# loadField — type checking before inplace branch
+# ─────────────────────────────────────────────────────────────────────────────
+
+def test_loadField_type_checks_fire_for_inplace_false():
+    """Type errors on field/method are raised even when inplace=False."""
+    ts = TimeSeries()
+    ts.loadArray([[0.0, 1.0], [1.0, 2.0]], varName="x", dataFormat="row", verbose=False)
+    with pytest.raises(TypeError):
+        loadField(ts, field=123, method="array", array=[[0.0, 1.0], [1.0, 2.0]],  # type: ignore
+                  inplace=False, verbose=False)
