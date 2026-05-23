@@ -10,7 +10,7 @@ data at generic instants.
 Content of the module:
     `TimeSeries` (`class`): data structure for time-series data.
     `TimeSeriesWarning` (`class`): warning for TimeSeries class.
-    
+
 @author: F. Ramognino       <federico.ramognino@polimi.it>
 """
 
@@ -19,7 +19,7 @@ Content of the module:
 #####################################################################
 
 from __future__ import annotations
-from typing import Self, Literal, Callable
+from typing import Self, Literal, Any
 import os
 
 from libICEpost.src.base.Functions.typeChecking import checkType
@@ -50,16 +50,16 @@ class TimeSeries(Utilities):
     some useful I/O methods and defines interpolators of the varibles to
     easily access data at generic instants.
     """
-    
+
     _interpolators:set[str]
     """The names of the variables that have an interpolator."""
-    
+
     _data:pd.DataFrame
     """The DataFrame instance that stores the data."""
-    
+
     _timeName:str
     """The name of the time column in the DataFrame."""
-    
+
     #########################################################################
     #properties:
     @property
@@ -73,8 +73,8 @@ class TimeSeries(Utilities):
         return self._data.columns
 
     @columns.setter
-    def columns(self, *args, **kwargs) -> None:
-        self._data.columns(*args, **kwargs)
+    def columns(self, value) -> None:
+        self._data.columns = value
 
     ##############################
     @property
@@ -96,7 +96,7 @@ class TimeSeries(Utilities):
         Calls 'loc' propertie of the DataFrame.
         """
         return self._data.loc
-    
+
     ##############################
     @property
     def iloc(self):
@@ -124,8 +124,8 @@ class TimeSeries(Utilities):
         Create the table.
         """
         checkType(timeName, str, "timeName")
-        
-        self._data = pd.DataFrame(columns={timeName:[]})
+
+        self._data = pd.DataFrame(columns=[timeName])
         self._interpolators = set()
         self._timeName = timeName
 
@@ -146,16 +146,22 @@ class TimeSeries(Utilities):
     def __setitem__(self, key, item) -> None:
         self._data.__setitem__(key, item)
 
-    def __getattribute__(self, name: str) -> os.Any:
-        #Check if the interpolator is missing and construct it
-        if (name in super().__getattribute__("_data").columns):
-            if not name in super().__getattribute__("_interpolators"):
-                super(self.__class__, self).__getattribute__("_createInterpolator")(name)
-            return super().__getattribute__(name)
-        return super().__getattribute__(name)
+    def __getattr__(self, name: str) -> Any:
+        # Only called when normal attribute lookup fails.
+        # If `name` is a column, create a per-instance interpolator on first access.
+        try:
+            data = object.__getattribute__(self, "_data")
+        except AttributeError:
+            raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
+        if name in data.columns:
+            self._createInterpolator(name)
+            return object.__getattribute__(self, name)
+        raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
 
     def __delitem__(self, item):
         self._interpolators.discard(item)
+        if item in self.__dict__:
+            delattr(self, item)
         return self._data.__delitem__(item)
 
     def __call__(self) -> pd.DataFrame:
@@ -165,7 +171,7 @@ class TimeSeries(Utilities):
             pd.DataFrame: The DataFrame instance that stores the data.
         """
         return self._data
-    
+
     #########################################################################
     #Methods:
     @helpOnFail
@@ -184,23 +190,23 @@ class TimeSeries(Utilities):
             verbose:bool=True,
             **kwargs) -> Self:
         """
-        Load a file containing the time-series of a variable. If data were already 
-        loaded, the CA range must be consistent (sub-arrays are also permitted; 
+        Load a file containing the time-series of a variable. If data were already
+        loaded, the CA range must be consistent (sub-arrays are also permitted;
         excess data will be truncated).
-        
-        **NOTE**: 
+
+        **NOTE**:
             - use delimiter=',' to load CSV files. Automatically removes duplicate times.
-            - Resolution order: first offset and then scale.
-            
+            - Transform order: first offset then scale, i.e., ``x_new = (x + x_off) * x_scale``.
+
         Args:
             fileName (str): Source file
             varName (str): Name of variable in data structure
             x_col (int, optional): Column of x data (time). Defaults to 0. Aliases: `xCol`, `time_col`, `t_col`, `timeCol`, `tCol`, `CACol` (deprecated).
             y_col (int, optional): Column of y data. Defaults to 1. Aliases: `yCol`, `varCol` (deprecated).
-            x_off (float, optional): Offset to sum to x range (time). Defaults to 0.0. Aliases: `xOff`, `time_off`, `t_off`, `timeOff`, `tOff`, `CAOff` (deprecated).
-            y_off (float, optional): Offset to sum to y range. Defaults to 0.0. Aliases: `yOff`, `varOff` (deprecated).
-            x_scale (float, optional): Scaling factor to apply to x range. Defaults to 1.0. Aliases: `xScale`, `time_scale`, `t_scale`, `timeScale`, `tScale`, `CAscale` (deprecated).
-            y_scale (float, optional): Scaling factor to apply to y range. Defaults to 1.0. Aliases: `yScale`, `varScale` (deprecated).
+            x_off (float, optional): Offset applied to x range before scaling. Defaults to 0.0. Aliases: `xOff`, `time_off`, `t_off`, `timeOff`, `tOff`, `CAOff` (deprecated).
+            y_off (float, optional): Offset applied to y range before scaling. Defaults to 0.0. Aliases: `yOff`, `varOff` (deprecated).
+            x_scale (float, optional): Scaling factor applied to x range after offset. Defaults to 1.0. Aliases: `xScale`, `time_scale`, `t_scale`, `timeScale`, `tScale`, `CAscale` (deprecated).
+            y_scale (float, optional): Scaling factor applied to y range after offset. Defaults to 1.0. Aliases: `yScale`, `varScale` (deprecated).
             skip_rows (int, optional): Number of raws to skip at beginning of file. Defaults to 0. Aliases: `skipRows`, `skiprows`.
             max_rows (int, optional): Maximum number of raws to use. Defaults to None. Aliases: `maxRows`.
             comments (str, optional): Character to use to detect comment lines. Defaults to '#'.
@@ -208,7 +214,7 @@ class TimeSeries(Utilities):
             interpolate (bool, optional): Interpolate the data-set at existing time range (used to load non-consistent data). Defaults to True.
             default (float, optional): Default value to add in out-of-range values or if `interpolate` is `False`. Defaults to `float("nan")`.
             verbose (bool, optional): If need to print loading information. Defaults to True.
-            
+
         Returns:
             Self: self.
         """
@@ -220,15 +226,15 @@ class TimeSeries(Utilities):
             "max_rows":["max_rows", "maxRows"],
         }
         deprecatedKeys:set[str] = {"CACol", "varCol"}
-        
+
         fullkwargs = {**kwargs}
         if x_col is not None: fullkwargs["x_col"] = x_col
         if y_col is not None: fullkwargs["y_col"] = y_col
         if skip_rows is not None: fullkwargs["skip_rows"] = skip_rows
         if max_rows is not None: fullkwargs["max_rows"] = max_rows
-        
+
         foundKeys = set(fullkwargs.keys()).intersection(sum(equivalentKeys.values(), start=[]))
-        
+
         #Check for multiple entries that are equivalent
         keyMap:dict[str,list] = {v:[] for v in equivalentKeys.keys()}
         for key in foundKeys:
@@ -238,24 +244,24 @@ class TimeSeries(Utilities):
         for key in keyMap:
             if len(keyMap[key]) > 1:
                 raise ValueError(f"Key '{key}' found multiple times in kwargs: {keyMap[key]}")
-        
+
         #Check for deprecated keys
         for key in keyMap:
             if len(keyMap[key]) == 0:
                 continue
             if keyMap[key][0] in deprecatedKeys:
                 warnings.warn(DeprecationWarning(f"Key '{keyMap[key][0]}' is deprecated. Use '{key}' instead."))
-        
+
         #Set equivalent keys
         x_col = fullkwargs.pop(keyMap["x_col"][0]) if len(keyMap["x_col"]) > 0 else 0
         y_col = fullkwargs.pop(keyMap["y_col"][0]) if len(keyMap["y_col"]) > 0 else 1
         skip_rows = fullkwargs.pop(keyMap["skip_rows"][0]) if len(keyMap["skip_rows"]) > 0 else 0
         max_rows = fullkwargs.pop(keyMap["max_rows"][0]) if len(keyMap["max_rows"]) > 0 else None
-        
-        #Gather unused keys to pass to loadArray
+
+        #Gather unused keys to pass to loadArray (x_off, y_off, x_scale, y_scale, etc.)
         unusedKeys = set(fullkwargs.keys()).difference(sum(equivalentKeys.values(), start=[]))
         loadArraykwargs = {k:fullkwargs[k] for k in unusedKeys}
-        
+
         #Check arguments
         checkType(fileName , str   , "fileName")
         checkType(varName  , str   , "varName" )
@@ -310,10 +316,15 @@ class TimeSeries(Utilities):
             default (float, optional): Default value for out-of-range elements. Defaults to float("nan").
             interpolate (bool, optional): Interpolate the data-set at existing time range (used to load \
                 non-consistent data). Defaults to True.
-            x_off (float, optional): Offset to sum to x range (time). Defaults to 0.0. Aliases: `xOff`, `time_off`, `t_off`, `timeOff`, `tOff`, `CAOff` (deprecated).
-            y_off (float, optional): Offset to sum to y range. Defaults to 0.0. Aliases: `yOff`, `varOff` (deprecated).
-            x_scale (float, optional): Scaling factor to apply to x range. Defaults to 1.0. Aliases: `xScale`, `time_scale`, `t_scale`, `timeScale`, `tScale`, `CAscale` (deprecated).
-            y_scale (float, optional): Scaling factor to apply to y range. Defaults to 1.0. Aliases: `yScale`, `varScale` (deprecated).
+            x_off (float, optional): Offset applied to x range (time) before scaling, i.e., \
+                ``x_new = (x + x_off) * x_scale``. Defaults to 0.0. Aliases: `xOff`, `time_off`, \
+                `t_off`, `timeOff`, `tOff`, `CAOff` (deprecated).
+            y_off (float, optional): Offset applied to y range before scaling. Defaults to 0.0. \
+                Aliases: `yOff`, `varOff` (deprecated).
+            x_scale (float, optional): Scaling factor applied to x range after offset. Defaults to 1.0. \
+                Aliases: `xScale`, `time_scale`, `t_scale`, `timeScale`, `tScale`, `CAscale` (deprecated).
+            y_scale (float, optional): Scaling factor applied to y range after offset. Defaults to 1.0. \
+                Aliases: `yScale`, `varScale` (deprecated).
             dataFormat (str, Literal[&quot;column&quot;, &quot;row&quot;], optional): Format of data: \
                 'column' -> [N,2] \
                 'row' -> [2,N]
@@ -335,7 +346,7 @@ class TimeSeries(Utilities):
             3   4    14
             4   5    15
 
-            Loading second variable from list of (CA,var) pairs (order by column) without interpolation
+            Loading second variable from list of (CA,var) pairs (by column, default interpolation)
             >>> data = [(3, 3), (4, 3.5), (5, 2.4), (6, 5.2), (7, 3.14)]
             >>> ts.loadArray(data, "var2", dataFormat="column")
                CA  var1  var2
@@ -348,7 +359,7 @@ class TimeSeries(Utilities):
             6   7   NaN  3.14
 
             Extend the interval of var2 from a pandas.DataFrame with data by column,
-            suppressing the warning for orverwriting.
+            suppressing the warning for overwriting.
             >>> from pandas import DataFrame as df
             >>> data = df({"CA":[8, 9, 10, 11], "var":[2, 1, 0, -1]})
             >>> ts.loadArray(data, "var2", dataFormat="column", verbose=False)
@@ -388,28 +399,30 @@ class TimeSeries(Utilities):
         checkType(data    , collections.abc.Iterable   , "data")
         checkType(verbose  , bool  , "verbose")
         checkType(default  , float  , "default")
-        
+
+        # Validate name early: reserved/invalid names can't be accessed as interpolators
+        if not is_valid_variable_name(varName):
+            raise ValueError(f"Field name '{varName}' is not a valid variable name.")
+        if varName in _reservedMethds:
+            raise ValueError(f"Name '{varName}' is reserved.")
+
         #Check for equivalent keys
         equivalentKeys:dict[str,list[str]] = {
-            "x_col":["x_col", "xCol", "time_col", "t_col", "timeCol", "tCol", "CACol"],
-            "y_col":["y_col", "yCol", "varCol"],
             "x_off":["x_off", "xOff", "time_off", "t_off", "timeOff", "tOff", "CAOff"],
             "y_off":["y_off", "yOff", "varOff"],
             "x_scale":["x_scale", "xScale", "time_scale", "t_scale", "timeScale", "tScale", "CAscale"],
             "y_scale":["y_scale", "yScale", "varScale"],
-            "skip_rows":["skip_rows", "skipRows", "skiprows"],
-            "max_rows":["max_rows", "maxRows"],
         }
-        deprecatedKeys:set[str] = {"CACol", "varCol", "CAOff", "varOff", "varScale", "CAscale"}
-        
+        deprecatedKeys:set[str] = {"CAOff", "varOff", "varScale", "CAscale"}
+
         fullkwargs = {**kwargs}
         if x_off is not None: fullkwargs["x_off"] = x_off
         if y_off is not None: fullkwargs["y_off"] = y_off
         if x_scale is not None: fullkwargs["x_scale"] = x_scale
         if y_scale is not None: fullkwargs["y_scale"] = y_scale
-        
+
         foundKeys = set(fullkwargs.keys()).intersection(sum(equivalentKeys.values(), start=[]))
-        
+
         #Check for multiple entries that are equivalent
         keyMap:dict[str,list] = {v:[] for v in equivalentKeys.keys()}
         for key in foundKeys:
@@ -419,39 +432,54 @@ class TimeSeries(Utilities):
         for key in keyMap:
             if len(keyMap[key]) > 1:
                 raise ValueError(f"Key '{key}' found multiple times in kwargs: {keyMap[key]}")
-        
+
         #Check for deprecated keys
         for key in keyMap:
             if len(keyMap[key]) == 0:
                 continue
             if keyMap[key][0] in deprecatedKeys:
                 warnings.warn(DeprecationWarning(f"Key '{keyMap[key][0]}' is deprecated. Use '{key}' instead."))
-                
+
         # Set equivalent keys
         x_off = fullkwargs.pop(keyMap["x_off"][0]) if len(keyMap["x_off"]) > 0 else 0.0
         y_off = fullkwargs.pop(keyMap["y_off"][0]) if len(keyMap["y_off"]) > 0 else 0.0
         x_scale = fullkwargs.pop(keyMap["x_scale"][0]) if len(keyMap["x_scale"]) > 0 else 1.0
         y_scale = fullkwargs.pop(keyMap["y_scale"][0]) if len(keyMap["y_scale"]) > 0 else 1.0
-        
+
+        # Raise on any unrecognized remaining kwargs
+        known_aliases = set(sum(equivalentKeys.values(), start=[]))
+        remaining_unknown = set(fullkwargs.keys()).difference(known_aliases)
+        if remaining_unknown:
+            raise TypeError(f"Unexpected keyword arguments: {sorted(remaining_unknown)}")
+
         #Check arguments
         checkType(x_off    , float , "x_off"   )
         checkType(y_off    , float , "y_off"   )
         checkType(x_scale  , float , "x_scale" )
         checkType(y_scale  , float , "y_scale" )
-        
-        #Cast to pandas.DataFrame
+
+        #Cast to numpy array
         npData = np.array(data)
         if not npData.ndim == 2:
             raise ValueError(f"Array must be of shape (N,2) or (2,N) while {npData.shape} was found.")
-        
+
+        if dataFormat not in ("column", "row"):
+            raise ValueError(f"Unknown dataFormat '{dataFormat}'. Available formats are 'row' and 'column'.")
+
         if (dataFormat == "column") and (npData.shape[1] != 2):
             raise ValueError(f"Array must be of shape (N,2) while dataFormat='column', while {npData.shape} was found.")
         elif (dataFormat == "row") and (npData.shape[0] != 2):
             raise ValueError(f"Array must be of shape (2,N) while dataFormat='row', while {npData.shape} was found.")
-        elif (dataFormat == "row"):
+
+        if dataFormat == "row":
             npData = npData.T
-        elif (dataFormat != "column"):
-            raise ValueError(f"Unknown dataFormat '{dataFormat}'. Avaliable formats are 'row' and 'column'.")
+
+        # Ensure float so in-place arithmetic doesn't fail on integer input arrays.
+        # Conversion failure means non-numeric data — raise TypeError to match the contract.
+        try:
+            npData = npData.astype(float)
+        except (ValueError, TypeError):
+            raise TypeError("Data must be numeric (float or int).")
 
         if verbose:
             if x_off != 0.0:
@@ -462,29 +490,34 @@ class TimeSeries(Utilities):
                 print(f"\tApplying scaling {x_scale} to time data")
             if y_scale != 1.0:
                 print(f"\tApplying scaling {y_scale} to variable data")
-        
+
+        # Transform: (x + off) * scale
         npData[:,0] += x_off
         npData[:,0] *= x_scale
         npData[:,1] += y_off
         npData[:,1] *= y_scale
-        
+
         df = pd.DataFrame(npData, columns=[self.timeName, varName])
-        
+
         #Check types
         if not all([issubclass(t.type, (np.floating, np.integer, float, int)) for t in df.dtypes]):
             raise TypeError("Data must be numeric (float or int).")
-        
+
         #Remove duplicates
         df.drop_duplicates(subset=self.timeName, keep="first", inplace=True)
-        
-        #Index with CA (useful for merging)
+
+        #Index with time (useful for merging)
         reindexedData = self._data.set_index(self.timeName)
         df.set_index(self.timeName, inplace=True)
 
-        #Check if data were already loaded
+        #Check if data were already loaded, warn only when incoming range overlaps existing data
         firstTime = not (varName in self.columns)
         if (not firstTime) and verbose:
-            warnings.warn(TimeSeriesWarning(f"Overwriting existing data for field '{varName}'"))
+            if not df.index.intersection(reindexedData.index).empty:
+                warnings.warn(TimeSeriesWarning(f"Overwriting existing data for field '{varName}'"))
+
+        # Tracks time points where varName already had data; used to skip interpolation there.
+        alreadyPresent = None
 
         #If data were not stored yet, just load this
         if len(reindexedData) < 1:
@@ -495,25 +528,25 @@ class TimeSeries(Utilities):
             tLeft = reindexedData.index
             tRight = df.index
             consistentTime = tRight.to_list() == tLeft.to_list()
-            
+
             #Update based on time of self
             newData = reindexedData.join(df, how="outer", rsuffix="_new")
-            
+
             #Merge data if overwriting
             if not firstTime:
                 newData.update(pd.DataFrame(newData[varName + "_new"].rename(varName)))
-                
-                # Store the times where data where already present, we won't interpolate at those
+
+                # Store the times where data were already present; we won't interpolate at those
                 alreadyPresent = np.invert(newData[varName].isna())
-                
+
                 #Remove the new column
                 newData.drop(varName + "_new", axis="columns", inplace=True)
-                
+
             #Perform interpolation
             if (not consistentTime) and interpolate:
                 time = newData.index
-                
-                #Interpolate original dataset at indexes of the new dataset not present 
+
+                #Interpolate original dataset at indexes of the new dataset not present
                 # in the old one
                 t = tLeft.to_numpy()
                 notMissing = time.isin(t)
@@ -524,8 +557,8 @@ class TimeSeries(Utilities):
                         if var == varName:
                             continue
                         newData.iloc[missing, ii] = np.interp(
-                            time[missing], 
-                            time[notMissing], 
+                            time[missing],
+                            time[notMissing],
                             newData.iloc[notMissing,ii].to_numpy(),
                             float("nan"), float("nan"))
 
@@ -533,11 +566,11 @@ class TimeSeries(Utilities):
                 t = tRight.to_numpy()
                 notMissing = time.isin(t)
                 missing = np.invert(notMissing)
-                
+
                 #If some data were already present, we don't interpolate there
-                if not firstTime:
+                if alreadyPresent is not None:
                     missing = missing & np.invert(alreadyPresent)
-                    
+
                 varID = newData.columns.get_loc(varName)
                 if any(missing):
                     newData.iloc[missing, varID] = np.interp(
@@ -549,51 +582,40 @@ class TimeSeries(Utilities):
         #Return to normal indexing
         newData.reset_index(inplace=True)
         self._data = newData
-        
+
         return self
 
     #######################################
     def _createInterpolator(self, varName:str):
         """
-        Create the interpolator for a variable and defines the method varName(t) which 
-        returns the interpolated value of variable 'varName' at instant 't' from the 
-        data in self._data
-        
+        Create the interpolator for a variable and store it as a per-instance callable
+        ``self.varName(t)`` that returns the interpolated value at instant ``t``.
+
         Args:
             varName (str): Name of the variable to interpolate.
         """
-        #Check if varName is an allowed variable name, as so that it can be used to access by . operator
         if not is_valid_variable_name(varName):
             raise ValueError(f"Field name '{varName}' is not a valid variable name.")
 
-        #Check if attribute already exists, to prevent overloading existing attribustes.
         if varName in _reservedMethds:
             raise ValueError(f"Name '{varName}' is reserved.")
-        
+
         if not varName in self._data.columns:
             raise ValueError(f"Variable '{varName}' not found. Available fields are:\n\t" + "\n\t".join(self._data.columns))
 
-        def interpolator(self:Self, t:float|collections.abc.Iterable, /) -> float|np.ndarray:
-            """
-            Linear interpolation at t.
-            
-            Args:"
-                t (float | collections.abc.Iterable): time at which iterpolating data.
-                
-            Returns:"
-                float|np.ndarray: Interpolated data at t.
-            """
+        def interpolator(t:float|collections.abc.Iterable, /) -> float|np.ndarray:
+            """Linear interpolation at t."""
             return np.interp(t, self._data[self.timeName], self._data[varName], float("nan"), float("nan"))
-        
-        #Add to the set of interpolators
+
         self._interpolators.add(varName)
-        setattr(self.__class__,varName,interpolator)
+        # Store on the instance, not the class, to avoid cross-instance contamination.
+        setattr(self, varName, interpolator)
 
     #######################################
     def write(self, fileName:str, *, overwrite:bool=False, sep:str=' ', header:bool=True, na_rep:str='nan', decimal:str='.', **kwargs) -> None:
         """
         Write data to a file.
-        
+
         Args:
             fileName (str): Name of the file where to write the data structure.
             overwrite (bool, optional): Allow to overwrite file if existing. Defaults to `False`.
@@ -601,12 +623,14 @@ class TimeSeries(Utilities):
             header (bool, optional): Write header. Defaults to `True`.
             na_rep (str, optional): String representation of `NaN` values. Defaults to `'nan'`.
             decimal (str, optional): Decimal separator. Defaults to `'.'`.
-            **kwargs: Additional arguments to pass to `pandas.DataFrame.to_csv` 
+            **kwargs: Additional arguments to pass to `pandas.DataFrame.to_csv`
         """
         checkType(fileName, str, "fileName")
         checkType(overwrite, bool, "overwrite")
         checkType(sep, str, "sep")
         checkType(header, bool, "header")
+        checkType(na_rep, str, "na_rep")
+        checkType(decimal, str, "decimal")
 
         if os.path.exists(fileName) and not overwrite:
             raise FileExistsError(f"File {fileName} exists. Use overwrite=True keyword to force overwriting data.")
@@ -627,14 +651,14 @@ class TimeSeries(Utilities):
     #Auxiliary plotting methods
     def plot(self, *args, **kwargs):
         """
-        Plotting the data stored in the table. Alias to `pandas.DataFrame.plot` method 
+        Plotting the data stored in the table. Alias to `pandas.DataFrame.plot` method
         of the internal DataFrame instance.
 
         Returns:
             matplotlib.Axes|numpy.ndarray[matplotlib.Axes]: The axes of the plot(s).
         """
         return self().plot(*args, **kwargs)
-    
+
 #########################################################################
 #Store the reserved methods of the class to prevent overloading
 _reservedMethds = dir(TimeSeries)
