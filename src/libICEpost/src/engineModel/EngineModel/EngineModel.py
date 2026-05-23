@@ -1033,13 +1033,12 @@ class EngineModel(BaseClass):
                 ...
                 super()._process__post__()
         """
-        #WHF and ROHR
         self._computeWallHeatFlux()
-        self.data.loc[:,"ROHR"] = self.data.loc[:,"AHRR"] + self.data.loc[:,"dQwalls"]
-        
-        #Cumulatives
-        self.data.loc[:,"cumHR"] = self.cumulativeIntegral("ROHR")
-        self.data.loc[:,"cumAHR"] = self.cumulativeIntegral("AHRR")
+
+        mask = (self.data.loc[:,"CA"] >= self.time.startTime) & (self.data.loc[:,"CA"] <= self.time.endTime)
+        self.data.loc[mask,"ROHR"] = self.data.loc[mask,"AHRR"] + self.data.loc[mask,"dQwalls"]
+        self.data.loc[mask,"cumHR"] = self.cumulativeIntegral("ROHR")[mask.values]
+        self.data.loc[mask,"cumAHR"] = self.cumulativeIntegral("AHRR")[mask.values]
     
     ####################################
     def _computeWallHeatFlux(self) -> None:
@@ -1050,13 +1049,11 @@ class EngineModel(BaseClass):
         
         #Compute wall heat transfer coefficient:
         h = self.HeatTransferModel.h(engine=self, CA=self.data.loc[:,"CA"])
-        self.data.loc[:,"heatTransferCoeff"] = h
-        
-        #Total whf
-        self.data.loc[:,"dQwalls"] = 0.0
-        self.data.loc[:,"Qwalls"] = 0.0
-        self.data.loc[:,"wallsArea"] = 0.0
-        
+
+        mask = (self.data.loc[:,"CA"] >= self.time.startTime) & (self.data.loc[:,"CA"] <= self.time.endTime)
+        h_arr = np.full(len(self.data), h) if np.isscalar(h) else np.asarray(h)
+        self.data.loc[mask,"heatTransferCoeff"] = h_arr[mask.values]
+
         for patch in [c for c in areas.columns if not (c == "CA")]:
             #Search temperature as "T<patchName>":
             if f"T{patch}" in self.data.columns:
@@ -1067,23 +1064,17 @@ class EngineModel(BaseClass):
             else:
                 raise ValueError("Cannot compute wall heat flux. Either load patch temperatures in the form t<patchName> or default temperature Twalls to compute wall heat fluxes.")
 
-            #Compute patch area:
             A = areas[patch]
-            self.data.loc[:,"wallsArea"] += A
-            
-            name = patch + "Area"
-            if not name in self.data.columns:
-                self.data.loc[:,name] = A
-            
-            #Compute wall heat flux at patch [converted to J/CA]:
-            self.data.loc[:,f"dQ{patch}"] = h * A * (self.data.loc[:,"T"] - Twall) / self.time.dCAdt
-            
-            #Compute cumulative
-            self.data.loc[:,f"Q{patch}"] = self.cumulativeIntegral(f"dQ{patch}")
-            
-            #Add to total
-            self.data.loc[:,"dQwalls"] += self.data.loc[:,f"dQ{patch}"]
-            self.data.loc[:,"Qwalls"] += self.data.loc[:,f"Q{patch}"]
+            self.data.loc[mask,"wallsArea"] += A[mask]
+            self.data.loc[mask, patch + "Area"] = A[mask]
+
+            dQ = h * A * (self.data.loc[:,"T"] - Twall) / self.time.dCAdt
+            self.data.loc[mask,f"dQ{patch}"] = dQ[mask]
+
+            self.data.loc[mask,f"Q{patch}"] = self.cumulativeIntegral(f"dQ{patch}")[mask.values]
+
+            self.data.loc[mask,"dQwalls"] += self.data.loc[mask,f"dQ{patch}"]
+            self.data.loc[mask,"Qwalls"] += self.data.loc[mask,f"Q{patch}"]
             
     ####################################
     def integrateVariable(self, y:str, *, x:str="CA", start:float=None, end:float=None) -> float:
