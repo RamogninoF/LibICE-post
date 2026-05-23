@@ -930,14 +930,31 @@ class EngineModel(BaseClass):
         #Initial conditions for thermodinamic models:
         self.initializeThermodynamicModels()
         
-        #Add fields to data:
-        fields = {"dpdCA", "AHRR", "ROHR", "A"}
+        mask = (self.data.loc[:,"CA"] >= self.time.startTime) & (self.data.loc[:,"CA"] <= self.time.endTime)
+
+        #Fields produced by the time-loop and post-processing:
+        fields = {"dpdCA", "A", "heatTransferCoeff"}
         for zone in self.Zones:
             fields |= {v + get_postfix(zone) for v in getattr(self, f"_{zone}").state.__dict__}
+
+        #Patch-specific WHF fields (need geometry to enumerate patches):
+        areas = self.geometry.areas(self.data.loc[:,"CA"])
+        for patch in [c for c in areas.columns if not c == "CA"]:
+            fields |= {f"dQ{patch}", f"Q{patch}", f"{patch}Area"}
+
+        #Accumulators reset to 0 within the window; all other fields reset to NaN:
+        accumulators = {"dQwalls", "Qwalls", "wallsArea", "AHRR", "ROHR", "cumHR", "cumAHR"}
+
         for f in fields:
             if not f in self.data.columns:
-                self.data.loc[:,f] = float("nan")
-        
+                self.data.loc[:,f] = 0.0
+            self.data.loc[mask, f] = 0.0
+
+        for f in accumulators:
+            if not f in self.data.columns:
+                self.data.loc[:,f] = 0.0
+            self.data.loc[mask, f] = 0.0
+
         #Store at startTime
         self._storeLatestTime()
     
