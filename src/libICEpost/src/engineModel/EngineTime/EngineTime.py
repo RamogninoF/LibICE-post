@@ -38,24 +38,18 @@ class EngineTime(BaseClass):
         - endTime (float): The end-time for post-processing [CA]
     """
     
-    time:float
+    time:float|None
     """The current time instant"""
     
-    deltaT:float
+    deltaT:float|None
     """Current time-step"""
     
-    oldTime:float
+    oldTime:float|None
     """The old time instant"""
-    
-    startTime:float
-    """The start time"""
-    
-    endTime:float
-    """The end time"""
     
     #########################################################################
     #Constructor:
-    def __init__(self,speed, *, IVC:float, EVO:float, startTime:float=None, endTime:float=None):
+    def __init__(self,speed, *, IVC:float, EVO:float, startTime:float|None=None, endTime:float|None=None):
         """
         Construct from keyword arguments.
         
@@ -83,13 +77,63 @@ class EngineTime(BaseClass):
         
         self.n = speed
         self.omega = speed / 60.0 * 2.0 * math.pi
-        self.IVC = IVC
-        self.EVO = EVO
-        self.startTime = startTime
-        self.endTime = endTime
+        self._IVC = IVC
+        self._EVO = EVO
+        self._startTime = startTime
+        self._endTime = endTime
         
         self.time = None
         self.oldTime = None
+    
+    @property
+    def IVC(self) -> float:
+        """Inlet valve closing [CA]"""
+        return self._IVC
+    
+    @IVC.setter
+    def IVC(self, value: float) -> None:
+        """Set IVC and update startTime accordingly"""
+        self.checkType(value, float, "IVC")
+        self._IVC = value
+        self._startTime = value
+        self.time = value
+        self.oldTime = value
+    
+    @property
+    def EVO(self) -> float:
+        """Exhaust valve opening [CA]"""
+        return self._EVO
+    
+    @EVO.setter
+    def EVO(self, value: float) -> None:
+        """Set EVO and update endTime accordingly"""
+        self.checkType(value, float, "EVO")
+        self._EVO = value
+        self._endTime = value
+    
+    @property
+    def startTime(self) -> float:
+        """The start time"""
+        return self._startTime
+    
+    @startTime.setter
+    def startTime(self, value: float) -> None:
+        """Set startTime and reset time"""
+        self.checkType(value, float, "startTime")
+        self._startTime = value
+        self.time = value
+        self.oldTime = value
+    
+    @property
+    def endTime(self) -> float:
+        """The end time"""
+        return self._endTime
+    
+    @endTime.setter
+    def endTime(self, value: float) -> None:
+        """Set endTime"""
+        self.checkType(value, float, "endTime")
+        self._endTime = value
     
     ######################################
     #NOTE: overwrite in child class if necessary
