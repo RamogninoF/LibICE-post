@@ -705,7 +705,7 @@ class EngineModel(BaseClass):
         return self
     
     ####################################
-    def initializeThemodynamicModels(self) -> EngineModel:
+    def initializeThermodynamicModels(self) -> EngineModel:
         """
         Initialize the thermodynamic models of the system based on the loaded data and the initial conditions.
         """
@@ -730,7 +730,7 @@ class EngineModel(BaseClass):
             
             return self
         except Exception as err:
-            raise RuntimeError(f"Failed to initialize the themodynamic models: {err}") from err
+            raise RuntimeError(f"Failed to initialize the thermodynamic models: {err}") from err
     
     ####################################
     def _preprocessThermoModelInput(self, inputDict:dict, zone:str) -> dict:
@@ -928,7 +928,7 @@ class EngineModel(BaseClass):
                 ...
         """
         #Initial conditions for thermodinamic models:
-        self.initializeThemodynamicModels()
+        self.initializeThermodynamicModels()
         
         #Add fields to data:
         fields = {"dpdCA", "AHRR", "ROHR", "A"}
@@ -1106,7 +1106,7 @@ class EngineModel(BaseClass):
         return integrate.trapezoid(Yarray, x=data.loc[:,x])
     
     ####################################
-    def cumulativeIntegral(self, y:str, *, x:str="CA", start:float=None) -> np.ndarray:
+    def cumulativeIntegral(self, y:str, *, x:str="CA", start:float|None=None) -> np.ndarray:
         """
         Compute the cumulative integral of a variable over another. 
         If start is not given, it is set to self.time.startOfCombustion.
