@@ -934,8 +934,6 @@ class EngineModel(BaseClass):
 
         #Fields produced by the time-loop and post-processing:
         fields = {"dpdCA", "A", "heatTransferCoeff"}
-        for zone in self.Zones:
-            fields |= {v + get_postfix(zone) for v in getattr(self, f"_{zone}").state.__dict__}
 
         #Patch-specific WHF fields (need geometry to enumerate patches):
         areas = self.geometry.areas(self.data.loc[:,"CA"])
@@ -947,13 +945,13 @@ class EngineModel(BaseClass):
 
         for f in fields:
             if not f in self.data.columns:
-                self.data.loc[:,f] = 0.0
-            self.data.loc[mask, f] = 0.0
+                self.data.loc[:,f] =float("nan")
+            self.data.loc[mask, f] = float("nan")
 
         for f in accumulators:
             if not f in self.data.columns:
-                self.data.loc[:,f] = 0.0
-            self.data.loc[mask, f] = 0.0
+                self.data.loc[:,f] =float("nan")
+            self.data.loc[mask, f] = float("nan")
 
         #Store at startTime
         self._storeLatestTime()
