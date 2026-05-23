@@ -140,7 +140,7 @@ class TimeSeries(Utilities):
     def __repr__(self):
         return self._data.__repr__()
 
-    def __getitem__(self, *item) -> pd.Series|pd.DataFrame:
+    def __getitem__(self, *item):
         return self._data.__getitem__(*item)
 
     def __setitem__(self, key, item) -> None:
@@ -552,15 +552,22 @@ class TimeSeries(Utilities):
                 notMissing = time.isin(t)
                 missing = np.invert(notMissing)
                 if any(missing):
-                    #Interpolate everything but the loaded variable:
-                    for ii, var in enumerate(newData.columns):
-                        if var == varName:
-                            continue
-                        newData.iloc[missing, ii] = np.interp(
-                            time[missing],
-                            time[notMissing],
-                            newData.iloc[notMissing,ii].to_numpy(),
-                            float("nan"), float("nan"))
+                    # New time points outside [tLeft.min(), tLeft.max()] are already NaN
+                    # after the outer join — interpolation would only return NaN anyway.
+                    # Only interpolate existing columns for points strictly inside the range.
+                    missing_times = time[missing]
+                    t_min, t_max = float(t.min()), float(t.max())
+                    in_range = (missing_times >= t_min) & (missing_times <= t_max)
+                    if any(in_range):
+                        in_range_idx = np.where(missing)[0][in_range]
+                        for ii, var in enumerate(newData.columns):
+                            if var == varName:
+                                continue
+                            newData.iloc[in_range_idx, ii] = np.interp(
+                                time[in_range_idx],
+                                time[notMissing],
+                                newData.iloc[notMissing,ii].to_numpy(),
+                                float("nan"), float("nan"))
 
                 #Interpolate loaded dataset if not first time
                 t = tRight.to_numpy()
